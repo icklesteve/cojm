@@ -1,0 +1,16 @@
+COJM Install Instructions
+
+Requirements :
+php Web Server ( php 5.6 Tested OK )
+sql Database
+
+
+
+Install :
+1 Copy / Paste into your public_html directory, so should read public_html/cojm/live/index.php
+2 Create a mysql database, noting username, password etc.
+3 Edit cojm/live/C4uconnect.php
+Add your sql database password, username etc.  
+For added security, include a password.php file outside of your web root ( public_html ) folder, include to it from C4uconnect.php
+
+4 Setup secure directory on public_html/cojm/live ( may be possible from your )

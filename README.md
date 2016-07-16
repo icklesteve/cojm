@@ -1,8 +1,8 @@
-# COJM
+#COJM
 Courier Online Operations and Job Management
 
 An Online Courier Management System.
-Job Creation, Dispatch, Tracking and Invoice.
+#Job Creation, Dispatch, Tracking and Invoice.
 
 Client Login via your website, along with easy checking of reference numbers.
 Seperate Courier / Dispatcher / Manager Logins.
@@ -18,3 +18,8 @@ Google maps interface to accurately schedule collections and deliveries.
 Low startup and running costs, easy to use for the smaller operator.
 
 See cojm.co.uk
+
+This project includes software and fonts from :
+
+Freefont : Free UCS scalable fonts: http://savannah.gnu.org/projects/freefont/
+TCPDF : www.sourceforge.net/projects/tcpdf

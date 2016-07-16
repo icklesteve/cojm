@@ -1,0 +1,8 @@
+# Force no caching for dynamic files
+<FilesMatch "\.(php|cgi|pl|htm)$">
+ExpiresActive On
+
+Header set Cache-Control "private, proxy-revalidate, no-transform"
+
+Header set Pragma "cache"
+</FilesMatch>

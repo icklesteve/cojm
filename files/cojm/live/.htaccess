@@ -1,0 +1,35 @@
+
+# Set up caching on media files for 1 week
+# changed to 1 year, originally A604800
+<FilesMatch "\.(gif|jpg|jpeg|png|swf|js|ogg|mp3)$">
+ExpiresDefault A29030400
+Header append Cache-Control "public"
+</FilesMatch>
+
+# attempt to get gzipped
+
+php_value output_handler ob_gzhandler
+
+
+<Files *.css>
+SetOutputFilter DEFLATE
+</Files>
+
+<Files *.pdf>
+SetOutputFilter DEFLATE
+</Files>
+
+<Files *.php>
+SetOutputFilter DEFLATE
+</Files>
+
+<Files *.kml>
+SetOutputFilter DEFLATE
+</Files>
+
+# Force no caching for dynamic files
+<FilesMatch "\.(php|cgi|pl|htm)$">
+ExpiresActive Off
+Header set Cache-Control "private, no-cache, no-store, proxy-revalidate, no-transform"
+Header set Pragma "no-cache"
+</FilesMatch>

@@ -23,3 +23,8 @@ This project includes software and fonts from :
 
 Freefont : Free UCS scalable fonts: http://savannah.gnu.org/projects/freefont/
 TCPDF : www.sourceforge.net/projects/tcpdf
+JQuery : http://jquery.com/
+phpMySQLAutoBackup : http://www.dwalker.co.uk/phpmysqlautobackup/
+Trackstats : https://www.openhub.net/p/trackstats
+
+HTML5 CSS3

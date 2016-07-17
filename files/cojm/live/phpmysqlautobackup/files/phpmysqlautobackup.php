@@ -1,7 +1,5 @@
 <?php
 
-ini_set('memory_limit','256M');
-
 /*******************************************************************************************
     phpMySQLAutoBackup  -  Author:  http://www.DWalker.co.uk - released under GPL License
            For support and help please try the forum at: http://www.dwalker.co.uk/forum/
@@ -21,8 +19,8 @@ Version    Date              Comment
 ********************************************************************************************/
 $phpMySQLAutoBackup_version="1.6.2";
 
-$from_emailaddress = "cojmbackup@cojm.co.uk";// your email address to show who the email is from (should be different $to_emailaddress)
-$report_emailaddress = "cojm@cojm.co.uk";//address to send reports, not the backup just details on last backups (can be same as above)
+$from_emailaddress = $globalprefrow['backupemailfrom']; // your email address to show who the email is from (should be different $to_emailaddress)
+$report_emailaddress = $globalprefrow['backupemailto']; //address to send reports, not the backup just details on last backups (can be same as above)
 $to_emailaddress = ""; // your email address to send backup files to
                        //best to specify an email address on a different server than the MySQL db  ;-)
 
@@ -77,28 +75,15 @@ if (isset($table_exclude))
 }
 $errors="";
 
-// echo ' phpmysqlautobackup ln 44 ';
+// echo ' phpmysqlautobackup ln 77 ';
 
 
-$directory='/beer';
  
 // echo (BALOCATION."phpmysqlautobackup_extras.php");
 
 
-$testvar='
-    $from = "emailtest@cycle4u.co.uk";
-    $to = "cojm@cojm.co.uk";
-    $subject = "autobackup ln 85";
-    $message = "This is a test email";
-    $headers = "From:" . $from;
-    mail($to,$subject,$message, $headers);
-    echo "Test email sent";
-';
-
  
 include ("phpmysqlautobackup_extras.php");
-
-// echo ' phpmysqlautobackup ln 51 ';
 
 
 include(BALOCATION."schema_for_export.php");

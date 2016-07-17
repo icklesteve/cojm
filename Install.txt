@@ -11,6 +11,12 @@ Install :
 2 Create a mysql database, noting username, password etc.
 3 Edit cojm/live/C4uconnect.php
 Add your sql database password, username etc.  
+Define BACKUPPASSWD : This is the password for protected zipped backup files
 For added security, include a password.php file outside of your web root ( public_html ) folder, include to it from C4uconnect.php
 
-4 Setup secure directory on public_html/cojm/live ( may be possible from your )
+
+4 Run the install.sql via phpAdmin on your database to create the database structure.
+
+5 Setup user / password on the public_html/cojm/live directory
+( may be possible from your webhost cPanel login, Files > Directory Privacy ), alternatively see https://css-tricks.com/easily-password-protect-a-website-or-subdirectory/
+The user name which you create will be the COJM username.

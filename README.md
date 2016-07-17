@@ -1,6 +1,8 @@
 #COJM
 Courier Online Operations and Job Management
 
+See https://github.com/Courier-Online/cojm/milestone/1 for status of the first stable release
+
 An Online Courier Management System.
 #Job Creation, Dispatch, Tracking and Invoice.
 

@@ -95,7 +95,7 @@ $subject = $globalprefrow['globalshortname']." Monthly Backup Report";
 
 
 
-$to='cojm@cojm.co.uk';
+$to=$globalprefrow['backupemailto'];
 
 
 

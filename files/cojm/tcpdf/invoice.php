@@ -42,7 +42,6 @@ include "../live/C4uconnect.php";
 $page=$_GET['page']; // preview , createpdf , addtodb
 $setinvoiced=$_POST['setinvoiced'];
 
-$orderselectdep = trim($_POST['orderselectdep']);
 
 
 $expensedate=trim($_POST['expensedate']);
@@ -67,7 +66,9 @@ $minutes="00";
 $collectionsfromdate = $year . "-" . $month . "-" . $day . " " . $hour . ":" . $minutes . ":00";
 $showdelivery=$_POST['showdelivery'];
 $showdeliveryaddress=$_POST['showdeliveryaddress'];
-$clientid=$_POST['clientid']; 
+$clientid=trim($_POST['clientid']); 
+$orderselectdep = trim($_POST['orderselectdep']);
+
 $existinginvoiceref=$_POST['existinginvoiceref'];
 $invdatemod=$_POST['invdate'];
 $invcomments=trim($_POST['invcomments']);
@@ -75,6 +76,23 @@ $nowdate = date("Y-m-d H:i:s");
 $orderselectdep = trim($_POST['orderselectdep']);
 $addresstype= trim($_POST['addresstype']);
 $ir='';
+  
+
+
+
+// $sql = "SELECT * FROM clientdep WHERE associatedclient = '$clientid' ORDER BY isactivedep DESC , depnumber DESC  ";
+
+
+if ($orderselectdep<>'') {
+
+$query = "SELECT associatedclient FROM clientdep  WHERE depnumber=$orderselectdep "; 
+$clientid = mysql_result(mysql_query($query, $conn_id), 0); 
+
+}
+
+  
+  
+  
   
 // $html='<h1>Page is '.$page.'. </h1>';
   

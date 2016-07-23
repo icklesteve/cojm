@@ -30,6 +30,16 @@ The security of your customers data should not be compromised by sloppy installs
 It is NOT recommended to use this software without a valid SSL certificate ( https ).
 If you are in any doubt about how to properly secure your server, please take advice from a professional or see cojm.co.uk
 
+
+Optimised for Modern Browsers, ie latest updates of Chrome / Firefox.
+
+Internet Explorer > ie9
+Android > 1.6
+
+Actively Tested with latest Firefox / Chrome / Android
+
+
+
 This project includes software and fonts from :
 
 Freefont : Free UCS scalable fonts: http://savannah.gnu.org/projects/freefont/

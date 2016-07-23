@@ -33,7 +33,7 @@ $trow='';
 $tarow='';
 
 $clientids = array('');
-
+$depselectjs='';
 $tablecost='0';
 
 $todayDate = date("Y-m-d");// current date
@@ -187,7 +187,7 @@ $temp=$row['orderdep'];
 // ORDER BY associatedclient, depname"; 
 
  $query = "
- SELECT depnumber, depname, CompanyName 
+ SELECT depnumber, depname, CompanyName, CustomerID 
  FROM clientdep, Clients
  WHERE clientdep.associatedclient = Clients.CustomerID 
  AND clientdep.isactivedep='1' 
@@ -231,6 +231,13 @@ if ($CustomerIDlist==$row['orderdep']) { echo ' SELECTED '; }
 // echo $costrowd['FreightCharge'];
 
 echo 'value="'.$CustomerIDlist.'">&'.$globalprefrow['currencysymbol'].' '.$depcharge.' '.$clientname.' -- '.$CompanyName.'</option>';
+
+$depselectjs.='  
+
+if ( newdep=='.$CustomerIDlist.') { $("#pageclientid").val("'.$CustomerID.'"); } 
+';
+
+
  } // ends check for charge>0
 
 } // ends list of departments 
@@ -467,10 +474,25 @@ datelink = datelink + "&clientview=normal&viewcomments=normal&statustype=notinvo
 
 
 });
-	
-	
-	
+
+
+
+$("#orderselectdep").change(function() { 
+
+var newdep=$("#orderselectdep").val();
+
+// alert("department changed to " + newdep);
+
+'.$depselectjs.'
+
+
 });
+
+
+	
+	
+	
+}); // ends on pageload
 </script>';
 
 echo '</div>';

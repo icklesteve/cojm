@@ -213,27 +213,8 @@ if ($page=='editglobals') {
 
 // if (isset($_POST['showdebug'])) { $showdebug=trim($_POST['showdebug']); } else { $showdebug=''; }
 
-$viewedicon=trim($_POST['viewedicon']);
-$unviewedicon=trim($_POST['unviewedicon']);
-
-$globalname=trim($_POST['globalname']);
-
-$globalshortname=trim($_POST['globalshortname']);
-// $showpostcomm=trim($_POST['showpostcomm']);
-
 // $backupemailto=trim($_POST['backupemailto']);
 // $backupemailfrom=trim($_POST['backupemailfrom']);
-
-$adminlogo=trim($_POST['adminlogo']);
-$adminlogoabs=trim($_POST['adminlogoabs']);
-$adminlogoheight=trim($_POST['adminlogoheight']);
-$adminlogowidth=trim($_POST['adminlogowidth']);
-
-
-if (isset($_POST['adminlogoback'])) { $adminlogoback=trim($_POST['adminlogoback']); } else { $adminlogoback=''; }
-
-if (isset($_POST['showsettingsmobile'])) {   $showsettingsmobile=trim($_POST['showsettingsmobile']);  }  else { $showsettingsmobile=''; }
-
 
 // $showsettingsmobile=trim($_POST['showsettingsmobile']);
 
@@ -244,35 +225,17 @@ $highlightcolour=trim($_POST['highlightcolour']);
 $highlightcolourno=trim($_POST['highlightcolourno']);
 $numjobs=trim($_POST['numjobs']);
 $numjobsm=trim($_POST['numjobsm']);
-$formtimeout=trim($_POST['formtimeout']);
+
 $pagetimeout=$formtimeout-1;
 // $mobpagetimeout=trim($_POST['mobpagetimeout']);
 
 
 // $infotext=$infotext.'<br />sroot : '.$httproots;
 
-$myaddress1=trim($_POST['myaddress1']);
-$myaddress2=trim($_POST['myaddress2']);
-$myaddress3=trim($_POST['myaddress3']);
-$myaddress4=trim($_POST['myaddress4']);
-$myaddress5=trim($_POST['myaddress5']);
-$vatbanda=trim($_POST['vatbanda']);
-$vatbandb=trim($_POST['vatbandb']);
-$testjoomlalogin=trim($_POST['testjoomlalogin']);
+
+
 $waitingtimedelay=trim($_POST['waitingtimedelay']);
 
- if (isset($_POST['forcehttps'])) { $forcehttps=trim($_POST['forcehttps']); } else { $forcehttps=''; }
-
-
-// $forcehttps=trim($_POST['forcehttps']);
-
- 
- $gexpc1=trim($_POST['gexpc1']);
-$gexpc2=trim($_POST['gexpc2']);
-$gexpc3=trim($_POST['gexpc3']);
-$gexpc4=trim($_POST['gexpc4']);
-$gexpc5=trim($_POST['gexpc5']);
-$gexpc6=trim($_POST['gexpc6']);
 
 $co2perdist=trim($_POST['co2perdist']);
 $pm10perdist=trim($_POST['pm10perdist']);
@@ -281,19 +244,7 @@ $pm10perdist=trim($_POST['pm10perdist']);
 // spare is image 7 - 10
 
 
-$image1=trim($_POST['image1']);
-$image2=trim($_POST['image2']);
-$image3=trim($_POST['image3']);
-$image4=trim($_POST['image4']);
-$image5=trim($_POST['image5']);
-$image6=trim($_POST['image6']);
 
-
-$sound1=trim($_POST['sound1']); // map refresh alert
-// $sound2=trim($_POST['sound2']);
-// $sound3=trim($_POST['sound3']);
-// $sound4=trim($_POST['sound4']);
-// $sound5=trim($_POST['sound5']);
 
 $glob1=trim($_POST['glob1']); // latitude for new pc
 $glob2=trim($_POST['glob2']); // longitude for new pc
@@ -301,16 +252,13 @@ $glob3=trim($_POST['glob3']); // Birmingham for new pc
 $glob4=trim($_POST['glob4']); // West Midlands for new pc
 $glob5=trim($_POST['glob5']); // Cyclist / Rider
 $glob6=trim($_POST['glob6']); // index.php colour change style
-if (isset($_POST['glob7'])) { $glob7=trim($_POST['glob7']); } else { $glob7=''; } // page load times
 $glob8=trim($_POST['glob8']); // email address for cojm errors
 $glob9=trim($_POST['glob9']); // Main COJM JS File
 $glob10=trim($_POST['glob10']); // Main COJM CSS File
 if (isset($_POST['glob11'])) { $glob11=trim($_POST['glob11']); } else { $glob11='0'; } // Show Working Windows
 
 // $clweb2=trim($_POST['clweb2']);
-$clweb3=trim($_POST['clweb3']); // https ref google maps icon
-$clweb4=trim($_POST['clweb4']);
-$clweb5=trim($_POST['clweb5']);
+
 // $clweb7=trim($_POST['clweb7']); 
 $clweb8=trim($_POST['clweb8']);
 // $clweb9=trim($_POST['clweb9']);
@@ -324,39 +272,13 @@ $courier3=trim($_POST['courier3']);
 $courier4=trim($_POST['courier4']);
 $courier5=trim($_POST['courier5']);
 $courier6=trim($_POST['courier6']);
-$courier9=trim($_POST['courier9']);
-$courier10=trim($_POST['courier10']);
 $googlemapapiv3key=trim($_POST['googlemapapiv3key']);
 
-$favusrn1=trim($_POST['favusrn1']);
-$favusrn2=trim($_POST['favusrn2']);
-$favusrn3=trim($_POST['favusrn3']);
-$favusrn4=trim($_POST['favusrn4']);
-$favusrn5=trim($_POST['favusrn5']);
-$favusrn6=trim($_POST['favusrn6']);
-$favusrn7=trim($_POST['favusrn7']);
-$favusrn8=trim($_POST['favusrn8']);
-$favusrn9=trim($_POST['favusrn9']);
-$favusrn10=trim($_POST['favusrn10']);
-$favusrn11=trim($_POST['favusrn11']);
-$favusrn12=trim($_POST['favusrn12']);
-$favusrn13=trim($_POST['favusrn13']);
-$favusrn14=trim($_POST['favusrn14']);
-$favusrn15=trim($_POST['favusrn15']);
-$favusrn16=trim($_POST['favusrn16']);
-$favusrn17=trim($_POST['favusrn17']);
-$favusrn18=trim($_POST['favusrn18']);
-$favusrn19=trim($_POST['favusrn19']);
-$favusrn20=trim($_POST['favusrn20']);
-
-$unrider1=trim($_POST['unrider1']);
-$unrider2=trim($_POST['unrider2']);
 
 
 
 
 
-if ($globalname) {
 
 $sql = "UPDATE globalprefs SET 
 courier2='$courier2' ,
@@ -364,85 +286,27 @@ courier3='$courier3' ,
 courier4='$courier4' ,
 courier5='$courier5' ,
 courier6='$courier6' ,
-courier9='$courier9' ,
-courier10='$courier10' ,
 googlemapapiv3key='$googlemapapiv3key' ,
-clweb3='$clweb3' ,
-clweb4='$clweb4' ,
-clweb5='$clweb5' ,
 clweb8='$clweb8' ,
-image1='$image1',
-image2='$image2',
-image3='$image3',
-image4='$image4',
-image5='$image5',
-image6='$image6',
-sound1='$sound1',
 glob1='$glob1',
 glob2='$glob2',
 glob3='$glob3',
 glob4='$glob4',
 glob5='$glob5',
 glob6='$glob6',
-glob7='$glob7',
 glob8='$glob8',
 glob9='$glob9',
 glob10='$glob10',
 glob11='$glob11',
-viewedicon='$viewedicon',
-unviewedicon='$unviewedicon',
-globalname='$globalname' , 
 co2perdist='$co2perdist',
 pm10perdist='$pm10perdist',
-myaddress1='$myaddress1' ,
-myaddress2='$myaddress2' ,
-myaddress3='$myaddress3' ,
-myaddress4='$myaddress4' ,
-myaddress5='$myaddress5' ,
-globalshortname='$globalshortname' ,
-adminlogo='$adminlogo' ,
-adminlogoabs='$adminlogoabs' ,
-adminlogoheight='$adminlogoheight' ,
-adminlogowidth='$adminlogowidth' ,
-adminlogoback='$adminlogoback' ,
 highlightcolour='$highlightcolour' , 
 highlightcolourno='$highlightcolourno' , 
 numjobs='$numjobs' ,
-vatbanda='$vatbanda' ,
-vatbandb='$vatbandb' ,
 numjobsm='$numjobsm' ,
 formtimeout='$formtimeout' ,
 pagetimeout='$pagetimeout' ,
-showsettingsmobile='$showsettingsmobile' ,
-testjoomlalogin='$testjoomlalogin' ,
-forcehttps='$forcehttps' ,
-waitingtimedelay='$waitingtimedelay',
-gexpc1='$gexpc1',
-gexpc2='$gexpc2',
-gexpc3='$gexpc3',
-gexpc4='$gexpc4',
-gexpc5='$gexpc5',
-gexpc6='$gexpc6',
-favusrn1='$favusrn1',
-favusrn2='$favusrn2',
-favusrn3='$favusrn3',
-favusrn4='$favusrn4',
-favusrn5='$favusrn5',
-favusrn6='$favusrn6',
-favusrn7='$favusrn7',
-favusrn8='$favusrn8',
-favusrn9='$favusrn9',
-favusrn10='$favusrn10',
-favusrn11='$favusrn11',
-favusrn12='$favusrn12',
-favusrn13='$favusrn13',
-favusrn14='$favusrn14',
-favusrn15='$favusrn15',
-favusrn16='$favusrn16',
-favusrn17='$favusrn17',
-favusrn18='$favusrn18',
-favusrn19='$favusrn19',
-favusrn20='$favusrn20'
+waitingtimedelay='$waitingtimedelay'
 "; 
 $result = mysql_query($sql, $conn_id);
 if ($result){ 
@@ -457,24 +321,8 @@ $alerttext=$alerttext."<p><strong>An error occured during updating Preferences</
 
 
 
-$sql = "UPDATE Cyclist SET poshname='$unrider2', cojmname='$unrider1' WHERE CyclistID='1' ";
-
-$result = mysql_query($sql, $conn_id);
-if ($result){ 
-$infotext=$infotext."<br />Updated Preferences"; 
-$pagetext=$pagetext."<p>Preferences Updated</p>"; 
-
-} else { 
-
-$infotext=$infotext.mysql_error()."<br /><strong>An error occured during updating Preferences</strong>".$sql;
-$alerttext=$alerttext."<p><strong>An error occured during updating Preferences</strong></p>"; 
-} 
 
 
-
-
-
- } // finishes gcheck for global name before comitting to db
  } // finishes edit globals
 
  
@@ -651,15 +499,26 @@ $area=trim($_POST['area']);
 $newpc=trim($_POST['newpc']);
 $newpc = str_replace(" ", "", "$newpc", $count); 
 $newpc = str_replace (" ", "", strtoupper($newpc));
-$infotext=$infotext.'<br />Adding new postcode '.$newpc;
+$infotext.='<br />Adding new postcode '.$newpc;
 
-$ifexistingpc = mysql_result(mysql_query(" SELECT `PZ_Postcode`
+
+$existingquery=" SELECT `PZ_Postcode`
 FROM  `postcodeuk` 
 WHERE  `PZ_Postcode` 
 LIKE  '$newpc' LIMIT 0,1
-", $conn_id), 0);
+";
 
-if ($ifexistingpc) {  
+// echo $existingquery;
+
+$ifexistingpc = mysql_num_rows(mysql_query($existingquery, $conn_id));
+
+
+// $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+// $num_rows = mysql_num_rows($sql_result);
+
+
+if ($ifexistingpc>0) {  
+
 
 // $infotext=$infotext.'<br />ifexistingpc : '.$ifexistingpc; 
 // $infotext=$infotext.'<br />lat : '.$lat; 
@@ -667,8 +526,6 @@ if ($ifexistingpc) {
 
 $sql = "UPDATE `postcodeuk` 
 SET  `PZ_zero` =  '1' ,
- `PZ_town` =  '$town' ,
- `PZ_area` =  '$area' ,
  `PZ_northing` =  '$lat' ,
  `PZ_easting` =  '$lng'
 WHERE 
@@ -684,8 +541,8 @@ $pagetext=$pagetext.'<p> Postcode updated </p>';
 } else {  // ends no existing pc
 
 
-$sql="INSERT INTO `postcodeuk` (`PZ_Postcode`, `PZ_town`, `PZ_area`, `PZ_northing`, `PZ_easting`, `PZ_zero`) VALUES 
-('$newpc', '$town', '$area', '$lat', '$lng', '1');";
+$sql="INSERT INTO `postcodeuk` (`PZ_Postcode`, `PZ_northing`, `PZ_easting`, `PZ_zero`) VALUES 
+('$newpc', '$lat', '$lng', '1');";
  $result = mysql_query($sql, $conn_id);
 if ($result){ 
 $pagetext=$pagetext.'<p> Postcode added </p>';
@@ -1836,7 +1693,9 @@ WHERE cojm_favadr.favadrclient= '$clientorder'
 AND (( cojm_favadr.favadrpc LIKE '%$collectpc%' ) OR ( cojm_favadr.favadrft LIKE '%$fromfreeaddress%'))
 AND cojm_favadr.favadrisactive='1' 
 AND cojm_favadr.favadrclient = Clients.CustomerID 
-"; $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+"; 
+
+$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
 $num_rows = mysql_num_rows($sql_result);
 
 if ($num_rows>'0') { 

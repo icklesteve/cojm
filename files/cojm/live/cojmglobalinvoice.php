@@ -49,9 +49,7 @@ Invoice Total Colour ( white is ffffff ) :
 <p>Title Font Name 
 
 <select  class="ui-state-default ui-corner-left"  name="invoice1" >
-<option <?php if ($globalprefrow['invoice1']=='tradegothicltstd') { echo ' selected="selected" '; } ?> value="tradegothicltstd"> Trade Gothic </option>
-<option <?php if ($globalprefrow['invoice1']=='tradegothicltstdb') { echo ' selected '; } ?> value="tradegothicltstdb"> Trade Gothic Bold </option>
-<option <?php if ($globalprefrow['invoice1']=='tradegothicltstdbi') { echo ' selected '; } ?> value="tradegothicltstdbi"> Trade Gothic Bold Italic </option>
+<option <?php if ($globalprefrow['invoice1']=='tradegothicltstd') { echo ' selected="selected" '; } ?> value="tradegothicltstd"> TG </option>
 <option <?php if ($globalprefrow['invoice1']=='almohanad') { echo ' selected '; } ?> value="almohanad"> Almohanad </option>
 <option <?php if ($globalprefrow['invoice1']=='dejavusans') { echo ' selected '; } ?> value="dejavusans"> Dejavusans </option>
 <option <?php if ($globalprefrow['invoice1']=='freesans') { echo ' selected '; } ?> value="freesans"> freesans </option>
@@ -64,9 +62,7 @@ Invoice Total Colour ( white is ffffff ) :
 
 <p>Body Font Name 
 <select  class="ui-state-default ui-corner-left"  name="invoice5" >
-<option <?php if ($globalprefrow['invoice5']=='tradegothicltstd') { echo ' selected="selected" '; } ?> value="tradegothicltstd"> Trade Gothic </option>
-<option <?php if ($globalprefrow['invoice5']=='tradegothicltstdb') { echo ' selected '; } ?> value="tradegothicltstdb"> Trade Gothic Bold </option>
-<option <?php if ($globalprefrow['invoice5']=='tradegothicltstdbi') { echo ' selected '; } ?> value="tradegothicltstdbi"> Trade Gothic Bold Italic </option>
+<option <?php if ($globalprefrow['invoice5']=='tradegothicltstd') { echo ' selected="selected" '; } ?> value="tradegothicltstd"> TG </option>
 <option <?php if ($globalprefrow['invoice5']=='almohanad') { echo ' selected '; } ?> value="almohanad"> Almohanad </option>
 <option <?php if ($globalprefrow['invoice5']=='dejavusans') { echo ' selected '; } ?> value="dejavusans"> Dejavusans </option>
 <option <?php if ($globalprefrow['invoice5']=='freesans') { echo ' selected '; } ?> value="freesans"> freesans </option>
@@ -81,8 +77,6 @@ Invoice Total Colour ( white is ffffff ) :
 
 <select  class="ui-state-default ui-corner-left"  name="invoice3" >
 <option <?php if ($globalprefrow['invoice3']=='tradegothicltstd') { echo ' selected="selected" '; } ?> value="tradegothicltstd"> Trade Gothic </option>
-<option <?php if ($globalprefrow['invoice3']=='tradegothicltstdb') { echo ' selected '; } ?> value="tradegothicltstdb"> Trade Gothic Bold </option>
-<option <?php if ($globalprefrow['invoice3']=='tradegothicltstdbi') { echo ' selected '; } ?> value="tradegothicltstdbi"> Trade Gothic Bold Italic </option>
 <option <?php if ($globalprefrow['invoice3']=='almohanad') { echo ' selected '; } ?> value="almohanad"> Almohanad </option>
 <option <?php if ($globalprefrow['invoice3']=='dejavusans') { echo ' selected '; } ?> value="dejavusans"> Dejavusans </option>
 <option <?php if ($globalprefrow['invoice3']=='freesans') { echo ' selected '; } ?> value="freesans"> freesans </option>

@@ -21,7 +21,7 @@ $title = "COJM";
 <?php echo '<link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>'; ?>
-<title><?php print ($title); ?> Add PC </title>
+<title><?php print ($title); ?> Add or Edit PostCode </title>
     <script src="https://maps.google.co.uk/maps?file=api&amp;v=2&amp;key=AIzaSyAQR0YkeZdeyV_u2tnRHD-v28PR4upoVaI" type="text/javascript"></script>
     <script type="text/javascript">
  function load() {
@@ -164,8 +164,6 @@ $filename='newpc.php';
 <form action="<?php if ($ID) { echo 'order.php'; } else echo '#'; ?>" method="post" >
 <input type="hidden" name="page" value="newpostcode" />
 <div style="position:relative; float:left;">
-Town : <input class="ui-state-default ui-corner-all" type='text' name='town' value=' <?php echo $globalprefrow['glob3']; ?> ' />
-Region : <input class="ui-state-default ui-corner-all" type='text' name='area' value=' <?php echo $globalprefrow['glob4']; ?> ' />
 <input type="hidden" name="formbirthday" value="<?php echo date("U");  ?>"></div>
 <div id="para" > <button onclick='changeText3()' >Confirm Position on Map</button></div> 
 </form>

@@ -176,7 +176,6 @@ echo '<li><a href="cojmglobal.php"'; if ($filename=='cojmglobal.php') echo ' cla
 echo '<li><a href="service.php"'; if ($filename=='service.php') { echo ' class="selected"'; } echo '>Services</a></li>';
 echo '<li><a href="corepricing.php"'; if ($filename=='corepricing.php') echo ' class="selected"'; echo '>Distance Pricing</a></li>';
 echo '<li><a href="cojmglobalemail.php"'; if ($filename=='cojmglobalemail.php') echo ' class="selected"'; echo '>Set Email</a></li>';
-echo '<li><a href="cojmglobalinvoice.php"'; if ($filename=='cojmglobalinvoice.php') echo ' class="selected"'; echo '>Set Invoice</a></li>';
 echo '<li><a href="cojmglobalstatus.php"'; if ($filename=='cojmglobalstatus.php') echo ' class="selected"'; echo '>Status Text</a></li>';
 if ($globalprefrow['adminlogoback']>'0') { 
 echo '<li><a href="debug.php"'; if ($filename=='debug.php') echo ' class="selected"'; echo '>Debug</a></li>'; }  

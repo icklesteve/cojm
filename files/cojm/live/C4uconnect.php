@@ -13,6 +13,7 @@ function cookbook_connect () {
  $password  = "password"; 
 
 define('BACKUPPASSWD', 'changemetosomethingdecent'); 
+define("REMOTEFTPPASSWD","changemetosomethingdecent"); // ftp password
  
 define('DBHOST', $host_name);
 define('DBUSER', $user_name);

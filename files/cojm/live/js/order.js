@@ -841,11 +841,19 @@ $("#orderajaxmap").html("").show();
 	 
 showhidebystatus(); // updates which buttons to show	 
  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  // if existing message start a new line
  if (message!=='') {  message += '<br />'; }
  oktosubmit=1;
  
- message+='Status is ' + initialstatus + ' <br /> '; 
+// message+='Status is ' + initialstatus + ' <br /> '; 
 
  
 if (initialtargetcollectiondate=="") {

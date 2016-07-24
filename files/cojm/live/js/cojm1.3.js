@@ -3661,12 +3661,7 @@ $('#alerttext').delay(alertdelay).slideUp(alertslide);
 	$('.alerttext').html(message).stop().removeAttr('style').delay(alertdelay).slideUp(alertslide)
 		}
 
-	if ((olddeporder)<1) {
 
-$("div#clientdep.fsr input.ui-autocomplete-input").addClass("autoinputerror").removeClass("");
-		} else { 
-$("div#clientdep.fsr input.ui-autocomplete-input").addClass("").removeClass("autoinputerror");
-		}
 
 	}
 

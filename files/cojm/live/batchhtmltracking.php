@@ -924,6 +924,14 @@ header('Content-Disposition:attachment; filename="'.$filename.'"');
 
 echo $htmloutput; 
 
+
+ include 'cojmcron.php';
+
+mysql_close();
+
+$dbh=null;
+
+
 } // ends check for _POST passed
 
 ?>

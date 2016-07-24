@@ -456,6 +456,127 @@ echo '
 
 <div style="clear:both;"> </div>
 
+';
+
+
+
+
+
+
+// starts area selectors
+echo '<div id="areaselectors" class="hideuntilneeded">';
+
+
+$showsubarea='0';
+
+
+if ($row['opsmaparea']) {
+$opsmaparea=$row['opsmaparea'];
+$checkifarchivearea=mysql_result(mysql_query("SELECT inarchive FROM opsmap WHERE opsmapid=$opsmaparea LIMIT 1 ", $conn_id), 0);
+// echo ' aa:'.$checkifarchivearea;
+}
+
+
+if ($checkifarchivearea=='1') {
+$topareaquery = "SELECT opsmapid, opsname, descrip, istoplayer FROM opsmap WHERE type=2 AND corelayer='0' "; 
+} else {
+$topareaquery = "SELECT opsmapid, opsname, descrip, istoplayer FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer='0' "; 
+}
+
+$topareaqueryres = mysql_query ($topareaquery, $conn_id); 
+
+echo '<div class="fs"><div class="fsl"> </div>  <select id="opsmaparea" name="opsmaparea" class="ui-state-default ui-corner-left">
+<option value="" > Choose Area </option>';
+
+while (list ($listopsmapid, $listopsname, $descrip, $istoplayer ) = mysql_fetch_row ($topareaqueryres)) {
+print ("<option "); 
+if ($row['opsmaparea'] == $listopsmapid) {echo ' selected="selected" '; 
+
+$showsubarea=$istoplayer; 
+$topname=$listopsname;
+$topdescrip=$descrip;
+
+
+
+} 
+echo 'value="'.$listopsmapid.'" >' .$listopsname;
+if ($istoplayer=='1') { echo ' ++ ';    }
+echo '</option>';
+}
+echo '</select> 
+
+<a id="arealink" class="showclient marright10 hideuntilneeded" title="Area Details" 
+target="_blank" href="opsmap-new-area.php?page=showarea&areaid='.$row['opsmaparea'].'"> </a>
+
+';
+
+
+
+
+
+
+$btmareaquery = "SELECT opsmapid, opsname, descrip  FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer='".$row['opsmaparea']."' "; 
+$btmareaqueryres = mysql_query ($btmareaquery, $conn_id); 
+
+echo ' <select id="opsmapsubarea" name="opsmapsubarea" class="ui-state-default ui-corner-left hideuntilneeded">
+<option value="" > Choose Sub Area </option>';
+
+while (list ($listopsmapid, $listopsname, $descrip ) = mysql_fetch_row ($btmareaqueryres)) {
+print ("<option "); 
+if ($row['opsmapsubarea'] == $listopsmapid) {
+	
+	echo ' selected="selected" '; 
+// $btmdescrip=$descrip;
+$subareaname=$listopsname;
+$subareacomments=$descrip;
+
+ } 
+echo 'value="'.$listopsmapid.'" >' .$listopsname.' '.$descrip;
+echo '</option>';
+}
+echo '</select> 
+
+<a id="subarealink" class="showclient hideuntilneeded" title="Sub Area Details" 
+target="_blank" href="opsmap-new-area.php?page=showarea&areaid='.$row['opsmapsubarea'].'"> </a>
+ </div>
+ <div id="areacomments" class="favcomments fsr hideuntilneeded"> '.$topdescrip;
+ 
+ echo '<span id="subareacomments"> ';
+ 
+if ($subareacomments) { echo ' ('.$subareacomments.') '; }
+
+
+echo '</span> </div>';
+
+echo '</div>';
+///////     ends area selector
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+echo '
 </div>'; // ends distance container
 
 
@@ -1379,109 +1500,6 @@ echo '</div>';
 
 
 
-echo '<div id="areaselectors" class="ui-corner-all ui-state-highlight addresses hideuntilneeded">';
-
-
-$showsubarea='0';
-
-
-if ($row['opsmaparea']) {
-$opsmaparea=$row['opsmaparea'];
-$checkifarchivearea=mysql_result(mysql_query("SELECT inarchive FROM opsmap WHERE opsmapid=$opsmaparea LIMIT 1 ", $conn_id), 0);
-// echo ' aa:'.$checkifarchivearea;
-}
-
-
-if ($checkifarchivearea=='1') {
-$topareaquery = "SELECT opsmapid, opsname, descrip, istoplayer FROM opsmap WHERE type=2 AND corelayer='0' "; 
-} else {
-$topareaquery = "SELECT opsmapid, opsname, descrip, istoplayer FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer='0' "; 
-}
-
-$topareaqueryres = mysql_query ($topareaquery, $conn_id); 
-
-echo '<div class="fs"><div class="fsl"> </div>  <select id="opsmaparea" name="opsmaparea" class="ui-state-default ui-corner-left">
-<option value="" > Choose Area </option>';
-
-while (list ($listopsmapid, $listopsname, $descrip, $istoplayer ) = mysql_fetch_row ($topareaqueryres)) {
-print ("<option "); 
-if ($row['opsmaparea'] == $listopsmapid) {echo ' selected="selected" '; 
-
-$showsubarea=$istoplayer; 
-$topname=$listopsname;
-$topdescrip=$descrip;
-
-
-
-} 
-echo 'value="'.$listopsmapid.'" >' .$listopsname;
-if ($istoplayer=='1') { echo ' ++ ';    }
-echo '</option>';
-}
-echo '</select> ';
-
-
-
-
-
-
-echo '
-<a id="arealink" class="showclient marright10 hideuntilneeded" title="Area Details" 
-target="_blank" href="opsmap-new-area.php?page=showarea&areaid='.$row['opsmaparea'].'"> </a>';
-
-
-
-
-
-
-$btmareaquery = "SELECT opsmapid, opsname, descrip  FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer='".$row['opsmaparea']."' "; 
-$btmareaqueryres = mysql_query ($btmareaquery, $conn_id); 
-
-echo ' <select id="opsmapsubarea" name="opsmapsubarea" class="ui-state-default ui-corner-left hideuntilneeded">
-<option value="" > Choose Sub Area </option>';
-
-while (list ($listopsmapid, $listopsname, $descrip ) = mysql_fetch_row ($btmareaqueryres)) {
-print ("<option "); 
-if ($row['opsmapsubarea'] == $listopsmapid) {
-	
-	echo ' selected="selected" '; 
-// $btmdescrip=$descrip;
-$subareaname=$listopsname;
-$subareacomments=$descrip;
-
- } 
-echo 'value="'.$listopsmapid.'" >' .$listopsname.' '.$descrip;
-echo '</option>';
-}
-echo '</select> ';
-
-
-
-
-
-
-
-echo '
-<a id="subarealink" class="showclient hideuntilneeded" title="Sub Area Details" 
-target="_blank" href="opsmap-new-area.php?page=showarea&areaid='.$row['opsmapsubarea'].'"> </a>
- </div>
- <div id="areacomments" class="favcomments fsr hideuntilneeded"> '.$topdescrip;
- 
- echo '<span id="subareacomments"> ';
- 
-if ($subareacomments) { echo ' ('.$subareacomments.') '; }
-
-
-echo '</span> </div>';
-
-
-
-echo '</div>';
-
-
-
-
-
 echo '<div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses"></div>';
 echo ' </div> <br /> '; // ends div hangright
 
@@ -1678,6 +1696,19 @@ ordermapupdater();
 
 
 function showhidebystatus() { // or changes to time values for showing buttons for working windows
+
+
+	if ((olddeporder)<1) {
+
+$("div#clientdep.fsr input.ui-autocomplete-input").addClass("autoinputerror").removeClass("");
+		} else {
+$("div#clientdep.fsr input.ui-autocomplete-input").addClass("").removeClass("autoinputerror");
+		}
+
+
+
+
+
 
 
 if (initialstatus<31) {

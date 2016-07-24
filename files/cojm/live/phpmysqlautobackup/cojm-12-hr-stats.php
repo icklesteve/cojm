@@ -163,7 +163,7 @@ $msg.="\r\n\r\n";
 
 
 
-if (($error>0)or($globalprefrow['adminlogoback']>0)){
+if (($error>3)or($globalprefrow['adminlogoback']>0)){
 
 
 

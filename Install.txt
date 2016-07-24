@@ -20,3 +20,9 @@ For added security, include a password.php file outside of your web root ( publi
 5 Setup user / password on the public_html/cojm/live directory
 ( may be possible from your webhost cPanel login, Files > Directory Privacy ), alternatively see https://css-tricks.com/easily-password-protect-a-website-or-subdirectory/
 The user name which you create will be the COJM username.
+
+Auto Backups - On your server / web hosting that you want to backup to, create an FTP account with access to a new directory outside of your root public_html
+
+eg home/cojmautobackup
+
+Get a Google Maps API key, add this to your setup via settings menu

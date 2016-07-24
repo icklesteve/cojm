@@ -3104,25 +3104,6 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 }
 
 
-if ($globalname=='glob6') {
- try {
-$query = "UPDATE globalprefs SET glob6=:newvalue WHERE settingsid=:settingsid";
-$stmt = $dbh->prepare($query);
-$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
-$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
-$stmt->execute();
-$total = $stmt->rowCount();
-$infotext.=$total.' row updated <br />';
-if ($total=='1') {
-$allok='1';
-$newformbirthday=microtime(TRUE);
-$message.='Index Alternate Display updated to '.$newvaluet.'<br />';
-}
-}
-catch(PDOException $e) { $message.= $e->getMessage(); }
-}
-
-
 if ($globalname=='courier2') {
  try {
 $query = "UPDATE globalprefs SET courier2=:newvalue WHERE settingsid=:settingsid";
@@ -3142,9 +3123,9 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 }
 
 
-if ($globalname=='glob11') {
+if ($globalname=='courier3') {
  try {
-$query = "UPDATE globalprefs SET glob11=:newvalue WHERE settingsid=:settingsid";
+$query = "UPDATE globalprefs SET courier3=:newvalue WHERE settingsid=:settingsid";
 $stmt = $dbh->prepare($query);
 $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
 $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
@@ -3154,11 +3135,69 @@ $infotext.=$total.' row updated <br />';
 if ($total=='1') {
 $allok='1';
 $newformbirthday=microtime(TRUE);
-$message.='Show Working Windows updated to '.$newvaluet.'<br />';
+$message.='Rider Top menu selected colour set to '.$newvaluet.'<br />';
 }
 }
 catch(PDOException $e) { $message.= $e->getMessage(); }
 }
+
+
+if ($globalname=='courier4') {
+ try {
+$query = "UPDATE globalprefs SET courier4=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Rider Logo Location set to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='courier5') {
+ try {
+$query = "UPDATE globalprefs SET courier5=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Rider Logo Style set to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='courier6') {
+ try {
+$query = "UPDATE globalprefs SET courier6=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Rider COC or COD Style set to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
 
 if ($globalname=='glob1') {
  try {
@@ -3233,7 +3272,6 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 }
 
 
-
 if ($globalname=='glob5') {
  try {
 $query = "UPDATE globalprefs SET glob5=:newvalue WHERE settingsid=:settingsid";
@@ -3247,6 +3285,63 @@ if ($total=='1') {
 $allok='1';
 $newformbirthday=microtime(TRUE);
 $message.='Rider name updated to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='glob6') {
+ try {
+$query = "UPDATE globalprefs SET glob6=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Index Alternate Display updated to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='glob7') { // show page load times
+ try {
+$query = "UPDATE globalprefs SET glob7=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Show Page Load Times updated to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='glob8') {
+ try {
+$query = "UPDATE globalprefs SET glob8=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Alert email address updated to '.$newvaluet.'<br />';
 }
 }
 catch(PDOException $e) { $message.= $e->getMessage(); }
@@ -3291,9 +3386,23 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 }
 
 
-
-
-
+if ($globalname=='glob11') {
+ try {
+$query = "UPDATE globalprefs SET glob11=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Show Working Windows updated to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
 
 
 if ($globalname=='unrider1') {
@@ -3826,9 +3935,6 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 }
 
 
-
-
-
 if ($globalname=='favusrn1') {
  try {
 $query = "UPDATE globalprefs SET favusrn1=:newvalue WHERE settingsid=:settingsid";
@@ -4209,7 +4315,6 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 }
 
 
-
 if ($globalname=='vatbanda') {
  try {
 $query = "UPDATE globalprefs SET vatbanda=:newvalue WHERE settingsid=:settingsid";
@@ -4246,8 +4351,6 @@ $message.='VAT Band B updated to '.$newvaluet.'<br />';
 }
 catch(PDOException $e) { $message.= $e->getMessage(); }
 }
-
-
 
 
 if ($globalname=='gexpc1') {
@@ -4420,25 +4523,6 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 }
 
 
-if ($globalname=='glob7') { // show page load times
- try {
-$query = "UPDATE globalprefs SET glob7=:newvalue WHERE settingsid=:settingsid";
-$stmt = $dbh->prepare($query);
-$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
-$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
-$stmt->execute();
-$total = $stmt->rowCount();
-$infotext.=$total.' row updated <br />';
-if ($total=='1') {
-$allok='1';
-$newformbirthday=microtime(TRUE);
-$message.='Show Page Load Times updated to '.$newvaluet.'<br />';
-}
-}
-catch(PDOException $e) { $message.= $e->getMessage(); }
-}
-
-
 if ($globalname=='adminlogoback') { // show debug
  try {
 $query = "UPDATE globalprefs SET adminlogoback=:newvalue WHERE settingsid=:settingsid";
@@ -4456,9 +4540,6 @@ $message.='Show Debug updated to '.$newvaluet.'<br />';
 }
 catch(PDOException $e) { $message.= $e->getMessage(); }
 }
-
-
-
 
 
 if ($globalname=='forcehttps') { // force https
@@ -4499,10 +4580,365 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 }
 
 
+if ($globalname=='showpostcomm') { // showpostcomm
+ try {
+$query = "UPDATE globalprefs SET showpostcomm=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Show Licensed Mail Options updated to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
 
 
+if ($globalname=='inaccuratepostcode') { // inaccuratepostcode     1 is yes, eg Crete.   0 is no, eg GB
+ try {
+$query = "UPDATE globalprefs SET inaccuratepostcode=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Show Inacurate Postcode Setting updated to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
 
 
+if ($globalname=='backupftpserver') { 
+ try {
+$query = "UPDATE globalprefs SET backupftpserver=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Backup Server updated to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='backupftpusername') { 
+ try {
+$query = "UPDATE globalprefs SET backupftpusername=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Backup FTP Username updated to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='co2perdist') {   
+ try {
+$query = "UPDATE globalprefs SET co2perdist=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='CO2 saving per mile or km updated to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='pm10perdist') {   
+ try {
+$query = "UPDATE globalprefs SET pm10perdist=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='PM10 saving per mile or km updated to '.$newvaluet.'<br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='waitingtimedelay') {   
+ try {
+$query = "UPDATE globalprefs SET waitingtimedelay=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Waiting Time Delay Prompt updated to '.$newvaluet.' mins. <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='googlemapapiv3key') {   
+ try {
+$query = "UPDATE globalprefs SET googlemapapiv3key=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Google Maps API v3 Key updated to '.$newvaluet.' <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='invoicefooter') {   
+ try {
+$query = "UPDATE globalprefs SET invoicefooter=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Alternate Row Colour changed to '.$newvaluet.' <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='invoicefooter2') {   
+ try {
+$query = "UPDATE globalprefs SET invoicefooter2=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Copy / Pasteable comments updated to '.$newvaluet.' <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='invoicefooter3') {   
+ try {
+$query = "UPDATE globalprefs SET invoicefooter3=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Invoice footer pt1 changed to '.$newvaluet.' <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='invoicefooter4') {   
+ try {
+$query = "UPDATE globalprefs SET invoicefooter4=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Invoice footer pt2 changed to '.$newvaluet.' <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='invoicetotalcolour') {   
+ try {
+$query = "UPDATE globalprefs SET invoicetotalcolour=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Invoice Total Colour Cell changed to '.$newvaluet.' <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='invoice1') {   
+ try {
+$query = "UPDATE globalprefs SET invoice1=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Title Font changed to '.$newvaluet.' <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='invoice2') {   
+ try {
+$query = "UPDATE globalprefs SET invoice2=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Title Font size changed to '.$newvaluet.' <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='invoice3') {   
+ try {
+$query = "UPDATE globalprefs SET invoice3=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Footer Font changed to '.$newvaluet.' <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='invoice4') {   
+ try {
+$query = "UPDATE globalprefs SET invoice4=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Footer Font size changed to '.$newvaluet.' <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='invoice5') {   
+ try {
+$query = "UPDATE globalprefs SET invoice5=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Body Font changed to '.$newvaluet.' <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
+
+if ($globalname=='invoice6') {   
+ try {
+$query = "UPDATE globalprefs SET invoice6=:newvalue WHERE settingsid=:settingsid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Body Font size changed to '.$newvaluet.' <br />';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
 
 
 

@@ -234,45 +234,9 @@ $pagetimeout=$formtimeout-1;
 
 
 
-$waitingtimedelay=trim($_POST['waitingtimedelay']);
-
-
-$co2perdist=trim($_POST['co2perdist']);
-$pm10perdist=trim($_POST['pm10perdist']);
-
-
-// spare is image 7 - 10
 
 
 
-
-$glob1=trim($_POST['glob1']); // latitude for new pc
-$glob2=trim($_POST['glob2']); // longitude for new pc
-$glob3=trim($_POST['glob3']); // Birmingham for new pc
-$glob4=trim($_POST['glob4']); // West Midlands for new pc
-$glob5=trim($_POST['glob5']); // Cyclist / Rider
-$glob6=trim($_POST['glob6']); // index.php colour change style
-$glob8=trim($_POST['glob8']); // email address for cojm errors
-$glob9=trim($_POST['glob9']); // Main COJM JS File
-$glob10=trim($_POST['glob10']); // Main COJM CSS File
-if (isset($_POST['glob11'])) { $glob11=trim($_POST['glob11']); } else { $glob11='0'; } // Show Working Windows
-
-// $clweb2=trim($_POST['clweb2']);
-
-// $clweb7=trim($_POST['clweb7']); 
-$clweb8=trim($_POST['clweb8']);
-// $clweb9=trim($_POST['clweb9']);
-// $clweb10=trim($_POST['clweb10']);
-
-
-
-// $courier1=trim($_POST['courier1']);
-$courier2=trim($_POST['courier2']);
-$courier3=trim($_POST['courier3']);
-$courier4=trim($_POST['courier4']);
-$courier5=trim($_POST['courier5']);
-$courier6=trim($_POST['courier6']);
-$googlemapapiv3key=trim($_POST['googlemapapiv3key']);
 
 
 
@@ -281,32 +245,15 @@ $googlemapapiv3key=trim($_POST['googlemapapiv3key']);
 
 
 $sql = "UPDATE globalprefs SET 
-courier2='$courier2' ,
-courier3='$courier3' ,
-courier4='$courier4' ,
-courier5='$courier5' ,
-courier6='$courier6' ,
-googlemapapiv3key='$googlemapapiv3key' ,
-clweb8='$clweb8' ,
-glob1='$glob1',
-glob2='$glob2',
-glob3='$glob3',
-glob4='$glob4',
-glob5='$glob5',
-glob6='$glob6',
-glob8='$glob8',
-glob9='$glob9',
-glob10='$glob10',
+
+
 glob11='$glob11',
-co2perdist='$co2perdist',
-pm10perdist='$pm10perdist',
 highlightcolour='$highlightcolour' , 
 highlightcolourno='$highlightcolourno' , 
 numjobs='$numjobs' ,
 numjobsm='$numjobsm' ,
 formtimeout='$formtimeout' ,
-pagetimeout='$pagetimeout' ,
-waitingtimedelay='$waitingtimedelay'
+pagetimeout='$pagetimeout' 
 "; 
 $result = mysql_query($sql, $conn_id);
 if ($result){ 

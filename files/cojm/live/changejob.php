@@ -208,71 +208,6 @@ if ($nowepoch < $globalprefrow['formtimeout']) {
 
 
 
-
-if ($page=='editglobals') {
-
-// if (isset($_POST['showdebug'])) { $showdebug=trim($_POST['showdebug']); } else { $showdebug=''; }
-
-// $backupemailto=trim($_POST['backupemailto']);
-// $backupemailfrom=trim($_POST['backupemailfrom']);
-
-// $showsettingsmobile=trim($_POST['showsettingsmobile']);
-
-
-
-
-$highlightcolour=trim($_POST['highlightcolour']);
-$highlightcolourno=trim($_POST['highlightcolourno']);
-$numjobs=trim($_POST['numjobs']);
-$numjobsm=trim($_POST['numjobsm']);
-
-$pagetimeout=$formtimeout-1;
-// $mobpagetimeout=trim($_POST['mobpagetimeout']);
-
-
-// $infotext=$infotext.'<br />sroot : '.$httproots;
-
-
-
-
-
-
-
-
-
-
-
-
-
-$sql = "UPDATE globalprefs SET 
-
-
-glob11='$glob11',
-highlightcolour='$highlightcolour' , 
-highlightcolourno='$highlightcolourno' , 
-numjobs='$numjobs' ,
-numjobsm='$numjobsm' ,
-formtimeout='$formtimeout' ,
-pagetimeout='$pagetimeout' 
-"; 
-$result = mysql_query($sql, $conn_id);
-if ($result){ 
-$infotext=$infotext."<br />Updated Preferences"; 
-$pagetext=$pagetext."<p>Preferences Updated</p>"; 
-
-} else { 
-
-$infotext=$infotext.mysql_error()."<br /><strong>An error occured during updating Preferences</strong>".$sql;
-$alerttext=$alerttext."<p><strong>An error occured during updating Preferences</strong></p>"; 
-} 
-
-
-
-
-
- } // finishes edit globals
-
- 
  
  
 if ($page=='editglobalemail') {
@@ -358,79 +293,6 @@ $alerttext=$alerttext."<p><strong>An error occured during updating email setting
 
 } // ends chek for emai from
 } // finishes global email
-
-
-
-if ($page=='editglobalinvoice') {
-
-// $composeemailwidth=trim($_POST['composeemailwidth']);
-
-
-$invoicefooter=trim($_POST['invoicefooter']);
-$invoicefooter2=trim($_POST['invoicefooter2']);
-$invoicefooter3=trim($_POST['invoicefooter3']);
-$invoicefooter4=trim($_POST['invoicefooter4']);
-$invoicetotalcolour=trim($_POST['invoicetotalcolour']);
-$invoice1=trim($_POST['invoice1']); // font
-$invoice2=trim($_POST['invoice2']); // font size
-$invoice3=trim($_POST['invoice3']); // font
-$invoice4=trim($_POST['invoice4']); // font size
-$invoice5=trim($_POST['invoice5']); // font
-$invoice6=trim($_POST['invoice6']); // font size
-
-
-// $invoice7=trim($_POST['invoice7']);
-// $invoice8=trim($_POST['invoice8']);
-// $invoice9=trim($_POST['invoice9']);
-// $invoice10=trim($_POST['invoice10']);
-// $invoice11=trim($_POST['invoice11']);
-// $invoice12=trim($_POST['invoice12']);
-// $invoice13=trim($_POST['invoice13']);
-// $invoice14=trim($_POST['invoice14']);
-// $invoice15=trim($_POST['invoice15']);
-// $invoice16=trim($_POST['invoice16']);
-// $invoice17=trim($_POST['invoice17']);
-// $invoice18=trim($_POST['invoice18']);
-// $invoice19=trim($_POST['invoice19']);
-// $invoice20=trim($_POST['invoice20']);
-
-
-
-
-if ($invoice1) {
-
-$sql = "UPDATE globalprefs SET 
-invoicefooter='$invoicefooter' ,
-invoicefooter2='$invoicefooter2' ,
-invoicefooter3='$invoicefooter3' ,
-invoicefooter4='$invoicefooter4' ,
-invoice1='$invoice1' , 
-invoice2='$invoice2' , 
-invoice3='$invoice3' , 
-invoice4='$invoice4' , 
-invoice5='$invoice5' , 
-invoice6='$invoice6' , 
-invoicetotalcolour='$invoicetotalcolour'
-"; 
-
-$result = mysql_query($sql, $conn_id);
-if ($result){ 
-$infotext=$infotext."<br />Updated Invoice Setup"; 
-$pagetext=$pagetext."<p>Updated Invoice Setup</p>"; 
-
-} 
-else { 
-$infotext=$infotext.mysql_error()."<br /><strong>An error occured during updating Invoice settings</strong>"; 
-$alerttext=$alerttext."<p><strong>An error occured during updating Invoice settings</strong></p>"; 
-} 
-
-} // finishes email width zero
-} // finishes global email
-
-
-
-
-
 
 
 
@@ -1922,7 +1784,7 @@ mysql_query("UNLOCK TABLES", $conn_id);
 if ($page=='editcorepricing') {
 $infotext=$infotext.'<br/>Editing distance pricing';
 
-$i='100'; while ($i>0)  { 
+$i='21'; while ($i>0)  {
 
 if (isset($_POST["chargedbybuildid$i"])) { 
 
@@ -1952,7 +1814,13 @@ if (trim($_POST["new$i"])=='') {
 
 
 
- $sql = "UPDATE chargedbybuild SET cbbname='$cbbname', cbbasap='$cbbasap', cbbcargo='$cbbcargo' , cbbmod='$cbbmod', cbbcost='$cbbcost', cbborder='$cbborder', cbbcomment='$cbbcomment' 
+ $sql = "UPDATE chargedbybuild SET 
+ cbbname='$cbbname', 
+ cbbasap='$cbbasap', 
+ cbbcargo='$cbbcargo' , 
+ cbbmod='$cbbmod', 
+ cbbcost='$cbbcost', 
+ cbborder='$cbborder'
  WHERE chargedbybuildid = $i LIMIT 1"; 
  $result = mysql_query($sql, $conn_id);
  if ($result){ 

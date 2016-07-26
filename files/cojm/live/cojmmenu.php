@@ -119,7 +119,21 @@ echo '</div>
 
 
 		
-if (isset($pagetext)) { $pagetext=$pagetext; } else {$pagetext='';} if ((isset($adminmenu)) and ($adminmenu=='1')) { 
+if (isset($pagetext)) { $pagetext=$pagetext; } else {$pagetext='';} 
+
+
+echo '<div class="pagetext success" id="pagetext" ';
+if (trim($pagetext)) { } else { echo ' style="display:none;" '; } echo ' >'.$pagetext.'</div>'; 
+
+echo'<div id="alerttext" class="error ui-corner-all alerttext" ';
+if ((isset($alerttext)) and ($alerttext)) { } else { echo ' style="display:none;" '; } echo ' >'. $alerttext.' </div> ';
+
+
+
+
+
+
+if ((isset($adminmenu)) and ($adminmenu=='1')) { 
 echo '<div class="demo_top_wrapper"><div class="sticky_navigation_wrapper"><div class="sticky_navigation"><ul>';
 echo '<li><div id="toggleinvoicemenuchoose" ><a href="#">Finance</a></div></li><li><a href="new_cojm_client.php"'; 
 if ($filename=='new_cojm_client.php') { echo ' class="selected"'; } echo '>Client</a></li>';
@@ -204,12 +218,6 @@ echo '<form action="order.php" method="post" id="newjob_form" accept-charset="ut
 
 // echo '<div id="loggedinas">Logged in as '.$cyclistid.'</div>';
 
-
-echo '<div class="pagetext success" id="pagetext" ';
-if (trim($pagetext)) { } else { echo ' style="display:none;" '; } echo ' >'.$pagetext.'</div>'; 
-
-echo'<div id="alerttext" class="error ui-corner-all alerttext" ';
-if ((isset($alerttext)) and ($alerttext)) { } else { echo ' style="display:none;" '; } echo ' >'. $alerttext.' </div> ';
 
 
 // if ($globalprefrow['adminlogoback']>'0') { echo '<br /> DEBUG MODE'; }

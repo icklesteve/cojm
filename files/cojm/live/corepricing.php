@@ -13,10 +13,27 @@ include "C4uconnect.php";
 <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no" >
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<?php echo '<link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
-<link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
-<script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>'; ?>
+<link rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
+<link rel="stylesheet" href="js/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
+<script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
+<script type="text/javascript" src="js/jquery-ui.1.8.7.min.js"></script>
 <title><?php print ($title); ?> Core Pricing</title>
+<style>
+.ui-sortable tr {
+    cursor:pointer;
+}    
+.ui-sortable tr:hover {
+    background:rgba(244,251,17,0.45);
+}
+	
+.mod {  
+width:15px;   
+display:inline-flex;
+}	
+	
+
+
+</style>
 </head><body>
 <?php 
 
@@ -28,137 +45,323 @@ $invoicemenu='0';
 $filename='corepricing.php';
 include "cojmmenu.php"; 
  // echo 'extras page'; 
- 
- $query = "SELECT * FROM chargedbybuild ORDER BY cbborder ASC"; 
-// while ($costrow = mysql_fetch_array($result_id)) { extract($row);
+ ?>
 
-echo '<div class="Post">
+<div class="Post">
 
-<form action="#" method="post">
-<input type="hidden" name="formbirthday" value="'. date("U").'">
-<input type="hidden" name="page" value="editcorepricing">
+<div class="ui-state-highlight ui-corner-all" style="padding: 1em;"> 
+<p>Pricing to exclude any VAT or tax element.  This and other factors are defined within the services.</p>
+<p>On calculating the price, the order set here will define which price modifier is processed first.</p>
+<p>Drag and Drop each row to change the order.</p>
+<p>Value for cost and percentage can be both positive and negative.</p>
+<p>Percentages are calculated as 100 being 100% of the cost of the step before, 150 would be price in previous step +50%.</p>
+<p>Items with a zero cost will not be displayed (except First and subsequent mileage), use this as a means of disabling in the menus.</p>
+<p>Items set to 100% will not change the price, however will be checkable within the menus.</p>
+<p>The ASAP and cargobike fields are used to highlight jobs for scheduling purposes.</p>
+</div>
 
-<div class="ui-widget">
-			<div class="ui-state-highlight ui-corner-all" style="padding: 1em;"> 
-				<p>
-			
-<table class="acc"><tbody>
+
+
+<div style="padding: 1em;">	
+<table id="cbbsettings" class="acc" style="overflow:auto;"> <!-- overflow is firefox fix for sorting   -->
+<thead>
 <tr>
-<th scope="col"> Order </th>
-<th scope="col"> ID </th>
+<th class="hidden" scope="col"> Order </th>
 <th scope="col"> Name </th>
 <th scope="col"> Cost or % </th>
 <th scope="col"> Added or Multipler % </th>
-<th scope="col"> ASAP </th>
-<th scope="col"> Cargobike </th>
-
+<th scope="col">ASAP<br /><img style="height:16px;" alt="asap" title="ASAP Logo" src="<?php echo $globalprefrow['image5']; ?>"></th>
+<th scope="col">Cargo<br /><img style="height:16px;" alt="cargo" title="Cargobike Logo" src="<?php echo $globalprefrow['image6']; ?>"></th>
 <th scope="col"> Comments </th>
-</tr>';
+</tr>
+</thead>
+
+
+<tbody>
+<?php
+
+$query = "SELECT * FROM chargedbybuild ORDER BY cbborder ASC";
+
+
 $idmax=1;
 $sql_result = mysql_query($query,$conn_id)  or mysql_error(); 
 while ($row = mysql_fetch_array($sql_result)) { extract($row);
 
+?>
+<tr id="<?php echo $row['chargedbybuildid']; ?>">
+<td class="hidden" >
+<input data-id="<?php echo $row['chargedbybuildid']; ?>" data-type="cbborder" class="priority ui-state-default ui-corner-all pad" 
+type="text" size="3" maxlength="4" value="<?php echo $cbborder; ?>">
+</td>
 
-echo '<tr><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>
-<tr>
-<td><input class="ui-state-default ui-corner-all" type="text" name="cbborder'.$chargedbybuildid.'" size="3" maxlength="4" value=" '. $cbborder.'"></td>
-<td> <input type="hidden" name="chargedbybuildid'.$chargedbybuildid.'" value="'. $chargedbybuildid.'">'.$chargedbybuildid.'</td>
-<td><input class="ui-state-default ui-corner-all" type="text" name="cbbname'.$chargedbybuildid.'" size="30" maxlength="30" value=" '.$cbbname.'"></td>
-<td>';
-if ( $cbbmod=='+') { echo ' &'. $globalprefrow['currencysymbol']; }
-echo '<input class="ui-state-default ui-corner-all" type="text" name="cbbcost'.$chargedbybuildid.'" size="7" maxlength="8" value=" '.$cbbcost.'">';
-if ( $cbbmod=='x') { echo ' % '; }
-echo '</td>
-<td><select class="ui-state-default ui-corner-left" name="cbbmod'.$chargedbybuildid.'">';
-if ( $cbbmod=='+') { echo  '<option  SELECTED value="+">Added to total</option><option value="x">Multiplied as percentage</option>'; } else
-{ echo  '<option value="+">Added to total</option><option SELECTED value="x">Multiplied as percentage</option>'; }
+<td>
+<input data-id="<?php echo $row['chargedbybuildid']; ?>" data-type="cbbname" class="ui-state-default ui-corner-all pad" 
+type="text" size="30" maxlength="30" value="<?php echo $cbbname; ?>">
+</td>
 
-// <input type="text" name="cbbmod'.$idmax.'" size="3" maxlength="3" value=" '.$cbbmod.' "></td>
+<td>
 
-echo '</select></td>
-<td> <input type="checkbox" name="cbbasap'.$chargedbybuildid.'" value="1" '; 
-if ($row['cbbasap']>0) { echo ' checked'; } 
-echo ' > </td>
-<td> <input type="checkbox" name="cbbcargo'.$chargedbybuildid.'" value="1" ';
- if ($row['cbbcargo']>0) { echo 'checked';} 
- echo ' > </td>
-<td><input type="text" class="ui-state-default ui-corner-all" name="cbbcomment'.$chargedbybuildid.'" size="65" maxlength="100" value=" '.$cbbcomment.'"></td>
-</tr>';
+<span id="plus<?php echo $row['chargedbybuildid']; ?>" class="mod"><?php if ( $cbbmod=='+') { echo " &".$globalprefrow['currencysymbol']; } ?> &nbsp; </span>
 
-$idmax=$idmax+1; 
 
-// echo $idmax;
-}
+<?php // if ( $row['cbbmod']=='+') { echo ' &'. $globalprefrow['currencysymbol']; } 
+?>
 
-if ($idmax<'21') {
-echo '<tr><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>
-<tr>
-<td><input class="ui-state-default ui-corner-all" type="text" name="cbborder'.$idmax.'" size="3" maxlength="3" value=" "></td>
-<td> <input type="hidden" name="chargedbybuildid'.$idmax.'" value=" '.$idmax.'">'.$idmax.'</td>
-<td><input class="ui-state-default ui-corner-all" type="text" name="cbbname'.$idmax.'" size="30" maxlength="30" value=" "></td>
-<td>';
- echo ' &'. $globalprefrow['currencysymbol']; 
-echo ' <input class="ui-state-default ui-corner-all" type="text" name="cbbcost'.$idmax.'" size="7" maxlength="8" value=" ">';
- echo ' % '; 
-echo '</td>
-<td><select class="ui-state-default ui-corner-left" name="cbbmod'.$idmax.'">';
- echo  '<option  SELECTED value="+">Added to total</option><option value="x">Multiplied as percentage</option>'; 
 
-// <input type="text" name="cbbmod'.$idmax.'" size="3" maxlength="3" value=" '.$cbbmod.' "></td>
+<input data-id="<?php echo $row['chargedbybuildid']; ?>" data-type="cbbcost" class="ui-state-default ui-corner-all pad" 
+type="text" size="7" maxlength="8" value="<?php echo $row['cbbcost']; ?>">
 
-echo '</select></td>
-<td> <input type="checkbox" name="cbbasap'.$chargedbybuildid.'" value="1" '; 
-if ($row['cbbasap']>0) { echo ' checked'; } 
-echo ' > </td>
-<td> <input type="checkbox" name="cbbcargo'.$chargedbybuildid.'" value="1" ';
- if ($row['cbbcargo']>0) { echo 'checked';} 
- echo ' > </td>
 
-<td><input class="ui-state-default ui-corner-all" type="text" name="cbbcomment'.$idmax.'" size="65" maxlength="100" value=" "></td>
+<span id="times<?php echo $row['chargedbybuildid']; ?>" class="mod"><?php if ( $cbbmod=='x') { echo " % "; } ?> &nbsp; </span>
+
+
+</td>
+
+<td>
+<select data-id="<?php echo $chargedbybuildid; ?>" data-type="cbbmod" class="ui-state-default ui-corner-left" >
+<option 
+
+<?php if ( $row['cbbmod']=='+') { echo  ' SELECTED '; } ?>
+ value="+">Added to total</option>
+<option 
+<?php if ( $row['cbbmod']=='x') { echo  ' SELECTED '; } ?>
+value="x">Multiplied as percentage</option>
+</select></td>
+
+<td> <input data-id="<?php echo $chargedbybuildid; ?>" data-type="cbbasap" type="checkbox" value="0" 
+<?php if ($row['cbbasap']>0) { echo ' checked'; } ?> > 
+</td>
+
+<td> <input data-id="<?php echo $chargedbybuildid; ?>" data-type="cbbcargo" type="checkbox" value="0" 
+<?php if ($row['cbbcargo']>0) { echo 'checked';} ?> > 
+</td>
+
+<td>
+<input data-id="<?php echo $row['chargedbybuildid']; ?>" data-type="cbbcomment" type="text" class="ui-state-default ui-corner-all pad" 
+size="65" maxlength="100" value="<?php echo $row['cbbcomment']; ?>">
+
+</td>
 </tr>
-<input type="hidden" name="new'.$idmax.'" value="yes">
-';
 
-
-echo '<tr><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>';
-
+<?php
+$idmax++; 
 }
+?>
 
-
-
-
-echo '
 </tbody>
 </table>
 
+<?php  if ($idmax<21)  { ?>
+<button id="newrow">New</button>
+<?php } ?>
+</div>
+<div class="line"></div>
+<br />
+</div>
+<script>
 
-</p></div></div><br />
-<button type="submit"> Edit </button>
-';
+var formbirthday=<?php echo microtime(TRUE); ?>; 
 
-?><br />
 
-<div class="ui-widget">
-			<div class="ui-state-highlight ui-corner-all" style="padding: 1em;"> 
-				<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
-				
-				
-To add a custom charge (there can be 20 IDs in total), make sure it has a name.
-<br />Pricing to exclude any VAT or tax element.  This and other factors are defined within the services.
-<br />On calculating the price, the order set here will define which price modifier is processed first.
-<br />Value for cost and percentage can be both positive and negative.
-<br />Percentages are calculated as 100 being 100% of the cost of the step before, 150 would be price in previous step +50%.
-<br />Items with a zero cost will not be displayed (except First and subsequent mileage), use this as a means of disabling in the menus.
-<br />Items set to 100% will not change the price, however will be checkable within the menus.
-<br />The ASAP and cargobike fields are used to highlight jobs for scheduling purposes.
+$(document).ready(function() {
+	
+    //Helper function to keep table row from collapsing when being sorted
+    var fixHelperModified = function(e, tr) {
+        var $originals = tr.children();
+        var $helper = tr.clone();
+        $helper.children().each(function(index)
+        {
+          $(this).width($originals.eq(index).width())
+        });
+        return $helper;
+    };
 
-</p>
-			</div>
-		</div><br />
+    //Make diagnosis table sortable
+    $("#cbbsettings tbody").sortable({
+        helper: fixHelperModified,
+        stop: function(event,ui) {renumber_table('#cbbsettings')}
+    });
+
+});
+
+var orderstring='';
+
+//Renumber table rows
+function renumber_table(tableID) {
+    $(tableID + " tr").each(function() {
+        count = $(this).parent().children().index($(this)) + 1;
+        $(this).find('.priority').html(count);
 		
+   rowid = '' + $(this).closest('tr').attr("id");
+   
+   if (rowid>0) {	orderstring=orderstring + rowid + ',' + count + ';'; }
+		
+    });
+	 orderstring = btoa(orderstring); // base 64 encodes so can be transmitted ok
 
-</form>
-<div class="line"></div><br /></div>
+	    $.ajax({
+        url: 'ajaxchangejob.php',  //Server script to process data
+		data: {
+		page:'ajaxeditglobals',
+		formbirthday:formbirthday,
+		globalname:'cbborder',
+		newvalue:orderstring},
+		type:'post',
+        success: function(data) {
+$('.Post').append(data);
+	},
+		complete: function(data) {
+		showmessage();
+		}
+});
+
+}
+
+
+
+
+
+$(document).ready(function() {
+	
+
+var idmax=<?php echo $idmax; ?>;
+var chargedbybuildid;
+var testtype;
+var newvalue;
+var checked;
+
+$("#newrow").click(function(){
+
+if (idmax>19) { $("#newrow").hide(); }
+
+var newtr=	'<tr id="' + idmax + '"><td class="hidden" ><input data-id="' + idmax +
+ '" data-type="cbborder" type="text" ' +
+ ' value="' + idmax + '"></td><td><input data-id="' + 
+ idmax + '" data-type="cbbname" class="newrow ui-state-default ui-corner-all pad" type="text" size="30" maxlength="30" ' +
+ ' ></td><td>' +
+ ' <span id="plus' + idmax +'" class="mod"> <?php  echo " &".$globalprefrow['currencysymbol'];?> </span> ' + 
+ ' <input data-id="' + idmax + '" data-type="cbbcost" class="newrow ui-state-default ui-corner-all pad" ' +
+ ' type="text" size="7" maxlength="8" value="0"> <span id="times' + idmax +'" class="mod"> </span> </td>' +
+ ' <td><select data-id="' + idmax + '" data-type="cbbmod" ' +
+ ' class="newrow ui-state-default ui-corner-left" ><option value="+">Added to total</option>' +
+ ' <option value="x">Multiplied as percentage</option>'+
+ ' </select></td><td> <input class="newrow " data-id="' + idmax + '" data-type="cbbasap" type="checkbox" value="0" ></td>' +
+ ' <td> <input class="newrow " data-id="' + idmax + '" data-type="cbbcargo" type="checkbox" value="0" > </td>' +
+ ' <td><input data-id="' + idmax + '" data-type="cbbcomment" type="text" class="newrow ui-state-default ui-corner-all pad" ' +
+ ' size="65" maxlength="100" ></td></tr>';
+
+
+//		alert(newtr);
+		$('#cbbsettings > tbody:last-child').append(newtr);
+ 
+	
+		    $.ajax({
+        url: 'ajaxchangejob.php',  //Server script to process data
+		data: {
+		page:'ajaxeditglobals',
+		formbirthday:formbirthday,
+		globalname:'cbbsettings',
+		testtype:'newrow',
+		chargedbybuildid:idmax},
+		type:'post',
+        success: function(data) {
+$('.Post').append(data);
+	},
+		complete: function(data) {
+		showmessage();
+			idmax=idmax+1;
+		$($(".newrow")).change(function(e) {
+
+ chargedbybuildid=$(this).data('id');
+ testtype=$(this).data('type');
+ newvalue=$(this).val();
+
+
+if($(this).prop('checked')) { // something when checked
+checked=1;
+} else { // something else when not
+checked=0;
+}
+
+senddata();	
+	
+});	
+		}
+});
+	});
+	
+	
+	
+	
+	
+$('#cbbsettings input, #cbbsettings select').change(function(e) {
+
+ chargedbybuildid=$(this).data('id');
+ testtype=$(this).data('type');
+ newvalue=$(this).val();
+
+
+if($(this).prop('checked')) { // something when checked
+checked=1;
+} else { // something else when not
+checked=0;
+}
+
+senddata();	
+	
+});
+
+function senddata() {	
+	
+
+//		alert(chargedbybuildid + ' ' + testtype + ' ' + newvalue + ' ' + checked);
+
+
+if ( testtype=='cbbmod' ) {  
+// alert("selector"); 
+
+if ( newvalue=='+') {
+$("#plus"+chargedbybuildid).html('<?php echo " &".$globalprefrow['currencysymbol']; ?>'); $("#times"+chargedbybuildid).html('');
+}
+
+
+else { 
+
+$("#plus"+chargedbybuildid).html(''); $("#times"+chargedbybuildid).html(' % ');
+
+
+}
+
+}
+
+		 newvalue = btoa(newvalue); // base 64 encodes so can be transmitted ok
+	    $.ajax({
+        url: 'ajaxchangejob.php',  //Server script to process data
+		data: {
+		page:'ajaxeditglobals',
+		formbirthday:formbirthday,
+		globalname:'cbbsettings',
+		checked:checked,
+		testtype:testtype,
+		chargedbybuildid:chargedbybuildid,
+		newvalue:newvalue},
+		type:'post',
+        success: function(data) {
+$('.Post').append(data);
+	},
+		complete: function(data) {
+		showmessage();
+		}
+});
+   }
+ 
+
+});  // ends page ready
+
+
+
+</script>
+
 <?php 
 
 include 'footer.php';

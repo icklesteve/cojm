@@ -4941,6 +4941,98 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 }
 
 
+if ($globalname=='cbbsettings') {
+
+
+
+if ($_POST['checked']=='1') {  $newvalue=0; $newvaluet=' Checked '; }
+$type=$_POST['testtype'];
+$chargedbybuildid=$_POST['chargedbybuildid'];
+
+
+
+
+
+
+$newformbirthday=microtime(TRUE);
+$infotext.='Submitted id '.$chargedbybuildid.' <br /> val was '.$newvaluet.' <br /> type ' .$type. ' <br /> ';
+
+
+if (($type=='cbbmod') or ($type=='cbbname') or ($type=='cbbcost') or ($type=='cbbcomment') or ($type=='cbbcargo') or 
+($type=='cbbasap'))  try {
+$query = "UPDATE chargedbybuild SET ".$type."=:newvalue WHERE chargedbybuildid=:chargedbybuildid";
+$stmt = $dbh->prepare($query);
+// $stmt->bindParam(':type', $type, PDO::PARAM_INT); 
+$stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':chargedbybuildid', $chargedbybuildid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='Distance Price Settings updated. <br />';
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+
+
+if ($type=='newrow') try {
+$query = "INSERT INTO chargedbybuild SET chargedbybuildid=:chargedbybuildid, cbborder=:chargedbybuildidn, cbbcost=0 ";
+$stmt = $dbh->prepare($query);
+// $stmt->bindParam(':type', $type, PDO::PARAM_INT); 
+// $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+$stmt->bindParam(':chargedbybuildid', $chargedbybuildid, PDO::PARAM_INT); 
+$stmt->bindParam(':chargedbybuildidn', $chargedbybuildid, PDO::PARAM_INT); 
+
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+if ($total=='1') {
+$allok='1';
+$newformbirthday=microtime(TRUE);
+$message.='New Row Added to Distance Price Settings. <br />';
+$script.=' idmax='.($chargedbybuildid+1).'; ';
+}
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+
+} // ends cbb settings
+
+
+if ($globalname=='cbborder') {
+
+$refarray = explode(";",$newvalue); foreach ($refarray as $value) {
+
+$arr = explode(",", $value, 2);
+$rowid = $arr[0];
+$cbborder = $arr[1];
+ $infotext.='value '.$value.' '.$rowid.' '.$cbborder.'<br /> ';
+
+if ($rowid>0) try {
+$query = "UPDATE chargedbybuild SET cbborder=:newvalue WHERE chargedbybuildid=:chargedbybuildid";
+$stmt = $dbh->prepare($query);
+// $stmt->bindParam(':type', $type, PDO::PARAM_INT); 
+$stmt->bindParam(':newvalue', $cbborder, PDO::PARAM_INT); 
+$stmt->bindParam(':chargedbybuildid', $rowid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+$infotext.=$total.' row updated <br />';
+$allok='1';
+$newformbirthday=microtime(TRUE);
+}
+catch(PDOException $e) { $message.= $e->getMessage(); }
+
+} // ends loop through and get each row
+
+$message.='Checkbox Order updated. <br />';
+
+} // ends globalname=='cbborder
+
+
+
+
+
+
+
 
 
 

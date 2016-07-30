@@ -1,4 +1,30 @@
 <?php
+
+// needs original trackstats license adding
+
+
+
+/*
+    COJM Courier Online Operations Management
+	trackstats.php - Create a PDF invoice
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
 /**********************************************************
  * Creates statistics from given GPX file
  **********************************************************/
@@ -32,7 +58,9 @@ $trackoutofrange='0';
 
 $tempdate='';
 $newsql = array(); 
-
+$firstrun=1;
+$device_key=$_POST['newcyclist'];
+$device_label='GPX Upload';
 
 // INITIALIZATION
 require_once($classpath."require.php");
@@ -143,6 +171,37 @@ foreach ($gpx_xml->trk as $track) {
 // $timestamp = str_replace ("Z", " ", strtoupper($timestamp));
 // echo	($timestamp).' ';
 
+
+
+if ($firstrun==0) {
+
+if ($confirmgpx=='confirm') {
+
+$testfile="cache/jstrack/".date('Y/m', $timestamp).'/'.date('Y_m_d', $timestamp).'_'.$device_key.'.js';
+$infotext.=" trackstats.php 179 file : ". $testfile.' <br />';
+if (!file_exists($testfile)) {
+ $infotext.= ' <br /> cj 2349 Cache does not exist, no action needed. '.$testfile;
+} else {
+$infotext.=  ' <br /> cj 2351 Cache exists, needs deleting. '.$testfile;	
+unlink($testfile);
+if (file_exists($testfile)) {
+	 $infotext.=  ' not deleted ';
+}
+}
+
+
+} // ends confirm check
+
+
+
+} // ends firstrun
+
+$firstrun++;
+
+
+
+
+
 $timestamp = strtotime($timestamp);
    $map['latitude']=round($map['latitude'],5);
 
@@ -164,8 +223,7 @@ $speed=round($speed);
 $lon=round($lon,5);
 		
 		
-		$device_key=$_POST['newcyclist'];
-		$device_label='GPX Upload';
+
 		$latitude=$lat;
 		$longitude=$lon;
 		$altitude=$ele;
@@ -360,6 +418,13 @@ if ($trackoutofrange>'0') { echo '<h3>There were '.$trackoutofrange.' tracking p
 
 if ($alreadyondb=='1') { echo '<h2> '.$numberofondbtracks.' locations were found which were already on the GPS tracking Database</h2>';}
 if ($addedtodb=='1') { echo '<h2> '.$numberoftracks.' locations were added to the GPS tracking database.</h2>';}
+
+
+
+
+
+
+
 
 // print($template);
 

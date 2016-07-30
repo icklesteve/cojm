@@ -177,7 +177,7 @@ echo '</ul>
 	
 <div id="tabs-1">
 
-<fieldset><label for="txtName" class="fieldLabel"> COJM Name </label>
+<fieldset><label class="fieldLabel"> COJM Name </label>
  <input style="    width: 150px;
     min-width: 150px;
     max-width: 300px;
@@ -188,17 +188,17 @@ echo '
 	value="'. $row['cojmname'].'" />
 </fieldset>
 
-<fieldset><label for="txtName" class="fieldLabel"> Public Name </label>
+<fieldset><label class="fieldLabel"> Public Name </label>
  <input class="ui-state-default ui-corner-all caps" placeholder="Public Name" type="text" name="poshname" size="20" value="'. $row["poshname"].'" />
 </fieldset>  
 
 
-<fieldset><label for="isactive" class="fieldLabel"> Is Active </label><input type="checkbox" name="isactive" value="1" ';
+<fieldset><label class="fieldLabel"> Is Active </label><input type="checkbox" name="isactive" value="1" ';
  if ($row['isactive']>0) { echo 'checked';} 
   echo ' />  </fieldset> 
   
   
-<fieldset><label for="submit" class="fieldLabel"> Notes </label>
+<fieldset><label class="fieldLabel"> Notes </label>
 <textarea style="width: 65%; outline: none;" class="normal pad ui-state-default ui-corner-all caps" name="description" >'.$row['notes'].'</textarea>
 </fieldset>
 
@@ -211,23 +211,23 @@ echo '</div>';
 echo '<div id="tabs-2">';
 
 echo '
-<fieldset><label for="txtName" class="fieldLabel"> Mobile Number </label>
+<fieldset><label class="fieldLabel"> Mobile Number </label>
 <input class="ui-state-default ui-corner-all caps" type="text" name="mobilenumber" size="20" value="'.$row['mobilenumber'].'" />
 </fieldset>
 
-<fieldset><label for="submit" class="fieldLabel">  House Number </label> 
+<fieldset><label class="fieldLabel">  House Number </label> 
 <input class="ui-state-default ui-corner-all caps" type="text" name="housenumber" size="5" value="'.$row['housenumber'].'" />
 </fieldset>
 
-<fieldset><label for="submit" class="fieldLabel"> Street Name </label>
+<fieldset><label class="fieldLabel"> Street Name </label>
  <input class="ui-state-default ui-corner-all caps" type="text" name="streetname" size="20" value="'.$row['streetname'].'" />
  </fieldset>
  
- <fieldset><label for="submit" class="fieldLabel"> City </label>
+ <fieldset><label class="fieldLabel"> City </label>
  <input class="ui-state-default ui-corner-all caps" type="text" name="city" size="20" value="'.$row['city'].'" />
  </fieldset>
  
- <fieldset><label for="submit" class="fieldLabel"> Postcode </label>
+ <fieldset><label class="fieldLabel"> Postcode </label>
  <input class="ui-state-default ui-corner-all caps" type="text" name="postcode" size="10" value="'.$row['postcode'].'">
  <a href="http://www.royalmail.com/postcode-finder" target="_blank" >Lookup Postcode</a>
  </fieldset>
@@ -244,19 +244,19 @@ echo '
 echo '" id="dob" size="12" name="dob" > </fieldset>
 
 
-<fieldset><label for="submit" class="fieldLabel"> NI Number </label>
+<fieldset><label class="fieldLabel"> NI Number </label>
  <input class="ui-state-default ui-corner-all caps" type="text" name="ninumber" size="10" value="'. $row['ninumber'].'" />
 </fieldset>
 
-<fieldset><label for="submit" class="fieldLabel"> Sort Code </label>
+<fieldset><label class="fieldLabel"> Sort Code </label>
  <input class="ui-state-default ui-corner-all caps" type="text" name="sortcode" size="20" value="'.$row['sortcode'].'" />
  </fieldset>
  
- <fieldset><label for="submit" class="fieldLabel"> Account Number </label>
+ <fieldset><label class="fieldLabel"> Account Number </label>
  <input class="ui-state-default ui-corner-all caps" type="text" name="accountnum" size="20" value="'.$row['accountnum'].'" />
  </fieldset>
  
- <fieldset><label for="submit" class="fieldLabel"> Bank Name </label>
+ <fieldset><label class="fieldLabel"> Bank Name </label>
  <input class="ui-state-default ui-corner-all caps" type="text" name="bankname" size="20" value="'.$row['bankname'].'" />
 </fieldset>
 
@@ -272,11 +272,11 @@ echo '" id="dob" size="12" name="dob" > </fieldset>
 
 echo '<div id="tabs-4">
 
- <fieldset><label for="submit" class="fieldLabel">  ICE Name </label>
+ <fieldset><label class="fieldLabel">  ICE Name </label>
  <input class="ui-state-default ui-corner-all caps" type="text" name="icename" size="30" value="'.$row['icename'].'" />
  </fieldset>
  
- <fieldset><label for="submit" class="fieldLabel"> ICE Number </label> 
+ <fieldset><label class="fieldLabel"> ICE Number </label> 
  <input class="ui-state-default ui-corner-all caps" type="text" name="icenumber" size="30" value="'.$row['icenumber'].'">
  </fieldset>
 </div>
@@ -285,9 +285,10 @@ echo '<div id="tabs-4">
 
 <div id="tabs-5">
 
-<fieldset><label for="submit" class="fieldLabel"> COJM ID </label> ' . $thiscyclist.'</fieldset>
+<fieldset><label class="fieldLabel"> COJM ID </label> ' . $thiscyclist.'</fieldset>
 
-<label for="contractstartdate"> Start Date </label> <input class="ui-state-default ui-corner-all caps" type="text" value="';
+
+<fieldset><label class="fieldLabel" for="contractstartdate"> Start Date </label> <input class="ui-state-default ui-corner-all caps" type="text" value="';
 if ($row['contractstartdate']>10) {echo date('d-m-Y', strtotime($row['contractstartdate'])); } 
 echo '" id="contractstartdate" size="12" name="contractstartdate"></fieldset> 
 
@@ -299,11 +300,11 @@ echo '" id="contractstartdate" size="12" name="contractstartdate"></fieldset>
 
 
 
-<fieldset><label for="trackerid" class="fieldLabel"> Tracking ID </label> ';
+<fieldset><label class="fieldLabel"> Tracking ID </label> ';
 if (trim($row['trackerid'])=='') { echo $row['CyclistID']; } else { echo $row['trackerid']; } 
 echo '</fieldset>
 
-<fieldset><label for="trackerid" class="fieldLabel"> OpenGPSTracker </label> ';
+<fieldset><label class="fieldLabel"> OpenGPSTracker </label> ';
 
 echo $globalprefrow['httproot'].'/cojm/upload.php?latitude=@LAT@&longitude=@LON@&trackid=';
 
@@ -324,7 +325,7 @@ enter this address in Custom web server URL
 
 echo '
 <div class="line"> </div>
-<fieldset><label for="submit" class="fieldLabel">  
+<fieldset><label class="fieldLabel">  
 <button type="submit"> Edit '.$globalprefrow['glob5'].' Details </button>
 </label></fieldset>
 
@@ -380,25 +381,19 @@ $(document).ready(function() {
 	$(function() {
 		var dates = $( "#dob" ).datepicker({
 			numberOfMonths: 1,
-			changeYear:true,
+			changeYear:false,
 			firstDay: 1,
             dateFormat: "dd-mm-yy",
-			changeMonth:true,
-		yearRange: "1940:2020",
-		  beforeShow: function(input, instance) { 
-            $(input).datepicker("setDate",  new Date('. date('Y,n-1,j', strtotime($row['DOB'])).') );
-        }
+			changeMonth:false,
+		yearRange: "1940:2020"
 		});
 
 		var dates = $( "#contractstartdate" ).datepicker({
 			numberOfMonths: 1,
-			changeYear:true,
+			changeYear:false,
 			firstDay: 1,
             dateFormat: "dd-mm-yy",
-			changeMonth:true,
-		  beforeShow: function(input, instance) { 
-            $(input).datepicker("setDate",  new Date('. date('Y,n-1,j', strtotime($row['contractstartdate'])).') );
-        }
+			changeMonth:false
 		});
 	});
 	});

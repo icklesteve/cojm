@@ -65,8 +65,8 @@ $row=mysql_fetch_array($sql_result);
 
 <div class="Post">
 
-<div class="ui-widget">
-<div class="ui-state-highlight ui-corner-all p15" style=" line-height:21px;"> 
+<div class="">
+<div class="ui-state-highlight ui-corner-all p15" > 
 <form action="?page=selectexpense" method="post" >
 <fieldset><label class="fieldLabel"> Search Ref or Leave Blank for new</label>
 <input type="hidden" name="formbirthday" value="<?php echo date("U").'">
@@ -185,7 +185,8 @@ $cojmname=$dep->cojmname;
 <div class="vpad"> </div>
 
 
-<fieldset><label for="expensedate" class="fieldLabel"> Date </label> <input class="ui-state-default ui-corner-all caps" type="text" value="<?php 
+<fieldset><label for="expensedate" class="fieldLabel"> Date </label> 
+<input class="ui-state-default ui-corner-all caps" type="text" value="<?php 
 if ($row['expensedate']>'10') {echo date('d-m-Y', strtotime($row['expensedate'])); } else { echo date('d-m-Y', strtotime('now')); } ?>" 
 id="expensedate" size="12" name="expensedate"></fieldset>
 
@@ -278,10 +279,10 @@ $(document).ready(function() {
 	$(function() {
 		var dates = $( "#expensedate" ).datepicker({
 			numberOfMonths: 1,
-			changeYear:true,
+			changeYear:false,
 			firstDay: 1,
             dateFormat: 'dd-mm-yy',
-			changeMonth:true
+			changeMonth:false
 		});
 	});
 	});

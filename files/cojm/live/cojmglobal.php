@@ -836,6 +836,8 @@ jQuery-Plugin "daterangepicker.jQuery.js" by Scott Jehl
 </li><li>
 datejs http://www.datejs.com/ 
 </li><li>
+markerclusterer https://github.com/googlemaps/js-marker-clusterer
+</li><li>
 zebra dialogue http://stefangabos.ro/jquery/zebra-dialog/
 </li><li>
 Autosize http://www.jacklmoore.com/autosize

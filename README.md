@@ -49,7 +49,8 @@ Freefont : Free UCS scalable fonts: http://savannah.gnu.org/projects/freefont/
 TCPDF : www.sourceforge.net/projects/tcpdf
 JQuery : http://jquery.com/ JQueryUI
 jQuery-Plugin "daterangepicker.jQuery.js" by Scott Jehl
-datejs http://www.datejs.com/ 
+datejs http://www.datejs.com/
+markerclusterer https://github.com/googlemaps/js-marker-clusterer
 zebra dialogue http://stefangabos.ro/jquery/zebra-dialog/
 Autosize http://www.jacklmoore.com/autosize
 phpMySQLAutoBackup : http://www.dwalker.co.uk/phpmysqlautobackup/

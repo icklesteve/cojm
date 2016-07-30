@@ -1,4 +1,27 @@
 <?php 
+
+/*
+    COJM Courier Online Operations Management
+	gpstracking.php - Displays rider GPS history
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+
 $alpha_time = microtime(TRUE);
 
 
@@ -100,20 +123,13 @@ echo '<!DOCTYPE html>
 <head> 
 <meta http-equiv="Content-Type"  content="text/html; charset=utf-8">';
 
-
-// echo '<script src="//maps.googleapis.com/maps/api/js?key='.$globalprefrow['googlemapapiv3key'].'&sensor=false" type="text/javascript"></script>'; 
-
-
-
-echo '<script src="https://maps.google.com/maps/api/js?libraries=geometry&amp;sensor=false"></script> 
+echo '<script src="https://maps.google.com/maps/api/js?libraries=geometry&key='.$globalprefrow['googlemapapiv3key'].'"></script> 
 ';
 
 
 
 if ($clientview=='cluster') {
-echo '
-   <script type="text/javascript" src="//google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer.js"></script>
-';
+echo '   <script type="text/javascript" src="js/markerclusterer.js"></script> ';
 }
 
 echo '

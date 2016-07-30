@@ -1,6 +1,26 @@
 ﻿<?php 
+/*
+    COJM Courier Online Operations Management
+	single_tracking.php - Shows 1 job, to be used as a php include on a page on your website
+    Copyright (C) 2016 S.Young cojm.co.uk
 
-echo '<div id="cojmsingletrackdiv">';
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+echo '<div id="cojmsingletrackdiv" class="cojm">';
 
 $postedref=trim($_POST['quicktrackref']); 
 if ($postedref) {} else { $postedref = trim($_GET['quicktrackref']); }
@@ -222,12 +242,9 @@ $stmt->bindParam(':getid', $row['publictrackingref'], PDO::PARAM_INT);
 $stmt->execute();
 $total = $stmt->rowCount();
 if ($total=='1') {
-
-
 echo "<tr><td colspan='2'><img alt='proof of delivery' style='width:100%;' 
-src='https://cycle4u.co.uk/cojm/podimage.php?id=".$row['publictrackingref']."' /></td></tr><tr><td > </td><td> </td></tr>";  
-
-};
+src='https://cycle4u.co.uk/cojm/podimage.php?id=".$row['publictrackingref']."' /></td></tr><tr><td > </td><td> </td></tr>";
+}
 
 
 

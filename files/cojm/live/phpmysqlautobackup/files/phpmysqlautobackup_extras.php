@@ -1,5 +1,27 @@
 <?php
 
+/*
+    COJM Courier Online Operations Management
+	phpmysqlautobackup_extras.php 
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+
 ini_set('memory_limit','256M');
 
 
@@ -258,8 +280,8 @@ if ($info['speed_upload'] >= 1073741824)
 
 	   $testvar='
 	   
-    $from = "emailtest@cycle4u.co.uk";
-    $to = "cojm@cojm.co.uk";
+    $from = "me@example.com";
+    $to = "me@example.com";
     $subject = "autobackupextra ln 260";
     $message = "This is a test email";
     $headers = "From:" . $from;

@@ -3017,8 +3017,6 @@ if (isset($_POST['folder'])) { $folder = trim($_POST['folder']); }
 
 // echo ' 3064 ID is '.$id;
 
-
-
  $testfile="cache/jstrack/".$folder.'/'.$id.'.js';
 $infotext.= ' test file is  '.$testfile;
  if (file_exists($testfile)) {

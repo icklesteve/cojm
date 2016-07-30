@@ -76,6 +76,9 @@ $minutes='00';
 $second='00';
 $sqlstart= date("Y-m-d H:i:s", mktime($hour, $minutes, $second, $month, $day, $year));
 $dstart= date("U", mktime($hour, $minutes, $second, $month, $day, $year));
+
+
+
 if ($year) { $inputstart=$day.'/'.$month.'/'.$year; }
 } else  { // nothing posted
 $inputstart='';
@@ -236,6 +239,27 @@ $file = ($_FILES["file"]["tmp_name"]);
  include"trackstats.php"; 
 
 
+ 
+ 
+ 
+ // delete cache positions
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 // move_uploaded_file( $_FILES['userFile']['tmp_name'], $target);
 
 
@@ -245,134 +269,6 @@ $file = ($_FILES["file"]["tmp_name"]);
 }
 } // ends check to make sure that some sort of file has been uploaded  
  
- 
- 
- 
-
-
- 
- 
- if (($dstart<>'') and ($thisCyclistID)) {
- 
- $dinterim=$dstart;
-
-while ($dinterim<$dend) {
-$dinterif=$dinterim+'86399';
-// echo '<br /> dstart : '.$dstart.' dinterim : '.$dinterim.' dinterif : '.$dinterif.' dend '.$dend.'';
-if ($thisCyclistID == 'all') {
-$query = "SELECT CyclistID, cojmname, trackerid FROM Cyclist ORDER BY CyclistID"; }
-else { $query = "SELECT CyclistID, cojmname, trackerid FROM Cyclist WHERE CyclistID = ". $thisCyclistID; }
-$result_id = mysql_query ($query, $conn_id); 
-
-echo $query;
-
-
-
-while (list ($CyclistID, $cojmname, $trackerid) = mysql_fetch_row ($result_id)) {
-$sql="SELECT latitude, longitude, speed, timestamp FROM `instamapper` 
-WHERE `device_key` = '$trackerid' 
-AND `timestamp` >= '$dinterim' 
-AND `timestamp` <= '$dinterif' 
-ORDER BY `timestamp` ASC "; 
-$sql_resulth = mysql_query($sql,$conn_id)  or mysql_error();
-$num_rows = mysql_num_rows($sql_resulth);
-if ($num_rows>'0') {
-$prevts='';
-$tablecount='';
-$tabledatestart='';
-while ($map = mysql_fetch_array($sql_resulth)) {
-$i++;
-$tablecount++;
-
-     extract($map); 
-	 if ($clientview=='blurred') {
-$map['latitude']=round($map['latitude'],2);
-$map['longitude']=round($map['longitude'],2);
-	 } elseif ($clientview=='cluster') {
-$map['latitude']=round($map['latitude'],3);
-$map['longitude']=round($map['longitude'],3);
-	 } else {
-$map['latitude']=round($map['latitude'],5);
-$map['longitude']=round($map['longitude'],5); 
-}
-$map['speed']=round($map['speed']);
-
-
-  if($map['longitude']>$max_lon) { $max_lon = $map['longitude']; }
-  if($map['longitude']<$min_lon) { $min_lon = $map['longitude']; }
-
-  
-  if($map['latitude']>$max_lat) { $max_lat = $map['latitude']; }
-  if($map['latitude']<$min_lat)  { $min_lat = $map['latitude']; }
-
-
-
-
-
-	
-if ($thisCyclistID<>'all') { $linecoords=$linecoords.' ['.$map['latitude'] . "," . $map['longitude'].'],';  }
-  $clusterdata=$clusterdata.' ['.$map['latitude'] . "," . $map['longitude'].'],';
-	$thists=date('H:i A D j M ', $map['timestamp']);
-   if ($thists<>$prevts) {
-  	 $comments=$cojmname.' <br />'.date('H:i D j M ', $map['timestamp']);
-	 $comments=$comments.'<br />'.$map['speed'];
- if ($globalprefrow['distanceunit']=='miles') { $comments=$comments. 'mph '; } 
- if ($globalprefrow['distanceunit']=='km') { $comments=$comments. 'km ph '; } 
-  $thists=date('H:i A D j M ', $map['timestamp']);
-
-$gmapdata=$gmapdata. "['" . $comments ."',". $map['latitude'] . "," . $map['longitude'] . "," . $i ."],"; 
-
- $lattot=$lattot+$map['latitude'];
- $lontot=$lontot+$map['longitude'];
-$prevts=date('H:i A D j M ', $map['timestamp']); 
-$tabledate= date('D j M ', $map['timestamp']); 
-$tabledatefinish=date('H:i A ', $map['timestamp']);
-
-
-
-
-
-
-if ($tabledatestart=='') { $tabledatestart=date('H:i A ', $map['timestamp']);
- }
-
-$loop++;
-}
-}
-
-$tabletext=$tabletext.'<tr>
-<td>'.$cojmname.'</td>
-<td>'.$tabledate.'</td>
-<td>'.$tabledatestart.'</td>
-<td>'.$tabledatefinish.'</td>
-<td>'.$tablecount.'</td>
-</tr>';
-
-
-}
-
-}
-$dinterim=$dinterim+'86400';
-}
-
-// echo $loop;
-
-if ($loop) {
-
-$avglat=($lattot/$loop);
-$avglon=($lontot/$loop);
-} else {
-
-echo ' No tracking positions to display ';
-
-
-
-}
-
-} // ends check for $dstart
- 
-
-
 
  
  if ($gmapdata) {
@@ -524,8 +420,6 @@ echo '<table class="acc"><tbody><tr>
   
 echo ' <br />
 
-
-
 <div class="ui-state-highlight ui-corner-all p15 " >
 
 <!-- The data encoding type, enctype, MUST be specified as below -->
@@ -606,10 +500,10 @@ $(document).ready(function() {
 	$(function() {
 		var dates = $( "#gpsdeletedate" ).datepicker({
 			numberOfMonths: 1,
-			changeYear:true,
+			changeYear:false,
 			firstDay: 1,
             dateFormat: 'dd-mm-yy ',
-			changeMonth:true,
+			changeMonth:false,
 		  beforeShow: function(input, instance) { 
             $(input).datepicker('setDate',  new Date() );
         }

@@ -33,7 +33,7 @@
 
 $cj_time = microtime(TRUE);
 
-
+$origid='';
 
 
 // echo memory_get_usage();
@@ -2329,9 +2329,38 @@ $sql="DELETE FROM instamapper WHERE device_key=".$_POST['newcyclist']." AND time
 $result = mysql_query($sql, $conn_id);
 
 if (mysql_affected_rows()>'0') {
+	
+	
 
 $alerttext=$alerttext."". mysql_affected_rows().' tracking positions deleted.<br>';
 $infotext=$infotext."". mysql_affected_rows().' tracking positions deleted.<br>';
+
+
+
+$testfile="cache/jstrack/".date('Y/m', $startdate).'/'.date('Y_m_d', $startdate).'_'.$_POST['newcyclist'].'.js';
+$infotext.=" 2343 test file : ". $testfile.' <br />';
+if (!file_exists($testfile)) {
+ $infotext.= ' <br /> cj 2349 Cache does not exist, no action needed. '.$testfile;
+} else {
+$infotext.=  ' <br /> cj 2351 Cache exists, needs deleting. '.$testfile;	
+unlink($testfile);
+if (file_exists($testfile)) {
+	 $infotext.=  ' not deleted ';
+}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 } else { $pagetext=$pagetext.'Tracking data unchanged.'; }
 

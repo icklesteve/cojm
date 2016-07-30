@@ -2296,7 +2296,9 @@ $query = "
 SELECT 
 status,
 targetcollectiondate,
-duedate
+collectionworkingwindow,
+duedate,
+deliveryworkingwindow
 FROM Orders 
 INNER JOIN Services, Clients
 WHERE `Orders`.`id` = :getid LIMIT 0,1";
@@ -2308,6 +2310,8 @@ $cp = $cpstmt->fetchObject();
 $status=$cp->status;
 $targetcollectiondate=$cp->targetcollectiondate;
 $duedate=$cp->duedate;
+$collectionworkingwindow=$cp->collectionworkingwindow;
+$deliveryworkingwindow=$cp->deliveryworkingwindow;
 
 
 
@@ -2317,9 +2321,22 @@ $duedate=$cp->duedate;
 
 
 
+if ($status<49){
+
+if ($collectionworkingwindow<>'0000-00-00 00:00:00')  { $nextactiondate=$collectionworkingwindow; } else {
+$nextactiondate = $targetcollectiondate; 
+}
 
 
-if ($status<49){ $nextactiondate = $targetcollectiondate; } else { $nextactiondate = $duedate; }
+
+} else { 
+
+if ($deliveryworkingwindow<>'0000-00-00 00:00:00')  { $nextactiondate=$deliveryworkingwindow; } else {
+$nextactiondate = $duedate; 
+}
+
+
+}
 $sql = "UPDATE Orders SET nextactiondate='$nextactiondate' WHERE ID='$id' LIMIT 1";
 $result = mysql_query($sql, $conn_id); 
 if ($result){

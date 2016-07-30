@@ -236,9 +236,26 @@ if ($row['jobcomments']=="") { } else {
  $emailtext7= $row['jobcomments']; 
 };
 
-if ($row['podname']=="") { } else {
- $emailtext8= $globalprefrow['email9'].' '.$globalprefrow['httproots']."/pod/$year/$month/" . $row['podname'] . '' . ""; 
+
+
+
+
+$query = "SELECT * FROM cojm_pod WHERE id = :getid LIMIT 0,1";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':getid', $row['publictrackingref'], PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+
+
+ $emailtext8= $globalprefrow['email9'].' '; // "pod can be viewed online"
+// $emailtext8.=$globalprefrow['httproots']."/cojm/podimage.php?id&#61;".$row['publictrackingref'];
+ 
 }
+
+
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 if ($row['co2saving']>'0.1')  {$tableco2=$row["co2saving"]; }
@@ -294,6 +311,10 @@ $emailtext11=$globalprefrow['emailbody'];
 $emailtext12=$globalprefrow['emailfooter'];
 
 ///////////////////////  ENDS TOTAL PRICE   ////////////////////////////////////////////////
+
+
+
+
 
 
 
@@ -484,12 +505,27 @@ $fhtmltext=$fhtmltext .'.</p>'.PHP_EOL;
 
 
 if ($newemailtext7)  { $fhtmltext.='<p>'.$newemailtext7.'</p>'.PHP_EOL ;  }
+
+
 if ($newemailtext8)  {
 if ($emailchang8=='0') { 
 
-$fhtmltext.='<img alt="Proof of delivery" src="'.$globalprefrow['httproots']."/cojm/podimage.php?id=".$row['publictrackingref'].'"> <br />'; 
 
- 
+$query = "SELECT * FROM cojm_pod WHERE id = :getid LIMIT 0,1";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':getid', $row['publictrackingref'], PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+
+
+$fhtmltext.='<a title="View POD" href="'.$globalprefrow['httproots'].'/cojm/podimage.php?id&#61;'.$row['publictrackingref'].'">'.$emailtext8.'</a>'; // show pod link as per non html
+
+// no point in displaying the actual image as will be probably be ad-blocked as obviously php generated,
+// will be resolved when move to email library when will be attached inline.
+// $fhtmltext.='<img alt="Proof of delivery" src="'.$globalprefrow['httproots']."/cojm/podimage.php?id=".$row['publictrackingref'].'"> <br />'; 
+
+}
  
  
  } else { 
@@ -594,27 +630,44 @@ $tempformtext='
  
 
  $ID=$row['ID'];
+ include "cojmmenu.php";
  
-include "cojmmenu.php";
+ ?>
 
-echo '<div class="Post">
-<div class="ui-widget">	<div class="ui-state-highlight ui-corner-all" style="padding: 1em; width:auto;"><p>
-Return to job <a href="order.php?id='.$id.'">'.$id.'</a><br />
-
+<div class="Post">
 <form action="#" method="post" >
-<fieldset><label for="txtName" class="fieldLabel">From </label> '.$globalprefrow['emailfrom'].'</fieldset>
-<fieldset><label for="txtName" class="fieldLabel">To </label>
-<input class="ui-state-default ui-corner-all pad" type="text" name="newto" size="40" value="'.$clientemail.'"></fieldset>';
 
-if ($bcc) { echo  '<fieldset><label for="txtName" class="fieldLabel">Bcc </label>'.$bcc.'</fieldset>'; }
-echo '<fieldset><label for="txtName" class="fieldLabel"> Subject </label>' . $subject .'</fieldset>';
+<div class="ui-widget">	
+<div class="ui-state-highlight ui-corner-all" style="padding: 1em; width:auto;">
+<p>
+Return to job <a href="order.php?id=<?php echo $id; ?>"><?php echo $id; ?></a>
+
+</p>
+
+
+<fieldset><label class="fieldLabel">From </label> <?php echo $globalprefrow['emailfrom']; ?></fieldset>
+<fieldset><label class="fieldLabel">To </label>
+<input class="ui-state-default ui-corner-all pad" type="text" name="newto" size="40" value="<?php echo $clientemail; ?>"></fieldset>
+
+<?php
+
+if ($bcc) { echo  '<fieldset><label class="fieldLabel">Bcc </label>'.$bcc.'</fieldset>'; }
+echo '<fieldset><label class="fieldLabel"> Subject </label>' . $subject .'</fieldset>';
  
-echo  '<fieldset><label for="txtName" class="fieldLabel"> &nbsp;</label>';
+echo  '<fieldset><label class="fieldLabel"> &nbsp;</label>';
  
 echo $tempformtext;
 
-echo '</fieldset></p></div></div><div class="vpad"></div><div class="line"></div><div class="vpad"></div>
-<div class="ui-widget">	<div class="ui-state-highlight ui-corner-all" style="padding: 1em; width:auto;"><p>';
+echo '</fieldset>
+</div>
+</div>
+<div class="vpad">
+</div>
+<div class="line"></div>
+<div class="vpad"></div>
+<div class="ui-widget">	
+<div class="ui-state-highlight ui-corner-all" style="padding: 1em; width:auto;">
+<p>';
 
 if ($emailtext1) { echo '<TEXTAREA class="normal ui-state-default ui-corner-all" name="newemailtext1" rows="1" style="width:100%;">'.$emailtext1.'</TEXTAREA>'; }
 if ($emailtext2) { echo '<TEXTAREA class="normal ui-state-default ui-corner-all" name="newemailtext2" rows="1" style="width:100%;">'.$emailtext2.'</TEXTAREA>'; }
@@ -636,7 +689,7 @@ if ($emailtext12) { echo '<TEXTAREA class="normal ui-state-default ui-corner-all
 echo '</p></div></div>';
 echo '<input type="hidden" name="id1" value="'.$row['ID'].'" >
 </form></div>
-</body>';
+';
 
  echo '<script type="text/javascript">
 $(document).ready(function() {
@@ -653,7 +706,7 @@ $(document).ready(function() {
 });
 </script>';
 
-echo '</html>';
+echo '</body></html>';
 
 mysql_close();
 ?>

@@ -30,7 +30,7 @@ The security of your customers data should not be compromised by sloppy installs
 It is NOT recommended to use this software without a valid SSL certificate ( https ).
 If you are in any doubt about how to properly secure your server, please take advice from a professional or see cojm.co.uk
 
-This software was initally developed for the UK and can only calculate "fixed price" services at present, however international options are imminent.
+This software was initally developed for the UK, however more international options are imminent.
 
 
 

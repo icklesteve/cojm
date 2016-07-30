@@ -93,7 +93,7 @@ size=30 name="emailbcc" value="<? echo $globalprefrow['emailbcc']; ?>"></fieldse
 <input class="ui-state-default ui-corner-all pad" type="text" size="60" name="email6" value="<? echo $globalprefrow['email6']; ?>"></fieldset>
 <fieldset><label for="txtName" class="fieldLabel">Delivery completed at : </label>
 <input class="ui-state-default ui-corner-all pad" type="text" size="60" name="email7" value="<? echo $globalprefrow['email7']; ?>"></fieldset>
-<fieldset><label for="txtName" class="fieldLabel">Proof of delivery can be viewed at : </label>
+<fieldset><label for="txtName" class="fieldLabel">Proof of delivery available online </label>
 <input class="ui-state-default ui-corner-all pad" type="text" size="60" name="email9" value="<? echo $globalprefrow['email9']; ?>"></fieldset>
 <fieldset><label for="txtName" class="fieldLabel">Estimated minimum CO2 saving : </label> 
 <input class="ui-state-default ui-corner-all pad" type="text" size="60" name="email10" value="<? echo $globalprefrow['email10']; ?>"></fieldset>

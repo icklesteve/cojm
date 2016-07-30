@@ -318,18 +318,23 @@ echo $html.'<div class="vpad"> </div>';
 	
 $gpsadmin = mysql_query("SELECT COUNT(*) FROM cojm_admin WHERE cojm_admin_stillneeded='1' AND cojmadmin_tracking='1' ") or die(mysql_error());
 $gpsadminrow = mysql_fetch_row($gpsadmin); if($gpsadminrow) { $gpsadmintotal= $gpsadminrow[0]; }
+
+if ($gpsadmintotal>0) {
+
 echo '<br /> '.$gpsadmintotal.' Job(s) in individ job GPS Admin Q ';
 	
-
+}
 
 
 // $infotext.= ' checking if rider-gps-admin task needed ';
 	
 $gpsrideradmin = mysql_query("SELECT COUNT(*) FROM cojm_admin WHERE cojm_admin_stillneeded='1' AND cojmadmin_rider_gps='1' ") or die(mysql_error());
 $gpsriderrow = mysql_fetch_row($gpsrideradmin); if($gpsriderrow) { $gpsrideradmintotal= $gpsriderrow[0]; }
+
+if ($gpsrideradmintotal>0) {
 echo '<br /> '.$gpsrideradmintotal.' Job(s) in Rider GPS Admin Q ';
 
-
+}
 
 
 

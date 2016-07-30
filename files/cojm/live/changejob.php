@@ -5314,30 +5314,6 @@ $newvatcost=round($newvatcost, 2);
 
 
 
-// trap to check jobs with customerid=0
-
-$origid=$id;
-$sql = "SELECT ID FROM Orders WHERE `Orders`.`CustomerID`=0 LIMIT 1";
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); $sumtot=mysql_affected_rows(); if ($sumtot>0)  { 
-$infotext=$infotext. '<strong> '.$sumtot.' Job with Customer ID at 0 </strong> id is '.$origid.' ';
- while ($zcidrow = mysql_fetch_array($sql_result)) { extract($zcidrow); 
-$infotext=$infotext. 'found at 0 : '. $zcidrow['ID'].' ';
- }
-$infotext=$infotext. ' page is '.$page; 
- 
-// $pagetext=$pagetext.'COJM has found a problem and this error will displayed until error log has been read ';
- 
- $to='cojm@cojm.co.uk';
- $from=$globalprefrow['emailfrom'];
- $subject='CustomerID at 0 on '.$globalprefrow['globalname'];
- $message = wordwrap($infotext, 70, PHP_EOL);
- $ok = @mail($to, $subject, $message, $headers, "-f$from");    
-  if ($ok) {    
- $tempformtext=$tempformtext."<h2><strong>Mail sent!</strong></h2>";    
-} else {    
- $tempformtext=$tempformtext. "<h1>Message not sent.</h1>";    
-}
-} // ends trap
 
 $ID=$origid;
 $id=$origid;

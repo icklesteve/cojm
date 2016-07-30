@@ -288,7 +288,7 @@ For PDF Invoices and other, aim for about 200px x 60px
 
 <fieldset><label class="fieldLabel"> &nbsp; </label>
 
- default is  http://www.cojm.co.uk/images/my_logo_199x60.jpg
+should look somethikng like  https://example.com/images/my_logo_199x60.jpg
 For PDF Invoices and other, aim for about 200px x 60px
 
 </fieldset>

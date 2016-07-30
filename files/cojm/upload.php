@@ -1,4 +1,27 @@
-<?php if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) ob_start("ob_gzhandler"); else ob_start();
+<?php
+
+/*
+    COJM Courier Online Operations Management
+	upload.php - Receives live GPS data from apps like OpenGPSTracker
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) ob_start("ob_gzhandler"); else ob_start();
 include "live/C4uconnect.php";
 
 if (isset($_GET['latitude'])) { $latitude=round($_GET['latitude'],5); } else { $latitude=''; }
@@ -20,27 +43,13 @@ $speed=round($speed,1);
 }
 
 
-  
-  
-  
-  
-  
-  
  
  if (($device_key) and ($timestamp) and ($latitude) and ($longitude)) {
  
  
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- $to = "cojm@cojm.co.uk, ".$globalprefrow['glob8'];
+ $to = $globalprefrow['glob8'];
  $subject = "COJM Live Tracking  on ".$globalprefrow['backupemailfrom'];
  $body =       "\n Tracking on line 16 upload.php"; 
  $body =$body. "\n line 49 Time is ".$timestamp;
@@ -54,30 +63,6 @@ $speed=round($speed,1);
  $body =$body. "\n Time diff via U ".date("U", $timestamp);
  $body =$body. "\n U               ".date("U"); 
  $body =$body. "\n New time  via U ".date("U", $timestamp); 
- $to = "cojm@cojm.co.uk";
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
  
  
  
@@ -139,6 +124,7 @@ if (mail($to, $subject, $body)) {    echo"<p>Message successfully sent!</p>";
 
 
 
+// if in debug mode
 
 
  if (mail($to, $subject, $body)) {    echo("<p>Message successfully sent!</p>");
@@ -151,19 +137,8 @@ if (mail($to, $subject, $body)) {    echo"<p>Message successfully sent!</p>";
  
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 echo ' 400 script completed OK ';
+// end debug mode
+
 
 ?>

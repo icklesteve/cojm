@@ -81,10 +81,9 @@ $globalprefrow=mysql_fetch_array($sql_result);
 <li><a href="#tabs-6">Maps / Tracking Icons</a></li>
 <li><a href="#tabs-8">Favourite Tags</a></li>
 <li><a href="#tabs-9">PDF Invoice</a></li>
-<li><a href="#tabs-5">Financial</a></li>	
+<li><a href="#tabs-5">Financial</a></li>
 <li><a href="#tabs-2">Advanced</a></li>
 <li><a href="#tabs-10">License</a></li>
-
 </ul>
 
 
@@ -113,26 +112,37 @@ if ($globalprefrow['distanceunit']=='km') { echo ' km '; } ?></fieldset>
 
 <fieldset><label class="fieldLabel"> Backup sent to </label> <? echo $globalprefrow['backupemailto']; ?></fieldset>
 
-<fieldset><label class="fieldLabel"> Location Quick Check </label><? echo $globalprefrow['locationquickcheck']; ?></fieldset>
+<fieldset><label class="fieldLabel"> Location Quick Check </label>
+<? echo $globalprefrow['locationquickcheck']; ?></fieldset>
 
-<fieldset><label class="fieldLabel"> Location Client Invoice page </label><? echo $globalprefrow['clweb6']; ?></fieldset>
+<fieldset><label class="fieldLabel"> Location Client Invoice page </label>
+<? echo $globalprefrow['clweb6']; ?></fieldset>
 
 
 
 
-<fieldset>
-<label class="fieldLabel"> Website usage policy location </label> 
-<?php echo $globalprefrow['clweb2']; ?>
-</fieldset>
+<fieldset><label class="fieldLabel"> Website usage policy location </label> 
+<?php echo $globalprefrow['clweb2']; ?></fieldset>
 
 
 <fieldset><label class="fieldLabel"> Rider CSS File : </label> 
 <? echo $globalprefrow['courier1']; ?></fieldset>
 
 
-<fieldset><label class="fieldLabel"> SERVER_PORT </label><?php echo $_SERVER['SERVER_PORT']; ?></fieldset>
+<fieldset><label class="fieldLabel"> SERVER_PORT </label>
+<?php echo $_SERVER['SERVER_PORT']; ?></fieldset>
 
-<fieldset><label class="fieldLabel"> HTTPS </label><?php echo $_SERVER["HTTPS"]; ?></fieldset>
+<fieldset><label class="fieldLabel"> HTTPS </label>
+<?php echo $_SERVER["HTTPS"]; ?></fieldset>
+
+
+<fieldset><label class="fieldLabel"> SQL DB Name </label>
+<?php 
+$result=$dbh->query('select database()')->fetchColumn();
+echo $result;
+
+?></fieldset>
+
 
 </div>
 

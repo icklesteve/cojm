@@ -2744,7 +2744,7 @@ $priceexvat=$orgiFreightCharge;
 
 
 $priceexvat=number_format (($priceexvat), 2, '.', '');
-if ($newvatcost<>'0.00') { $script.='<span title=\"Incl. VAT\"> &'.$globalprefrow["currencysymbol"].number_format (($newvatcost+$priceexvat), 2, '.', ',').'</span> ';
+if ($newvatcost>'0.00') { $script.='<span title=\"Incl. VAT\"> &'.$globalprefrow["currencysymbol"].number_format (($newvatcost+$priceexvat), 2, '.', ',').'</span> ';
 }
 
 

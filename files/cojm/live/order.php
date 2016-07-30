@@ -59,7 +59,7 @@ echo '<!doctype html><html lang="en"><head>
 <link id="pagestyle" rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
-<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;sensor=true" type="text/javascript"></script>
+<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>
 <script src="js/richmarker.js" type="text/javascript"></script>
 <script src="js/order.js" type="text/javascript"></script>
 <style>

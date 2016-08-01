@@ -89,10 +89,10 @@ echo '</div>'; //ends infotext div
 
 
 
- echo '<div id="demo_top_wrapper"> ';
-echo '<div id="sticky_navigation_wrapper">';
+// echo '<div id="demo_top_wrapper"> ';
+// echo '<div id="sticky_navigation_wrapper">';
 echo '
-<div id="sticky_navigation">
+<div class="sticky_navigation demo_top_wrapper" id="sticky_navigation_wrapper">
 
 <ul><li><a href="index.php"'; 
 if ($filename=='index.php') echo ' class="selected"'; echo ' >Home</a></li>';
@@ -133,9 +133,7 @@ if ($hasforms=='1'){echo '<li><span id="cdtext"> </span></li><li><b class="hidde
 echo '</ul>';
 
 	
-echo '</div>
-</div>
-</div>';
+echo '</div>';
 
 
 
@@ -155,7 +153,7 @@ if ((isset($alerttext)) and ($alerttext)) { } else { echo ' style="display:none;
 
 
 if ((isset($adminmenu)) and ($adminmenu=='1')) { 
-echo '<div class="demo_top_wrapper"><div class="sticky_navigation_wrapper"><div class="sticky_navigation"><ul>';
+echo '<div class="demo_top_wrapper"><div class="sticky_navigation"><ul>';
 echo '<li><div id="toggleinvoicemenuchoose" ><a href="#">Finance</a></div></li><li><a href="new_cojm_client.php"'; 
 if ($filename=='new_cojm_client.php') { echo ' class="selected"'; } echo '>Client</a></li>';
 echo '<li><a href="cyclist.php"'; if ($filename=='cyclist.php') { echo ' class="selected"';} 
@@ -170,7 +168,7 @@ if ($filename=='recentlyclosed.php') { echo ' class="selected"';} echo '>Last 10
 <li><a href="dashboard.php"'; if ($filename=='dashboard.php') echo ' class="selected"'; echo '>Stats</a></li>
 <li><a href="help.php"'; if ($filename=='help.php') { echo ' class="selected"'; } echo '>Help</a></li>';
  if ($settingsmenu<>'1') { echo '<li><div id="togglesettingsmenuchoose" ><a href="#" >Settings</a></div></li>'; }
-echo '</ul></div></div></div>'; 
+echo '</ul></div></div>'; 
 }
 
 
@@ -179,17 +177,17 @@ if (($settingsmenu<>'1') and ($invoicemenu<>'1') and ($adminmenu<>'1')) {} else 
 echo '<div '; 
 if ($invoicemenu<>'1') { echo 'id="toggleinvoicemenu" '; }
 echo ' class="demo_top_wrapper ';
-if ($invoicemenu<>'1') { echo ' toggleinvoicemenu '; }
+if ($invoicemenu<>'1') { echo 'toggleinvoicemenu '; }
 
 
-echo ' "><div class="sticky_navigation_wrapper">
+echo ' ">
 <div class="sticky_navigation"><ul>';
 echo '<li><a style="float:left;" href="view_all_invoices.php"'; if ($filename=='view_all_invoices.php') echo ' class="selected"'; echo '>Invoicing</a></li>';
 echo '<li><a style="float:left;" href="pdfview.php"'; if ($filename=='pdfview.php') echo ' class="selected"'; echo '>New Invoice</a></li>';
 echo '<li><a style="float:left;" href="expenseview.php"'; if ($filename=='expenseview.php') echo ' class="selected"'; echo '> Expenses</a></li>';
 echo '<li><a style="float:left;" href="expenses.php?page=createnew"'; if ($filename=='expenses.php') echo ' class="selected"'; echo '>New Expense</a></li>';
 echo '<li><a style="float:left;" href="pandl.php"'; if ($filename=='pandl.php') echo ' class="selected"'; echo '>P+L</a></li> 
-</ul></div></div></div>';
+</ul></div></div>';
 } 
  
  

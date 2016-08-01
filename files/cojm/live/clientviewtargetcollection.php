@@ -1,4 +1,23 @@
 <?php 
+/*
+    COJM Courier Online Operations Management
+	clientviewtargetcollection.php - General Purpose Job Lookup
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 $alpha_time = microtime(TRUE);
 
@@ -115,6 +134,9 @@ echo '
 <meta name="HandheldFriendly" content="true" >
 <meta name="viewport" content="width=device-width, height=device-height" >
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
+<meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" /> <!----  for ie table floathead   -->
+<script type="text/javascript" src="js/jquery-ui.1.8.7.min.js"></script>  <!----  for table floathead   -->
+<script type="text/javascript" src="js/jquery.floatThead.js"></script>  <!----  for table floathead   -->
 <title><?php print ($title); ?> View by Client and Date</title>
 </head>
 <body>
@@ -479,11 +501,13 @@ array_push($subareaarray,$row['opsmapsubarea']);
 // print_r(array_values($areaarray)).'<br />';
 
 	 
-if ($firstrun=='1') { echo '<div class="vpad"></div><table id="acc" class="acc" ';
+if ($firstrun=='1') { echo '<div class="vpad"></div>
+
+<table id="clientviewtargetcollection" class="acc" ';
 
 if ($clientview=='normal') { echo ' style="width:100%;"  '; }
 
-echo '><tbody><tr><th scope="col">COJM ID</th>';
+echo '><thead><tr><th scope="col">COJM ID</th>';
 
 if ($clientid=='all')  { echo '<th scope="col">Client</th>'; }
 
@@ -504,7 +528,11 @@ echo '<th scope="col">Job Status</th>
 <th scope="col">Collection</th>
 <th scope="col">Target Delivery</th>
 <th scope="col">Delivery</th>
-</tr>';
+</tr>
+</thead>
+<tbody>
+
+';
 
 
 // echo '<tr><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td>';
@@ -760,7 +788,7 @@ $areaquery = "SELECT opsmapid, opsname, descrip, istoplayer FROM opsmap WHERE op
  while (list ($listopsmapid, $listopsname, $descrip, $istoplayer ) = mysql_fetch_row ($areaqueryres)) {
  echo $listopsname.' ';
    
- if ($row['opsmapsubarea']) { echo ' ( Sub Area ) '. $row['opsmapsubarea'];  }
+ if ($row['opsmapsubarea']) { echo ' ( Sub Area '.$row['opsmapsubarea'].' ) ';  }
 
 } 
 }
@@ -1050,8 +1078,14 @@ $(document).ready(function() {
 			 
 			 
 function comboboxchanged() { }			 
-			 
-			 
+			
+
+
+$("#clientviewtargetcollection").floatThead({
+	position: "fixed",
+	top: 36
+});			
+
 </script>';
 
 include 'footer.php';

@@ -304,16 +304,13 @@ echo '" id="contractstartdate" size="12" name="contractstartdate"></fieldset>
 if (trim($row['trackerid'])=='') { echo $row['CyclistID']; } else { echo $row['trackerid']; } 
 echo '</fieldset>
 
-<fieldset><label class="fieldLabel"> OpenGPSTracker </label> ';
+<fieldset><label class="fieldLabel"> Self-Hosted GPS Tracker </label> ';
 
-echo $globalprefrow['httproot'].'/cojm/upload.php?latitude=@LAT@&longitude=@LON@&trackid=';
+echo $globalprefrow['httproots'].'/cojm/upload.php?trackid=';
 
 
 if (trim($row['trackerid'])=='') { echo $row['CyclistID']; } else { echo $row['trackerid']; } 
-echo '&speed=@SPEED@&time=@TIME@&bear=@BEAR@&alt=@ALT@
-
-<br />
-enter this address in Custom web server URL
+echo '
 
 </fieldset>
 

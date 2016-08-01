@@ -1,4 +1,30 @@
 <?php 
+
+/*
+    COJM Courier Online Operations Management
+	opsmap.php - Displays POI & Ops Areas
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+
+
+
+
 $alpha_time = microtime(TRUE);
 include "C4uconnect.php";
 if ($globalprefrow['forcehttps']>0) {
@@ -24,7 +50,8 @@ $hasforms='1';
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 <?php echo '<link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
-<script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>'; ?>
+<script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>';
+ ?>
 
 <style> div.info { font-weight:bold; }
 
@@ -57,11 +84,11 @@ padding:1px;
 </style>
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <?php
-echo '<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;sensor=false&amp;libraries=geometry" type="text/javascript"></script>'; 
+echo '<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;libraries=geometry&amp;key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>'; 
 
 
 if ($searchtype=='') { $query = "SELECT * FROM opsmap WHERE inarchive<>1 AND corelayer='0' "; }
-if ($searchtype=='archive') { $query = "SELECT * FROM opsmap WHERE inarchive=1 AND corelayer='0' "; }
+if ($searchtype=='archive') { $query = "SELECT * FROM opsmap WHERE corelayer='0' "; }
 
   $showallrow='';
   $tablerow='';
@@ -650,7 +677,7 @@ if ($searchtype=='') {  echo ' selected="selected" '; }
 echo 'value="">Active</option>';
 echo '<option ';
 if ($searchtype=='archive') {  echo ' selected="selected" '; }
-echo ' value="archive">Archived</option>';
+echo ' value="archive">Active + Archived</option>';
 
 echo '
 </select>
@@ -690,9 +717,9 @@ echo '
 <br />
 <table class="nolines">
 <tbody>
-<tr><td><img class="opsmapicon" src="../images/info-50-50-trans.gif" /> </td><td> <span id="markertype1span"> </span> </td><td>General</td></tr>
-<tr><td><img class="opsmapicon" src="../images/access-50-50-trans.gif" /> </td><td>  <span id="markertype2span"> </span> </td><td> Access </td></tr>
-<tr><td><img class="opsmapicon" src="../images/alert-50-50-trans.gif" /> </td><td>  <span id="markertype3span"> </span>  </td><td> Safety </td></tr>
+<tr><td><img alt="Marker Type 1" class="opsmapicon" src="../images/info-50-50-trans.gif" /> </td><td> <span id="markertype1span"> </span> </td><td>General</td></tr>
+<tr><td><img alt="Marker Type 2" class="opsmapicon" src="../images/access-50-50-trans.gif" /> </td><td>  <span id="markertype2span"> </span> </td><td> Access </td></tr>
+<tr><td><img alt="Marker Type 3" class="opsmapicon" src="../images/alert-50-50-trans.gif" /> </td><td>  <span id="markertype3span"> </span>  </td><td> Safety </td></tr>
 
 </tbody>
 </table>

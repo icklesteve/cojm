@@ -51,6 +51,9 @@ JQuery : http://jquery.com/ JQueryUI
 jQuery-Plugin "daterangepicker.jQuery.js" by Scott Jehl
 datejs http://www.datejs.com/
 markerclusterer https://github.com/googlemaps/js-marker-clusterer
+js Rich Marker for https://github.com/googlemaps/js-rich-marker/
+floatThead http://mkoryak.github.io/floatThead/
+Stickyfill -- `position: sticky` polyfill v. 1.1.4 | https://github.com/wilddeer/stickyfill
 zebra dialogue http://stefangabos.ro/jquery/zebra-dialog/
 Autosize http://www.jacklmoore.com/autosize
 phpMySQLAutoBackup : http://www.dwalker.co.uk/phpmysqlautobackup/

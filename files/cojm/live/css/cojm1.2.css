@@ -38,6 +38,14 @@ font-family: Roboto,Tahoma,sans-serif;
   }
 
   
+
+ #sticky_navigation_wrapper { 
+ position:sticky;
+ top:0;
+ left:0;
+ z-index:12;
+ }
+  
   
   #clientnotes { 
   overflow-x:hidden;
@@ -1590,6 +1598,8 @@ td.strong { font-weight: bold }
 	}
 
 
+table.acc thead { color:#111111; }
+table.acc thead { background-color:threedlightshadow; }
 
 
  
@@ -1606,11 +1616,11 @@ td.strong { font-weight: bold }
 
 
 
-.acc tr:nth-of-type(odd)  {
+.acc tbody tr:nth-of-type(odd)  {
    background-color: #ffffff; 
    }
 
-.acc tr:nth-of-type(even)  {
+.acc tbody tr:nth-of-type(even)  {
 background-color: #f3f2f2; 
 }
 

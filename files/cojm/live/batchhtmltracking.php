@@ -512,16 +512,14 @@ $idsuccess[]=' <p title="'.$id.' '.date('jS M Y', strtotime($orow['collectiondat
 var infowindow = new google.maps.InfoWindow();
  
   var image = {
- //   url: "'. $globalprefrow['clweb3'].'",
-  url: "https://web247.secure-secure.co.uk/cycle4u.co.uk/cojm/images/plot-20-20-gray-square-pad.png",
+  url: "'.$globalprefrow['httproots'].'/cojm/images/plot-20-20-gray-square-pad.png",
  size: new google.maps.Size(20, 20),
    origin: new google.maps.Point(0,0),
    anchor: new google.maps.Point(10, 10)
   };  
   
     var imagehighlight = {
- //   url: "'. $globalprefrow['clweb3'].'",
-  url: "https://web247.secure-secure.co.uk/cycle4u.co.uk/cojm/images/plot-20-20-339900-square-pad.png",
+  url: "'.$globalprefrow['httproots'].'/cojm/images/plot-20-20-339900-square-pad.png",
  size: new google.maps.Size(20, 20),
    origin: new google.maps.Point(0,0),
    anchor: new google.maps.Point(10, 10)

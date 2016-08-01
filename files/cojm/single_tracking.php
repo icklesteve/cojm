@@ -19,7 +19,6 @@
 
 */
 
-
 echo '<div id="cojmsingletrackdiv" class="cojm">';
 
 $postedref=trim($_POST['quicktrackref']); 
@@ -243,7 +242,7 @@ $stmt->execute();
 $total = $stmt->rowCount();
 if ($total=='1') {
 echo "<tr><td colspan='2'><img alt='proof of delivery' style='width:100%;' 
-src='https://cycle4u.co.uk/cojm/podimage.php?id=".$row['publictrackingref']."' /></td></tr><tr><td > </td><td> </td></tr>";
+src='".$globalprefrow['httproots']."/cojm/podimage.php?id=".$row['publictrackingref']."' /></td></tr><tr><td > </td><td> </td></tr>";
 }
 
 

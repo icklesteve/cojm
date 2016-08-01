@@ -1022,7 +1022,9 @@ $i++;
 
 
 
- echo ' '. $cronissue.' of the last 10 cojmcron checks failed as already running.  If oldest was more than 5 mins ago this was reset, however you need to contact your admin if you get this message too often.';
+ echo ' '. $cronissue.' of the last 10 cojmcron checks failed as already running.  
+ If oldest was more than 5 mins ago this was reset, 
+ however you need to contact your admin if you get this message too often.';
 
 $to = $globalprefrow['emailbcc'];
 $from= $globalprefrow['emailfrom'];
@@ -1031,8 +1033,9 @@ $subject = $globalprefrow['globalshortname']." possible Cron Issue";
 
 $plainbodytext=$oldtime.' was oldest time';
 
-$plainbodytext.=' There may be an issue with COJMCron, which schedules background jobs.  further info is available in the main audit log. '.
-$cronissue.' of the last 10 cojmcron checks failed as already running, sending email to cojm support to check your setup. ';
+$plainbodytext.=' There may be an issue with COJMCron, which schedules background jobs.  
+Further info is available in the main audit log. '.
+$cronissue.' of the last 10 cojmcron checks failed as already running, cron reset. ';
 $headers = 'From: '.$from. PHP_EOL;
 $headers =$headers. 'Return-path: '.$to. PHP_EOL; 
 $headers = $headers . 'Repy-To: '.$to . PHP_EOL.

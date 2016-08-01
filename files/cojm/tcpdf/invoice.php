@@ -749,7 +749,7 @@ $stmt = $dbh->prepare($query);
 $stmt->bindParam(':getid', $row['publictrackingref'], PDO::PARAM_INT); 
 $stmt->execute();
 $haspod = $stmt->rowCount();
-if  ($haspod) { $htmlb.= ' <a title="Proof of Delivery" href="https://cycle4u.co.uk/cojm/podimage.php?id='. $row['publictrackingref'].'" >POD</a> '; }
+if  ($haspod) { $htmlb.= ' <a title="Proof of Delivery" href="'.$globalprefrow['httproots'].'/cojm/podimage.php?id='. $row['publictrackingref'].'" >POD</a> '; }
 
 
 

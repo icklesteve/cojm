@@ -1,5 +1,24 @@
 <?php
 
+/*
+    COJM Courier Online Operations Management
+	cojm-12-hr-stats.php - called by cron to generate stats / do database checks
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 if (isSet($infotext)) {} else {
 	$infotext='';
@@ -48,30 +67,47 @@ $msg.=''.$auditresult." Audit Logs in DB \r\n";
 
 
 
+$sql = "
+SELECT 
+CO2Saved, 
+co2saving, 
+PM10Saved, 
+pm10saving, 
+numberitems 
+FROM Orders, Services WHERE Orders.ServiceID = Services.ServiceID AND Orders.status >= 77 AND Orders.numberitems>0";
+$astmt = $dbh->prepare($sql);
+$astmt->execute();
 
+$rows = $astmt->fetchAll(PDO::FETCH_ASSOC);
+foreach ($rows as $cojmrow) {
 
-
-
-
-
-
-// $arow = $astmt->fetch(PDO::FETCH_ASSOC);
-// $atotal = $astmt->rowCount();
-
-
+if ($cojmrow['co2saving']>0.01) {   
+	$cojmtableco2 = $cojmtableco2 + $cojmrow["co2saving"];
+	 } else { 
+	 $cojmtableco2 = $cojmtableco2 + (($cojmrow['numberitems'])*($cojmrow["CO2Saved"]));
+	  }
+	  	  
+if ($cojmrow['pm10saving']>0.001) {
+	$cojmtablepm10 = $cojmtablepm10 + $cojmrow['pm10saving'];  
+	} else {
+	 $cojmtablepm10 = $cojmtablepm10 + (($cojmrow['numberitems'])*($cojmrow["PM10Saved"]));  
+	 }
+	
+} // ends row loop
 
 
    try {
 $statement = $dbh->prepare("INSERT INTO cojm_selfstats 
-(time, totorders, totinstamapper, totpostcodes, totaudit) 
+(time, totorders, totinstamapper, totpostcodes, totaudit, totco2, totpm10) 
 values 
-(now(), :totorders, :instamapperresult, :postcoderesult, :auditresult)");
+(now(), :totorders, :instamapperresult, :postcoderesult, :auditresult, :totco2, :totpm10)");
 
 $statement->bindParam(':totorders', $result, PDO::PARAM_STR);
 $statement->bindParam(':instamapperresult', $instamapperresult, PDO::PARAM_STR);
 $statement->bindParam(':postcoderesult', $postcoderesult, PDO::PARAM_STR);
 $statement->bindParam(':auditresult', $auditresult, PDO::PARAM_STR);
-
+$statement->bindParam(':totco2', $cojmtableco2, PDO::PARAM_STR);
+$statement->bindParam(':totpm10', $cojmtablepm10, PDO::PARAM_STR);
 $statement->execute();
 $insertid = $dbh->lastInsertId();
 
@@ -163,7 +199,7 @@ $msg.="\r\n\r\n";
 
 
 
-if (($error>3)or($globalprefrow['adminlogoback']>0)){
+if (($error>3)or($globalprefrow['showdebug']>0)){
 
 
 
@@ -171,37 +207,18 @@ if (($error>3)or($globalprefrow['adminlogoback']>0)){
  $to=$globalprefrow['glob8'];
  $from=$globalprefrow['emailfrom'];
 $headers = 'From: '.$from. PHP_EOL;
-// $headers =$headers. 'Return-path: '.$to. PHP_EOL; 
-// $headers = $headers . 'Repy-To: '.$to . PHP_EOL;
  $headers.= "X-Mailer: COJM-Courier-Online-Job-Management" . PHP_EOL;
-// $headers = $headers .		   "Cc: ".$globalprefrow['glob8'];
-
- $from=$globalprefrow['emailfrom'];
-
-
- $subject='Databse Monitor '.$globalprefrow['globalname'];
+$from=$globalprefrow['emailfrom'];
+$subject='Databse Monitor '.$globalprefrow['globalname'];
  
- if ($globalprefrow['adminlogoback']>0) { $subject.=' Debug Mode'; } else { $subject='COJM ERROR '.$subject; }
- 
- 
- 
+ if ($globalprefrow['showdebug']>0) { $subject.=' Debug Mode'; } else { $subject='COJM ERROR '.$subject; }
  
  $message = str_replace('&nbsp;',' ',($msg.$infotext));
  $message = wordwrap(($message), 70);
- 
- 
+  
  mail($to, $subject, $message, $headers, "-f$from");
-
 
 }
 
-
 $infotext.=$msg;
-
-
-
-
-
-
-
 ?>

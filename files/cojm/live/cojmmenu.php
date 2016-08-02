@@ -47,7 +47,7 @@ var message="";
 
 
 // set a longer timesout if in debug mode
-if ($globalprefrow['adminlogoback']=='1') { 
+if ($globalprefrow['showdebug']=='1') { 
 echo '
 <script>
 ptdelay=10000;
@@ -64,19 +64,19 @@ echo '<span class="ctitle">C</span><span class="ctitle">O</span><span class="cti
 // echo '<div id="loggedinas">Logged in as '.$cyclistid.'</div>';
 
 
-if (isset($mobdevice) and ($mobdevice=='1') )  { if ($globalprefrow['adminlogoback']>'0') { 
+if (isset($mobdevice) and ($mobdevice=='1') )  { if ($globalprefrow['showdebug']>'0') { 
 $pagetext=$pagetext.$infotext; 
 
 } } else { $mobdevice='';
  }
-if (($globalprefrow['adminlogoback']>'0')) { 
+if (($globalprefrow['showdebug']>'0')) { 
 echo 'DEBUG MODE';
 
 echo $infotext; }
 
 
 
-if ($globalprefrow['adminlogoback']>'0') { echo '<div class="activestatus" id="activestatus"></div>'; }
+if ($globalprefrow['showdebug']>'0') { echo '<div class="activestatus" id="activestatus"></div>'; }
 
 
 
@@ -210,7 +210,7 @@ echo '<li><a href="service.php"'; if ($filename=='service.php') { echo ' class="
 echo '<li><a href="corepricing.php"'; if ($filename=='corepricing.php') echo ' class="selected"'; echo '>Distance Pricing</a></li>';
 echo '<li><a href="cojmglobalemail.php"'; if ($filename=='cojmglobalemail.php') echo ' class="selected"'; echo '>Set Email</a></li>';
 echo '<li><a href="cojmglobalstatus.php"'; if ($filename=='cojmglobalstatus.php') echo ' class="selected"'; echo '>Status Text</a></li>';
-if ($globalprefrow['adminlogoback']>'0') { 
+if ($globalprefrow['showdebug']>'0') { 
 echo '<li><a href="debug.php"'; if ($filename=='debug.php') echo ' class="selected"'; echo '>Debug</a></li>'; }  
 if (($globalprefrow['inaccuratepostcode'])=='0') {
 echo '<li><a href="newpc.php"'; if ($filename=='newpc.php') echo ' class="selected"'; echo '>Add Postcode</a></li>'; }
@@ -239,5 +239,5 @@ echo '<form action="order.php" method="post" id="newjob_form" accept-charset="ut
 
 
 
-// if ($globalprefrow['adminlogoback']>'0') { echo '<br /> DEBUG MODE'; }
+// if ($globalprefrow['showdebug']>'0') { echo '<br /> DEBUG MODE'; }
 

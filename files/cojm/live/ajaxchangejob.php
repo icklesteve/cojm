@@ -4558,9 +4558,9 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 }
 
 
-if ($globalname=='adminlogoback') { // show debug
+if ($globalname=='showdebug') { // show debug
  try {
-$query = "UPDATE globalprefs SET adminlogoback=:newvalue WHERE settingsid=:settingsid";
+$query = "UPDATE globalprefs SET showdebug=:newvalue WHERE settingsid=:settingsid";
 $stmt = $dbh->prepare($query);
 $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
 $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
@@ -5167,7 +5167,7 @@ $message.=$e->getMessage();
 $message.="ACJ in $cj_echo ms. ";
  }
 
-if ($globalprefrow['adminlogoback']=='1') {
+if ($globalprefrow['showdebug']=='1') {
 $message.="<br />DEBUG MODE --------------- <br />$infotext";
 
 }

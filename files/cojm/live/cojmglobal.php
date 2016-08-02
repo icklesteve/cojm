@@ -769,7 +769,7 @@ style="width:60%;"><? echo $globalprefrow['courier10']; ?></textarea>
 
 
 <fieldset><label class="fieldLabel"> Force Show COJM Debug info </label>
-<input type="checkbox" id="adminlogoback" value="1" <?php if ($globalprefrow['adminlogoback']>0) { echo 'checked';} ?>></fieldset>
+<input type="checkbox" id="showdebug" value="1" <?php if ($globalprefrow['showdebug']>0) { echo 'checked';} ?>></fieldset>
 
 
 <fieldset><label class="fieldLabel"> Force admin https SSL </label>
@@ -2130,9 +2130,9 @@ changedvar();
 });
 
 
-$("#adminlogoback").change(function () {
- globalname='adminlogoback';
-if($('#adminlogoback').prop('checked')) { // something when checked
+$("#showdebug").change(function () {
+ globalname='showdebug';
+if($('#showdebug').prop('checked')) { // something when checked
 	newvalue=1;
 } else { // something else when not
 	newvalue=0;

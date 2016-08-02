@@ -66,7 +66,7 @@ $cojmaction='';
 if (isset ($pagetext)) {} else { $pagetext=''; }
 if (isset ($alerttext)) {} else { $alerttext=''; }
 
-if ($globalprefrow['adminlogoback']>0) {
+if ($globalprefrow['showdebug']>0) {
 
 // error handler function
 function myErrorHandler($errno, $errstr, $errfile, $errline)
@@ -3032,7 +3032,7 @@ opsmapsubarea,
 mysql_query("UNLOCK TABLES", $conn_id);   
 $ID=$id;
 
-// $infotext=$infotext.'<br />2741 Discount : '.$clientdiscount;
+ $infotext=$infotext.'new id is'.$ID;
 
 
 
@@ -5342,12 +5342,12 @@ $newvatcost=round($newvatcost, 2);
 
 
 
-
+if ($page<>'createnewfromexisting') {
 
 $ID=$origid;
 $id=$origid;
 
-
+}
 
 $caudtext='<hr><b>'. $cyclistid.' : '.$today.'</b>'. $infotext; 
 

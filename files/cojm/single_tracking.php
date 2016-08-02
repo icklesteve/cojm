@@ -37,11 +37,6 @@ if (ctype_alnum($postedref)) {
 	  $postedref='';
     }
 
-// $postedref=htmlspecialchars($postedref);
-// echo ' postedref is '.$postedref;
-// echo '13';
-
-
 $query="SELECT * FROM Orders
 INNER JOIN Clients 
 INNER JOIN Services 
@@ -51,19 +46,31 @@ WHERE Orders.CustomerID = Clients.CustomerID
 AND Orders.ServiceID = Services.ServiceID 
 AND Orders.status = status.status 
 AND Orders.CyclistID = Cyclist.CyclistID 
-AND Orders.publictrackingref = ? LIMIT 1";
+AND Orders.publictrackingref = ? LIMIT 0,1";
+
+
+// numberitems, ID, trackerid, publictrackingref publicstatusname status poshname Service jobcomments CollectPC ShipPC fromfreeaddress
+
+
+// enrpc1, enrpc2, enrpc3, enrpc4, enrpc5, enrpc6, enrpc7, enrpc8, enrpc9, enrpc10, enrpc11, enrpc12, enrpc13, enrpc14, enrpc15,
+// enrpc16, enrpc17, enrpc18, enrpc19, enrpc20
+
+
+// enrft1, enrft2, enrft3, enrft4, enrft5, enrft6, enrft7, enrft8, enrft9, enrft10,
+// enrft11, enrft12, enrft13, enrft14, enrft15, enrft16, enrft17, enrft18, enrft19, enrft20
+
+// tofreeaddress , targetcollectiondate, duedate, deliveryworkingwindow, starttravelcollectiontime, waitingstarttime, collectiondate
+// starttrackpause, finishtrackpause, ShipDate, podsurname, distance
+
+// co2saving, CO2Saved, pm10saving, PM10Saved, opsmaparea, opsmapsubarea
+
+
+
 
 $parameters = array($postedref);
-
 $statement = $dbh->prepare($query);
-
 $statement->execute($parameters);
-// Get the first returned row
 $row = $statement->fetch(PDO::FETCH_ASSOC);
- 
-
-
-
 	
 
 
@@ -81,15 +88,12 @@ if ($row['ID']) {  // starts main table
 $numberitems= trim(strrev(ltrim(strrev($row['numberitems']), '0')),'.');
 
 $thistrackerid=$row['trackerid'];
-$thisposhname=$row['poshname'];
+
 
 
 echo '
-
 <h1>'.$row['publictrackingref'].'</h1>
-
 <hr />
-
 <table id="cojm" class="cojm" cellspacing="0" style="table-layout:auto;"><tbody><tr><th class="stleft">';
 
 
@@ -118,7 +122,7 @@ echo $completestatus;
 
 
 echo '</th></tr>
-<tr><td>'.$globalprefrow['glob5'].'</td><td>'. $thisposhname.'</td></tr>
+<tr><td>'.$globalprefrow['glob5'].'</td><td>'. $row['poshname'].'</td></tr>
 
 <tr><td>Service </td><td> '. $numberitems .' x ' .$row['Service'] .'</td></tr>';
 
@@ -132,7 +136,7 @@ $linkShipPC = str_replace(" ", "%20", "$linkShipPC", $count);
 
 
 
- if ((trim($row['CollectPC'])) or (trim($row['fromfreeaddress']))) {  
+ if ((trim($row['CollectPC'])) or (trim($row['fromfreeaddress']))) {
  
  
  echo '<tr><td colspan="2"><hr /></td></tr>';
@@ -294,44 +298,7 @@ if ($comppm10) { echo "<tr><td>Estimated PM<sub>10</sub> Saved </td><td>".$table
 
 
 
-///   GPS Tracking
 
-
-$collecttime=strtotime($row['starttravelcollectiontime']); 
-if (strtotime($row['starttravelcollectiontime'])<60) { $collecttime = strtotime($row['collectiondate']); }
-
-
-$startpause=strtotime($row['starttrackpause']); 
-$finishpause=strtotime($row['finishtrackpause']);  
-
-// if ($collecttime<10) { $collecttime=strtotime($row['starttravelcollectiontime']);  } 
-$delivertime=strtotime($row['ShipDate']); 
-if (($startpause > 10) and ( $finishpause < 10)) { $delivertime=$startpause; } 
-if ($startpause <10) { $startpause=9999999999; } 
-if (($row['status']<86) and ($delivertime < 200)) { $delivertime=999999999999; } 
-if ($row['status']<50) { $delivertime=0; } 
-if ($collecttime < 10) { $collecttime=9999999999;} 
-
-
-
-
-
-
-
-$thissql = "SELECT timestamp FROM `instamapper` 
-WHERE `device_key` = '$thistrackerid' 
-AND `timestamp` >= '$collecttime' 
-AND `timestamp` NOT BETWEEN '$startpause' AND '$finishpause' 
-AND `timestamp` <= '$delivertime' 
-ORDER BY `timestamp` DESC LIMIT 0,1"; 
-
-
-$q= $dbh->query($thissql);
-$lastgpstime = $q->fetchColumn();
-
-// echo ' lgps '. $lastgpstime;
-
-$englishlast=date('H:i A D j M', $lastgpstime); 
 
 
 
@@ -596,14 +563,10 @@ class="ui-state-default ui-corner-all address" />
 
 
 <div id="map" style="float:left; width: 100%; height: 400px;"></div>
- 
- 
+  
  </div>';
  
- 
- 
- 
- 
+
  echo '<div style="clear:both; "></div>';
 
 
@@ -648,32 +611,8 @@ $areajs.='  var worldCoords = [
 
 $stmt = $dbh->query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=$areaid");
 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-//   $score = mysql_fetch_assoc($result);
-
-
- //  print_r ($results);
-   
-   $score=$results['0'];
-   
-//   print_r ($test);
-   
-//   echo ' <hr /> ';
-   
-   
-   
-//   echo ' <hr /> ';
-   
-//   print_r ($score);
-
-
-// if (mysql_num_rows($result)) {
-	
- 
-	
-	
-	
-	
+$score=$results['0'];
+   	
 	$p=$score['POLY'];
 $trans = array("POLYGON" => "", "((" => "", "))" => "");
 $p= strtr($p, $trans);
@@ -873,6 +812,27 @@ var geocoder = null;
    var locations = [';
 
    
+
+///   GPS Tracking
+
+
+$collecttime=strtotime($row['starttravelcollectiontime']); 
+if (strtotime($row['starttravelcollectiontime'])<60) { $collecttime = strtotime($row['collectiondate']); }
+
+
+$startpause=strtotime($row['starttrackpause']); 
+$finishpause=strtotime($row['finishtrackpause']);  
+
+// if ($collecttime<10) { $collecttime=strtotime($row['starttravelcollectiontime']);  } 
+$delivertime=strtotime($row['ShipDate']); 
+if (($startpause > 10) and ( $finishpause < 10)) { $delivertime=$startpause; } 
+if ($startpause <10) { $startpause=9999999999; } 
+if (($row['status']<86) and ($delivertime < 200)) { $delivertime=999999999999; } 
+if ($row['status']<50) { $delivertime=0; } 
+if ($collecttime < 10) { $collecttime=9999999999;} 
+
+
+
    
 
 $sql = "SELECT * FROM `instamapper` 
@@ -888,15 +848,13 @@ $sumtot=mysql_affected_rows();
 // echo 'Records found : '.$sumtot;
    
    
-   
-   
-   
-   
-   
+ 
    
 
 while ($map = mysql_fetch_array($trackingsql_result)) {
      extract($map);	 
+	 
+$englishlast=date('H:i A D j M', $map['timestamp']); 
 	 
 $map['latitude']=round($map['latitude'],5);
 $map['longitude']=round($map['longitude'],5);
@@ -913,9 +871,7 @@ $map['longitude']=round($map['longitude'],5);
 	  if ($thists<>$prevts) {
 	 $numbericons++;
  $comments=date('H:i D j M ', $map['timestamp']) . ' ';
- if ($map['speed']) {  $comments=$comments . ''. round($map['speed']);
- if ($globalprefrow['distanceunit']=='miles') { $comments=$comments. 'mph '; } 
- if ($globalprefrow['distanceunit']=='km') { $comments=$comments. 'km ph '; } }	 
+
 	 
 echo "['" . $comments ."',". $map['latitude'] . "," . $map['longitude'] . "," . $numbericons ."],"; 
 
@@ -1179,13 +1135,12 @@ for (var j = 0; j < all.length; j++) {
       });
       google.maps.event.addListener(marker, "mouseover", (function(marker, i) {
         return function() {
-          infowindow.setContent(" <div style='."'".' width: 110px; '."'".'> "+locations[i][0] + " </div> " );
+          infowindow.setContent(locations[i][0]);
 		  infowindow.setOptions({ disableAutoPan: true });
           infowindow.open(map, marker);
         }
       })(marker, i));
     }
-
 	
 	}
 
@@ -1197,7 +1152,7 @@ for (var j = 0; j < all.length; j++) {
  if ($sumtot) { echo ' <br />Tracking last updated at '. $englishlast.', with '.number_format ($numbercords, 0, '.', ',').' GPS positions.'; }
   
    if ($row['status']>70) { 
-echo '<p class="download"><a href="../../createkml.php?id='.$row['publictrackingref'].'">Download as Google Earth KML File</a></p>'; } 
+echo '<p class="download"><a href="'.$globalprefrow['httproots'].'/cojm/createkml.php?id='.$row['publictrackingref'].'">Download as Google Earth KML File</a></p>'; } 
 
 echo '</td></tr>';
  

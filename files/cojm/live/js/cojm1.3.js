@@ -232,7 +232,6 @@ this.activate(event,result);}else{this.activate(event,this.element.children(".ui
 
 $(document).ready(function() {
 
-
 /*
  * jQuery UI Tabs 1.8.18
  *
@@ -3626,23 +3625,7 @@ $('#alerttext').delay(alertdelay).slideUp(alertslide);
 	});
  
    $("menusearch").autosizeInput();
-  $('#menusearch').change(function() { $('#menusearch').submit(); });
-	
-	
-	
-	
-	
-
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
+  $('#menusearch').change(function() { $('#menusearch').submit(); });	
 	
 });
 
@@ -3680,8 +3663,17 @@ $(document).ready(function() {
 	
 	
 	// adds sticky css polyfill for top menu
-$('#sticky_navigation_wrapper').Stickyfill();	
+
 	
 	}, 450 ); });
 
 }
+
+
+
+$(document).ready(function() {
+
+$('#sticky_navigation_wrapper').Stickyfill();	
+
+
+})

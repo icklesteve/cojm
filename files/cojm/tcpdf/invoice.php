@@ -785,7 +785,7 @@ AND `timestamp` NOT BETWEEN '$startpause' AND '$finishpause'
 AND `timestamp` <= '$delivertime' "; 
 $trasql_result = mysql_query($trasql,$conn_id)  or mysql_error(); 
 $trsumtot=mysql_affected_rows();   
- if ($trsumtot>'1.5') { $htmlb=$htmlb.' <a href="'.$globalprefrow['httproots'].'/createkml.php?id='.
+ if ($trsumtot>'1.5') { $htmlb=$htmlb.' <a href="'.$globalprefrow['httproots'].'/cojm/createkml.php?id='.
  $row['publictrackingref'].'">Tracking</a> '; }
 
 
@@ -1174,7 +1174,7 @@ echo'<div class="Post"> <div class="ui-widget">
 <div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
 ';
 
-if ($globalprefrow['adminlogoback']>'0') { echo $infotext; }
+if ($globalprefrow['showdebug']>'0') { echo $infotext; }
 
 echo '
 <h2>'. $pdfheaderstring.'</h2>'.$html.'

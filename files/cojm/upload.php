@@ -16,53 +16,82 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 */
+
 if (isset($_GET["lat"]) && preg_match("/^-?\d+\.\d+$/", $_GET["lat"])
  && isset($_GET["lon"]) && preg_match("/^-?\d+\.\d+$/", $_GET["lon"])
- && isset($_GET["t"]) && preg_match("/^-?\d+\.\d+$/", $_GET["t"])
- && isset($_GET["trackid"]) && preg_match("/^-?\d+\.\d+$/", $_GET["trackid"]) ) {
+ && isset($_GET["trackid"])) {
+
+$latitude=round($_GET['lat'],5);
+$longitude=round($_GET['lon'],5);
+$device_key=trim($_GET['trackid']);
+ if (isset($_GET['t'])) { 
+ $timestamp=trim($_GET['t']); 
+ $timestamp=substr($timestamp, 0, -3); 
+ } else { $timestamp=date("U"); }
+
+$device_label='LiveOpenGPS';
+ 
 
 include "live/C4uconnect.php";
 
-if (isset($_GET['lat'])) { $latitude=round($_GET['lat'],5); } else { $latitude=''; }
-if (isset($_GET['lon'])) { $longitude=round($_GET['lon'],5); } else { $longitude=''; }
-if (isset($_GET['trackid'])) { $device_key=trim($_GET['trackid']); } else { $device_key=''; }
-if (isset($_GET['t'])) { $timestamp=trim($_GET['t']); } else { $timestamp=''; }
+// check for valid device key passed
+try {
+$result = $dbh->prepare($sql); 
+$result->bindParam(':device_key', $device_key, PDO::PARAM_INT); 
+$result->execute(); 
+$validriderid = $result->fetchColumn(); 
+}
+catch(PDOException $e) { $body.="\n " .$e->getMessage(); }
 
-$device_label='LiveOpenGPS';
-$timestamp=substr($timestamp, 0, -3);  
 
  $to = $globalprefrow['glob8'];
  $subject = "COJM Live Tracking  on ".$globalprefrow['backupemailfrom'];
- $body =       "\n Tracking in upload.php"; 
- $body =$body. "\n line 64 Timestamp is ".$timestamp;
- $body =$body. "\n Lat is ".$latitude;
- $body =$body. "\n Lon is ".$longitude;
- $body =$body. "\n Device Key is ".$device_key;
- $body =$body. "\n Time difference ".($timestamp-(date("U")))."second";
+ $body = "\n Tracking in upload.php"; 
+ $body.= "\n Timestamp is ".$timestamp;
+ $body.= "\n Lat is ".$latitude;
+ $body.= "\n Lon is ".$longitude;
+ $body.= "\n Device Key is ".$device_key;
+ $body.= "\n Time difference ".($timestamp-(date("U")))."second";
+ $body.= "\n Rider Found : ".$validriderid;
 
-if ((is_numeric($device_key)) and (is_numeric($timestamp)) and (is_numeric($latitude)) and (is_numeric($longitude))) {
+if  (!$device_key) { $body.="\n No Tracker ID Set"; }
+elseif (!$validriderid) { $body.="\n Tracker ID Not Found "; } 
+else {
 
-$newpoint="INSERT INTO instamapper (device_key,device_label,timestamp,latitude,longitude,added)
-	  VALUES ('$device_key','$device_label','$timestamp','$latitude','$longitude','$alt','$speed','$heading'," . time() . ")";
+try {
+$query = "INSERT INTO instamapper 
+SET 
+device_key=:device_key, 
+device_label=:device_label, 
+timestamp=:timestamp,
+latitude=:latitude,
+longitude=:longitude,
+added=:added";
 
-$body='\n'.$newpoint.$body;
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':device_key', $device_key, PDO::PARAM_INT); 
+$stmt->bindParam(':device_label', $device_label, PDO::PARAM_INT); 
+$stmt->bindParam(':timestamp', $timestamp, PDO::PARAM_INT); 
+$stmt->bindParam(':latitude', $latitude, PDO::PARAM_INT); 
+$stmt->bindParam(':longitude', $longitude, PDO::PARAM_INT); 
+$stmt->bindParam(':added', time(), PDO::PARAM_INT); 
+$stmt->execute();
+$body.="\n Insert ID : ". $dbh->lastInsertId();
+}
+catch(PDOException $e) { $body.= $e->getMessage(); }
 
-mysql_query($newpoint, $conn_id) or mysql_error();
+} 
 
-if (mysql_error()) { $body='\n\n MYSQL ERROR WHEN ADDING TO DB \n'.$newpoint.' '.$body; }
 
-} // ends check for device key and timestamp
-
-// if in debug mode
+if ($globalprefrow['showdebug']>'0') { // if in debug mode
 if (mail($to, $subject, $body)) { echo("<p>Message successfully sent!</p>"); }
 echo $body;
-echo ' script completed OK ';
-// end debug mode
-}
+} // end debug mode
 
-echo ' script completed OK ';
+$dbh=null;
 
+} // ends check for post values
 
+exit;
 ?>

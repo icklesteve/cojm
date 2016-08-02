@@ -1,4 +1,24 @@
 <?php
+/*
+    COJM Courier Online Operations Management
+	cojmcron.php - Runs one of the cron jobs if need be
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 
 $cj_time = microtime(TRUE);	
 
@@ -6,7 +26,7 @@ include_once "C4uconnect.php";
 
 if (isSet($infotext)) {} else {$infotext='';}
 
-if ($globalprefrow['adminlogoback']>0) {
+if ($globalprefrow['showdebug']>0) {
 
 // error handler function
 function myErrorHandler($errno, $errstr, $errfile, $errline)
@@ -285,6 +305,6 @@ if ($backupruntype)	{
 }
 
 
-if ($globalprefrow['adminlogoback']>0) { echo $backupdescription.'<hr />' . $infotext; }
+if ($globalprefrow['showdebug']>0) { echo $backupdescription.'<hr />' . $infotext; }
 
 ?>

@@ -113,7 +113,6 @@ div.Post form#allorder fieldset span#toggledww.toggledww { display:none; }
     background-color:#ffffff;
     float:left;
     overflow:scroll;
-    overflow-style:auto;
     z-index:10;
     position:fixed;
     top:72px;
@@ -125,7 +124,6 @@ div.Post form#allorder fieldset span#toggledww.toggledww { display:none; }
   height:100%;
  /*       */
     overflow:hidden;
-    overflow-style:auto;
     position:relative;
     padding-left:320px;
     overflow-x:hidden;
@@ -401,10 +399,12 @@ span.debug {
 color:darkblue;
 }
 
-
+/*
 input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill { 
 background-color: #ffffff !important;
 }
+
+*/
 
 button.ui-button-icon-only { 
 

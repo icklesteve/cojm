@@ -603,7 +603,7 @@ echo '</p></div></div><div class="vpad line"></div>';
 
 
 
-if ($globalprefrow['adminlogoback']>0) {
+if ($globalprefrow['showdebug']>0) {
 
 
 
@@ -941,7 +941,7 @@ echo '<br />
 
 
 
-if ($globalprefrow['adminlogoback']>0) {
+if ($globalprefrow['showdebug']>0) {
 
 
 // jobs with status as invoiced but no invoice ref for jobs within the last year

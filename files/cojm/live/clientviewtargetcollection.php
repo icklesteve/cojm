@@ -459,7 +459,7 @@ if ($orderby=='nextaction') { $sql=$sql." ORDER BY `Orders`.`nextactiondate` DES
 
 
 
-if ($globalprefrow['adminlogoback']>0) {
+if ($globalprefrow['showdebug']>0) {
 
  echo '<br />'. $sql;
 
@@ -637,7 +637,7 @@ $trackingtext= $trackingtext.' Last updated ' . $englishlast . '.'; }
 
 
 if ($trackingtext) {
-echo '<a href="../../createkml.php?id='. $row['publictrackingref'].'"><img src="images/icon_world_dynamic.gif" alt="Download Tracking" title="'.$trackingtext.'"></a>';
+echo '<a href="../createkml.php?id='. $row['publictrackingref'].'"><img src="images/icon_world_dynamic.gif" alt="Download Tracking" title="'.$trackingtext.'"></a>';
 
 array_push($gpxarray,$row['publictrackingref']);
 }

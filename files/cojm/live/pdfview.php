@@ -1,4 +1,25 @@
 <?php 
+/*
+    COJM Courier Online Operations Management
+	pdfview.php.php - Create a PDF invoice
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
 error_reporting( E_ERROR | E_WARNING | E_PARSE );
 
 $alpha_time = microtime(TRUE);
@@ -337,11 +358,14 @@ id="expensedate" size="12" name="expensedate"></fieldset>
 
 ?>
 
+
+
 <button id="datesearchpreview">View in Date Search</button>
 
-<button type='submit' onclick="f1.action='../../cojm/tcpdf/invoice.php?page=preview'; this.form.target='_blank'; return true;">Preview Invoice</button> 
-<button type='submit' onclick="f1.action='../../cojm/tcpdf/invoice.php?page=createpdf'; return true;">Create PDF Invoice</button>
-<button type='submit' onclick="f1.action='../../cojm/tcpdf/invoice.php?page=addtodb'; this.form.target='_blank'; return true;" 
+<button type='submit' onclick="f1.action='invoice.php?page=preview'; this.form.target='_blank'; return true;">Preview Invoice</button> 
+
+<button type='submit' onclick="f1.action='invoice.php?page=createpdf'; return true;">Create PDF Invoice</button>
+<button type='submit' onclick="f1.action='invoice.php?page=addtodb'; this.form.target='_blank'; return true;" 
 style="color: Red;" > Commit invoices details to database </button>
 
 

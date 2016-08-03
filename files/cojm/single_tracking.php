@@ -44,28 +44,38 @@ INNER JOIN status
 INNER JOIN Cyclist 
 WHERE Orders.CustomerID = Clients.CustomerID 
 AND Orders.ServiceID = Services.ServiceID 
-AND Orders.status = status.status 
+AND Orders.status = status.status
 AND Orders.CyclistID = Cyclist.CyclistID 
 AND Orders.publictrackingref = ? LIMIT 0,1";
 
 
-// numberitems, ID, trackerid, publictrackingref publicstatusname status poshname Service jobcomments CollectPC ShipPC fromfreeaddress
-
-
-// enrpc1, enrpc2, enrpc3, enrpc4, enrpc5, enrpc6, enrpc7, enrpc8, enrpc9, enrpc10, enrpc11, enrpc12, enrpc13, enrpc14, enrpc15,
-// enrpc16, enrpc17, enrpc18, enrpc19, enrpc20
-
-
-// enrft1, enrft2, enrft3, enrft4, enrft5, enrft6, enrft7, enrft8, enrft9, enrft10,
-// enrft11, enrft12, enrft13, enrft14, enrft15, enrft16, enrft17, enrft18, enrft19, enrft20
-
-// tofreeaddress , targetcollectiondate, duedate, deliveryworkingwindow, starttravelcollectiontime, waitingstarttime, collectiondate
-// starttrackpause, finishtrackpause, ShipDate, podsurname, distance
-
-// co2saving, CO2Saved, pm10saving, PM10Saved, opsmaparea, opsmapsubarea
 
 
 
+
+
+
+
+
+
+$query = "SELECT 
+numberitems, ID, ShipDate, trackerid, publictrackingref, publicstatusname, Orders.status, poshname, Service, jobcomments, CollectPC,
+ ShipPC, fromfreeaddress,
+ enrpc1, enrpc2, enrpc3, enrpc4, enrpc5, enrpc6, enrpc7, enrpc8, enrpc9, enrpc10, enrpc11, enrpc12, enrpc13, enrpc14, enrpc15,
+ enrpc16, enrpc17, enrpc18, enrpc19, enrpc20, enrft1, enrft2, enrft3, enrft4, enrft5, enrft6, enrft7, enrft8, enrft9, enrft10,
+ enrft11, enrft12, enrft13, enrft14, enrft15, enrft16, enrft17, enrft18, enrft19, enrft20, tofreeaddress , targetcollectiondate, 
+ duedate, deliveryworkingwindow, starttravelcollectiontime, waitingstarttime, collectiondate, starttrackpause, finishtrackpause, 
+ podsurname, distance, co2saving, CO2Saved, pm10saving, PM10Saved, opsmaparea, opsmapsubarea
+FROM Orders
+INNER JOIN Clients 
+INNER JOIN Services 
+INNER JOIN status 
+INNER JOIN Cyclist 
+WHERE Orders.CustomerID = Clients.CustomerID 
+AND Orders.ServiceID = Services.ServiceID 
+AND Orders.status = status.status
+AND Orders.CyclistID = Cyclist.CyclistID 
+AND Orders.publictrackingref = ? LIMIT 0,1";
 
 $parameters = array($postedref);
 $statement = $dbh->prepare($query);
@@ -94,13 +104,11 @@ $thistrackerid=$row['trackerid'];
 echo '
 <h1>'.$row['publictrackingref'].'</h1>
 <hr />
-<table id="cojm" class="cojm" cellspacing="0" style="table-layout:auto;"><tbody><tr><th class="stleft">';
-
-
- 
- echo 'Job Status';
-
-echo '</th><th class="stright">';
+<table id="cojm" class="cojm" cellspacing="0" style="table-layout:auto;">
+<tbody>
+<tr>
+<th class="stleft"> Job Status</th>
+<th class="stright">';
 
 
 
@@ -110,10 +118,8 @@ if ($row['status']<'101') { echo $row['publicstatusname'];
 $row['status']='100'; 
 
 $completestatusquery="SELECT publicstatusname FROM `status` WHERE status=100 LIMIT 0,1;";
-
 $q= $dbh->query($completestatusquery);
 $completestatus = $q->fetchColumn();
-
 echo $completestatus;
 
 } 
@@ -300,18 +306,6 @@ if ($comppm10) { echo "<tr><td>Estimated PM<sub>10</sub> Saved </td><td>".$table
 
 
 
-
-
-
-
-
-
-
-
-
-
-// echo ' a '. $row['opsmaparea'];
-
 if ($row['opsmaparea']) {
 	
 $areaid=$row['opsmaparea'];
@@ -326,8 +320,45 @@ echo ' <tr><td> Distribution Area </td><td>'.$areaname.'</td></tr>';
 
 
 
+///   GPS Tracking
+$collecttime=strtotime($row['starttravelcollectiontime']); 
+if (strtotime($row['starttravelcollectiontime'])<60) { $collecttime = strtotime($row['collectiondate']); }
 
-if (($lastgpstime) or ($row['opsmaparea'])) { /// tracking or opsmap present so show map
+
+$startpause=strtotime($row['starttrackpause']); 
+$finishpause=strtotime($row['finishtrackpause']);  
+
+// if ($collecttime<10) { $collecttime=strtotime($row['starttravelcollectiontime']);  } 
+$delivertime=strtotime($row['ShipDate']); 
+if (($startpause > 10) and ( $finishpause < 10)) { $delivertime=$startpause; } 
+if ($startpause <10) { $startpause=9999999999; } 
+if (($row['status']<86) and ($delivertime < 200)) { $delivertime=999999999999; } 
+if ($row['status']<50) { $delivertime=0; } 
+if ($collecttime < 10) { $collecttime=9999999999;} 
+
+$sql = "SELECT timestamp, latitude, longitude FROM `instamapper` 
+WHERE `device_key` = '$thistrackerid' 
+AND `timestamp` >= '$collecttime' 
+AND `timestamp` NOT BETWEEN '$startpause' AND '$finishpause' 
+AND `timestamp` <= '$delivertime' 
+ORDER BY `timestamp` ASC "; 
+
+$instamapperstmt = $dbh->prepare($sql);
+$instamapperstmt->execute();
+$instasumtot = $instamapperstmt->rowCount();
+
+
+
+
+
+
+
+
+
+
+
+
+if (($instasumtot>0) or ($row['opsmaparea'])) { /// tracking or opsmap present so show map
 
 echo '<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;sensor=false" type="text/javascript"></script>
 <script>
@@ -342,34 +373,12 @@ echo '<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;sensor=false" ty
     main(1);
 }
 function main(alreadyused) {
-
 jQuery.noConflict();
-
-// alert(alreadyused);
-
 google.maps.event.addDomListener(window, "load", initialize);
-
 }
 
 </script>
   ';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -398,11 +407,15 @@ div.map-sub-area-label {
 background:white;
 font-size:14px;
 padding:3px;
-
 }
 
-div.printinfo { 
+div.map-sub-area-selected {
+font-size:18px;
+font-weight:bold;
+padding:6px;
+}
 
+div.printinfo {
 display:none; 
 position:absolute;
 top: 10px;
@@ -410,9 +423,7 @@ right:10px;
 width:200px;
 }
 
-
-div.printinfo p { 
-
+div.printinfo p {
 background:white;
 font-size:18px;
 line-height:20px;
@@ -420,12 +431,9 @@ padding-bottom:5px;
 padding-right:5px;
 padding-top: 3px;
 text-align:right;
-
 }
 
-
-button#btn-exit-full-screen { 
-
+button#btn-exit-full-screen {
 display:none;
 border: 1px solid rgba(0, 0, 0, 0.15);
 border-radius:2px;
@@ -438,16 +446,11 @@ top:5px;
 background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAMAAADzapwJAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MjUzMzJCNjE1Q0Q5MTFFNTg2OEE4QTA3NURERDI1OEEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MjUzMzJCNjI1Q0Q5MTFFNTg2OEE4QTA3NURERDI1OEEiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDoyNTMzMkI1RjVDRDkxMUU1ODY4QThBMDc1REREMjU4QSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDoyNTMzMkI2MDVDRDkxMUU1ODY4QThBMDc1REREMjU4QSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PjTesdQAAAAYUExURZ+fn+Xl5RcXF01NTf///zIyMmFhYfDw8KnTeccAAAAFdFJOU/////8A+7YOUwAAAI5JREFUeNp0kVEOBCEIQwsVuP+NV8URx93tBwkvNVBBmwq4dTkie2Q1XTJsHK6HKImD+pLJxK6XODD0Sx3GnIb1hNNkgTR7DuCajsc2+UPV98ad297UKghFvEId61aAclOcwo1901H4jETR4rjieMaRf+Fb400tBhb7+bFNeNM8WpxHi7plkzwxIdl/BBgATG8FP/Ix0XUAAAAASUVORK5CYII=)
 no-repeat scroll 50% 50% / 22px 22px;
 cursor:pointer;
+}
 
- }
- 
- 
 button#btn-exit-full-screen:hover { 
- 
 background: #ebebeb url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAMAAADzapwJAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MjUzMzJCNjE1Q0Q5MTFFNTg2OEE4QTA3NURERDI1OEEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MjUzMzJCNjI1Q0Q5MTFFNTg2OEE4QTA3NURERDI1OEEiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDoyNTMzMkI1RjVDRDkxMUU1ODY4QThBMDc1REREMjU4QSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDoyNTMzMkI2MDVDRDkxMUU1ODY4QThBMDc1REREMjU4QSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PjTesdQAAAAYUExURZ+fn+Xl5RcXF01NTf///zIyMmFhYfDw8KnTeccAAAAFdFJOU/////8A+7YOUwAAAI5JREFUeNp0kVEOBCEIQwsVuP+NV8URx93tBwkvNVBBmwq4dTkie2Q1XTJsHK6HKImD+pLJxK6XODD0Sx3GnIb1hNNkgTR7DuCajsc2+UPV98ad297UKghFvEId61aAclOcwo1901H4jETR4rjieMaRf+Fb400tBhb7+bFNeNM8WpxHi7plkzwxIdl/BBgATG8FP/Ix0XUAAAAASUVORK5CYII=)
 no-repeat scroll 50% 50% / 23px 23px;
-
- 
 }
  
 button#printbutton { 
@@ -467,19 +470,13 @@ cursor:pointer;
 
 
 button#printbutton:hover { 
-
-
 background: #ebebeb url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAMAAADzapwJAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QUQ4Nzk5MzA1Q0Q3MTFFNUI5RDlCNjlCRTYyNDJCM0MiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QUQ4Nzk5MzE1Q0Q3MTFFNUI5RDlCNjlCRTYyNDJCM0MiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpBRDg3OTkyRTVDRDcxMUU1QjlEOUI2OUJFNjI0MkIzQyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpBRDg3OTkyRjVDRDcxMUU1QjlEOUI2OUJFNjI0MkIzQyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqofrKwAAAAYUExURf7+/l9fX87OzhYWFiwsLKurq5OTk4ODgzY9+YAAAAABdFJOUwBA5thmAAAAZElEQVR42p3RWw6AIAxEUUpn6P53rLxqAxoSrz9yjJDQ1BLFSKXBZA+B8c40r3Qp7T3Uv+lT3AnfjPvZ2RIydxaCdtr7zEavBM4mI8sIDP/9F+vK/UjWW4tc15xzWKZw4DHjyRfAIQWmgeGdlAAAAABJRU5ErkJggg==)
 no-repeat scroll 50% 50% / 23px 23px;
-
-
-
 }
+
 div.btn-full-screen {  position:relative; z-Index: 5; }
 
-button#btn-enter-full-screen 
-{
-	
+button#btn-enter-full-screen {
 border: 1px solid rgba(0, 0, 0, 0.15);
 border-radius:2px;
 box-shadow : 0 1px 4px -1px rgba (0, 0, 0, 0.3);
@@ -502,34 +499,24 @@ no-repeat scroll 50% 50% / 23px 23px;
 div#map-container { 
 line-height:14px;
 z-Index: 4;
-
 }
 
 span.inlinemapcopy {
-
 background: white none repeat scroll 0 00;
 color: #111111;
 font-weight:bold;
 opacity:0.8;
 padding-left:4px;
 padding-right:6px;
-
 }
 
 
-div#cojmsingletrackdiv table#cojm.cojm tbody tr td div#map-container div.btn-full-screen div.printinfo form input.ui-state-default.ui-corner-all.address { 
-
-
+div#cojmsingletrackdiv table#cojm.cojm tbody tr td div#map-container div.btn-full-screen div.printinfo form input.ui-state-default.ui-corner-all.address {
 font-size: 14px !important;
 width: calc( 100% - 12px) !important;
 text-align:right;
-
 }
-
 </style>
-
-
-
 <div id="map-container" >
  <div class="btn-full-screen" >
  <button id="btn-enter-full-screen" title="Full Screen Map"> &nbsp; </button>
@@ -550,42 +537,16 @@ echo ' <p title="Completed">'. date('l jS M Y', strtotime($row['ShipDate'])).'</
  }
  
  echo '
-  <p>'.$row['publictrackingref'].'</p>
-  
-  <form action="#" onsubmit="showAddress(this.address.value); return false" style=" background:none;">
+<p>'.$row['publictrackingref'].'</p>
+<form action="#" onsubmit="showAddress(this.address.value); return false" style=" background:none;">
 <input title="Address Search" type="text" name="address" placeholder="Address Search" 
 class="ui-state-default ui-corner-all address" />
 </form>	
-
 </div>
- </div>
-
-
-
+</div>
 <div id="map" style="float:left; width: 100%; height: 400px;"></div>
-  
- </div>';
- 
-
- echo '<div style="clear:both; "></div>';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  </div>
+ <div style="clear:both; "></div>';
 
 
 if ($row['opsmaparea'] <>'') {
@@ -604,9 +565,6 @@ $areajs.='  var worldCoords = [
 	new google.maps.LatLng(-85,180),
 	new google.maps.LatLng(0,180),
 	new google.maps.LatLng(85,180)]; ';
-
-// $result = mysql_query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=".$areaid);
-
 
 
 $stmt = $dbh->query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=$areaid");
@@ -654,15 +612,8 @@ $areajs=$areajs.'    ];
 	 clickable:false,
 	 map:map
   }); ';
-
   
-  
-  
-  
- // ends top layer
-
-
-
+// ends top layer
 
 
 
@@ -670,25 +621,25 @@ $areajs=$areajs.'    ];
 
 
 // sub layers stuff
+$query = "SELECT opsmapid, opsname FROM opsmap WHERE corelayer=".$areaid;
 
 
+if ($row['opsmapsubarea']) { $query.=" order by FIELD(opsmapid,'".$row['opsmapsubarea']."') ASC"; }
 
-
-$lilquery = "SELECT * FROM opsmap WHERE corelayer=".$areaid  ; 
-
-$lilsql_result = mysql_query ($lilquery, $conn_id) or mysql_error();  
-$lilsumtot=mysql_affected_rows();
-
-// echo ' alert(" on '.$opsname.' '.$lilsumtot.' found '.$lilquery.'"); ';
-
+$stmt = $dbh->prepare($query);
+$stmt->execute();
+$lilsumtot = $stmt->rowCount();
 
 if ($lilsumtot>'0') { 
 
 
 // for google maps markers https://github.com/googlemaps/js-rich-marker/blob/gh-pages/src/richmarker-compiled.js
-	
-
 $areajs.='
+
+
+ alert("'.$row['opsmapsubarea'].'");
+
+
 	
 	(function(){var b=true,f=false;function g(a){var c=a||{};this.d=this.c=f;if(a.visible==undefined)a.visible=b;if(a.shadow==undefined)a.shadow="7px -3px 5px rgba(88,88,88,0.7)";if(a.anchor==undefined)a.anchor=i.BOTTOM;this.setValues(c)}g.prototype=new google.maps.OverlayView;window.RichMarker=g;g.prototype.getVisible=function(){return this.get("visible")};g.prototype.getVisible=g.prototype.getVisible;g.prototype.setVisible=function(a){this.set("visible",a)};g.prototype.setVisible=g.prototype.setVisible;
 g.prototype.s=function(){if(this.c){this.a.style.display=this.getVisible()?"":"none";this.draw()}};g.prototype.visible_changed=g.prototype.s;g.prototype.setFlat=function(a){this.set("flat",!!a)};g.prototype.setFlat=g.prototype.setFlat;g.prototype.getFlat=function(){return this.get("flat")};g.prototype.getFlat=g.prototype.getFlat;g.prototype.p=function(){return this.get("width")};g.prototype.getWidth=g.prototype.p;g.prototype.o=function(){return this.get("height")};g.prototype.getHeight=g.prototype.o;
@@ -713,24 +664,18 @@ g.prototype.onRemove=g.prototype.onRemove;var i={TOP_LEFT:1,TOP:2,TOP_RIGHT:3,LE
 ';
 
 
-
-while ($lilrow = mysql_fetch_array($lilsql_result)) { extract($lilrow); 
-
-// echo ' alert(" 519 '.$opsname.' "); ';
+while($lilrow = $stmt->fetch(/* PDO::FETCH_ASSOC */)) {
 
 $lilareaid=$lilrow['opsmapid'];
 $lilareaname=$lilrow['opsname'];
 
 
 
-// $areajs.= ' alert(" 779 '.$lilareaname.' "); ';
-
-
-
-$lilresult = mysql_query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=".$lilareaid);
-
-    $score = mysql_fetch_assoc($lilresult);
-	$p=$score['POLY'];
+$stmtt = $dbh->query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=$lilareaid");
+$results = $stmtt->fetchAll(PDO::FETCH_ASSOC);
+$score=$results['0'];	
+	
+$p=$score['POLY'];
 	
 // $moreinfotext=$moreinfotext.'<br /> p is :'.$p.':';
 $trans = array("POLYGON" => "", "((" => "", "))" => "");
@@ -746,31 +691,65 @@ $v= strtr($v, $transf);
 $areajs.='   
 	new google.maps.LatLng('.$v.'),';
 	
-	// get lat / lon pairings in array to test if clockwise or anti
-//	$coord[]=$v;
 	
+	
+	if ($row['opsmapsubarea']==$lilareaid) { // in which case show bounds
+	$vexploded=explode( ',', $v );
+	$tmpi='1';
+	foreach ($vexploded as $testcoord) {
+	if ($tmpi % 2 == 0) {
+  if($testcoord>$max_lon) { $max_lon = $testcoord; }
+  if($testcoord<$min_lon)  { $min_lon = $testcoord; }
+} else { 
+  if($testcoord>$max_lat) { $max_lat = $testcoord; }
+  if($testcoord<$min_lat)  { $min_lat = $testcoord; }
+}
+	$tmpi++;
+	}
+	}		
 	
 	
 } // ends each in array
 
-
-$areajs= rtrim($areajs, ','); 
-$areajs.='    ]; 
+$areajs= rtrim($areajs, ',').'    ]; ';
 
 
+if ($row['opsmapsubarea']==$lilareaid) { 
+// $areajs.= ' alert(" 707 '.$lilareaname.' "); ';
+
+
+$areajs.='
+ poly'.$lilareaid.' = new google.maps.Polygon({
+	paths: [polymarkers'.$lilareaid.'],
+    strokeWeight: 5,
+	strokeOpacity: 1,
+	 fillOpacity: 0,
+	 strokeColor: "#FF8000",
+	 clickable: false,
+	 map: map
+  }); ';
+
+} else {
+
+if ($row['opsmapsubarea']) {  $fillop=0.1; } else {  $fillop=0; }
+
+$areajs.='
  poly'.$lilareaid.' = new google.maps.Polygon({
 	paths: [polymarkers'.$lilareaid.'],
     strokeWeight: 4,
 	strokeOpacity: 0.35,
-     fillColor: "#ffffff",
-	 fillOpacity: 0,
+     fillColor: "#111111",
+	 fillOpacity: '.$fillop.',
 	 strokeColor: "#000000",
 	 clickable: false,
 	 map: map
-  });
+  }); ';
+  
+}
   
   
-   
+  
+  $areajs.='
 var bounds'.$lilareaid.' = new google.maps.LatLngBounds();
 var i;  
 for (i = 0; i < polymarkers'.$lilareaid.'.length; i++) {
@@ -782,18 +761,16 @@ var cent=(bounds'.$lilareaid.'.getCenter());
           position: cent,
           map: map,
           draggable: false,
-          content: '<div class=".'"map-sub-area-label">'.$lilareaname.'</div>'."'
+          content: '<div class=";
+		  $areajs.='"map-sub-area-label';
+if ($row['opsmapsubarea']==$lilareaid) {  $areajs.=' map-sub-area-selected';  }
+		  $areajs.='">'.$lilareaname.'</div>'."'
            });
-		   
 ";
   
   
 
-
 } // ends lil sub area row extract
-
-
-
 
 } // ends sub area
 
@@ -803,62 +780,23 @@ var cent=(bounds'.$lilareaid.'.getCenter());
 
 
 echo ' 
-  <script type="text/javascript">
- 
+  <script type="text/javascript"> 
 function initialize() {
-
 var geocoder = null;
-
    var locations = [';
 
    
 
-///   GPS Tracking
 
 
-$collecttime=strtotime($row['starttravelcollectiontime']); 
-if (strtotime($row['starttravelcollectiontime'])<60) { $collecttime = strtotime($row['collectiondate']); }
-
-
-$startpause=strtotime($row['starttrackpause']); 
-$finishpause=strtotime($row['finishtrackpause']);  
-
-// if ($collecttime<10) { $collecttime=strtotime($row['starttravelcollectiontime']);  } 
-$delivertime=strtotime($row['ShipDate']); 
-if (($startpause > 10) and ( $finishpause < 10)) { $delivertime=$startpause; } 
-if ($startpause <10) { $startpause=9999999999; } 
-if (($row['status']<86) and ($delivertime < 200)) { $delivertime=999999999999; } 
-if ($row['status']<50) { $delivertime=0; } 
-if ($collecttime < 10) { $collecttime=9999999999;} 
-
-
-
-   
-
-$sql = "SELECT * FROM `instamapper` 
-WHERE `device_key` = '$thistrackerid' 
-AND `timestamp` >= '$collecttime' 
-AND `timestamp` NOT BETWEEN '$startpause' AND '$finishpause' 
-AND `timestamp` <= '$delivertime' 
-ORDER BY `timestamp` ASC "; 
-$trackingsql_result = mysql_query($sql, $conn_id)  or mysql_error();
 $lattot='0';
 $lontot='0';
-$sumtot=mysql_affected_rows();
-// echo 'Records found : '.$sumtot;
-   
-   
- 
-   
 
-while ($map = mysql_fetch_array($trackingsql_result)) {
-     extract($map);	 
-	 
+while($map = $instamapperstmt->fetch(/* PDO::FETCH_ASSOC */)) {
 $englishlast=date('H:i A D j M', $map['timestamp']); 
 	 
 $map['latitude']=round($map['latitude'],5);
 $map['longitude']=round($map['longitude'],5);
-
 
   if($map['longitude']>$max_lon) { $max_lon = $map['longitude']; }
   if($map['longitude']<$min_lon) { $min_lon = $map['longitude']; }
@@ -888,17 +826,14 @@ $lontot=$lontot+$map['longitude'];
 
 // ends php loop
 }
-	// gets averages
-	
+
 	if ($numbericons>'0') {
-	
  $lattot=($lattot / $numbericons );
  $lontot=($lontot / $numbericons );
 	}
 		// restarts javascript
 echo '  
   ];
-
   
   var element = document.getElementById("map");
 		
@@ -937,12 +872,8 @@ echo '
                 maxZoom: 20
             }));
 
-			
-			
-			
 var osmcopyr="'."<span class='inlinemapcopy' > &copy; <a style='color:#444444' " .
                "href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors</span>".'"
-
 
  var outerdiv = document.createElement("div");
 outerdiv.className  = "outerdiv";
@@ -966,9 +897,6 @@ jQuery("span.printcopyr").html(" Map Data &copy; Google Maps ");
 }
 
 });
-			
-	
-
 
 // if OSM / OCM set as default, show copyright
 jQuery(document).ready(function() {setTimeout(function() {
@@ -979,7 +907,6 @@ jQuery("span.printcopyr").html(" " + osmcopyr + " " );
   var googleMapWidth =  jQuery("#map").css("width");
   var googleMapHeight = jQuery("#map").css("height");
 
-	
 jQuery("#btn-enter-full-screen").click(function() {
     // Gui
     jQuery("#btn-enter-full-screen").hide();
@@ -996,10 +923,6 @@ jQuery("#btn-enter-full-screen").click(function() {
 	 height:"100%",
 	 top:"0px"
 	 });
-
-	// 	top: "36px",
-	//	height: "calc(100% - 36px)"
-   
 	 
     jQuery("#map").css({
         height: "100%"
@@ -1007,29 +930,18 @@ jQuery("#btn-enter-full-screen").click(function() {
 
     google.maps.event.trigger(map, "resize");
 	map.fitBounds(bounds);
-
-
- 
-	
 	
     return false;
 });	
-	
-	
+		
 	jQuery(document).keyup(function(e) {
      if (e.keyCode == 27) { // escape key maps to keycode `27`
 //	 alert(" escape pressed ");
 	 	 jQuery("#btn-exit-full-screen").trigger("click");
     }
 });	
-	
-	
-	
-	
+		
 	jQuery("#btn-exit-full-screen").click(function() {
-
-
-	
     jQuery("#map-container").css({
         position: "relative",
         top: 0,
@@ -1050,8 +962,6 @@ jQuery("#btn-enter-full-screen").click(function() {
 });
 	
 
-	
-	
  geocoder = new google.maps.Geocoder(); 
  window.showAddress = function(address) {
     geocoder.geocode( { 
@@ -1088,13 +998,8 @@ echo $areajs. '
     bounds.extend(new google.maps.LatLng('.$min_lat.', '.$max_lon.')); // lower right
     bounds.extend(new google.maps.LatLng('.$min_lat.', '.$min_lon.')); // lower left
 
-
  	map.fitBounds(bounds);
  
- var lineSymbol = {
-    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
- strokeOpacity: 0.3
- };	
 
   var all = [
  '.$linecoords. '
@@ -1107,10 +1012,18 @@ for (var j = 0; j < all.length; j++) {
         var marker = new google.maps.LatLng(lat, lng);
      gmarkers.push(marker);
 }
+
+ var lineSymbol = {
+    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+ strokeOpacity: 0.6
+ };	
+
   var line = new google.maps.Polyline({
     path: gmarkers,
 	geodesic: true,
-	strokeOpacity: 0.3,
+	strokeOpacity: 1,
+	strokeWeight: 5,
+	strokeColor: "#000000",
     icons: [{
     icon: lineSymbol,
     repeat: "50px"
@@ -1149,7 +1062,7 @@ for (var j = 0; j < all.length; j++) {
  
  
  
- if ($sumtot) { echo ' <br />Tracking last updated at '. $englishlast.', with '.number_format ($numbercords, 0, '.', ',').' GPS positions.'; }
+ if ($instasumtot) { echo ' <br />Tracking last updated at '. $englishlast.', with '.number_format ($numbercords, 0, '.', ',').' GPS positions.'; }
   
    if ($row['status']>70) { 
 echo '<p class="download"><a href="'.$globalprefrow['httproots'].'/cojm/createkml.php?id='.$row['publictrackingref'].'">Download as Google Earth KML File</a></p>'; } 
@@ -1158,7 +1071,7 @@ echo '</td></tr>';
  
 
  
-} // edns check for $sumtot tracking positions & areaid
+} // edns check for $instasumtot tracking positions & areaid
 
  
  

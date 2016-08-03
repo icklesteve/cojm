@@ -1074,9 +1074,7 @@ $(document).ready(function() {
 		});
 	    $("#rangeBa, #rangeBb").daterangepicker();  
 			 });
-			 
-			 
-			 
+
 function comboboxchanged() { }			 
 			
 

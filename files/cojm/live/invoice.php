@@ -51,6 +51,18 @@
  */
 
  
+ 
+ 
+ 
+ if (!isset($_POST['addresstype'])) { die; }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 $alpha_time = microtime(TRUE); 
  $filename="invoice.php";
  error_reporting(E_ALL);
@@ -58,15 +70,13 @@ ini_set('display_errors', '1');
  
  
 // error_reporting( E_ERROR | E_WARNING | E_PARSE );
-// include "../../administrator/cojm/updatetracking.php";
 
-include "../live/C4uconnect.php";
+include "C4uconnect.php";
 
 $page=$_GET['page']; // preview , createpdf , addtodb
-$setinvoiced=$_POST['setinvoiced'];
 
 
-
+// date to invoice until
 $expensedate=trim($_POST['expensedate']);
 $expensedate = str_replace("/", ":", "$expensedate", $count);
 $expensedate = str_replace(",", ":", "$expensedate", $count);
@@ -81,12 +91,8 @@ $setinvoiced=$_POST['setinvoiced'];
 $newsetinvoiced=$_POST['setinvoiced'];
 $hourly=$_POST['hourly'];
 $exacttime=$_POST['exacttime'];
-$year=$_POST['deliveryear'];
-$month=$_POST['delivermonth'];
-$day=$_POST['deliverday'];
-$hour="00";
-$minutes="00";
-$collectionsfromdate = $year . "-" . $month . "-" . $day . " " . $hour . ":" . $minutes . ":00";
+
+
 $showdelivery=$_POST['showdelivery'];
 $showdeliveryaddress=$_POST['showdeliveryaddress'];
 $clientid=trim($_POST['clientid']); 
@@ -101,23 +107,17 @@ $addresstype= trim($_POST['addresstype']);
 $ir='';
   
 
-
-
-// $sql = "SELECT * FROM clientdep WHERE associatedclient = '$clientid' ORDER BY isactivedep DESC , depnumber DESC  ";
-
-
+// Make sure that the client matches the department
 if ($orderselectdep<>'') {
-
-$query = "SELECT associatedclient FROM clientdep  WHERE depnumber=$orderselectdep "; 
-$clientid = mysql_result(mysql_query($query, $conn_id), 0); 
-
+$query = "SELECT associatedclient FROM clientdep WHERE depnumber=$orderselectdep LIMIT 0,1"; 
+$q= $dbh->query($query);
+$completestatus = $q->fetchColumn();
+$clientid=$completestatus;
 }
 
-  
-  
-  
-  
-// $html='<h1>Page is '.$page.'. </h1>';
+
+
+
   
   
 	// DOCUMENT_ROOT fix for IIS Webserver
@@ -144,7 +144,7 @@ $clientid = mysql_result(mysql_query($query, $conn_id), 0);
 	 */
 	define ('K_PATH_MAIN', $k_path_main);
 
-//	define ('K_PATH_MAIN', '../../../cojm/tcpdf/');
+	
 	
 	// Automatic calculation for the following K_PATH_URL constant
 	$k_path_url = $k_path_main; // default value for console mode
@@ -169,7 +169,7 @@ $clientid = mysql_result(mysql_query($query, $conn_id), 0);
 	 * path for PDF fonts
 	 * use K_PATH_MAIN.'fonts/old/' for old non-UTF8 fonts
 	 */
-	define ('K_PATH_FONTS', 'fonts/');
+	define ('K_PATH_FONTS', '../tcpdf/fonts/');
 
 	/**
 	 * cache directory for temporary files (full path)
@@ -214,17 +214,14 @@ $clientid = mysql_result(mysql_query($query, $conn_id), 0);
 	 $existinginvoiceref=$_POST['existinginvoiceref'];
 	 $invoicedept=$_POST['orderselectdep'];
 
-$query = "SELECT * FROM Clients WHERE Clients.CustomerID = $clientid";
+$query = "SELECT invoiceterms, CompanyName, invoiceAddress, invoiceAddress2, invoiceCity, invoiceCounty, invoicePostcode
+ FROM Clients WHERE Clients.CustomerID = $clientid";
 
 $result_id = mysql_query ($query, $conn_id);
 $clientrow=mysql_fetch_array($result_id);
 
+$compnm=$clientrow['CompanyName'];
 
-
-
-
-
-	 
 $temp_ar=explode("-",$nowdate); $spltime_ar=explode(" ",$temp_ar[2]); 
 
 $temptime_ar=explode(":",$spltime_ar[1]); if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { 
@@ -392,8 +389,8 @@ $pdfheaderstring='Invoice Date : ' . $temp2.', Due by ' . $invduedate;
   
 if ($page=='createpdf') {
   
-require_once('config/lang/eng.php');
-require_once('tcpdf.php');
+require_once('../tcpdf/config/lang/eng.php');
+require_once('../tcpdf/tcpdf.php');
 
 // create new PDF document
 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -468,7 +465,7 @@ $depnm=$deprow['depname'];
 
 $to = date('l jS F Y', strtotime($collectionsfromdate)); 
 $from = date('l jS F Y', strtotime($collectionsuntildate)); 
-$compnm=$clientrow['CompanyName'];
+
 
 
 
@@ -504,10 +501,10 @@ if ($orderselectdep>'0') {
  while ($row = mysql_fetch_array($sql_result)) { extract($row);
  if ($todate) {} else { $todate=$row[collectiondate]; } }
  $to = date('l jS F Y', strtotime($todate)); 
-$html = $html. '<table border="0" cellspacing="2" cellpadding="1">
+$html = $html. '<table id="invoiceaddresses" border="0" cellspacing="2" cellpadding="1">
 <tr>
-<th><h4>To :</h4></th>
-<th><h4>From :</h4></th>
+<th><strong>To :</strong></th>
+<th><strong>From :</strong></th>
 </tr>
 
 <tr>
@@ -565,9 +562,9 @@ $html=$html.'</td>
 if ($to==$from)  { $html=$html.'<h4>For services on '.$from.'</h4>'; } 
 else { $html=$html.'<h4>For services between '.$to.' and '.$from.'.</h4>'; }
 if ($invcomments) { $html=$html.' <h4>'.$invcomments.'</h4>'; }
-$html=$html.'<hr /><br /><h4> </h4><br />';
+$html=$html.'<hr /><div style=" height: 40px; "></div>';
 
-$html=$html.'<table width="100%" cellspacing="0" cellpadding="2" border="0" ><tr>';
+$html=$html.'<table id="invoiceorderloop" style="width:100%;" cellspacing="0" cellpadding="2" border="0" ><tr>';
 if ($showdelivery) { $html=$html .'<th >'; } 
 else { $html=$html . '<th >'; } $html=$html . '<strong>Our<br />Ref</strong></th>';
 if ($showdelivery=="1" ) { $html=$html .'<th width="20%">'; } else { $html=$html . '<th width="20%">'; }
@@ -1044,7 +1041,7 @@ $html=$html.'<td colspan="5"></td></tr>
 
 
 
-$totco2sql="SELECT * FROM Orders, Services 
+$totco2sql="SELECT co2saving, numberitems, CO2Saved, pm10saving, PM10Saved FROM Orders, Services 
 WHERE Orders.ServiceID = Services.ServiceID 
 AND Orders.status >= 90 
 AND Orders.CustomerID='$CustomerID'";
@@ -1149,45 +1146,55 @@ $endfilename=$endfilename.'Invoice_ref_'.$newinvoiceref.'.pdf';
  
  }  else {
   
-include ("../live/changejob.php");
+include ("changejob.php");
  
- echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
- <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-gb" lang="en-gb">
- <head>
+ echo '<!DOCTYPE html> 
+<html lang="en"> 
+<head>
  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
  <link href="../live/favicon.ico" rel="shortcut icon" type="image/x-icon" >
- <link rel="stylesheet" type="text/css" href="../live/cojm.css" >
-<link rel="stylesheet" href="../live/js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" />
-<script type="text/javascript" src="../live/js/jquery-1.7.1.min.js"></script>
- <title>Invoice </title>
- </head> <body>';
-// include '../live/cojmmenu.php';
+ <title>Invoice Preview</title>
+ <style>
+ #invoiceaddresses td, #invoiceaddresses th  { 
+width:350px;
+text-align:left; 
+  }
+  
+#invoiceorderloop td, #invoiceorderloop th { 
+text-align:left;
 
-
-if ($pagetext)
-{
-echo $pagetext;
 }
+  
+  
+ </style>
+ </head> <body style="margin:0px;">';
+
+if ($pagetext) { echo $pagetext; }
 
 
-echo'<div class="Post"> <div class="ui-widget">
-<div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
+echo'<div class="Post" style="background:gray;">
+<div style="width:800px; margin:auto; background:white;">
+<div style="padding:20px;">
 ';
+
+// 800px paper width
 
 if ($globalprefrow['showdebug']>'0') { echo $infotext; }
 
-echo '
-<h2>'. $pdfheaderstring.'</h2>'.$html.'
-</div></div><br /></div>';
+echo '<img style="float:left; padding-right:20px;" alt="Logo" title="Logo" src="'.$globalprefrow['adminlogoabs'].'" />
 
-include '../live/footer.php';
+<strong>'.$temp1.'</strong>
+<br />'. $pdfheaderstring.'
+
+<div style="clear:both;"> </div>
+<hr />
+'.$html.'
+</div></div></div>';
 
 echo '</body>
 </html>';
 
 }
-
-
 
  
  mysql_close();

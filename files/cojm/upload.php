@@ -37,6 +37,7 @@ include "live/C4uconnect.php";
 
 // check for valid device key passed
 try {
+$sql = "SELECT cojmname FROM Cyclist WHERE trackerid=:device_key AND isactive='1'"; 
 $result = $dbh->prepare($sql); 
 $result->bindParam(':device_key', $device_key, PDO::PARAM_INT); 
 $result->execute(); 

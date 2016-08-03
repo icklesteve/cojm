@@ -1,6 +1,26 @@
 <?php
+/*
+    COJM Courier Online Operations Management
+	gps-admin-rider.php - caches js rider gps tracking
+    Copyright (C) 2016 S.Young cojm.co.uk
 
-// echo  ' <br /> In gps-admin-rider.php ln 4';
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+
 
 $infotext.= ' <br /> In gps-admin-rider.php ln 4';
 
@@ -120,35 +140,15 @@ $markerout = rtrim($markerout, ',').'    ]; ';
  min_lon.push("'.$min_lon.'"); 
  max_lat.push("'.$max_lat.'"); 
  min_lat.push("'.$min_lat.'");  ';
- 
- // $lineout=$lineout.' alert(max_lon[1]) ';
- 
-  /*
-   $lineout=$lineout.'
-  if ('.$max_lon.'>max_lon) { max_lon = '.$max_lon.'; }
-  if ('.$min_lon.'>min_lon) { min_lon = '.$min_lon.'; }
-  if ('.$max_lat.'>max_lat) { max_lat = '.$max_lat.'; }  
-  if ('.$max_lat.'>max_lat) { max_lat = '.$max_lat.'; }  
- alert("max_lat min_lat max_lon min_lon"); 	';
- 
- */
- 
- 
-// echo ''.$lineout;
-
 
 $mypath="cache/jstrack/".$thisyear."/".$thismonth."/";
 
 if (!file_exists($mypath)) { mkdir($mypath, 0777, true); }
-
 $filename = $mypath.$ID.'.js';
-
 $handle = fopen($filename,"w");
 $filecontent = $markerout.$lineout;
 fwrite($handle,$filecontent);
-
 fclose($handle);
-
 
 $infotext.= " <br />created JS CacheFile ".$filename." <br /> ". $markercount." markers and ".$linecount." line points.";
 
@@ -156,7 +156,6 @@ $infotext.= " <br />created JS CacheFile ".$filename." <br /> ". $markercount." 
 mysql_query($query, $conn_id);
 
 } // sumtot > 0.5 positions found check
-
 
 $query =  " update cojm_admin set cojmadminfinish = now() where cojmadmin_id ='$cojm_admin_ref'";	
 mysql_query($query, $conn_id);

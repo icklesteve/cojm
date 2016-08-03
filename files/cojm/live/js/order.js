@@ -835,7 +835,7 @@ function progressHandlingFunction(e){
 }  
 
 function ordermapupdater() {
-$("#orderajaxmap").html("").show();
+$("#orderajaxmap").html("<a class='loader'> </a>").show();
 
   	    $.ajax({
         url: 'ajaxordermap.php',  //Server script to process data

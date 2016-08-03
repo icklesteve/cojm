@@ -138,7 +138,10 @@ class transfer_backup
        {
 
  $ch = curl_init();
- curl_setopt ($ch, CURLOPT_URL,"ftp://$ftp_username:$ftp_password@$ftp_server");
+ 
+ $ftpaddress="ftp://$ftp_username:$ftp_password@$ftp_server";
+ 
+ curl_setopt ($ch, CURLOPT_URL,$ftpaddress);
  
  
 
@@ -149,7 +152,7 @@ class transfer_backup
  curl_setopt($ch, CURLOPT_FTPLISTONLY, 1);
  $return = trim(curl_exec($ch));
  $files = explode("n", $return);
- if(curl_error($ch)) {  $transfer_backup_infotext.= " ex127 ftp error on $ftp_server - Error: ". curl_error($ch) . " <br /> "; }
+ if(curl_error($ch)) {  $transfer_backup_infotext.= " FTP error on $ftp_server - $ftpaddress Error: ". curl_error($ch) . " <br /> "; }
  
  
  $dir=date('Y').'-'.date("m");

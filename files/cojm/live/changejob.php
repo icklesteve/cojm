@@ -4369,10 +4369,10 @@ if ($row['status']<'50') { $delivertime='0'; } if ($collecttime < '10') { $colle
 
 $findlast="SELECT timestamp FROM `instamapper` 
 WHERE `device_key` = '$thistrackerid' 
-AND `timestamp` >= '$collecttime' 
+AND `timestamp` > '$collecttime' 
 AND `timestamp` NOT BETWEEN '$startpause' 
 AND '$finishpause' 
-AND `timestamp` <= '$delivertime' 
+AND `timestamp` < '$delivertime' 
 ORDER BY `timestamp` ASC 
 LIMIT 1"; 
 

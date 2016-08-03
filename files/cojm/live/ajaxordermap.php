@@ -152,12 +152,17 @@ if ($startpause <'10') { $startpause='9999999999'; } if (($row['status']<'86') a
 if ($row['status']<'50') { $delivertime='0'; } if ($collecttime < '10') { $collecttime='9999999999';} 
 $findlast="SELECT * FROM `instamapper` 
 WHERE `device_key` = '$thistrackerid' 
-AND `timestamp` >= '$collecttime' 
+AND `timestamp` > '$collecttime' 
 AND `timestamp` NOT BETWEEN '$startpause' 
 AND '$finishpause' 
-AND `timestamp` <= '$delivertime' 
+AND `timestamp` < '$delivertime' 
 ORDER BY `timestamp` ASC 
 LIMIT 1"; 
+
+
+// echo $findlast;
+
+
 $sql_result = mysql_query($findlast,$conn_id)  or mysql_error(); 
 while ($foundlast = mysql_fetch_array($sql_result)) { extract($foundlast); 
 
@@ -172,10 +177,10 @@ $englishfirstd= date('jS', $foundlast['timestamp']);
 
 $findlast="SELECT * FROM `instamapper` 
 WHERE `device_key` = '$thistrackerid' 
-AND `timestamp` >= '$collecttime' 
+AND `timestamp` > '$collecttime' 
 AND `timestamp` NOT BETWEEN '$startpause' 
 AND '$finishpause' 
-AND `timestamp` <= '$delivertime' 
+AND `timestamp` < '$delivertime' 
 ORDER BY `timestamp` DESC 
 LIMIT 1"; 
 $sql_result = mysql_query($findlast,$conn_id)  or mysql_error(); 
@@ -198,8 +203,8 @@ $trackingtext= ' Tracking ' . $englishfirst . ' - ' . $englishlast . '';
  
 
 // start of tracking script
- $sql = "SELECT latitude, longitude, speed, timestamp FROM `instamapper`  WHERE `device_key` = '$thistrackerid' AND `timestamp` >= '$collecttime' AND `timestamp` 
-NOT BETWEEN '$startpause' AND '$finishpause' AND `timestamp` <= '$delivertime' ORDER BY `timestamp` ASC"; 
+ $sql = "SELECT latitude, longitude, speed, timestamp FROM `instamapper`  WHERE `device_key` = '$thistrackerid' AND `timestamp` > '$collecttime' AND `timestamp` 
+NOT BETWEEN '$startpause' AND '$finishpause' AND `timestamp` < '$delivertime' ORDER BY `timestamp` ASC"; 
 $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
 $lattot='0'; 
 $lontot='0'; 

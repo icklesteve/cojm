@@ -320,10 +320,10 @@ if ($collecttime < 10) { $collecttime=9999999999;}
 $sql = "
 SELECT longitude, latitude FROM `instamapper` 
 WHERE `device_key` = '$trackerid' 
-AND `timestamp` >= '$collecttime' 
+AND `timestamp` > '$collecttime' 
 AND `timestamp` NOT BETWEEN '$startpause' 
 AND '$finishpause' 
-AND `timestamp` <= '$delivertime' 
+AND `timestamp` < '$delivertime' 
 ORDER BY `timestamp` ASC LIMIT 0,1";
 
 $sth = $dbh->prepare($sql);

@@ -329,7 +329,9 @@ $startpause=strtotime($row['starttrackpause']);
 $finishpause=strtotime($row['finishtrackpause']);  
 
 // if ($collecttime<10) { $collecttime=strtotime($row['starttravelcollectiontime']);  } 
-$delivertime=strtotime($row['ShipDate']); 
+$delivertime=strtotime($row['ShipDate']);
+
+ 
 if (($startpause > 10) and ( $finishpause < 10)) { $delivertime=$startpause; } 
 if ($startpause <10) { $startpause=9999999999; } 
 if (($row['status']<86) and ($delivertime < 200)) { $delivertime=999999999999; } 
@@ -338,9 +340,9 @@ if ($collecttime < 10) { $collecttime=9999999999;}
 
 $sql = "SELECT timestamp, latitude, longitude FROM `instamapper` 
 WHERE `device_key` = '$thistrackerid' 
-AND `timestamp` >= '$collecttime' 
+AND `timestamp` > '$collecttime' 
 AND `timestamp` NOT BETWEEN '$startpause' AND '$finishpause' 
-AND `timestamp` <= '$delivertime' 
+AND `timestamp` < '$delivertime' 
 ORDER BY `timestamp` ASC "; 
 
 $instamapperstmt = $dbh->prepare($sql);

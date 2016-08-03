@@ -2392,7 +2392,7 @@ if ($clientemail) { $pagetext=$pagetext. '<br /><a href="../live/new_cojm_client
 if ($orderselectdep) { 
 $depname = mysql_result(mysql_query("SELECT depname from clientdep WHERE depnumber='$orderselectdep' LIMIT 1", $conn_id), 0);
 $depemail = mysql_result(mysql_query("SELECT depemail from clientdep WHERE depnumber='$orderselectdep' LIMIT 1", $conn_id), 0);
-if ($clientemail) { $pagetext=$pagetext. '<br /><a href="../live/new_cojm_department.php?clientid='.$clientid.'#tabs-'.$orderselectdep.'">'.$depname.'</a> Department Email : '.$depemail;}
+if ($clientemail) { $pagetext=$pagetext. '<br /><a href="../live/new_cojm_department.php?depid='.$orderselectdep.'">'.$depname.'</a> Department Email : '.$depemail;}
 }
 
 $existinginvref='';

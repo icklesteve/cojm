@@ -1351,7 +1351,7 @@ if ($isactivedep<>'1') { echo ' Inactive '; } echo '</option>'; } echo '</select
 
 echo '
 <a id="clientdeplink" class="showclient hideuntilneeded" title="'.$drow['depname'].' Details" 
-target="_blank" href="new_cojm_department.php?clientid='.$row['CustomerID'].'#tabs-'.$row['orderdep'].'"> </a>
+target="_blank" href="new_cojm_department.php?depid='.$row['orderdep'].'"> </a>
 </div>
 <div id="clientdepnotes" class="fsr favcomments">';
 if (isset($drow['depcomment'])) { if (trim($drow['depcomment'])) { echo $drow['depcomment']; }}

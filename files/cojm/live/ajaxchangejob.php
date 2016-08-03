@@ -1780,7 +1780,7 @@ $script.=' $("#clientdepnotes").html("").hide(); ';
 if ($newdeporder>0) { 
 
 
-$script.='$("#clientdeplink").show().attr("href", "new_cojm_department.php?clientid='.$associatedclient.'#tabs-'.$newdeporder.'"); ';
+$script.='$("#clientdeplink").show().attr("href", "new_cojm_department.php?depid='.$newdeporder.'"); ';
 $script.='$("#clientdeplink").attr("title", "'.$depname.' Details"); ';
 
 } else {

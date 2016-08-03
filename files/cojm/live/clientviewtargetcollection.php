@@ -684,7 +684,7 @@ $dsql_result = mysql_query($depsql,$conn_id)  or mysql_error();
 
 while ($drow = mysql_fetch_array($dsql_result)) {
      extract($drow);
-echo '<a href="new_cojm_department.php?clientid='.$row['CustomerID'].'#tabs-'.$drow['depnumber'].'">'.$drow['depname'].'</a>';	 
+echo '<a href="new_cojm_department.php?depid='.$drow['depnumber'].'">'.$drow['depname'].'</a>';	 
 }
 
 echo '</td>'; }
@@ -703,7 +703,7 @@ $dsql_result = mysql_query($depsql,$conn_id)  or mysql_error();
 
 while ($drow = mysql_fetch_array($dsql_result)) {
      extract($drow);
-echo ' (<a href="new_cojm_department.php?clientid='.$row['CustomerID'].'#tabs-'.$row['orderdep'].'">'.$drow['depname'].'</a>) ';
+echo ' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$drow['depname'].'</a>) ';
 }
 
 echo '</td>'; }

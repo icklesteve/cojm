@@ -1,4 +1,28 @@
 <?php 
+
+/*
+    COJM Courier Online Operations Management
+	new_cojm_department.php - Edit Clients Departments
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+
+
 $alpha_time = microtime(TRUE);
 error_reporting( E_ERROR | E_WARNING | E_PARSE );
 include "C4uconnect.php";
@@ -41,52 +65,25 @@ if (!$clientid) { if (isset($_GET['clientid'])) { $clientid=trim($_GET['clientid
 
 
 
-if (isset($_GET['depid'])) { $posteddepid=$_GET['depid']; 
+if (isset($_GET['depid'])) { $posteddepid=$_GET['depid']; } else { $posteddepid=''; }
+if (isset($_POST['depid'])) { $posteddepid=$_POST['depid']; }
 
+if ($posteddepid) {
 
-// $sql = "SELECT * FROM clientdep WHERE associatedclient = '$clientid' ORDER BY isactivedep DESC , depnumber DESC  ";
-
-$query = "SELECT associatedclient FROM clientdep  WHERE depnumber=$posteddepid "; 
+$query = "SELECT associatedclient FROM clientdep  WHERE depnumber=$posteddepid LIMIT 0,1"; 
 
 $clientid = mysql_result(mysql_query($query, $conn_id), 0); 
-
-
+// move tab to correct department if #tab unset
 
 echo '
 <script>
-
 $(document).ready(function(){
-//    $("a#tabs-49").trigger("click");
-	
-	
 window.location.href = "#tabs-'.$posteddepid.'";	
-	
-	
 });
-
-
 </script>
-
-
-
-
 ';
 
-
-
-
-
-
-
-
-
-
-} else { $posteddepid=''; }
-
-
-
-
-
+}
 
 
 

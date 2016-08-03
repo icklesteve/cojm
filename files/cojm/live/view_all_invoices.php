@@ -1,5 +1,24 @@
-<?php 
+<?php
 
+/*
+    COJM Courier Online Operations Management
+	view_all_invoices.php - New Job Ajax Helper for Clients with Departments
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 $alpha_time = microtime(TRUE);
 
 $tempthree='';
@@ -210,7 +229,7 @@ $tempdep=$row['invoicedept'];
 if ($tempdep) {
 
 $dclientname = mysql_result(mysql_query("SELECT depname FROM clientdep WHERE depnumber='$tempdep' LIMIT 0,1"), '0');
-$a=$a. ' (<a href="new_cojm_department.php?clientid='.$row['CustomerID'].'#tabs-'.$tempdep.'">'.$dclientname.'</a>) ';
+$a=$a. ' (<a href="new_cojm_department.php?depid='.$tempdep.'">'.$dclientname.'</a>) ';
 	
 }
 
@@ -332,7 +351,7 @@ $tempdep=$row['invoicedept'];
 if ($tempdep) {
 
 $dclientname = mysql_result(mysql_query("SELECT depname FROM clientdep WHERE depnumber='$tempdep' LIMIT 0,1"), '0');
-$b=$b. ' (<a href="new_cojm_department.php?clientid='.$row['CustomerID'].'#tabs-'.$tempdep.'">'.$dclientname.'</a>) ';
+$b=$b. ' (<a href="new_cojm_department.php?depid='.$tempdep.'">'.$dclientname.'</a>) ';
 	
 }
 
@@ -670,7 +689,7 @@ $dsql_result = mysql_query($depsql,$conn_id)  or mysql_error();
 while ($drow = mysql_fetch_array($dsql_result)) { extract($drow); 
 // echo ' ('.$drow['depname'].') ';
 
-echo ' (<a href="new_cojm_department.php?clientid='.$clientid.'#tabs-'.$drow['depnumber'].'">'.$drow['depname'].'</a>) ';
+echo ' (<a href="new_cojm_department.php?depid='.$drow['depnumber'].'">'.$drow['depname'].'</a>) ';
 
  }
 echo '</fieldset>';
@@ -1513,7 +1532,7 @@ $tempdep=$row['invoicedept'];
 	 
 	 if ($clientview<>'client') {
 	 
-$a=$a. ' (<a href="new_cojm_department.php?clientid='.$row['CustomerID'].'#tabs-'.$tempdep.'">'.$clientdepname.'</a>) ';
+$a=$a. ' (<a href="new_cojm_department.php?depid='.$tempdep.'">'.$clientdepname.'</a>) ';
 
 	 } else {
 	 

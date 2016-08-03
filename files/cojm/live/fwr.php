@@ -156,7 +156,7 @@ $result=mysql_query($depquery); $drow=mysql_fetch_array($result);
 // $rhtml=$rhtml. ' ('.$drow['depname'].') ';
 
 
-$rhtml.=' (<a href="new_cojm_department.php?clientid='.$row['CustomerID'].'#tabs-'.$row['orderdep'].'">'.$drow['depname'].'</a>) ';
+$rhtml.=' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$drow['depname'].'</a>) ';
 
 
  } // ends department check

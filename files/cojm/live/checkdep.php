@@ -1,4 +1,26 @@
 <?php
+
+/*
+    COJM Courier Online Operations Management
+	checkdep.php - New Job Ajax Helper for Clients with Departments
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
 $html='';
 $newjobdepid = $_POST['newjobdepid'];
 include "C4uconnect.php";
@@ -86,7 +108,7 @@ echo 'value="'.$CustomerIDlist.'">'.$CompanyName.'</option>';} echo '</select> '
 echo ' </div> ';
 
 echo '<div id="afterdepselect" class="left"> 
-<a href="new_cojm_department.php?clientid='. $newjobclientid. '#tabs-'.$newjobdepid.'" target="_blank" class="showclient showclientdep" 
+<a href="new_cojm_department.php?depid='.$newjobdepid.'" target="_blank" class="showclient showclientdep" 
 title="'. $depname.' Details"> &nbsp; </a>
 '.$html.'
 

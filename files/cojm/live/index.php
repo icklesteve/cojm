@@ -194,7 +194,7 @@ if ($row['orderdep']) { $depname = mysql_result(mysql_query("SELECT depname FROM
 // echo ' ('.$depname.') '; 
 
 
-echo ' (<a href="new_cojm_department.php?clientid='.$row['CustomerID'].'#tabs-'.$row['orderdep'].'">'.$depname.'</a>) ';
+echo ' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$depname.'</a>) ';
 
 } 
 

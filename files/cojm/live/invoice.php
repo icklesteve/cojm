@@ -777,9 +777,9 @@ if ($row['CyclistID'] == $CyclistID) { $thistrackerid=$trackerid; }}
 // $html=$html.' Start pause : '.$startpause.' collect : '.$collecttime.' trackerid : '.$thistrackerid.' delivertime : '.$delivertime.'';
 $trasql = "SELECT * FROM `instamapper` 
 WHERE `device_key` = '$thistrackerid' 
-AND `timestamp` >= '$collecttime' 
+AND `timestamp` > '$collecttime' 
 AND `timestamp` NOT BETWEEN '$startpause' AND '$finishpause' 
-AND `timestamp` <= '$delivertime' "; 
+AND `timestamp` < '$delivertime' "; 
 $trasql_result = mysql_query($trasql,$conn_id)  or mysql_error(); 
 $trsumtot=mysql_affected_rows();   
  if ($trsumtot>'1.5') { $htmlb=$htmlb.' <a href="'.$globalprefrow['httproots'].'/cojm/createkml.php?id='.

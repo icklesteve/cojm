@@ -1,4 +1,25 @@
-<?php if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) ob_start("ob_gzhandler"); else ob_start();
+<?php 
+/*
+    COJM Courier Online Operations Management
+	batchhtmltracking.php - creates standalone html page with gps tracking & area maps
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) ob_start("ob_gzhandler"); else ob_start();
 
 if (!isset($_POST['gpxarray'])) { 
 
@@ -482,16 +503,12 @@ polyline'.$orow['ID'].'.setOptions({strokeColor: "#666666", strokeWeight: 2 });
  ';
 
 
-// $idsuccess[]=' <li title="'.$orow['ID'].' " class="'.$orow['ID'].'">'.date('D jS', strtotime($orow['collectiondate'])).' '.$orow['ID'].'</li>';
-// $idsuccess[]=' <span title="'.$orow['ID'].' " id="'.$orow['ID'].'">'.date('D jS', strtotime($orow['collectiondate'])).' '.$orow['ID'].'</span>';
 
 $idsuccess[]=' <p title="'.$id.' '.date('jS M Y', strtotime($orow['collectiondate'])).'" id="'.$orow['ID'].'" class="markers">'.date('D jS', strtotime($orow['collectiondate'])).' '.$orow['ID'].'</p>';
 
 
 }
 
-// <Icon><href>'.$globalprefrow['httproot']. "/images/".($globalprefrow['adminlogo']).'</href></Icon>
-// </Document>';
   
 } // ends check job status
  

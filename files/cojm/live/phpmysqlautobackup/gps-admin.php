@@ -55,8 +55,8 @@ if ($startpause <'10') { $startpause='9999999999'; }
 
 
 
- $sql = "SELECT latitude, longitude, speed, timestamp FROM `instamapper`  WHERE `device_key` = '$thistrackerid' AND `timestamp` >= '$collecttime' AND `timestamp` 
-NOT BETWEEN '$startpause' AND '$finishpause' AND `timestamp` <= '$delivertime' ORDER BY `timestamp` ASC"; 
+ $sql = "SELECT latitude, longitude, speed, timestamp FROM `instamapper`  WHERE `device_key` = '$thistrackerid' AND `timestamp` > '$collecttime' AND `timestamp` 
+NOT BETWEEN '$startpause' AND '$finishpause' AND `timestamp` < '$delivertime' ORDER BY `timestamp` ASC"; 
 $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); $sumtot=mysql_affected_rows(); if ($sumtot>'0.5') { 
 
  $linecoords='';

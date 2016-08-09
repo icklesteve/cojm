@@ -336,7 +336,7 @@ for (var j = 0; j < lineCoordinates.length; j++) {
   var line = new google.maps.Polyline({
     path: gmarkers,
 	geodesic: true,
-	strokeOpacity: 0.3,
+	strokeOpacity: 0.7,
     icons: [{
     icon: lineSymbol,
     repeat: "50px"

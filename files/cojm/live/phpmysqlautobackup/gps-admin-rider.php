@@ -63,7 +63,14 @@ $query="SELECT cojmname FROM Cyclist WHERE trackerid = '$cojmadmin_rider_id' LIM
  
  
  
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); $sumtot=mysql_affected_rows(); if ($sumtot>'0.5') { 
+$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+
+$sumtot=mysql_affected_rows(); 
+
+$infotext.=' <br /> sumtot is '.$sumtot;
+
+
+if ($sumtot>'0.5') {
 
  $linecoords='';
  $prevts='';
@@ -76,9 +83,6 @@ $max_lat = '-99999';
 $min_lat =  '99999';
 $max_lon = '-99999';
 $min_lon =  '99999';
-
- 
- 
  
  $markerout=array();
  $linarray=array();
@@ -143,7 +147,14 @@ $markerout = rtrim($markerout, ',').'    ]; ';
 
 $mypath="cache/jstrack/".$thisyear."/".$thismonth."/";
 
-if (!file_exists($mypath)) { mkdir($mypath, 0777, true); }
+if (!file_exists($mypath)) { 
+
+$infotext.=' Creating directory '.$mypath;
+
+mkdir($mypath, 0777, true); 
+
+
+}
 $filename = $mypath.$ID.'.js';
 $handle = fopen($filename,"w");
 $filecontent = $markerout.$lineout;
@@ -152,13 +163,40 @@ fclose($handle);
 
 $infotext.= " <br />created JS CacheFile ".$filename." <br /> ". $markercount." markers and ".$linecount." line points.";
 
-  $query =  " update cojm_admin set cojm_admin_stillneeded = '0' where cojmadmin_id ='$cojm_admin_ref'";	
-mysql_query($query, $conn_id);
 
 } // sumtot > 0.5 positions found check
 
+
+
+  $query =  "update cojm_admin set cojm_admin_stillneeded=0 where cojmadmin_id ='$cojm_admin_ref'";	
+mysql_query($query, $conn_id);
+
+
+
+
+
+
+
+
 $query =  " update cojm_admin set cojmadminfinish = now() where cojmadmin_id ='$cojm_admin_ref'";	
 mysql_query($query, $conn_id);
+
+
+
+
+
+
+
+
+
+
+
+
+$infotext.=' Ending gps admin row ';
+
+
+
+
 
 } // ends check for gps admin row
 

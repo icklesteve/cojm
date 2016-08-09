@@ -1,4 +1,23 @@
 <?php
+/*
+    COJM Courier Online Operations Management
+	opsmap-new-area.php - Add / Edit Opsmap
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 $alpha_time = microtime(TRUE);
 if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) ob_start("ob_gzhandler"); else ob_start();
 $filename="opsmap-new-area.php";
@@ -44,13 +63,9 @@ $tareax++;
 
 }
 
-// echo ' winding :  '.$winding;
-
 if ($twinding<'0') { 
 
 $infotext.= '<br /> ant-clockwise '; 
-// $infotext.='<br /> vertices :  '.$vertices;
-// print_r($tcoord);
 
 $newvertices='';
 
@@ -61,14 +76,10 @@ while ( $tareax > '-1') {
 
 $newvertices.=' '.$co[0].' '.$co[1].', ';
 
-
-
-
 $tareax--;
 }
 
 $newvertices = ''.rtrim($newvertices, ', ').' '; 
-//  $infotext.=' <br /> New : '.$newvertices;
 $vertices=$newvertices;
 }
 }
@@ -249,7 +260,7 @@ echo '<!DOCTYPE html>
 <link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
-<script type="text/javascript" src="https://maps.google.com/maps/api/js?libraries=geometry&amp;sensor=false"></script>
+<script type="text/javascript" src="https://maps.google.com/maps/api/js?libraries=geometry&amp;key='.$globalprefrow['googlemapapiv3key'].'"></script>
 <script src="js/richmarker.js" type="text/javascript"></script>
 <title>OpsMap Area</title>
 </head>
@@ -1127,10 +1138,7 @@ if ($childescrip) { echo ' '.$childescrip; }
 echo '
  
  </form>
- 
- <form action="opsmap-new-area.php">
-<button type="submit" title="Add New Area">Add Blank New Area</button>
-</form>
+ <hr />
  
  '.$moreinfotext.'
 
@@ -1140,6 +1148,12 @@ echo '
 <p>Left Click on a point to remove a point. </p>
 <p>Left Drag a point to move it. </p>
 <p>Minimum 3 points needed to define an area.</p>
+<br />
+ <form action="opsmap-new-area.php">
+<button type="submit" title="New Area">Create Blank New Area</button>
+</form>
+
+
 </div>
  </div>
  </div>

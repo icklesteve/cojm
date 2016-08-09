@@ -3621,8 +3621,12 @@ $pagetext=$pagetext."<p>Created Job Ref ". $id.'</p>';
 $infotext=$infotext."<br />Created job has ID : " . $id;
 
 
+$origid=$id;
+
 calcmileage($id, $globalprefrow['distanceunit'], $globalprefrow['co2perdist'], $globalprefrow['pm10perdist']);
 $cojmaction='recalcprice';
+
+
 
 }  // ends  new job from ajax
 
@@ -5342,7 +5346,7 @@ $newvatcost=round($newvatcost, 2);
 
 
 
-if ($page<>'createnewfromexisting') {
+if (($page<>'createnewfromexisting')or($page<>'newjobfromajax')) {
 
 $ID=$origid;
 $id=$origid;

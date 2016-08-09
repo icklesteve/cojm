@@ -56,7 +56,7 @@ echo '<!DOCTYPE html> <html lang="en"> <head>
 
 echo '
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
-<META HTTP-EQUIV="Refresh" CONTENT="'. $globalprefrow['pagetimeout'].'; URL=index.php"> 
+<META HTTP-EQUIV="Refresh" CONTENT="'. $globalprefrow['formtimeout'].'; URL=index.php"> 
 
 <link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >

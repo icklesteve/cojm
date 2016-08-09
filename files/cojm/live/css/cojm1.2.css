@@ -137,13 +137,14 @@ width:100%;
 height:100%;
 }
 
-.pad10 { 
-padding:10px;
+
+.pad10 { /*  left hand of maps    */
+padding:10px 10px 35px;
 }  
   
   
   
-  
+ 
   
   
   
@@ -1640,7 +1641,13 @@ background-color: #f3f2f2;
 tr.error { background:white; color:red; }
 
 
+hr { 
 
+
+    border: 4px solid gray;
+
+
+}
 
 
 
@@ -2440,11 +2447,11 @@ position: relative;
 
 div.pad10 { 
 
-padding:4px;
+padding:4px 4px 35px;
 
 }
 
-} /* ends max width  */
+} /* ends max width  750px   */
 
 
 @media screen and (min-width: 750px)  {

@@ -144,6 +144,17 @@ echo $result;
 ?></fieldset>
 
 
+<fieldset><label class="fieldLabel"> IP Address </label>
+<?php 
+
+echo getHostByName(getHostName());
+
+?></fieldset>
+
+
+
+
+
 </div>
 
 

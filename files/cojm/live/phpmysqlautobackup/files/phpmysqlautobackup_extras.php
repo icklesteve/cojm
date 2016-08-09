@@ -139,13 +139,13 @@ class transfer_backup
 
  $ch = curl_init();
  
- $ftpaddress="ftp://$ftp_username:$ftp_password@$ftp_server";
+ $ftp_password=REMOTEFTPPASSWD;
+ 
+ $ftpaddress="ftp://$ftp_username:".REMOTEFTPPASSWD."@$ftp_server";
  
  curl_setopt ($ch, CURLOPT_URL,$ftpaddress);
- 
- 
 
-//      // curl_setopt ($ch, CURLOPT_USERPWD, “$userpass”);
+// curl_setopt ($ch, CURLOPT_USERPWD, $ftp_password);
  curl_setopt ($ch, CURLOPT_TIMEOUT, 15);
  curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 10);
  curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -187,7 +187,7 @@ $ch = curl_init();
  if(curl_error($ch)) {  $transfer_backup_infotext.= " ex161 ftp error on $ftp_server - Error: ". curl_error($ch) . " <br /> "; }
 
 
-		   }
+}
 		   
 		   
 		   

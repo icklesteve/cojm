@@ -224,7 +224,7 @@ if ($result){ $infotext.=  ' changed 168'; }  else { $infotext.=  " failed 168 "
  require  "phpmysqlautobackup/gps-admin-rider.php";	
 
  $sql = "UPDATE cojm_cron SET currently_running=0 , time_last_fired=".date("U")." WHERE ID='5' LIMIT 1"; 
-$result = mysql_query($sql, $conn_id) or mysql_error(); if ($result){ $infotext.=  ' changed 174'; }  else { $infotext.=  " failed 174 "; } 	
+$result = mysql_query($sql, $conn_id) or mysql_error(); if ($result){ $infotext.=  ' finished running gps-admin-rider.php '; }  else { $infotext.=  " failed running gps-admin-rider.php "; } 	
 
 
 
@@ -293,16 +293,17 @@ $backupdescription= $backupdescription.'<br />'.$transfer_backup_infotext;
 
 
 if ($backupruntype)	{
-
  $newpoint="INSERT INTO cojm_audit (auditid,audituser,auditorderid,auditpage,auditfilename,auditmobdevice,
  auditbrowser,audittext,auditcjtime,auditpagetime,auditmidtime,auditinfotext)   
  VALUES ('','CojmCron','','cojmcron.php','$backupruntype','',
  '','$backupdescription','','$cj_echo','','$infotext')";
  mysql_query($newpoint, $conn_id) or mysql_error(); $newauditid=mysql_insert_id();
  if (mysql_error()) { echo '<div class="moreinfotext"><h1> Problem saving audit log </h1></div>'; }
-
-
 }
+
+
+
+
 
 
 if ($globalprefrow['showdebug']>0) { echo $backupdescription.'<hr />' . $infotext; }

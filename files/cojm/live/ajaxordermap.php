@@ -24,10 +24,6 @@
 
 
 
-
-
-
-
 // show rider tracking if present
 // show area map if present
 // show sub areas if present
@@ -40,6 +36,10 @@ include_once ("GeoCalc.class.php");
 
 if (isset($_POST['page'])) { $page=trim($_POST['page']); } else { exit();  }
 if (isset($_POST['id'])) { $postedid = trim($_POST['id']); }
+
+
+
+echo '<script> $("#orderajaxmap").show(); </script> ';
 
 
 
@@ -614,12 +614,16 @@ var cent=(bounds'.$lilareaid.'.getCenter());
 
 
 
-
  if ($sumtot>'0.5') {
 
 
 echo ' <a href="../createkml.php?id='. $row['publictrackingref'].'">'.$trackingtext.'</a>. ';
 }
+
+
+
+
+
 
 echo '
 <div id="map-container" >
@@ -628,6 +632,19 @@ echo '
  <button id="mylocation" title="Current Position"> &nbsp; </button>
  <button id="btn-exit-full-screen" title="Exit Full Screen"> </button>
  <button id="printbutton" title="Print Map" > </button>
+ <input id="geocodeaddress" title="Address Search" type="text" style="
+ 
+ display: none;
+padding-left: 6px;
+position: absolute;
+right: 88px;
+top: 8px;
+z-index: 2;
+height: 30px;
+ 
+ 
+ " 
+ placeholder="Search Map" class="ui-state-default ui-corner-all" />
  <div class="printinfo">
  <img alt="'.$globalprefrow['globalshortname'].' Logo" src="'.$globalprefrow['adminlogo'].'" />
 <p>'. date('l jS M Y', strtotime($row['targetcollectiondate'])).'</p>';
@@ -648,6 +665,8 @@ if ($row['CyclistID']<>'1') { echo '<p> '.$row['cojmname'].' </p>'; }
  </div>
  <div class="ordermap" id="ordermap" ></div>
  </div><script>
+ 
+// $("#geocodeaddress").hide();
  
 var element = document.getElementById("ordermap");
 
@@ -883,8 +902,6 @@ function successCallback(position) {  }
 		';
 		}
 		
-		
-		
 		?>
 		
 		swapStyleSheet("<?php echo $globalprefrow['glob10']; ?>");
@@ -917,6 +934,7 @@ $("#printbutton").click(function() {
 		
     $("#btn-exit-full-screen").toggle();
     $("#printbutton").toggle();
+	$("#geocodeaddress").hide();
 	
      if (center_map(800)) {
    	
@@ -955,6 +973,7 @@ $("#btn-enter-full-screen").click(function() {
     // Gui
     $("#btn-enter-full-screen").toggle();
     $("#btn-exit-full-screen").toggle();
+	$("#geocodeaddress").show();
     $("#printbutton").toggle();
 	$("#back-top").css({
 		position: "unset"
@@ -986,6 +1005,7 @@ $("#btn-exit-full-screen").click(function() {
     $("#btn-enter-full-screen").show();
     $("#btn-exit-full-screen").hide();
 	$("#printbutton").hide();
+	$("#geocodeaddress").hide();
 	$("#back-top").css({
 		position: "fixed"
 	});
@@ -997,6 +1017,44 @@ function swapStyleSheet(sheet){
 }
  
 <?php   echo $areajs.$orderjs; ?>
+
+
+
+ geocoder = new google.maps.Geocoder(); 
+ $("#geocodeaddress").change(function (e) {
+    // e == our event data
+    e.preventDefault();
+	
+	
+	var addtocheck=$("#geocodeaddress").val();
+
+//	alert(bounds);
+	
+    geocoder.geocode( { 
+	"address": addtocheck + " , UK ",
+	"region":   "uk",
+	"bounds": bounds 
+	}, function(results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+          if (status != google.maps.GeocoderStatus.ZERO_RESULTS) {
+          map.setCenter(results[0].geometry.location);
+            var infowindow = new google.maps.InfoWindow(
+                { content: "<div class='info'>"+addtocheck+"</div>",
+				    position: results[0].geometry.location,
+                map: map
+                });
+			infowindow.open(map);
+          } else {
+            alert("No results found");
+          }
+        } else {
+          alert("Search was not successful : " + status);
+        }
+      });
+});
+
+
+
 </script><?php
 
 

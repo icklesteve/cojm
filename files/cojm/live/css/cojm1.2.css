@@ -58,6 +58,16 @@ width: 65%; outline: none; height:20px;
 }  
   
   
+ #spinner { 
+ 
+background: rgba(0, 0, 0, 0) url("../images/loader.gif") no-repeat scroll 0 0;
+margin: 5px 0 0 10px;
+position: absolute;
+width: 16px;
+opacity: 0.6;
+display:none;
+ } 
+  
 span.bankhol { background-color:#a8a8a8; 
 padding: 0px 5px 1px;
 }
@@ -1642,11 +1652,7 @@ tr.error { background:white; color:red; }
 
 
 hr { 
-
-
     border: 4px solid gray;
-
-
 }
 
 

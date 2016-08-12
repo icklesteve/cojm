@@ -482,6 +482,7 @@ if(this.checked) { cbbchecked=1; } else { cbbchecked=0; }
 
 
 $("#opsmaparea").change(function () {
+	$("#spinner").show();
  var opsmaparea=$("select#opsmaparea").val();
 	    $.ajax({
         url: 'ajaxchangejob.php',  //Server script to process data
@@ -497,7 +498,7 @@ $("#opsmaparea").change(function () {
 		complete: function(data) {
 showmessage();
 	$(document).ready(function() { 
- $("html, body").animate({ scrollTop: $(document).height() }, 500);
+// $("html, body").animate({ scrollTop: $(document).height() }, 500);
 	});
 		}
 });
@@ -540,6 +541,7 @@ showmessage();
 
 
 $('#uploadpodfile').change(function(){
+$("#spinner").show();
 $('progress').attr({value:0,max:1});
 $('#uploadpodprogress').show();
 $("#formbirthday").val(formbirthday);
@@ -569,6 +571,7 @@ $('#emissionsaving').append(data);
 },
 complete: function(data) {
 showmessage();
+$("#spinner").hide();
 },	
 	
 //        error: errorHandler,
@@ -652,6 +655,7 @@ $('#emissionsaving').append(data);
 
 
 $("#opsmapsubarea").change(function () {
+	$("#spinner").show();
  var opsmapsubarea=$("select#opsmapsubarea").val();
 	    $.ajax({
         url: 'ajaxchangejob.php',  //Server script to process data
@@ -749,6 +753,7 @@ var clientjobreference=$( this ).val();
  
  
    $( "#numberitems" ).change(function() {
+	   $("#spinner").show();
 var numberitems=$( this ).val();
   	    $.ajax({
         url: 'ajaxchangejob.php',  //Server script to process data
@@ -759,7 +764,7 @@ var numberitems=$( this ).val();
 		numberitems:numberitems},
 		type:'post',
         success: function(data) { $('#emissionsaving').append(data); },
-		complete: function(data) { showmessage(); }
+		complete: function(data) { showmessage(); $("#spinner").hide(); }
 }); });
  
  $(function() { $('#targetcollectiondate').on('blur' , function() { checktargetcollectiondate(); }); });
@@ -835,7 +840,9 @@ function progressHandlingFunction(e){
 }  
 
 function ordermapupdater() {
-$("#orderajaxmap").html("<a class='loader'> </a>").show();
+
+$("#spinner").show();
+
 
   	    $.ajax({
         url: 'ajaxordermap.php',  //Server script to process data
@@ -847,7 +854,7 @@ $("#orderajaxmap").html("<a class='loader'> </a>").show();
         success: function(data) { $('#orderajaxmap').html(data);  },
 		complete: function(data) { 
 //		showmessage(); 
-		
+		$("#spinner").hide();
 		}
 });
 }

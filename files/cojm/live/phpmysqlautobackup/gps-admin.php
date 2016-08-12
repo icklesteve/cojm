@@ -57,7 +57,7 @@ if ($startpause <'10') { $startpause='9999999999'; }
 
  $sql = "SELECT latitude, longitude, speed, timestamp FROM `instamapper`  WHERE `device_key` = '$thistrackerid' AND `timestamp` > '$collecttime' AND `timestamp` 
 NOT BETWEEN '$startpause' AND '$finishpause' AND `timestamp` < '$delivertime' ORDER BY `timestamp` ASC"; 
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); $sumtot=mysql_affected_rows(); if ($sumtot>'0.5') { 
+$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); $sumtot=mysql_affected_rows(); if ($sumtot>'0.5') {
 
  $linecoords='';
  $prevts='';
@@ -255,19 +255,12 @@ fwrite($handle,$kmlcontent);
 fclose($handle);
 $infotext.= " <br />created KML CacheFile ".$filename.", ". $markercount." markers and ".$linecount." line points.";
 
-
-
-
-
+} // sumtot > 0.5 positions found check
 
 
 
 $query =  " update cojm_admin set cojm_admin_stillneeded = '0' where cojmadmin_id ='$cojm_admin_ref'";	
 mysql_query($query, $conn_id);
-
-
-} // sumtot > 0.5 positions found check
-
 
 $query =  " update cojm_admin set cojmadminfinish = now() where cojmadmin_id ='$cojm_admin_ref'";	
 mysql_query($query, $conn_id);

@@ -613,6 +613,7 @@ $(window).resize(function () {
 
 
  geocoder = new google.maps.Geocoder(); 
+ 
  window.showAddress = function(address) {
     geocoder.geocode( { 
 	"address": address + " , UK ",
@@ -694,9 +695,6 @@ class="ui-state-default ui-corner-all address" />
 
 
 echo '
-<form action="opsmap-new-area.php">
-<button type="submit" title="Add New Area">Add New Area</button>
-</form>
 
 <br />
 <hr />
@@ -736,6 +734,9 @@ echo '
 echo '
 <br />
 
+ <form action="opsmap-new-area.php">
+<button type="submit" title="New Area">Create Blank New Area</button>
+</form>
 </div>		
 		</div>
 		

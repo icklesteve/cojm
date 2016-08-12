@@ -126,6 +126,17 @@ echo '<button class="menusearch" form="menusearch" type="submit" > <img class="m
 
 echo ' </form></li>';
 
+echo '
+<li>
+<span id="spinner"> &nbsp; </span>
+</li>
+';
+
+
+
+
+
+
 if ($hasforms=='1'){echo '<li><span id="cdtext"> </span></li><li><b class="hidden" id="show-time" >'. $globalprefrow['formtimeout'].'</b></li>';}
 
 

@@ -2556,7 +2556,7 @@ if (isset($_POST['dateshift'])) { $dateshift=$_POST['dateshift']; }
 if (isset($_POST['currorsched'])) { $currorsched=trim($_POST['currorsched']); } else { $currorsched=''; }
 
 
-$pagetext=$pagetext.'<p>New job created from ref <a href="order.php?id='.$oldid.'">'.$oldid.'</a></p>';
+// $pagetext=$pagetext.'<p>New job created from ref <a href="order.php?id='.$oldid.'">'.$oldid.'</a></p>';
 $infotext=$infotext.'<br />New job created from ref <a href="order.php?id='.$oldid.'">'.$oldid.'</a>';
 
 
@@ -3028,11 +3028,22 @@ opsmapsubarea,
    '$co2saving',
    '$pm10saving'
    ) ", $conn_id
-   )  or die(mysql_error()); $id=mysql_insert_id();  
+   )  or die(mysql_error()); 
+   
+   $newjobid=mysql_insert_id();  
 mysql_query("UNLOCK TABLES", $conn_id);   
-$ID=$id;
+// $ID=$id;
 
- $infotext=$infotext.'new id is'.$ID;
+   
+$pagetext=$pagetext."<p>Created ". $newjobid.' from '. $id .'</p>';
+$infotext=$infotext."<br />Created ". $newjobid.' from '. $id;
+
+
+$id=$newjobid;
+
+
+
+// $infotext=$infotext.'new id is'.$ID;
 
 
 
@@ -3801,27 +3812,6 @@ $alerttext=$alerttext."<p><strong>Delete option confirmed, job ref ".$id." delet
 
 
 
-
-if ($page=="editpodsurname" ) {
-
-$podsurname=trim($_POST['podsurname']);
-
- $podsurname = str_replace("'", "&#39;", "$podsurname", $count);
-
-
-// $infotext=$infotext."<br><b>Updating POD surname</b><br>Surname Posted : " .$podsurname. "<br>";
-$sql = "UPDATE Orders SET podsurname=(UPPER('$podsurname')) WHERE ID='$id'"; $result = mysql_query($sql, $conn_id);
-if ($result){ 
-$infotext=$infotext."<br />POD Surname updated to ".$podsurname;
-$pagetext=$pagetext."<p>POD Surname updated to ".strtoupper($podsurname).'</p>';
- 
-} else { 
-$infotext=$infotext."<br /><strong>An error occured during updating surname!</strong>"; 
-$alerttext=$alerttext."<p><strong>An error occured during updating surname!</p>"; 
-} 
-} // ends page=editpodsurname
-
-
   
 if ($page=='edituidate') {
 
@@ -4022,53 +4012,6 @@ $cojmaction='recalcprice';
 
 
 } ////////////////////      ENDS EDIT MAIN PAGE=edituidate          ///////////////////////////////////////////////////
-
-
-
-
-if ($page=='backtoadmin') {
-
-// firstly delete tracking cache if present
-
-
-
-$query="SELECT ID, ShipDate, collectiondate FROM Orders WHERE Orders.ID = '$id' LIMIT 0,1";
-
-$result=mysql_query($query, $conn_id); $orow=mysql_fetch_array($result);
-
-$testfile= __DIR__ . "/cache/jstrack/".date('Y', strtotime($orow['ShipDate']))."/".date('m', strtotime($orow['ShipDate']))."/".$orow['ID'].'tracks.js';
-$kmltfile= __DIR__ . "/cache/jstrack/".date('Y', strtotime($orow['ShipDate']))."/".date('m', strtotime($orow['ShipDate']))."/".$orow['ID'].'tracks.kml';
-
-if (!file_exists($testfile)) {
- $infotext.= ' <br /> 4911 Cache does not exist, no action needed. '.$testfile;
-} else {
-$infotext.=  ' <br /> 4918 Cache exists, needs deleting. '.$testfile;	
-unlink($testfile);
-unlink($kmltfile);
-if (file_exists($testfile)) {
-	 $infotext.=  ' not deleted ';
-}
-}
-
-
-
-
-$oldstatustext = mysql_result(mysql_query("SELECT statusname FROM status WHERE status='100' LIMIT 0,1", $conn_id), 0);
-$newstatustext = mysql_result(mysql_query("SELECT statusname FROM status WHERE status='86' LIMIT 0,1", $conn_id), 0);
-
-$sql = "UPDATE Orders SET status='86' WHERE ID=".$id." LIMIT 1"; $result = mysql_query($sql, $conn_id);
-if ($result){ 
-$pagetext=$pagetext.'<p>Status changed from '.$oldstatustext.' to '.$newstatustext.'</p>'; 
-$infotext=$infotext.'<br />Status changed from '.$oldstatustext.' to '.$newstatustext;
-
-} else { 
-$infotext=$infotext."<br /> cj 44628 <strong>Error occured in status Update</strong>"; 
-$alerttext=$alerttext."<p>Error cj 4629 occured in status Update</p>"; 
-} 
-
-
-
-}
 
 
 
@@ -4478,12 +4421,6 @@ $infotext=$infotext."<br />An error occured during updating cost and VAT!<br />"
 
 
 
- 
- 
- 
-
-
-
 } // these 2
 } // ends check to make sure job not modified by someone else at a time after the form was created
 
@@ -4501,20 +4438,6 @@ $query="SELECT * FROM Orders
 where ID = '$id' LIMIT 1";
 $result=mysql_query($query, $conn_id);
 $row=mysql_fetch_array($result);
-
-
-
-if ((trim($row['podname'])<>"") and ($row['podsurname']=='')) {
-$infotext=$infotext.'<br/>Needs surname ';
-$alerttext=$alerttext.'<p><form action="#" method="post">
-<input type="hidden" name="formbirthday" value="'. date("U").'">
-<input type="hidden" name="id" value="'. $ID .'">
-<input type="hidden" name="page" value="editpodsurname"> 
-<input class="ui-state-default ui-corner-all caps" type="text" name="podsurname" size="15" maxlength="40" value="">
-<button type="submit">Edit Surname</button></form></p>';
-} // checks for no surname and checks for attached pod image file
-
-
 
 if ($row['status'] <49  ){ $nextactiondate = $row['targetcollectiondate']; } else {$nextactiondate = $row['duedate']; }
 $sql = "UPDATE Orders SET nextactiondate='$nextactiondate' WHERE ID='$id' LIMIT 1";
@@ -4945,10 +4868,6 @@ function plural($num) {
 
 
 
-
-
-
-
 ///////////////////////////////////   RECALC PRICE ///////////////////
 
 if ($cojmaction=='recalcprice') {
@@ -5346,12 +5265,18 @@ $newvatcost=round($newvatcost, 2);
 
 
 
-if (($page<>'createnewfromexisting')or($page<>'newjobfromajax')) {
+if (($page<>'newjobfromajax')) {
 
-$ID=$origid;
+// $ID=$origid;
 $id=$origid;
 
 }
+
+
+if ($page=='createnewfromexisting') { $id=$newjobid; }
+
+
+
 
 $caudtext='<hr><b>'. $cyclistid.' : '.$today.'</b>'. $infotext; 
 

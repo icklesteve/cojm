@@ -70,6 +70,8 @@ echo '<!doctype html><html lang="en"><head>
 
 
 
+<--- starts spinner on page load, only for ajax pages -->
+#spinner { display:inline; }
 
 </style>
 </head><body >';
@@ -1518,7 +1520,7 @@ echo '</div>';
 
 
 
-echo '<div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses"></div>';
+echo '<div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses hideuntilneeded"></div>';
 echo ' </div> <br /> '; // ends div hangright
 
 

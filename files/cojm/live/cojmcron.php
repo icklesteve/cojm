@@ -249,9 +249,9 @@ $infotext.= '<br /> '.$gpsadmintotal.' Job(s) in individ job GPS Admin Q ';
 if ($gpsadmintotal>'0')	 {
 
 $sql = "UPDATE cojm_cron SET currently_running=1 WHERE ID='4' LIMIT 1";  $result = mysql_query($sql, $conn_id);
-if ($result){ $infotext.=  ' changed 173'; }  else { $infotext.=  " failed 173 "; } 
+if ($result){ $infotext.=  ' changed cron to start run individ job gps'; }  else { $infotext.=  " FAILED to changed cron to start run individ job gps "; } 
 
- $infotext.= '<br /> gps-admin.php included ';
+ $infotext.= '<br /> about to require gps-admin.php  ';
  require  "phpmysqlautobackup/gps-admin.php";	
 
  $sql = "UPDATE cojm_cron SET currently_running=0 , time_last_fired=".date("U")." WHERE ID='4' LIMIT 1"; 

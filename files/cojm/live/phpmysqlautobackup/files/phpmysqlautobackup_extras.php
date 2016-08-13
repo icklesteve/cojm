@@ -141,60 +141,12 @@ class transfer_backup
  
  $ftp_password=REMOTEFTPPASSWD;
  
- $ftpaddress="ftp://$ftp_username:".REMOTEFTPPASSWD."@$ftp_server";
- 
- curl_setopt ($ch, CURLOPT_URL,$ftpaddress);
-
-// curl_setopt ($ch, CURLOPT_USERPWD, $ftp_password);
- curl_setopt ($ch, CURLOPT_TIMEOUT, 15);
- curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 10);
- curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
- curl_setopt($ch, CURLOPT_FTPLISTONLY, 1);
- $return = trim(curl_exec($ch));
- $files = explode("n", $return);
- if(curl_error($ch)) {  $transfer_backup_infotext.= " FTP error on $ftp_server - $ftpaddress Error: ". curl_error($ch) . " <br /> "; }
- 
- 
- $dir=date('Y').'-'.date("m");
- $foundfolder='0'; 
-		   
-foreach ($files as $line)
-{
-// echo gettype($line) . " <br /> " . $line . " "; 
-if (strpos($line,$dir)) { 
-// $transfer_backup_infotext.= " OK - Folder found. <br /> "; 
-$foundfolder='1'; 
-}
-		   
-}
-		   
-		   if ($foundfolder<'1') {  $transfer_backup_infotext.= ' needs folder creating ';
-
-
-$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, "ftp://$ftp_username:$ftp_password@$ftp_server");
-//		curl_setopt($ch, CURLOPT_USERPWD, $this->ftp_user_pw);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		$cmd = array();
-//        $cmd[] = " CWD ";
-		$cmd[] = 'MKD '.$dir;
-		curl_setopt($ch, CURLOPT_POSTQUOTE, $cmd);
-	
-// curl_setopt($ch, CURLOPT_POSTQUOTE, MKD test160 );
-	
-		curl_exec ($ch);
-
- if(curl_error($ch)) {  $transfer_backup_infotext.= " ex161 ftp error on $ftp_server - Error: ". curl_error($ch) . " <br /> "; }
-
-
-}
-		   
-		   
 		   
         $file=BALOCATION."backups/".date("Y").'-'.date("m").'/'.$passwdzip_file_name;
         $fp = fopen($file, "r");
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "ftp://$ftp_username:$ftp_password@$ftp_server.$ftp_path".$passwdzip_file_name);
+        curl_setopt($ch, CURLOPT_URL, "ftp://$ftp_server/".$passwdzip_file_name);
+		curl_setopt($ch, CURLOPT_USERPWD, "$ftp_username:$ftp_password");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_UPLOAD, 1);
         curl_setopt($ch, CURLOPT_INFILE, $fp);
@@ -208,8 +160,6 @@ $ch = curl_init();
 // $tempinfotext= '<br /> CURLINFO_PRIMARY_IP : '.$info['primary_ip'];
 // $tempinfotext.= '<br /> namelookup_time : '.$info['namelookup_time'];
 // $tempinfotext.= curl_error($ch);
-
-
 // $transfer_backup_infotext.= '<br /> CURLINFO_PRIMARY_IP : '.$info['primary_ip'];
  
  $actualbytes=$info['size_upload'];
@@ -274,25 +224,8 @@ if ($info['speed_upload'] >= 1073741824)
  $transfer_backup_infotext.=' <br /> FTPd '. $bytes.' in ' . $info['total_time'] . ' secs, avg '.$speed. '  / sec ';	
  
  
- 
- 
-// 	   echo 'extra 251';
-
-	   
-//	   $recordBackup->save(time(), $actualbytes , $lines_exported, $backupdescription);
-
-	   $testvar='
-	   
-    $from = "me@example.com";
-    $to = "me@example.com";
-    $subject = "autobackupextra ln 260";
-    $message = "This is a test email";
-    $headers = "From:" . $from;
-    mail($to,$subject,$message, $headers);
-    echo "Test email sent";
- 
- ';
- 
+  // ends check for curl error message
+  
  $date=time();
  
  $lines=$lines_exported;
@@ -303,10 +236,7 @@ if ($info['speed_upload'] >= 1073741824)
                  VALUES ('$date', '$actualbytes', '$lines', '$backupdescription' )";
        $result = $dbc->prepare($query);
        $result = $dbc->execute($result);
- 
- 
- 
- 
+
 		
         if (empty($info['http_code'])) { $this->error = NEWLINE."FTP ERROR - Failed to transfer backup file to remote ftp server ".curl_error($ch); 
 		}
@@ -322,11 +252,6 @@ if ($info['speed_upload'] >= 1073741824)
        return $this->error;
 
 	   $transfer_backup_infotext=$info['size_upload'].'_bytes_end_var_'.$transfer_backup_infotext;
-	   
-	   
-
-
-
 	   
 	   return $transfer_backup_infotext;
 

@@ -138,14 +138,14 @@ $result = mysql_query($sql, $conn_id) or mysql_error(); if ($result){ $infotext.
 } elseif (($lastran2)<($shouldhavelastran4)) {
           
 $sql = "UPDATE cojm_cron SET currently_running=1 WHERE ID='2' LIMIT 1";  $result = mysql_query($sql, $conn_id);
-if ($result){ $infotext.=  ' changed 159'; }  else { $infotext.=  " failed 159 "; } 
+if ($result){ $infotext.=  ' starting run2.php '; }  else { $infotext.=  " failed 159 "; } 
 
 // $infotext.= ' Once per hour run2.php included ';
 	
 require  "phpmysqlautobackup/run2.php";	
 
 $sql = "UPDATE cojm_cron SET currently_running=0 , time_last_fired=".date("U")." WHERE ID='2' LIMIT 1"; 
-$result = mysql_query($sql, $conn_id) or mysql_error(); if ($result){ $infotext.=  ' changed 164'; }  else { $infotext.=  " failed 164 "; } 	
+$result = mysql_query($sql, $conn_id) or mysql_error(); if ($result){ $infotext.=  ' finished run2.php once / hr backup'; }  else { $infotext.=  " failed 164 "; } 	
 	
 	
 }  elseif ((($lastran6)<($shouldhavelastran6))) {
@@ -198,6 +198,7 @@ $result = mysql_query($sql, $conn_id) or mysql_error(); if ($result){ $infotext.
 
 // require  "phpmysqlautobackup/cojm-12-hr-stats.php";	
 
+require  "phpmysqlautobackup/run2.php";	
 	
 	
 	$infotext.="<br /> No Scheduled jobs to run, checking admin queues";
@@ -216,7 +217,6 @@ $infotext.= '<br /> '.$gpsrideradmintotal.' Job(s) in Rider GPS Admin Q ';
 	
 if ($gpsrideradmintotal>'0') {
 
-
 $sql = "UPDATE cojm_cron SET currently_running=1 WHERE ID='5' LIMIT 1";  $result = mysql_query($sql, $conn_id);
 if ($result){ $infotext.=  ' changed 168'; }  else { $infotext.=  " failed 168 "; } 
 
@@ -225,12 +225,6 @@ if ($result){ $infotext.=  ' changed 168'; }  else { $infotext.=  " failed 168 "
 
  $sql = "UPDATE cojm_cron SET currently_running=0 , time_last_fired=".date("U")." WHERE ID='5' LIMIT 1"; 
 $result = mysql_query($sql, $conn_id) or mysql_error(); if ($result){ $infotext.=  ' finished running gps-admin-rider.php '; }  else { $infotext.=  " failed running gps-admin-rider.php "; } 	
-
-
-
-
-
-
 
 }
 	

@@ -71,6 +71,19 @@ display:none;
 span.bankhol { background-color:#a8a8a8; 
 padding: 0px 5px 1px;
 }
+
+
+#geocodeaddress {
+display: none;
+padding-left: 6px;
+position: absolute;
+right: 88px;
+top: 8px;
+z-index: 2;
+height: 30px;
+}
+
+
   
 table.backupinfo tr.major-error { background-color:#D80532; color: #ffffff; }  
 table.backupinfo tr.minor-error { background-color:#e6b41a;  }

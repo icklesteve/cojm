@@ -628,19 +628,7 @@ echo '
  <button id="mylocation" title="Current Position"> &nbsp; </button>
  <button id="btn-exit-full-screen" title="Exit Full Screen"> </button>
  <button id="printbutton" title="Print Map" > </button>
- <input id="geocodeaddress" title="Address Search" type="text" style="
- 
- display: none;
-padding-left: 6px;
-position: absolute;
-right: 88px;
-top: 8px;
-z-index: 2;
-height: 30px;
- 
- 
- " 
- placeholder="Search Map" class="ui-state-default ui-corner-all" />
+ <input id="geocodeaddress" title="Address Search" type="text" placeholder="Search Map" class="ui-state-default ui-corner-all" />
  <div class="printinfo">
  <img alt="'.$globalprefrow['globalshortname'].' Logo" src="'.$globalprefrow['adminlogo'].'" />
 <p>'. date('l jS M Y', strtotime($row['targetcollectiondate'])).'</p>';

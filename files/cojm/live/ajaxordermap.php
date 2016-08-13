@@ -614,11 +614,7 @@ var cent=(bounds'.$lilareaid.'.getCenter());
 
 
 
- if ($sumtot>'0.5') {
 
-
-echo ' <a href="../createkml.php?id='. $row['publictrackingref'].'">'.$trackingtext.'</a>. ';
-}
 
 
 
@@ -664,6 +660,15 @@ if ($row['CyclistID']<>'1') { echo '<p> '.$row['cojmname'].' </p>'; }
 </div>
  </div>
  <div class="ordermap" id="ordermap" ></div>
+ <?php
+ 
+  if ($sumtot>'0.5') {
+
+
+echo ' <a href="../createkml.php?id='. $row['publictrackingref'].'">'.$trackingtext.'</a>. ';
+}
+ 
+ ?>
  </div><script>
  
 // $("#geocodeaddress").hide();
@@ -765,6 +770,15 @@ $("span.printcopyr").html(" " + osmcopyr + " " );
  	map.fitBounds(bounds);
 '; ?>
 
+
+
+
+
+
+
+
+
+
 	
 	if (navigator.geolocation) {
 	navigator.geolocation.getCurrentPosition(
@@ -772,11 +786,12 @@ $("span.printcopyr").html(" " + osmcopyr + " " );
     errorCallback_highAccuracy,
     {maximumAge:600000, timeout:5000, enableHighAccuracy: true}
 ); 
-		
+
 
   } else {
   error("Geo Location is not supported");
 }
+
   function currentpositionsuccess(position) {
    mycoords = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
  var mypositionimage = {
@@ -793,51 +808,82 @@ scaledSize: new google.maps.Size(26, 26), // scaled size
 	  clickable:true
   });	
     $("#mylocation").click(function() {	map.panTo(mycoords); });
+	$('#mylocation').prop('title', "Accurate to "+ position.coords.accuracy + "m");	
 	
 	
+	setInterval(function() {
+		   $("#mylocation").show();
    navigator.geolocation.getCurrentPosition(
     changesuccess,
     errorCallback_highAccuracy,
-    {maximumAge:600000, timeout:5000, enableHighAccuracy: true}
-
+    {maximumAge:600000, timeout:30000, enableHighAccuracy: true}
 ); 
+}, 60 * 1000); // 60 * 1000 milsec       runs once a minute to get latest position
+
+
+  }
  
  
  
+ function zeroPad(num, places) {
+  var zero = places - num.toString().length + 1;
+  return Array(+(zero > 0 && zero)).join("0") + num;
+}
  
  
- function changesuccess(position) {
-	 
-	 
-	 
+ function changesuccess(position) { // runs once a min of geolocation supported
+
 // alert(" function changesuccess has fired ");	 
-	 
-	 
 	 var currentdate = new Date(); 
 	 
  mycoords = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
- mytitle= "Accurate to " + position.coords.accuracy + "m, updated " + currentdate.getHours() + ":"  
-                + currentdate.getMinutes();
+ mytitle= "Accurate to " + position.coords.accuracy + "m, updated " + zeroPad(currentdate.getHours(), 2) + ":"  + zeroPad(currentdate.getMinutes(), 2);
 mymarker.setPosition(mycoords);  
 mymarker.setTitle(mytitle);
 
     var latitude = position.coords.latitude;
     var longitude = position.coords.longitude;
-        $("#map-container").append(mytitle);
-  }	
+		$('#mylocation').prop('title', mytitle);
+		    $("#mylocation").css({ opacity: "1"});
   }
   
+  
+  
+  
 function errorCallback_highAccuracy(position) {
-    var msg = "<p>Cant get your location (high accuracy attempt). ";
-    $("#map-container").append(msg);
-	
-	   $("#mylocation").hide();
-	
+//	 alert(" function every min position failed fired ");	 
+//	   $("#mylocation").hide();
+	     $("#mylocation").css({ opacity: "0.4"});
+		 $('#mylocation').prop('title', 'Unable to locate you');
 }
 
 
 
-function successCallback(position) {  }
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   

@@ -5,12 +5,21 @@ $alpha_time = microtime(TRUE);
 error_reporting( E_ERROR | E_WARNING | E_PARSE );
 include "C4uconnect.php";
 
+
+
 $inputstart='';
 $inputend='';
 
 include "changejob.php";
 
-if (isset($_GET['orderid'])) { $orderid=trim($_GET['orderid']); } else { $orderid=''; }
+if (isset($_GET['orderid'])) { $orderid=trim($_GET['orderid']); } else { 
+$orderid=''; 
+
+$inputstart=date("j/n/Y");
+$inputend=date("j/n/Y");
+
+
+}
 
 // include "changejob.php";
 
@@ -27,15 +36,9 @@ echo '
 <link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
 
-
 <script>
-
 var showtimes=0;
-
 </script>
-
-
-
 ';
 
 ?>
@@ -50,12 +53,16 @@ $settingsmenu='1';
 $invoicemenu='0';
 $filename="cojmaudit.php";
 include "cojmmenu.php"; 
-echo '<div class="Post">
+
+?>
+<div class="Post">
 <form id="form" action="#" method="post"> 
 <div class="ui-widget ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;"><p>
 
-Actions From	<input form="form" class="ui-state-highlight ui-corner-all pad" size="10" type="text" name="from" value="'. $inputstart .'" id="rangeBa" />			
-To		<input form="form" class="ui-state-highlight ui-corner-all pad"  size="10" type="text" name="to" value="'.  $inputend.'" id="rangeBb" />
+Actions From 
+<input form="form" class="ui-state-highlight ui-corner-all pad" size="10" type="text" name="from" value="<?php echo $inputstart; ?>" id="rangeBa" />			
+To		
+<input form="form" class="ui-state-highlight ui-corner-all pad"  size="10" type="text" name="to" value="<?php echo $inputend; ?>" id="rangeBb" />
 
 
 <select id="page" name="page" class="ui-state-highlight ui-corner-left">
@@ -64,14 +71,11 @@ To		<input form="form" class="ui-state-highlight ui-corner-all pad"  size="10" t
 <option value="editclient">Client ( Edit )</option>
 <option value="markinvpaid">Invoice Paid</option>
 <option value="editinvcomment">Invoice Comment Edited</option>
-
 <option value="orderaddpod">POD Added</option>
 <option value="ajaxremovepod">POD Removed</option>
-
 </select>
 
-<input class="ui-state-highlight ui-corner-all pad" id="orderid" name="orderid" placeholder="Search by job ref" value="'.$orderid.'" />
-
+<input class="ui-state-highlight ui-corner-all pad" id="orderid" name="orderid" placeholder="Search by job ref" value="<?php echo $orderid; ?>" />
 <input type="checkbox" name="showtimes" class="showtimes" value="1"  > Show Page Creation Times
 <input type="checkbox" name="showdebug" class="showdebug" value="1"  > Show Debug Text
 
@@ -83,16 +87,15 @@ To		<input form="form" class="ui-state-highlight ui-corner-all pad"  size="10" t
 <script type="text/javascript">
 $(document).ready(function() {
 	
-var loadingtext=" <div class=' . "'loadingsuccess'> ". '  Loading Results </div>"; ';
+var loadingtext=" <div class='loadingsuccess'>  Loading Results </div>"; 
 
+<?php
 
 if (isset($_GET['orderid'])) { // 
 
 echo '	
 $("#spinner").show();		
 $("#content").html(loadingtext);
-
-
 
  setTimeout( function() {
  var from = $("#rangeBa").val();
@@ -113,24 +116,23 @@ $("#spinner").hide();
     }
 });
 	
-	}, 100 );
+	}, 50 );
 ';
 
 
 } // ends check for 1st time form submittal
 
-
-
 // both posts are needed as not picking up on date changes
 
+?>
 
-echo '
+
 	    $("#rangeBa, #rangeBb").daterangepicker( {
 		onClose: function(){
 			$("#spinner").show();
 			
 $("#content").html(loadingtext);
-'; ?>
+
 
      var showdebug = $('input.showdebug:checked').map(function(){
              return this.value;
@@ -141,15 +143,7 @@ $("#content").html(loadingtext);
         }).get()
 		
 		
-		<?php
-echo '
-			
-	
-			
-			
-			
-			
-			
+
 	//    alert(" test 110 " ); //only for testing purposes
 var from = $("#rangeBa").val();
 var to = $("#rangeBb").val();
@@ -184,7 +178,7 @@ $("#content").html(loadingtext);
 			
 			
 	
-	'; ?>
+	
 
      var showdebug = $('input.showdebug:checked').map(function(){
              return this.value;
@@ -195,8 +189,7 @@ $("#content").html(loadingtext);
              return this.value;
         }).get()
 
-		<?php
-echo '
+	
 
 	
 var from = $("#rangeBa").val();
@@ -218,7 +211,9 @@ $("#spinner").hide();
 });
 });
 });
-</script>';
+</script>
+<?php
+
 include 'footer.php';
 mysql_close();  
 echo '</body></html>';

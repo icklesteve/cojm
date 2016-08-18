@@ -106,7 +106,7 @@ $output[] = '</title>';
 
 $output[] = '<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/> ';
 
-$output[] = '<script src="https://maps.google.com/maps/api/js?libraries=geometry&amp;sensor=false&amp;v=3.22"></script> ';
+$output[] = '<script src="https://maps.google.com/maps/api/js?libraries=geometry&amp;v=3.22"></script> ';
 $output[] = '<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>';
 
 
@@ -137,8 +137,8 @@ var lineplotscount = [];
 
 var element = document.getElementById("map-canvas");
 		
- var mapTypeIds = [];
-            var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"]
+
+            var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"];
 			
 		  map = new google.maps.Map(element, {
                 center: new google.maps.LatLng('. $globalprefrow['glob1'].','.$globalprefrow['glob2'].'),
@@ -174,7 +174,7 @@ var element = document.getElementById("map-canvas");
 
 
 var osmcopyr="'."<span style='background: white; color:#444444; padding-right: 6px; padding-left: 6px; '> &copy; <a style='color:#444444' " .
-               "href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors</span>".'"
+               "href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors</span>".'";
 
 
  var outerdiv = document.createElement("div");
@@ -187,13 +187,12 @@ map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(outerdiv);
 
 google.maps.event.addListener( map, "maptypeid_changed", function() {
 var checkmaptype = map.getMapTypeId();
-if ( checkmaptype=="OSM" || checkmaptype=="OCM") { 
+if ( checkmaptype=="OSM" || checkmaptype=="OCM") {
 $("div#outerdiv").html(osmcopyr);
 } else { $("div#outerdiv").text(""); }
 });
 
 
-// if OSM / OCM set as default, show copyright
 $(document).ready(function() {setTimeout(function() {
 $("div#outerdiv").html(osmcopyr);
 },3000);});
@@ -450,7 +449,7 @@ for (var n=0; n<highlightcheck.length; n++) {
 	  gmarkers'.$orow['ID'].'[j].setIcon(imagehighlight);
 	  gmarkers'.$orow['ID'].'[j].setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
 	 }
-        }
+        };
       })(marker, i));
 	  }
 	var route'.$orow['ID'].' = [];
@@ -479,7 +478,7 @@ $( "p" ).removeClass( "highlight" );
 eval(" highlightcheck = +highlightcheck ");
 eval("var polyref = polyline" + highlightcheck );
 polyref.setOptions({strokeColor: "#666666", strokeWeight: 2 });
-eval("var highlightcheck = gmarkers" + highlightcheck )
+eval("var highlightcheck = gmarkers" + highlightcheck );
 for (var n=0; n<highlightcheck.length; n++) {  
   highlightcheck[n].setIcon(image); 
   highlightcheck[n].setZIndex(2);
@@ -491,8 +490,8 @@ $( "p#'.$orow['ID'].'" ).addClass( "highlight" );
 	  gmarkers'.$orow['ID'].'[j].setIcon(imagehighlight);
 	  gmarkers'.$orow['ID'].'[j].setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
 	 }
-  })
-  .mouseout(function() {
+  });
+  $( "p#'.$orow['ID'].'" ).mouseout(function() {
 $( "p#'.$orow['ID'].'" ).removeClass( "highlight" );	
 polyline'.$orow['ID'].'.setOptions({strokeColor: "#666666", strokeWeight: 2 });
 	 for (var k=0; k<gmarkers'.$orow['ID'].'.length; k++) {  
@@ -551,10 +550,10 @@ var gmin_lat = Math.min.apply(Math, min_lat);
  
   $output[] = '
     bounds = new google.maps.LatLngBounds();
-    bounds.extend(new google.maps.LatLng(gmax_lat, gmin_lon)); // upper left
-    bounds.extend(new google.maps.LatLng(gmax_lat, gmax_lon)); // upper right
-    bounds.extend(new google.maps.LatLng(gmin_lat, gmin_lon)); // lower right
-    bounds.extend(new google.maps.LatLng(gmin_lat, gmax_lon)); // lower left
+    bounds.extend(new google.maps.LatLng(gmax_lat, gmin_lon));
+    bounds.extend(new google.maps.LatLng(gmax_lat, gmax_lon));
+    bounds.extend(new google.maps.LatLng(gmin_lat, gmin_lon));
+    bounds.extend(new google.maps.LatLng(gmin_lat, gmax_lon));
  ';
  
  $output[] = join("\n", $js);
@@ -573,21 +572,19 @@ var gmin_lat = Math.min.apply(Math, min_lat);
 
  var totalmarkers=0;
    for (var i=markercount.length; i--;) {
-	    totalmarkers = +totalmarkers ;
+	    totalmarkers = +totalmarkers;
 	   markercount[i]= +  markercount[i];
      totalmarkers = totalmarkers + markercount[i];
 
 	 }
 
- totalmarkers = +totalmarkers ;
-   
-// alert(typeof totalmarkers);
-// alert (totalmarkers);
+ totalmarkers = +totalmarkers;
+ 
 
  var totalpoints=0;
    for (var i=lineplotscount.length; i--;) {
 	   lineplotscount[i]= +  lineplotscount[i];
-	      totalpoints = +totalpoints ;
+	      totalpoints = +totalpoints;
      totalpoints+=lineplotscount[i];
    }
 
@@ -600,7 +597,7 @@ $("span#markertype2span").html((formatNumber(totalpoints)));
 
 
  function formatNumber (num) {
-    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
 }
 	';
  
@@ -636,10 +633,10 @@ $output[] = '  }  google.maps.event.addDomListener(window, "load", initialize);
 }
 
 
-//Used for centering the map on print
+
   function center_map(size) {
   lastPos = map.getCenter(); 
-  if (lastPos != null) {  
+  if (lastPos !== null) {  
     
     document.getElementById("map-canvas").style.height = "700" + "px";
     document.getElementById("map-canvas").style.width = "1050" + "px";
@@ -681,10 +678,8 @@ function print_map() {
      if (center_map(800)) {
    	
 	google.maps.event.addListenerOnce(map, "tilesloaded", function(){
-    //this part runs when the mapobject is created and rendered
     google.maps.event.addListenerOnce(map, "tilesloaded", function(){
-        //this part runs when the mapobject shown for the first time
-		google.maps.event.addListenerOnce(map, "idle", function(){		
+		google.maps.event.addListenerOnce(map, "idle", function(){
 	
 		  window.setTimeout(loadPrint, 750);  
 	  
@@ -906,7 +901,7 @@ $output[] = '
 
 </div>
 
-<div class="cojmcopyright"><a href="http://cojm.co.uk" target="_blank" title="Courier Online Job Management">COJM &copy;'.date("Y").'</div>
+<div class="cojmcopyright"><a href="http://cojm.co.uk" target="_blank" title="Courier Online Job Management">COJM &copy;'.date("Y").'</a></div>
 ';  
   
  
@@ -921,6 +916,25 @@ $output[] = '
 
 
 $htmloutput = join("\n", $output);
+function sanitize_output($buffer) {
+    $search = array(
+        '/\>[^\S ]+/s',  // strip whitespaces after tags, except space
+        '/[^\S ]+\</s',  // strip whitespaces before tags, except space
+        '/(\s)+/s'       // shorten multiple whitespace sequences
+    );
+    $replace = array(
+        '>',
+        '<',
+        '\\1'
+    );
+    $buffer = preg_replace($search, $replace, $buffer);
+    return $buffer;
+}
+
+
+$newoutput=sanitize_output($htmloutput);
+
+
 
 if ($projectname<>'') {
 
@@ -935,9 +949,10 @@ if (($error=='') and ($_REQUEST['btn_submit']=="batchhtmltracking")) {
 // if ($outputtype=='kml') { 
 header('Content-type: text/html');
 header('Content-Disposition:attachment; filename="'.$filename.'"');
-} 
+}
 
-echo $htmloutput; 
+// echo $htmloutput; // for debugging, not production
+echo $newoutput; 
 
 
  include 'cojmcron.php';

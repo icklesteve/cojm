@@ -536,7 +536,7 @@ $stmt->bindParam(':jobrequestedtime', $jobrequestedtime, PDO::PARAM_INT);
 $stmt->execute();
 $total = $stmt->rowCount();
 if ($total=='1') {
-$script.='  initialtargetcollectiondate = "'.$_POST['targetcollectiondate'].'"; ';
+// $script.='  initialtargetcollectiondate = "'.$_POST['targetcollectiondate'].'"; ';
 
 $message.=' Target Collection '.$jobrequestedtime;
 $allok=1;

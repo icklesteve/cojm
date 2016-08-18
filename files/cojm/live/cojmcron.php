@@ -195,11 +195,14 @@ $result = mysql_query($sql, $conn_id) or mysql_error(); if ($result){ $infotext.
 	
 
 // temp
-
+// $infotext.= ' test ';
 // require  "phpmysqlautobackup/cojm-12-hr-stats.php";	
+// require  "phpmysqlautobackup/run2.php";	
+// require  "phpmysqlautobackup/run99.php";	
+// require  "phpmysqlautobackup/gps-admin-rider-daily-check.php";	
+// $infotext.= ' Monthly monthly-backup-stats.php included ';
+// require  "phpmysqlautobackup/monthly-backup-stats.php";	
 
-require  "phpmysqlautobackup/run2.php";	
-	
 	
 	$infotext.="<br /> No Scheduled jobs to run, checking admin queues";
 	
@@ -214,6 +217,20 @@ $gpsrideradmin = mysql_query("SELECT COUNT(*) FROM cojm_admin WHERE cojm_admin_s
 $gpsriderrow = mysql_fetch_row($gpsrideradmin); if($gpsriderrow) { $gpsrideradmintotal= $gpsriderrow[0]; }
 $infotext.= '<br /> '.$gpsrideradmintotal.' Job(s) in Rider GPS Admin Q ';
 
+
+
+// $infotext.= ' checking if gps-admin task needed ';
+	
+$gpsadmin = mysql_query("SELECT COUNT(*) FROM cojm_admin WHERE cojm_admin_stillneeded='1' AND cojmadmin_tracking='1' ") or die(mysql_error());
+$gpsadminrow = mysql_fetch_row($gpsadmin); if($gpsadminrow) { $gpsadmintotal= $gpsadminrow[0]; }
+$infotext.= '<br /> '.$gpsadmintotal.' Job(s) in individ job GPS Admin Q ';
+	
+	
+
+
+
+
+
 	
 if ($gpsrideradmintotal>'0') {
 
@@ -226,21 +243,7 @@ if ($result){ $infotext.=  ' changed 168'; }  else { $infotext.=  " failed 168 "
  $sql = "UPDATE cojm_cron SET currently_running=0 , time_last_fired=".date("U")." WHERE ID='5' LIMIT 1"; 
 $result = mysql_query($sql, $conn_id) or mysql_error(); if ($result){ $infotext.=  ' finished running gps-admin-rider.php '; }  else { $infotext.=  " failed running gps-admin-rider.php "; } 	
 
-}
-	
-	
-	
-	
-	
-	
-// $infotext.= ' checking if gps-admin task needed ';
-	
-$gpsadmin = mysql_query("SELECT COUNT(*) FROM cojm_admin WHERE cojm_admin_stillneeded='1' AND cojmadmin_tracking='1' ") or die(mysql_error());
-$gpsadminrow = mysql_fetch_row($gpsadmin); if($gpsadminrow) { $gpsadmintotal= $gpsadminrow[0]; }
-$infotext.= '<br /> '.$gpsadmintotal.' Job(s) in individ job GPS Admin Q ';
-	
-	
-if ($gpsadmintotal>'0')	 {
+} elseif ($gpsadmintotal>'0')	 {
 
 $sql = "UPDATE cojm_cron SET currently_running=1 WHERE ID='4' LIMIT 1";  $result = mysql_query($sql, $conn_id);
 if ($result){ $infotext.=  ' changed cron to start run individ job gps'; }  else { $infotext.=  " FAILED to changed cron to start run individ job gps "; } 
@@ -258,17 +261,6 @@ $result = mysql_query($sql, $conn_id) or mysql_error(); if ($result){ $infotext.
 
 
 
-
-// $infotext.= ' test ';
-// require  "phpmysqlautobackup/run99.php";	
-// require  "phpmysqlautobackup/gps-admin-rider-daily-check.php";	
-
-
-
-
-
-// $infotext.= ' Monthly monthly-backup-stats.php included ';
-// require  "phpmysqlautobackup/monthly-backup-stats.php";	
 
 
 	

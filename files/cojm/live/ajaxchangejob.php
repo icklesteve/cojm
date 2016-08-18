@@ -536,7 +536,7 @@ $stmt->bindParam(':jobrequestedtime', $jobrequestedtime, PDO::PARAM_INT);
 $stmt->execute();
 $total = $stmt->rowCount();
 if ($total=='1') {
- $script.=' ordermapupdater(); ';
+$script.='  initialtargetcollectiondate = "'.$_POST['targetcollectiondate'].'"; ';
 
 $message.=' Target Collection '.$jobrequestedtime;
 $allok=1;
@@ -599,7 +599,12 @@ $stmt->bindParam(':jobrequestedtime', $jobrequestedtime, PDO::PARAM_INT);
 $stmt->execute();
 $total = $stmt->rowCount();
 if ($total=='1') {
- $script.=' ordermapupdater(); ';
+// $script.=' ordermapupdater(); ';
+
+
+// $script.=' var initialcollectionworkingwindow = "'.$_POST['collectionworkingwindow'].'"; ';
+
+
 
 $message.=' Collection Window '.$jobrequestedtime;
 $allok=1;
@@ -657,7 +662,10 @@ if ($total=='1') {
 
 $message.=' Travelling to collection '.$jobrequestedtime;
 $allok=1;
-// $script.=' ordermapupdater(); ';
+// $script.=' var ajaxstarttravelcollectiontime = "'.trim($_POST['starttravelcollectiontime']).'"; ';
+
+
+
 
 } // ends total changed ==1 check
 } // ends try
@@ -707,7 +715,10 @@ if ($total=='1') {
 
 $message.=' On Site time changed to '.$jobrequestedtime;
 $allok=1;
-// $script.=' ordermapupdater(); ';
+
+// $script.=' var initialwaitingstarttime="'.trim($_POST['waitingstarttime']).'"; ';
+
+
 
 } // ends total changed ==1 check
 } // ends try
@@ -755,9 +766,11 @@ $stmt->execute();
 $total = $stmt->rowCount();
 if ($total=='1') {
 
+// $script.=' var initialcollectiondate="'.trim($_POST['collectiondate']).'"; ';
+
 $message.=' Collection time changed to '.$jobrequestedtime;
 $allok=1;
- $script.=' ordermapupdater(); ';
+// $script.=' ordermapupdater(); ';
 
  $nextactiondatecheck='1';
 
@@ -807,7 +820,7 @@ if ($total=='1') {
 
 $message.=' Pause time changed to '.$jobrequestedtime;
 $allok=1;
- $script.=' ordermapupdater(); ';
+// $script.="var initialstarttrackpause='".trim($_POST['starttrackpause'])."'; ";
 
 } // ends total changed ==1 check
 } // ends try
@@ -855,7 +868,8 @@ if ($total=='1') {
 
 $message.=' Resume time changed to '.$jobrequestedtime;
 $allok=1;
- $script.=' ordermapupdater(); ';
+
+// $script.=' var initialfinishtrackpause="'.trim($_POST['finishtrackpause']).'"; ';
 
 } // ends total changed ==1 check
 } // ends try
@@ -902,7 +916,8 @@ $stmt->bindParam(':jobrequestedtime', $jobrequestedtime, PDO::PARAM_INT);
 $stmt->execute();
 $total = $stmt->rowCount();
 if ($total=='1') {
- $script.=' ordermapupdater(); ';
+
+// $script.=' var initialduedate="'.trim($_POST['duedate']).'"; ';
 
 $message.=' Due Date changed to '.$jobrequestedtime;
 $allok=1;
@@ -961,10 +976,11 @@ $stmt->bindParam(':jobrequestedtime', $jobrequestedtime, PDO::PARAM_INT);
 $stmt->execute();
 $total = $stmt->rowCount();
 if ($total=='1') {
- $script.=' ordermapupdater(); ';
+// $script.=' ordermapupdater(); ';
 $message.=' Delivery working window changed to '.$jobrequestedtime;
 $allok=1;
-// $script.=' ordermapupdater(); ';
+
+// $script.=' var initialdeliveryworkingwindow="'.trim($_POST['deliveryworkingwindow']).'"; ';
 
 $nextactiondatecheck='1';
 
@@ -1035,8 +1051,6 @@ if ($total=='1') {
 
 $message.=' Complete time changed to '.$jobrequestedtime;
 $allok=1;
-$script.=' ordermapupdater(); ';
-
 
 // if ($jobrequestedtime=='0000-00-00 00:00:00') {  }
 
@@ -1085,6 +1099,8 @@ if ($total=='1') {
 
 $message.=' Time Requested changed to '.$jobrequestedtime;
 $allok=1;
+
+// $script.=' var initialjobrequestedtime="'.trim($_POST['jobrequestedtime']).'"; ';
 
 } // ends total changed ==1 check
 } // ends try
@@ -1343,7 +1359,7 @@ catch(PDOException $e) {
 $message.= $e->getMessage(); 
 }
 
-} // ends page ajax deletepod
+} // ends page ajax ajaxremovepod
 
 
 
@@ -1977,7 +1993,7 @@ $("#subarealink").hide();
 
 $script.='
 
-ordermapupdater();
+// ordermapupdater();
 
 ';
 
@@ -2048,7 +2064,7 @@ $script.=' $("#subareacomments").html(" ('.$descrip.') ").show();
 $script.='  $("#subareacomments").hide();  ';
 }
 
-$script.=' ordermapupdater(); ';
+// $script.=' ordermapupdater(); ';
 
 // $cojmaction='recalcprice';
 } // ends total changed ==1 check

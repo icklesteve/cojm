@@ -1,3 +1,28 @@
+@charset 'UTF-8';
+
+/*
+COJM Courier Online Operations Management
+fullscreenmap.css - CSS File used for the full screen google map views, hides a load of stuff
+Copyright (C) 2016 S.Young cojm.co.uk
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+
+
  @page {
       margin: 0cm;
 	  size: landscape;
@@ -68,10 +93,10 @@ border-radius:2px;
 
 }
 
- 
+
 div.infotext { display:none; }
 
-div#demo_top_wrapper {  display:none; }
+div.top_menu_line {  display:none; }
  
 div.cojmcopyright {  
  bottom:0;

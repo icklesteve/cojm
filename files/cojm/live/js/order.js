@@ -463,6 +463,7 @@ $(function () { // Document is ready
             },
             complete: function () {
                 showmessage();
+                resizenewcost();
             }
         });
     }
@@ -1547,6 +1548,22 @@ $(function () { // Document is ready
 
 
 
+    function resizenewcost() {
+    
+//   alert(" about to resize ");
+    
+    var testsize=$("#newcost").val().length-1;
+    
+    $("#newcost").attr("style","");
+    $("#newcost").attr("size", testsize);
+}
+
+
+    
+    
+
+    
+    
 
     $("#newstatus").change(function () {
         message = '';
@@ -1660,6 +1677,7 @@ $(function () { // Document is ready
             complete: function () {
                 ordermapupdater();
                 showmessage();
+                resizenewcost();
             }
         });
     });
@@ -1882,6 +1900,7 @@ $(function () { // Document is ready
             },
             complete: function () {
                 showmessage();
+                resizenewcost();
                 $("#spinner").hide();
             }
         });
@@ -1968,7 +1987,6 @@ $(function () { // Document is ready
     }, 1100);
 
 
-
     $(function () {
         $(".normal").autosize();
     });
@@ -2029,6 +2047,7 @@ $(function () { // Document is ready
                 $('#emissionsaving').append(data);
             },
             complete: function () {
+            resizenewcost();
                 showmessage();
             }
         });

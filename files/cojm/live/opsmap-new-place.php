@@ -213,7 +213,7 @@ $(function(){ $('.normal').autosize();	});
 	
 	    $.ajax({
       type: 'POST',
-      url: 'opsmap_process.php',
+      url: 'ajaxopsmap_process.php',
       data: formdata,
       success:function(data){
         //    Marker.setIcon(''); //replace icon

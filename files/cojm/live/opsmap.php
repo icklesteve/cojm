@@ -238,14 +238,14 @@ $( "#'.$areaid.'" ).removeClass( " hidden " ); ';
 
 
 
-        //Load Markers from the XML File, Check (opsmap_process.php)			
+        //Load Markers from the XML File, Check (ajaxopsmap_process.php)			
 if ($searchtype=='archive') {
     
     
-$ajaxlocation='opsmap_process.php?archive=1';    
+$ajaxlocation='ajaxopsmap_process.php?archive=1';    
 }
     else { 
-    $ajaxlocation='opsmap_process.php?archive=0';
+    $ajaxlocation='ajaxopsmap_process.php?archive=0';
     }
     
 
@@ -423,7 +423,7 @@ function initialize() {
         //drop a new marker on right click
         google.maps.event.addListener(map, 'rightclick', function(event) {
             //Edit form to be displayed with new marker
-            var EditForm = '<form action="opsmap_process.php" method="POST" name="SaveMarker" id="SaveMarker">'+
+            var EditForm = '<form action="ajaxopsmap_process.php" method="POST" name="SaveMarker" id="SaveMarker">'+
 			'<div class="marker-edit">'+
             '<div class="fs"><div class="fsli"> Name </div>'+
 			'<input type="text" name="pName" class="save-name ui-state-default ui-corner-all w170" placeholder="Enter Title" maxlength="40" />'+
@@ -592,7 +592,7 @@ var savemarker="savemarker";
     console.log(replaceWin);        
     $.ajax({
       type: "POST",
-      url: "opsmap_process.php",
+      url: "ajaxopsmap_process.php",
       data: myData,
       success:function(data){
             replaceWin.html(data); //replace info window with new html

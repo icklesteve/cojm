@@ -1,7 +1,7 @@
 <?php
 /*
     COJM Courier Online Operations Management
-	checkscreen.php - Logs screen size to audit trail, starts cojmcron
+	ajaxkickcron.php - Logs screen size to audit trail, starts cojmcron
     Copyright (C) 2016 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify

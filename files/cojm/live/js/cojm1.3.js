@@ -2964,7 +2964,7 @@ if(usr.length >= 1)
 $("#afterclientselect").html('<a href="#" class="loader"></a> ');
     $.ajax({  
     type: "POST",  
-    url: "check.php",  
+    url: "ajaxcheck.php",  
     data: "newjobselectclient="+ usr ,  
     success: function(msg){  
    $("#status").ajaxComplete(function(event, request, settings){ 

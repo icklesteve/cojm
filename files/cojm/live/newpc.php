@@ -19,7 +19,7 @@ $title = "COJM";
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <meta http-equiv="Content-Type"  content="text/html; charset=utf-8">
 <?php echo '<link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
-<link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
+<link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>'; ?>
 <title><?php print ($title); ?> Add or Edit PostCode </title>
     <script src="https://maps.google.co.uk/maps?file=api&amp;v=2&amp;key=AIzaSyAQR0YkeZdeyV_u2tnRHD-v28PR4upoVaI" type="text/javascript"></script>

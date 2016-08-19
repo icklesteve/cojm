@@ -398,7 +398,7 @@ $evatdec='';
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <meta http-equiv="Content-Type"  content="text/html; charset=utf-8">
 <?php echo '<link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
-<link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
+<link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>'; ?>
 <title>COJM <?php print ($showyear); ?> Profit and Loss</title>
 </head>

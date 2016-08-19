@@ -33,7 +33,7 @@ include "C4uconnect.php";
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
-<link rel="stylesheet" href="js/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
+<link rel="stylesheet" href="css/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
 <script type="text/javascript" src="js/jquery-ui.1.8.7.min.js"></script>
 <title><?php print ($title); ?> Core Pricing</title>

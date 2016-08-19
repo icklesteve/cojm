@@ -84,7 +84,7 @@ $pm10text='';
 <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no" >
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <?php echo '<link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
-<link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
+<link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>'; ?>
 <title><?php print ($title) . $mailid1 ?> Send Single Email </title>
 <?php

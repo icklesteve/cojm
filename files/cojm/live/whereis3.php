@@ -48,7 +48,7 @@ $menuextra=$menuextra.' Refresh"></form>';
 
 echo '
 <link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
-<link rel="stylesheet" href="js/themes/'.$globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" />
+<link rel="stylesheet" href="css/themes/'.$globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" />
 '; ?>
 <meta name="HandheldFriendly" content="true" >
 <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no" >

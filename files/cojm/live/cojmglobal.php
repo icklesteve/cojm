@@ -38,7 +38,7 @@ $title = "COJM Settings";
 ?><!doctype html>
 <html lang="en"><head>
 
-<link rel="stylesheet" href="js/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" />
+<link rel="stylesheet" href="css/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" />
 <meta name="HandheldFriendly" content="true" >
 <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no" >
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >

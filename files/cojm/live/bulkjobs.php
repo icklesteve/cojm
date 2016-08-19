@@ -14,7 +14,7 @@ $hasforms='1';
 <META HTTP-EQUIV="Refresh" CONTENT="<?php echo $globalprefrow['pagetimeout']; ?>; "> 
 <?php echo '
 <link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
-<link rel="stylesheet" href="js/themes/'.$globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" />'; ?>
+<link rel="stylesheet" href="css/themes/'.$globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" />'; ?>
 <title><?php print ($title); ?> Bulk Jobs</title>
 <script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >

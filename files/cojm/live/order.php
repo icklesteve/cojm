@@ -147,7 +147,7 @@ $cojmid=$id;
 <title><?php echo $id; ?> COJM</title>
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <link id="pagestyle" rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
-<link rel="stylesheet" href="js/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
+<link rel="stylesheet" href="css/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
 <?php
 if ($row['ID']) {

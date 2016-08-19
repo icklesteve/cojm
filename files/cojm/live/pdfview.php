@@ -40,7 +40,7 @@ $title='COJM ';
 <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no" >
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <?php echo '<link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
-<link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
+<link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>'; ?>
 <title><?php print ($title); ?> Create Invoice</title></head>
 <body>
@@ -296,9 +296,6 @@ id="expensedate" size="12" name="expensedate"></fieldset>
 <option  value="0" >Hide Delivery Address</option>
 </select>
 </fieldset>
-
-
-
  
  
 <fieldset><label for="addresstype" class="fieldLabel"> &nbsp; </label>
@@ -308,8 +305,6 @@ id="expensedate" size="12" name="expensedate"></fieldset>
 <option  value="none" >No Addresses</option>
 </select>
 </fieldset>
-
-
 
 
 

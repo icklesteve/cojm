@@ -73,7 +73,7 @@ $licost='';
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <title>COJM : Dashboard</title>
 <?php echo '<link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
-<link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
+<link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>'; ?>
 	<script type="text/javascript">	
 	$(document).ready(function() {

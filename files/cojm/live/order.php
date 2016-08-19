@@ -48,37 +48,79 @@ $subareacomments='';
 
 include "changejob.php";
 
-$cojmid=$id;
-echo '<!doctype html><html lang="en"><head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-<meta name="HandheldFriendly" content="true" >
-<meta name="viewport" content="width=device-width, height=device-height" >
-<meta name="generator" content="COJM www.cojm.co.uk">
-<title>'. $ID.' COJM</title>
-<link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
-<link id="pagestyle" rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
-<link rel="stylesheet" href="js/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
-<script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
-<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>
-<script src="js/richmarker.js" type="text/javascript"></script>
-<script src="js/order.js" type="text/javascript"></script>
-<style>
-.hideuntilneeded {  display:none; }
-.orderjobcomments { width: 65%; outline: none; height:20px; }
-#baseservicecbbtext { padding-left:8px; }
+
+	function time2str($ts)  //Relative Date Function  // used in order.php and ajaxordermap
+	{
+		if(!ctype_digit($ts))
+			$ts = strtotime($ts);
 
 
+// echo ' cj 5643 ';		
+		
+		$tempdaydiff=date('z', $ts)-date('z');
+		
+// echo $tempday.' '.date('z');		// passed date day
+		
+// 		$tempday<>date('z', $ts)
+		
+//		$tempnay
+		
+		
+//		echo $tempdaydiff;
+		
+		
+		$diff = time() - $ts;
+		if($diff == 0)
+			return 'now';
+		elseif($diff > 0)
+		{
+			$day_diff = floor($diff / 86400);
+			if($day_diff == 0)
+			{
+				if($diff < 60) return ' Just now. ';
+				if($diff < 120) return ' 1 min ago. ';
+				if($diff < 3600) return ' '.floor($diff / 60) . ' min ago. ';
+				if($diff < 7200) return ' 1 hr, ' . floor(($diff-3600) / 60) . ' min ago. ';
+				
+				
+			if($diff < 86400) return floor($diff / 3600) . ' hours ago';
+			
+			}
+			
+			if($tempdaydiff=='-1') { return 'Yesterday '. date('A', $ts).'. '; }
+			
+//			if($day_diff == 1) return 'Yesterday';
+			if($day_diff < 7) return ' Last '. date('D A', $ts).'. ';
+			
+			//date('D', $ts).' '. $day_diff . ' days ago';
+	
 
+	if($day_diff < 31) return date('D', $ts).' '. ceil($day_diff / 7) . ' weeks ago. ';
+			if($day_diff < 60) return 'Last month';
+			return date('D M Y', $ts);
+		}
+		else
+		{
+			$diff = abs($diff);
+			$day_diff = floor($diff / 86400);
+			if($day_diff == 0)
+			{
+				if($diff < 120) return 'In a minute';
+				if($diff < 3600) return 'In ' . floor($diff / 60) . ' mins. ';
+				if($diff < 7200) { return ' 1hr, ' . floor(($diff-3600) / 60) . ' mins. '; }
+			//	if(($diff < 86400) and ($tempday<>date('z', $ts))) {  return ' Tomorrow ';    }
+				
+				if($diff < 86400) return ' ' . floor($diff / 3600) . ' hrs. ';
+			}
+			if($tempdaydiff == 1) return ' Tomorrow '. date('A', $ts).'. ';
+			if($day_diff < 4) return date(' D A', $ts);
+			if($day_diff < 7 + (7 - date('w'))) return date('D ', $ts).'next week. ';
+			if(ceil($day_diff / 7) < 4) return date('D ', $ts).' in ' . ceil($day_diff / 7) . ' weeks. ';
+			if(date('n', $ts) == date('n') + 1) return date('D', $ts).' next month. ';
+			return date('D M Y', $ts);
+		}
+	}
 
-<--- starts spinner on page load, only for ajax pages -->
-#spinner { display:inline; }
-
-</style>
-</head><body >';
-
-$filename='order.php'; 
-
-include "cojmmenu.php"; 
 
 
 
@@ -89,11 +131,72 @@ AND Orders.status = status.status
 AND Orders.CyclistID = Cyclist.CyclistID
 AND Orders.ID = '$id' LIMIT 1"; $result=mysql_query($query, $conn_id); $row=mysql_fetch_array($result);
 
+
+
+
+
+
+
+$cojmid=$id;
+?>
+<!doctype html><html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="HandheldFriendly" content="true" >
+<meta name="viewport" content="width=device-width, height=device-height" >
+<meta name="generator" content="COJM www.cojm.co.uk">
+<title><?php echo $id; ?> COJM</title>
+<link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
+<link id="pagestyle" rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
+<link rel="stylesheet" href="js/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
+<script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
+<?php
+if ($row['ID']) {
+
+?>
+<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;key=<?php echo $globalprefrow['googlemapapiv3key']; ?>" type="text/javascript"></script>
+<script src="js/richmarker.js" type="text/javascript"></script>
+<script src="js/order.js" type="text/javascript"></script>
+<style>
+/* starts spinner on page load, only for ajax pages  */
+#spinner { display:inline; }
+</style>
+<?php
+
+}
+
+?>
+</head><body >
+<?php
+
+
+$filename='order.php'; 
+
+include "cojmmenu.php"; 
+
+
+
+
 if ($row['ID']) {
   if (($row['isdepartments']=='1'))   {
 $orderdep=$row['orderdep']; $depquery="SELECT * FROM clientdep WHERE depnumber = '$orderdep' LIMIT 1";
 $result=mysql_query($depquery); $drow=mysql_fetch_array($result);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -105,7 +208,6 @@ $formbirthday=microtime(TRUE);
 var id='<?php echo $id; ?>';
 var publictrackingref='<?php echo $row['publictrackingref']; ?>';
 var allok=1;
-var oktosubmit=1; 
 var statustoohigh='Unable to edit, status too high';
 var formbirthday=<?php echo $formbirthday; ?>; 
 var oldclientorder=<?php echo $row['CustomerID']; ?>;
@@ -146,7 +248,7 @@ var initialprivatejobcomments<?php if ($row["privatejobcomments"]) { echo '=1'; 
 
 <?php
 
-echo '<div class="Post lh24">';
+echo '<div id="Post" class="Post lh24">';
 
 if ($row['status']<'100') {
 
@@ -474,7 +576,7 @@ if ( $globalprefrow["inaccuratepostcode"]=='1') {
 
 echo '
 
-<div style="clear:both;"> </div>
+<div class="clrfix"> </div>
 
 ';
 
@@ -821,7 +923,7 @@ value="'; if ($row['collectiondate']>'10') { echo date('d/m/Y H:i', strtotime($r
 
 echo '" />
 
-<button id="toggleresumechoose" class="toggleresumechoose" title="Add Pause / Resume">P R</button> 
+<button id="toggleresumechoose" class="toggleresumechoose" title="Add Pause / Resume"> &nbsp; </button> 
 <span id="collectiondatetext"></span> 
 </div>  
 <div id="toggleresume" class="toggleresume fs" >';
@@ -829,7 +931,7 @@ echo '" />
 
 echo '<div class="fsl">
 
- <span class="toggleresumechoose" title="Pause / Resume">P R</span> '; // not a button, just displays an icon
+ <span class="toggleresumechoose" title="Pause / Resume"> &nbsp; </span> '; // not a button, just displays an icon
 echo 'Paused </div> 
 
  <input type="text" class="caps ui-state-default ui-corner-all dpinput" name="starttrackpause" ';
@@ -998,7 +1100,13 @@ $haspod = $stmt->rowCount();
 </div>
 <div id="podimagecontainer" class="fsr hideuntilneeded"> 
 <span id="ajaxremovepod" title="Remove POD" > &nbsp; </span>
-<img id="orderpod" class="orderpod" alt="POD" src="../podimage.php?id=<?php echo $row['publictrackingref'];  ?>" > 
+<img id="orderpod" class="orderpod" alt="POD" 
+<?php if ($haspod>0) { ?> 
+
+src="../podimage.php?id=<?php echo $row['publictrackingref'];  ?>" 
+
+<?php  } ?>
+>
 </div>
 </div>
 <?php
@@ -1285,7 +1393,16 @@ echo '</span>
 
 
 echo ' <div class="ui-corner-all ui-state-highlight addresses">';
-echo '<div id="client" class="fs"> <div class="fsl"> Client </div>';
+echo '<div id="client" class="fs"> <div class="fsl"> 
+
+
+
+<a id="clientlink" class="showclient" title="'.$row['CompanyName'].' Details" target="_blank" href="new_cojm_client.php?clientid='.$row['CustomerID'].'"> </a>
+
+
+
+
+</div>';
 
  if ($row['isactiveclient'] =='1' ) {
 
@@ -1315,7 +1432,7 @@ echo ' value="'.$CustomerIDlist.'">'.$CompanyName;
  if ($isactive <>'1' ) { echo ' INACTIVE '; } 
 echo '</option>';} echo '</select> 
 
-<a id="clientlink" class="showclient" title="'.$row['CompanyName'].' Details" target="_blank" href="new_cojm_client.php?clientid='.$row['CustomerID'].'"> </a>
+
 ';
 
 
@@ -1331,9 +1448,16 @@ echo '</option>';} echo '</select>
  
   
 echo ' <div id="clientNotes" class="fsr favcomments hideuntilneeded" > '. $row['Notes'].' </div> ';
-echo '  <div id="clientdep" class="fsr hideuntilneeded"> ';
-  
-// echo ' orderdep ' . $row['orderdep'];
+echo '  <div id="clientdep" class="fs hideuntilneeded"> 
+
+
+<div class="fsl">
+
+<a id="clientdeplink" class="showclient hideuntilneeded" title="'.$drow['depname'].' Details" 
+target="_blank" href="new_cojm_department.php?depid='.$row['orderdep'].'"> </a>
+</div>
+
+ '; 
 
 
 $query = "SELECT depnumber, depname , isactivedep FROM clientdep WHERE associatedclient = '".$row['CustomerID']."' ORDER BY isactivedep DESC, depname"; 
@@ -1352,8 +1476,6 @@ if ($isactivedep<>'1') { echo ' Inactive '; } echo '</option>'; } echo '</select
 
 
 echo '
-<a id="clientdeplink" class="showclient hideuntilneeded" title="'.$drow['depname'].' Details" 
-target="_blank" href="new_cojm_department.php?depid='.$row['orderdep'].'"> </a>
 </div>
 <div id="clientdepnotes" class="fsr favcomments">';
 if (isset($drow['depcomment'])) { if (trim($drow['depcomment'])) { echo $drow['depcomment']; }}
@@ -1370,7 +1492,9 @@ size="28" value="'. $row['requestor'].'" /></div> ';
 
 
 
- echo '<div id="clientjobreferencediv" class="fs"><div class="fsl">Clients Ref </div> <input id="clientjobreference" type="text" class="caps ui-state-default ui-corner-all" 
+ echo '<div id="clientjobreferencediv" class="fs"><div class="fsl">Clients Ref </div> 
+ 
+ <input id="clientjobreference" type="text" title="Client Reference" class="caps ui-state-default ui-corner-all" 
 name="clientjobreference" size="28" value="'.$row['clientjobreference'].'"> </div> ';
 
 
@@ -1468,7 +1592,12 @@ if ($dateshift=='528') { echo ' SELECTED '; } echo ' value="528" >+ 22 Days</opt
 
 
 
-echo '<button id="orderaudit"> Audit Trail </button>';
+echo '<button id="orderaudit"> Audit Trail </button> ';
+
+if (!$mobdevice) { echo ' <button class="deleteord" id="deleteord"> Delete Job </button> '; }
+else { echo '<button class="deleteord" id="deleteordmob"> Delete Job </button>'; }
+
+
 
 
 
@@ -1480,7 +1609,6 @@ echo '<button id="orderaudit"> Audit Trail </button>';
 <input form="uploadpodform" type="hidden" name="formbirthday" value="<?php echo date("U"); ?>">
 </form>
 
-<button id="testcomplete"> Test </button>
 <?php
 
 
@@ -1492,7 +1620,7 @@ echo '<form action="index.php#" method="post" id="frmdel">
 <input type="hidden" name="formbirthday" value="'.date("U").'">
 <input type="hidden" name="id" value="'.$ID.'">
 <input type="hidden" name="page" value="confirmdelete">
-<button class="deleteord" id="deleteord"> Delete Job </button></form>';
+</form>';
 
 } else {  // ends check for mobile device
 
@@ -1500,7 +1628,7 @@ echo '<form action="index.php#" method="post" id="frmdelmob">
 <input type="hidden" name="formbirthday" value="'.date("U").'">
 <input type="hidden" name="id" value="'.$ID.'">
 <input type="hidden" name="page" value="confirmdeletemobile">
-<button class="deleteord" id="deleteordmob"> Delete Job </button></form>';
+</form>';
 
 } // ends mobile delete 
 
@@ -1510,17 +1638,10 @@ echo '</div>';
 
 
 
+?>
+<div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses hideuntilneeded"></div>
+<?php
 
-
-
-
-
-
-
-
-
-
-echo '<div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses hideuntilneeded"></div>';
 echo ' </div> <br /> '; // ends div hangright
 
 
@@ -1528,7 +1649,7 @@ echo ' </div> <br /> '; // ends div hangright
 
 } else { // no COJM ID located
  echo ' <div class="ui-state-highlight ui-corner-all p15" > 
-				<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+				<p><span class="ui-icon ui-icon-info"></span>
 				<strong>Hmmm, </strong> No COJM Reference with this ID located.</p> </div><br />';
 $searchid=strtoupper(trim($ID));
 if ($searchid) { include "ordersearch.php"; } // ends check for ID		
@@ -1589,7 +1710,7 @@ $(document).ready(function() {
 
  $('#jschangfavfr').bind('click', function(e) {
 	e.preventDefault();  
-	$.Zebra_Dialog('', {
+	$.zebra_dialog('', {
     'source':  {'ajax': ('ajaxselectfav.php?addr=fr&clientid=' + oldclientorder + '&jobid=' + id )},
 	  'type':     'question',
 //	  width : 500 ,
@@ -1606,18 +1727,7 @@ $(document).ready(function() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-if ((olddeporder)<1) {
-	$("div#clientdep.fsr input.ui-autocomplete-input").addClass("autoinputerror").removeClass(""); }
+if ((olddeporder)<1) { $("#clientdep.fsr input.ui-autocomplete-input").addClass("autoinputerror").removeClass(""); }
 
  <?php 
 
@@ -1645,14 +1755,7 @@ if (isset($drow['depname'])) { if ($drow['depname']) { echo ' $("a#clientdeplink
 
 
 
-
-
-
-
-
-
-
-if ($row['iscustomprice']=='1') { 
+if ($row['iscustomprice']=='1') {
 
 // cancelpricelock display
 
@@ -1662,7 +1765,7 @@ echo ' $("#buttoncancelpricelock").show(); ';
 
 
 
-
+// put into js variable
 if ($haspod>0) {
 
 echo '
@@ -1670,7 +1773,7 @@ $("#uploadpodfile").hide();
 $("#podimagecontainer").show(); 
 haspod=1; ';
 
-} else { 
+} else {
 
 echo '
 $("#uploadpodfile").show(); 
@@ -1702,245 +1805,9 @@ echo ' $("#mileagerow").show(); ';
 
 ?>
 
-showhidebystatus();	
-ordermapupdater();
 
 
-
-
-
-	
 });
-
-
-
-
-function showhidebystatus() { // or changes to time values for showing buttons for working windows
-
-
-	if ((olddeporder)<1) {
-
-$("div#clientdep.fsr input.ui-autocomplete-input").addClass("autoinputerror").removeClass("");
-		} else {
-$("div#clientdep.fsr input.ui-autocomplete-input").addClass("").removeClass("autoinputerror");
-		}
-
-
-
-
-
-
-
-if (initialstatus<31) {
-$("#starttravelcollectiontimediv").hide();
-} else {
-$("#starttravelcollectiontimediv").show();
-}
-
-
-if (initialstatus<49) {
-$("#waitingstarttimediv").hide();
-} else {
-$("#waitingstarttimediv").show();
-}
-
-
-if (initialstatus<59) {
-$("#collectiondatediv").hide();
-} else {
-$("#collectiondatediv").show();
-}
-
-
-if (initialstatus<69) {
-$("#ShipDatediv").hide();
-} else {
-$("#ShipDatediv").show();
-}
-
-
-
-if (initialstatus<100 && initialdeliveryworkingwindow=='')  {
-$("#allowdww").show();
-} else {
-$("#allowdww").hide();	
-}
-
-
-
-
-if (initialstatus<100 && initialcollectionworkingwindow=='')  {
-$("#allowww").show();
-} else {
-$("#allowww").hide();
-}
-
-
-
-
-
-if (initialdeliveryworkingwindow!=='') {
-$("#untildww").show();
-$("#deliveryworkingwindow").show();
-} else {
-$("#untildww").hide();
-$("#deliveryworkingwindow").hide();
-}
-
-if (initialcollectionworkingwindow!=='') {
-$("#allowwwuntil").show();
-$("#collectionworkingwindow").show();
-} else {
-$("#allowwwuntil").hide();
-$("#collectionworkingwindow").hide();
-}
-
-
-
-if ((initialstatus>99) && (initialjobcomments!==1)) {
- $("#jobcommentsdiv").hide();
-} else { 
- $("#jobcommentsdiv").show();
-}
-
-
-if ((initialstatus>99) && (initialprivatejobcomments!==1)) {
- $("#privatejobcommentsdiv").hide();
-} else { 
- $("#privatejobcommentsdiv").show();
-}
-
-
-if (initialstatus>99) {
- $("#toggleresumechoose").hide();
-}
-
-
-if (initialstatus>99) {
- $(".deleteord").hide();
-} else {
- $(".deleteord").show();
-
-}
-
-
-
-if (initialstatus>99) {
-var subarea=$("#opsmapsubarea").val();
-
-if (subarea=="") { 
- $("#opsmapsubarea").hide();
-} else {
-	 $("#opsmapsubarea").show();
-}
-} else {  $("#opsmapsubarea").show(); }
-	
-
-
-if (initialstatus<31) {
-
- $("#currorsched").hide();
-
-}
-
-
-
-
-
-
-if ((initialstarttrackpause!=='') | (initialfinishtrackpause!=='')) {
- $("#toggleresumechoose").hide();
-}
-
-
-
-
-if ((initialstatus>99 && initialstarttravelcollectiontime=="") | ( initialstatus<40  )) {
-$("#starttravelcollectiontimediv").hide();
-} else {
-$("#starttravelcollectiontimediv").show();
-}
-
-if ((initialstatus>99 && initialwaitingstarttime=="") | ( initialstatus<50  )) {
-$("#waitingstarttimediv").hide();
-} else {
-$("#waitingstarttimediv").show();
-}
-
-
-// alert($("#requestor").val);
-
-
-
-
-if ((initialstatus>99 && initialrequestor=="")) {
-$("#requestordiv").hide();
-} else {
-$("#requestordiv").show();
-}
-
-
-
-
-if ((initialstatus>99 && initialclientjobreference=="")) {
-$("#clientjobreferencediv").hide();
-} else {
-$("#clientjobreferencediv").show();
-}
-
-
-
-
-if (initialstatus>99) {
-$("#buttoncancelpricelock").addClass('buttoncancelpricelocklocked'); 
-} else { 
-
-$("#buttoncancelpricelock").removeClass('buttoncancelpricelocklocked'); 
-
-}
-
-
-
-
-
-if (initialstatus>99) {
-$("#ajaxremovepod").hide(); 
-$("#uploadpodfile").hide(); 
-}
-
-
-} // ends showhidebystatus
-	
-
-function sendstatus() {
-
-  	    $.ajax({
-        url: 'ajaxchangejob.php',  //Server script to process data
-		data: {
-		page:'ajaxorderstatus',
-		formbirthday:formbirthday,
-		newstatus:newstatus,
-		id:id},
-		type:'post',
-        success: function(data) { $('#emissionsaving').append(data); },
-		complete: function(data) { ordermapupdater(); showhidebystatus();	showmessage();  }
-});
-
-message=' Code to send status ';
-
-
-}
-
-
- 
- $(function() { $('#testcomplete').on('click' , function() {
- message='';
- testtimes(); 
- showmessage();
- }); });	
-
-	
-
 
 
 
@@ -1963,6 +1830,12 @@ $("div.togglenr5").hide();
 $("span.togglenr5choose").click(function(){$("div.togglenr5").slideToggle("fast");});
 
 </script>
+
+
+<!-- all divs are float so orderfoot pads the bottom out for menu etc to display ok -->
+<div class="orderfoot"> &nbsp; </div>
+
+
 <?php
 
 include "footer.php";

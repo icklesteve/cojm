@@ -435,8 +435,8 @@ $infotext=$infotext. '<br /><strong>Unable to deactive status'.$i.',</strong><br
 $pagetext=$pagetext. '<p><strong>Unable to deactive status'.$i.',</strong><br /><strong>'.$sumtot.' Jobs Outstanding.</p>';
 
 while ($row = mysql_fetch_array($sql_result)) { extract($row); 
-$infotext=$infotext. '<br /><a target="_blank" href="order.php?id='. $ID .'">'. $ID.'</a>';
-$pagetext=$pagetext. '<p><a target="_blank" href="order.php?id='. $ID .'">'. $ID.'</p>';
+$infotext=$infotext. '<br /><a target="_blank" href="order.php?id='. $row['ID'] .'">'. $row['ID'].'</a>';
+$pagetext=$pagetext. '<p><a target="_blank" href="order.php?id='. $row['ID'] .'">'. $row['ID'].'</p>';
 } // ends check for jobs in loop 
 $activestatus='1';
 } // see if active
@@ -834,11 +834,9 @@ if ($thisserviceid=='') { if ($Service) { $infotext=$infotext.'<p><strong>New Se
    ", $conn_id )
      or die(mysql_error()); 
    
-  $id=mysql_insert_id();  
+  $thisserviceid=mysql_insert_id();  
 mysql_query("UNLOCK TABLES", $conn_id);   
 
-$thisserviceid=$id;
-  $id='';
   $pagetext=$pagetext.'<p>New service '.$thisserviceid.' '.$Service.' Created.</p>';
   $infotext=$infotext.'<br />New service '.$thisserviceid.' '.$Service.' Created.'.$sql;
    
@@ -1044,14 +1042,12 @@ if (isset($_POST['CompanyName'])) { $CompanyName=trim($_POST['CompanyName']); } 
    ('$CompanyName',
    '1' )
    ", $conn_id
-   )  or die(mysql_error()); $id=mysql_insert_id();  
+   )  or die(mysql_error()); 
+   $clientid=mysql_insert_id();  
 mysql_query("UNLOCK TABLES", $conn_id);   
 
-$infotext=$infotext.'<br />ID Generated : '.$id;
+$infotext=$infotext.'<br />New client ID : '.$clientid;
 
-
-$clientid=$id;
-$id='';
 
 $infotext=$infotext."<br />Success! ".$clientid; 
 $pagetext=$pagetext."<p>New client added with name ".$CompanyName.".</p>"; 
@@ -1233,7 +1229,7 @@ $pagetext=$pagetext.'<p>Created new Department </p>';
 
 
 
-} // ends check for client id and dep name
+} // ends check for clientid and dep name
 } // ends page=new department
 
 
@@ -1479,13 +1475,12 @@ $i++;
    '1',
    (UPPER('$favadrcomments'))   )
    ", $conn_id
-   )  or die(mysql_error()); $pp=mysql_insert_id();  
+   )  or die(mysql_error()); 
+   $insertid=mysql_insert_id();  
 mysql_query("UNLOCK TABLES", $conn_id);   
 
-$clientid=$id;
-// $id='';
 
-$infotext=$infotext."<br />Success!"; 
+$infotext=$infotext."<br />New fav id ".$insertid.' '.$favadrft; 
 $pagetext=$pagetext."<p>New favourite added ".$favadrft.".</p>"; 
 
 } // end new client and check companyname>0 
@@ -1806,13 +1801,6 @@ mysql_query("UNLOCK TABLES", $conn_id);
 
 
 
-
-
-
-
-
-
-
 if ($page=='editcorepricing') {
 $infotext=$infotext.'<br/>Editing distance pricing';
 
@@ -1892,20 +1880,7 @@ $pagetext=$pagetext. '<p>Updated Pricing</p>';
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 // EDITS INVOICE COMMENT
-
-
 
 if ($page=='editinvcomment') {
 
@@ -1931,62 +1906,6 @@ $infotext=$infotext.'<br />Unable to edit invoice comment<br />'.$sql;
 } // checks for invoice ref
  
 } // finishes page= editinv comment
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2086,11 +2005,6 @@ $infotext=$infotext.'<br /><strong>An error occured during updating individual j
 
 
 
-
-
-
-
-
 if ($page=="editinvchase") {
 
 $infotext=$infotext.' <br />Editing invoice chase ';
@@ -2150,15 +2064,6 @@ $pagetext=$pagetext.'<p>Third Chased Changed</p>';
 
 
 } // ends page = edit chase invoice
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2249,19 +2154,6 @@ $infotext=$infotext.'<br /><strong>An error occured during updating individual j
 } // checks for invoice ref
 
 } // ends page=deleteinv
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2517,29 +2409,6 @@ $pagetext=$pagetext. "<h1>An error occured during client database update</h1>"; 
 } // ends check for existing invoice ref
 
 } // ends page='addtodb' ( new invoice )
-
-
-
-
-
-
-
-
-
-if ($page == "idlookup") {
-if ($id="") { $id=trim($_POST['id']);  };
-if ($id=" ") { $id=trim($_POST['id']); };
-}
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -3665,9 +3534,6 @@ if ($sumtot>0)  {
 
 // $infotext=$infotext.'<br />2639  checking form birthday for last edited time.';
 
-
-
-
 if ($nowepoch < $globalprefrow['formtimeout']) {
 
 $editedtime = mysql_result(mysql_query("
@@ -4432,7 +4298,7 @@ $infotext=$infotext."<br />An error occured during updating cost and VAT!<br />"
 /////////////////////////////        RANDOM THINGS IN ID           
 
 
-// checks for pod surname
+// checks for nextactiondate + 
 
 $query="SELECT * FROM Orders 
 where ID = '$id' LIMIT 1";
@@ -4454,34 +4320,17 @@ $alerttext=$alerttext."<p>Error occured during updating next action time </p>";
 
 if ($row['publictrackingref'] =='' ) {
 
-$newnewsecurity_code='';
-
-//Let's generate a totally random string using md5
-$md5_hash = md5(rand(0,999)); 
-//We don't need a 32 character long string so we trim it down to 6 
-$security_code = str_replace(array("0","O","o"), array("p"),substr($md5_hash, 15, 6)); 
-
-for ($i=0; $i<6; $i++) {
-    $d=rand(1,30)%2;
-    $newnewsecurity_code=$newnewsecurity_code.$d ? chr(rand(65,90)) : chr(rand(48,57));
-} 
 
 $length = 6;
 $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-
-    // Length of character list
-    $chars_length = (strlen($chars) - 1);
-    // Start our string
-    $string = $chars{rand(0, $chars_length)};
-       // Generate random string
-    for ($i = 1; $i < $length; $i = strlen($string))
+    $chars_length = (strlen($chars) - 1);  // Length of character list
+    $string = $chars{rand(0, $chars_length)}; // Start our string  
+    for ($i = 1; $i < $length; $i = strlen($string)) // Generate random string
     {
-        // Grab a random character from our list
-        $r = $chars{rand(0, $chars_length)};
-               // Make sure the same two characters don't appear next to each other
-        if ($r != $string{$i - 1}) $string .=  $r;
+        $r = $chars{rand(0, $chars_length)};  // Grab a random character from our list
+        if ($r != $string{$i - 1}) $string .=  $r;  // Make sure the same two characters don't appear next to each other
     }
-       // Return the string
+
 $newsecurity_code=$id.$string; 
 // echo 'security code : '.$string.'<br>New Security code :'.$newsecurity_code.'<br>';
 // $infotext=$infotext."Generated tracking reference ".$newsecurity_code;
@@ -4506,30 +4355,6 @@ if ($result){
 
 
 } //   ENDS CHECK FOR $id    // ////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -4725,86 +4550,6 @@ else { $infotext=$infotext."<br /><strong>An error occured during updating emiss
 
 
 
-
-
-
-//////////////////     STARTS RELATIVE DATE FUNCTION           //////////////////////////////////
-//Relative Date Function  // used in order.php
-
-
-	function time2str($ts)
-	{
-		if(!ctype_digit($ts))
-			$ts = strtotime($ts);
-
-
-// echo ' cj 5643 ';		
-		
-		$tempdaydiff=date('z', $ts)-date('z');
-		
-// echo $tempday.' '.date('z');		// passed date day
-		
-// 		$tempday<>date('z', $ts)
-		
-//		$tempnay
-		
-		
-//		echo $tempdaydiff;
-		
-		
-		$diff = time() - $ts;
-		if($diff == 0)
-			return 'now';
-		elseif($diff > 0)
-		{
-			$day_diff = floor($diff / 86400);
-			if($day_diff == 0)
-			{
-				if($diff < 60) return ' Just now. ';
-				if($diff < 120) return ' 1 min ago. ';
-				if($diff < 3600) return ' '.floor($diff / 60) . ' min ago. ';
-				if($diff < 7200) return ' 1 hr, ' . floor(($diff-3600) / 60) . ' min ago. ';
-				
-				
-			if($diff < 86400) return floor($diff / 3600) . ' hours ago';
-			
-			}
-			
-			if($tempdaydiff=='-1') { return 'Yesterday '. date('A', $ts).'. '; }
-			
-//			if($day_diff == 1) return 'Yesterday';
-			if($day_diff < 7) return ' Last '. date('D A', $ts).'. ';
-			
-			//date('D', $ts).' '. $day_diff . ' days ago';
-	
-
-	if($day_diff < 31) return date('D', $ts).' '. ceil($day_diff / 7) . ' weeks ago. ';
-			if($day_diff < 60) return 'Last month';
-			return date('D M Y', $ts);
-		}
-		else
-		{
-			$diff = abs($diff);
-			$day_diff = floor($diff / 86400);
-			if($day_diff == 0)
-			{
-				if($diff < 120) return 'In a minute';
-				if($diff < 3600) return 'In ' . floor($diff / 60) . ' mins. ';
-				if($diff < 7200) { return ' 1hr, ' . floor(($diff-3600) / 60) . ' mins. '; }
-			//	if(($diff < 86400) and ($tempday<>date('z', $ts))) {  return ' Tomorrow ';    }
-				
-				if($diff < 86400) return ' ' . floor($diff / 3600) . ' hrs. ';
-			}
-			if($tempdaydiff == 1) return ' Tomorrow '. date('A', $ts).'. ';
-			if($day_diff < 4) return date(' D A', $ts);
-			if($day_diff < 7 + (7 - date('w'))) return date('D ', $ts).'next week. ';
-			if(ceil($day_diff / 7) < 4) return date('D ', $ts).' in ' . ceil($day_diff / 7) . ' weeks. ';
-			if(date('n', $ts) == date('n') + 1) return date('D', $ts).' next month. ';
-			return date('D M Y', $ts);
-		}
-	}
-
-//////////////////     ENDS RELATIVE DATE FUNCTION                ////////////////////////////////
 
 
 
@@ -5274,7 +5019,6 @@ $id=$origid;
 
 
 if ($page=='createnewfromexisting') { $id=$newjobid; }
-
 
 
 

@@ -1242,7 +1242,7 @@ echo '<script type="text/javascript">
 
     $('#deleteinv').bind('click', function(e) {
         e.preventDefault();
-        $.Zebra_Dialog('<strong>Are you sure ?</strong><br />Invoice <?php echo $ref; ?> will be deleted. <br />All jobs will revert to completed status.', {
+        $.zebra_dialog('<strong>Are you sure ?</strong><br />Invoice <?php echo $ref; ?> will be deleted. <br />All jobs will revert to completed status.', {
             'type':     'warning',
 					'width' : '350',
             'title':    'Delete Invoice ?',
@@ -1260,7 +1260,7 @@ document.getElementById("frm1").submit();
 
     $('#invnotpaid').bind('click', function(e) {
         e.preventDefault();
-        $.Zebra_Dialog('<strong>Are you sure ?</strong><br />Payment details for this invoice ref <?php echo $ref; ?><br />will be cancelled.', {
+        $.zebra_dialog('<strong>Are you sure ?</strong><br />Payment details for this invoice ref <?php echo $ref; ?><br />will be cancelled.', {
             'type':     'warning',
 					'width' : '350',
             'title':    'Remove Payment Details ?',

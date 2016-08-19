@@ -69,7 +69,9 @@ $sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
 
 while ($row = mysql_fetch_array($sql_result)) { extract($row);
 $lastdate = "SELECT collectiondate FROM Orders WHERE CustomerID=$CustomerID ORDER BY collectiondate DESC LIMIT 0 , 1";
-$sql_result_last = mysql_query($lastdate,$conn_id) or die(mysql_error()); while ($lastrow = mysql_fetch_array($sql_result_last)) { extract($lastrow); 
+$sql_result_last = mysql_query($lastdate,$conn_id) or die(mysql_error()); 
+
+while ($lastrow = mysql_fetch_array($sql_result_last)) { extract($lastrow); 
 
 
 
@@ -148,7 +150,7 @@ echo '<div class="Post">
 
 <p>
 
-<form name="f1" action="../../cojm/tcpdf/invoice.php" method="post"> 
+<form id="f1" name="f1" action="invoice.php" method="post" target="_blank"> 
 <fieldset><label for="pageclientid" class="fieldLabel"> Client : </label>
 <select  class="ui-state-default ui-corner-left" id="pageclientid" name="clientid">';
 
@@ -170,26 +172,10 @@ if(in_array($CustomerID, $clientids))
 echo '
 </select>';
 
-
-
-
 echo '
 
-<a id="clientlink" class="showclient" title="Client Details" target="_blank" href="new_cojm_client.php"> </a>';
-
-
-
-
-
-
-
-
-
-
-
-
-
-echo '</fieldset>
+<a id="clientlink" class="showclient" title="Client Details" target="_blank" href="new_cojm_client.php"> </a>
+</fieldset>
 <fieldset><label for="orderselectdep" class="fieldLabel"> Department : </label>';
 
 
@@ -201,20 +187,12 @@ echo '</fieldset>
 $newjobclientid=$row['CustomerID'];
 $temp=$row['orderdep'];
 
-// $query = "
-// SELECT depnumber, depname, associatedclient 
-// FROM clientdep 
-// WHERE isactivedep='1' 
-// ORDER BY associatedclient, depname"; 
-
  $query = "
  SELECT depnumber, depname, CompanyName, CustomerID 
  FROM clientdep, Clients
  WHERE clientdep.associatedclient = Clients.CustomerID 
  AND clientdep.isactivedep='1' 
  ORDER BY Clients.CompanyName, clientdep.depname"; 
-
-// $query = "SELECT depnumber, depname FROM clientdep WHERE associatedclient = '$newjobclientid' AND isactivedep='1' ORDER BY depname"; 
 
 $result_id = mysql_query ($query, $conn_id) or mysql_error();  
 $sumtot=mysql_affected_rows();
@@ -248,8 +226,6 @@ print'<option ';
 if ($CustomerIDlist==$row['orderdep']) { echo ' SELECTED '; }
 
 
-// echo $depcharge;
-// echo $costrowd['FreightCharge'];
 
 echo 'value="'.$CustomerIDlist.'">&'.$globalprefrow['currencysymbol'].' '.$depcharge.' '.$clientname.' -- '.$CompanyName.'</option>';
 
@@ -268,80 +244,75 @@ echo '</select> ';
 
 //////////////////////////////////////////
 
-
-echo '
+?>
 
 <a id="clientdeplink" class="showclient" title="Department Details" target="_blank" href="new_cojm_department.php"> </a>
 
-';
 
-
-
-
-
-
-
-
-
-
-
-
-echo '
 </fieldset>
 
+
+<fieldset title="Leave Blank to include All Jobs" ><label for="fromdate" class="fieldLabel"> Date to Invoice From</label> 
+<input class="ui-state-default ui-corner-all caps" type="text" id="fromdate" size="12" name="fromdate"></fieldset>
+
+
 <fieldset><label for="expensedate" class="fieldLabel"> Date to Invoice Until</label> 
-<input class="ui-state-default ui-corner-all caps" type="text" value="'. date('d-m-Y', strtotime('now')); 
+<input class="ui-state-default ui-corner-all caps" type="text" value="<?php echo date('d-m-Y', strtotime('now')); ?>"
 
 
-echo '" 
+
 id="expensedate" size="12" name="expensedate"></fieldset>
 
 <fieldset><label for="existinginvoiceref" class="fieldLabel"> Existing invoice ref ? </label>
-<input type="text" class="ui-state-default ui-corner-all caps" name="existinginvoiceref" id="existinginvoiceref"
+<input placeholder="Existing Invoice Ref" type="text" class="ui-state-default ui-corner-all caps" name="existinginvoiceref" id="existinginvoiceref"
  size="22" maxlength="20" >
 </fieldset>
-<fieldset><label for="exacttime" class="fieldLabel"> Exact time or just the date : </label> 
+
+<fieldset><label for="exacttime" class="fieldLabel"> &nbsp; </label> 
+
 <select class="ui-state-default ui-corner-left" name="exacttime" id="exacttime" >
 <option selected value="1" >Exact Time</option>
 <option value="0" >Just the day</option>
 </select> </fieldset>
 
-<fieldset><label for="hourly" class="fieldLabel"> From/Until instead of Collection/Delivery </label>
+<fieldset><label for="hourly" class="fieldLabel"> &nbsp; </label>
 
 <select class="ui-state-default ui-corner-left" name="hourly" id="hourly">
-<option selected value="0" >No</option>
-<option value="1" >Yes</option>
+<option selected title="Collection/Delivery" value="0" >Delivery Job</option>
+<option value="1" title="From/Until">Hourly Job</option>
 </select></fieldset>
 
-<fieldset><label for="showdelivery" class="fieldLabel">Show delivery date ? </label>
+<fieldset><label for="showdelivery" class="fieldLabel"> &nbsp; </label>
 <select class="ui-state-default ui-corner-left" name="showdelivery" id="showdelivery">
-<option  value="0" >No</option>
-<option selected value="1" >Yes</option>
+<option selected value="1" >Show Delivery Date</option>
+<option  value="0" >Just Collection Date</option>
 </select>
- </fieldset>
+</fieldset>
+
+
+<fieldset><label for="showdeliveryaddress" class="fieldLabel"> &nbsp; </label>
+<select class="ui-state-default ui-corner-left" name="showdeliveryaddress" id="showdeliveryaddress">
+<option selected value="1" >Show Delivery Address</option>
+<option  value="0" >Hide Delivery Address</option>
+</select>
+</fieldset>
+
+
+
  
  
-  <fieldset><label for="addresstype" class="fieldLabel">Full address / Postcode? </label>
+<fieldset><label for="addresstype" class="fieldLabel"> &nbsp; </label>
 <select class="ui-state-default ui-corner-left" name="addresstype" id="addresstype" >
 <option selected value="full" >Full Address</option>
 <option  value="postcode" >Just Postcode</option>
 <option  value="none" >No Addresses</option>
 </select>
 </fieldset>
- 
- 
- 
- 
- <fieldset><label for="showdeliveryaddress" class="fieldLabel">Show delivery address ? </label>
-<select class="ui-state-default ui-corner-left" name="showdeliveryaddress" id="showdeliveryaddress">
-<option  value="0" >No</option>
-<option selected value="1" >Yes</option>
-</select>
-</fieldset>
- 
- 
- 
- 
+
+
+
+
+
 <fieldset><label for="invdate" class="fieldLabel"> Invoice Date : </label>
 <select class="ui-state-default ui-corner-left" name="invdate" id="invdate">
 <option selected value="0" >Today</option>
@@ -351,28 +322,28 @@ id="expensedate" size="12" name="expensedate"></fieldset>
 <option value="-1" >Yesterday</option>
 <option value="-2" >Day before Yesterday</option>
 </select></fieldset>
-<br>Invoice Comments : '. $globalprefrow['invoicefooter2'].'<br>
+<br>Invoice Comments : '<?php echo $globalprefrow['invoicefooter2']; ?>
+<br>
 <TEXTAREA class="ui-state-default ui-corner-left normal " style="padding-left:3px;" name="invcomments" rows="2" cols="50"></TEXTAREA> 
 <br>
-<div class="line"></div>';
 
-?>
 
+<hr />
+
+<input id="page" name="page" type="hidden">
+
+</form>
 
 
 <button id="datesearchpreview">View in Date Search</button>
 
-<button type='submit' onclick="f1.action='invoice.php?page=preview'; this.form.target='_blank'; return true;">Preview Invoice</button> 
+<button id="invoicepreview">Preview Invoice</button>
 
-<button type='submit' onclick="f1.action='invoice.php?page=createpdf'; return true;">Create PDF Invoice</button>
-<button type='submit' onclick="f1.action='invoice.php?page=addtodb'; this.form.target='_blank'; return true;" 
-style="color: Red;" > Commit invoices details to database </button>
+<button id="createpdf">Create PDF</button>
 
+<button id="markinvoicesent" style="color: red;" >Mark as Sent</button>
 
-
-<?php echo '
-</form>
-
+<hr />
 
 </div>
 
@@ -385,32 +356,45 @@ style="color: Red;" > Commit invoices details to database </button>
 <th scope="col">Invoice From</th>
 <th scope="col">Last Collection</th>
 <th scope="col" class="rh" >Cost ex vat</th>
-</tr>';
+</tr>
 
 
-
-// print_r($clientids);
-
+<?php
 
 echo $trow. '
 <tr><td> </td><td> </td><td> <strong>Total : </strong></td>
 <td class="rh"> &'.$globalprefrow['currencysymbol'].'<strong>'.$tempthree.'</strong></td></tr>
 </tbody></table>
-<br />
-<div class="line"></div>
+<hr />
 </div><br />';
+?>
+<script >
 
+$(function () { // set column size
+var max = 0;
+$("label").each(function(){
+    if ($(this).width() > max) {
+        max = $(this).width();  
+    }
+});
+$("label").width((max+15));
+});
 
-echo '<script type="text/javascript">
-$(document).ready(function() {
-    var max = 0;
-    $("label").each(function(){
-        if ($(this).width() > max)
-            max = $(this).width();    
-    });
-    $("label").width((max+15));
+$(document).ready(function () {
 	
-		$(function() {
+    
+    $(function () { // fromdate
+		var fromdatepicker = $( "#fromdate" ).datepicker({
+            numberOfMonths: 1,
+            changeYear:false,
+            firstDay: 1,
+            dateFormat: "dd-mm-yy",
+            changeMonth:false
+        });
+	});
+    
+    
+   	$(function () { // todate ( expensedate )
 		var dates = $( "#expensedate" ).datepicker({
 			numberOfMonths: 1,
 			changeYear:false,
@@ -421,105 +405,80 @@ $(document).ready(function() {
 	});
 	
 	
-$(function(){ $(".normal").autosize();	});	
-	
-	
+    $(function (){ // autosize
+        $(".normal").autosize();
+    });
 	
 	
 	
 	$("#clientdeplink").click(function (e) {
-	e.preventDefault();  
-	
-//	alert("clicked");
+        e.preventDefault();
+        var pagedepid=$("#orderselectdep").val();
+        var datelink = "new_cojm_department.php?depid=" + pagedepid + "#tabs-" + pagedepid;
+        if (pagedepid !== "") {  window.open(datelink,"_blank"); }
+    });
+
+    $("#clientlink").click(function (e) {
+        e.preventDefault();  
+        var pageclientid=$("#pageclientid").val();
+        var datelink = "new_cojm_client.php?clientid=" + pageclientid;
+        window.open(datelink,"_blank");
+    });
+
+    $("#datesearchpreview").click(function (e) {
+        e.preventDefault(); 
+        var pageclientid=$("#pageclientid").val();
+        var pagedepid=$("#orderselectdep").val();
+        var todate=$("#expensedate").val();
+        var fromdate=$("#fromdate").val();
+        var datelink = "clientviewtargetcollection.php?clientid=" + pageclientid;
+        datelink = datelink + "&viewselectdep=" + pagedepid;
+        datelink = datelink + "&from=" + fromdate + "&to=" + todate;
+        datelink = datelink + "&newcyclistid=all&servicetype=all&deltype=all&orderby=targetcollection";
+        datelink = datelink + "&clientview=normal&viewcomments=normal&statustype=notinvoicedcomp";
+        window.open(datelink,"_blank");
+    });
 
 
-var pageclientid=$("#pageclientid").val();
-var pagedepid=$("#orderselectdep").val();
+    $("#invoicepreview").click(function () {
+    $("#page").val("preview");
+    $("#f1").attr('target', '_blank');
+    $("#f1").submit();       
+    });
 
 
-var datelink = "new_cojm_department.php?depid=" + pagedepid + "#tabs-" + pagedepid;
-	
-	if (pagedepid=="") { } else {  window.open(datelink,"_blank") }
-
-	
-});
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
-$("#clientlink").click(function (e) {
-	
-//	alert("clicked");
+    $("#createpdf").click(function () {
+    $("#page").val("createpdf");
+    $("#f1").attr('target', '');
+    $("#f1").submit();       
+    });
 
 
-var pageclientid=$("#pageclientid").val();
-
-var datelink = "new_cojm_client.php?clientid=" + pageclientid;
-	
-	
-		e.preventDefault();  
-   window.open(datelink,"_blank")
-
-	
-});
-	
-	
-	
-$("#datesearchpreview").click(function (e) {
-
-var pageclientid=$("#pageclientid").val();
-
-var pagedepid=$("#orderselectdep").val();
-
-var todate=$("#expensedate").val();
+    $("#markinvoicesent").click(function () {
+    $("#page").val("addtodb");
+    $("#f1").attr('target', '_blank');
+    $("#f1").submit();       
+    });
 
 
-var datelink = "clientviewtargetcollection.php?clientid=" + pageclientid;
-
-datelink = datelink + "&viewselectdep=" + pagedepid;
-
-datelink = datelink + "&from=01%2F01%2F2009&to=" + todate;
-
-// alert (todate);
-
-datelink = datelink + "&newcyclistid=all&servicetype=all&deltype=all&orderby=targetcollection";
-datelink = datelink + "&clientview=normal&viewcomments=normal&statustype=notinvoicedcomp";
-	
-	e.preventDefault();  
-   window.open(datelink,"_blank")
-
-
-});
+    $("#orderselectdep").change(function () {
+    var newdep=$("#orderselectdep").val();
+    <? echo $depselectjs; ?>
+    });
 
 
 
-$("#orderselectdep").change(function() { 
 
-var newdep=$("#orderselectdep").val();
-
-// alert("department changed to " + newdep);
-
-'.$depselectjs.'
-
-
-});
-
-
-	
-	
-	
 }); // ends on pageload
-</script>';
 
-echo '</div>';
+
+</script>
+<?php
+echo '</div>
+
+<!-- all divs are float so orderfoot pads the bottom out for menu etc to display ok -->
+<div class="orderfoot"> &nbsp; </div>
+';
 
 include "footer.php";
 

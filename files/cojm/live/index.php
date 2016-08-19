@@ -34,19 +34,21 @@ $tempfirstrun='';
 
 include "C4uconnect.php";
 
+
+if ($globalprefrow['forcehttps']>'0') {
+if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
+
+
+
+
 include "changejob.php";
  
-// if ($globalprefrow['forcehttps']>'0') {
-// if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
 
 echo '<!DOCTYPE html> <html lang="en"> <head> 
 <meta http-equiv="Content-Type" 
  content="text/html; charset=utf-8"> ';
 
 // echo ' <meta name="viewport" content="width=device-width, maximum-scale=1.0, minimum-scale=1.0, initial-scale=1.0, user-scalable=no" "> ';
-
-
-// echo ' <meta name="viewport" content="width=device-width, maximum-scale=1.0, minimum-scale=1.0, initial-scale=1.0, user-scalable=no" > ';
 
  echo ' 
  <meta name="viewport" content="width=device-width, height=device-height" > ';
@@ -184,15 +186,12 @@ date('H:i A D jS M', strtotime($row["lookedatbycyclisttime"])) .'" src="'.$globa
 
 
 ////////////     COMMENT TEXT ///////////////////////////////////////////////////////////////
-// echo ' '.$CompanyName; 
 
 
 echo ' <a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'.$CompanyName.'</a>';
 
 
 if ($row['orderdep']) { $depname = mysql_result(mysql_query("SELECT depname FROM clientdep WHERE depnumber = '$orderdep' LIMIT 0,1 ", $conn_id), 0);
-// echo ' ('.$depname.') '; 
-
 
 echo ' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$depname.'</a>) ';
 

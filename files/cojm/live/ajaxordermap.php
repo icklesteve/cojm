@@ -663,8 +663,8 @@ echo ' <a href="../createkml.php?id='. $row['publictrackingref'].'">'.$trackingt
  
 var element = document.getElementById("ordermap");
 
- var mapTypeIds = [];
-            var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"]
+
+    var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"];
 			
 		 var map = new google.maps.Map(element, {
                 center: new google.maps.LatLng('. $lattot . ',' . $lontot.'),

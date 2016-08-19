@@ -50,17 +50,8 @@
  * @since 2008-03-04
  */
 
- 
- 
- 
- 
+
  if (!isset($_POST['addresstype'])) { die; }
- 
- 
- 
- 
- 
- 
  
  
 $alpha_time = microtime(TRUE); 
@@ -73,7 +64,7 @@ ini_set('display_errors', '1');
 
 include "C4uconnect.php";
 
-$page=$_GET['page']; // preview , createpdf , addtodb
+$page=$_POST['page']; // preview , createpdf , addtodb
 
 
 // date to invoice until
@@ -86,6 +77,27 @@ $startday=$temp_ar['0'];
 $startmonth=$temp_ar['1']; 
 $startyear=$temp_ar['2'];
 $collectionsuntildate=date("Y-m-d 23:59:59", mktime(01, 01, 01, $startmonth, $startday, $startyear));
+
+
+
+
+
+// date to invoice from
+$fromdate=trim($_POST['fromdate']);
+
+
+if ($fromdate=='') { $fromdate='30/03/1979'; }
+
+
+$fromdate = str_replace("/", ":", "$fromdate", $count);
+$fromdate = str_replace(",", ":", "$fromdate", $count);
+$fromdate = str_replace("-", ":", "$fromdate", $count);
+$temp_ar=explode(":",$fromdate); 
+$startday=$temp_ar['0']; 
+$startmonth=$temp_ar['1']; 
+$startyear=$temp_ar['2'];
+$fromdate=date("Y-m-d 00:00:00", mktime(01, 01, 01, $startmonth, $startday, $startyear));
+
 
 $setinvoiced=$_POST['setinvoiced'];
 $newsetinvoiced=$_POST['setinvoiced'];
@@ -477,7 +489,7 @@ if ($orderselectdep>'0') {
  Orders, Services 
  WHERE  Orders.ServiceID = Services.ServiceID 
  AND `Orders`.`orderdep` = '$orderselectdep' 
- AND `Orders`.`collectiondate` >= '1' 
+ AND `Orders`.`collectiondate` >= '$fromdate' 
  AND `Orders`.`collectiondate` <= '$collectionsuntildate'
  AND `Orders`.`status` < 110
  AND `Orders`.`status` > 78
@@ -489,7 +501,7 @@ if ($orderselectdep>'0') {
  Orders, Services 
  WHERE  Orders.ServiceID = Services.ServiceID 
  AND CustomerID = '$clientid' 
- AND `Orders`.`collectiondate` >= '1' 
+ AND `Orders`.`collectiondate` >= '$fromdate' 
  AND `Orders`.`collectiondate` <= '$collectionsuntildate'
  AND `Orders`.`status` < 110
  AND `Orders`.`status` > 78
@@ -588,7 +600,7 @@ WHERE  Orders.ServiceID = Services.ServiceID
 AND `Orders`.`orderdep` = '$orderselectdep' 
 AND Orders.CustomerID = '$clientid' 
 AND Orders.CyclistID = Cyclist.CyclistID 
-AND `Orders`.`collectiondate` >= '1' 
+AND `Orders`.`collectiondate` >= '$fromdate' 
 AND `Orders`.`collectiondate` <= '$collectionsuntildate'
 AND `Orders`.`status` < 110
 AND `Orders`.`status` > 90
@@ -603,7 +615,7 @@ Cyclist
 WHERE  Orders.ServiceID = Services.ServiceID 
 AND Orders.CustomerID = '$clientid' 
 AND Orders.CyclistID = Cyclist.CyclistID 
-AND `Orders`.`collectiondate` >= '1' 
+AND `Orders`.`collectiondate` >= '$fromdate' 
 AND `Orders`.`collectiondate` <= '$collectionsuntildate'
 AND `Orders`.`status` < 110
 AND `Orders`.`status` > 90

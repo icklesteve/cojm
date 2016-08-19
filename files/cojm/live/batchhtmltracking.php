@@ -932,7 +932,7 @@ function sanitize_output($buffer) {
 }
 
 
-$newoutput=sanitize_output($htmloutput);
+$htmloutput=sanitize_output($htmloutput);  // disable for debugging,
 
 
 
@@ -949,13 +949,25 @@ if (($error=='') and ($_REQUEST['btn_submit']=="batchhtmltracking")) {
 // if ($outputtype=='kml') { 
 header('Content-type: text/html');
 header('Content-Disposition:attachment; filename="'.$filename.'"');
+echo $htmloutput;
+
+
 }
 
-// echo $htmloutput; // for debugging, not production
-echo $newoutput; 
+
+else { 
+echo $htmloutput;
+include 'cojmcron.php';
 
 
- include 'cojmcron.php';
+}
+
+
+
+
+
+
+
 
 mysql_close();
 

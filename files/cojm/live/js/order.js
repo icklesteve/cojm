@@ -1537,9 +1537,9 @@ $(function () { // Document is ready
                 $('#emissionsaving').append(data);
             },
             complete: function () {
+                showmessage();
                 ordermapupdater();
                 showhidebystatus();
-                showmessage();
             }
         });
         // message=' Code to send status ';

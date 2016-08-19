@@ -203,7 +203,7 @@ var poly'.$areaid.' = new google.maps.Polygon({
 
 $clickrow.=' 
 console.log(google.maps.geometry.poly.containsLocation(event.latLng, poly'.$areaid.'));
- if(google.maps.geometry.poly.containsLocation(event.latLng, poly'.$areaid.') == true) {
+ if(google.maps.geometry.poly.containsLocation(event.latLng, poly'.$areaid.') === true) {
   areasfound=areasfound+1;
   
   
@@ -232,155 +232,156 @@ $( "#'.$areaid.'" ).removeClass( " hidden " ); ';
 
 } // ends db row loop
 
-echo '
-<script>
-
-function initialize() {
-	
-var geocoder = null;
-var totalareas=0;
-markertype1=0;
-markertype2=0;
-markertype3=0;
-
-var element = document.getElementById("map-canvas");
-		
- var mapTypeIds = [];
-            var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"]
-			
-		 var map = new google.maps.Map(element, {
-                center: new google.maps.LatLng('. $globalprefrow['glob1'].','.$globalprefrow['glob2'].'),
-                zoom: 11,
-				disableDoubleClickZoom: true,
-                mapTypeId: "OSM",
-				scaleControl: true,
-				 mapTypeControl: true,
-                mapTypeControlOptions: {
-                mapTypeIds: mapTypeIds
-                }
-            });
-	
-     map.mapTypes.set("OSM", new google.maps.ImageMapType({
-                getTileUrl: function(coord, zoom) {
-                    return "https://a.tile.openstreetmap.org/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-                },
-                tileSize: new google.maps.Size(256, 256),
-                name: "OSM",
-				alt: "Open Street Map",
-                maxZoom: 19
-            }));	
-	
-            map.mapTypes.set("OCM", new google.maps.ImageMapType({
-                getTileUrl: function(coord, zoom) {
-                    return "https://a.tile.thunderforest.com/cycle/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-                },
-                tileSize: new google.maps.Size(256, 256),
-                name: "OCM",
-				alt: "Open Cycle Map",
-                maxZoom: 19
-            }));
-
-			
-			
-			
-	
-var osmcopyr="'."<span style='background: white; color:#444444; padding-right: 6px; padding-left: 6px; margin-right:-12px;'> &copy; <a style='color:#444444' " .
-               "href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors</span>".'"
 
 
- var outerdiv = document.createElement("div");
-outerdiv.id = "outerdiv";
-  outerdiv.style.fontSize = "10px";
-  outerdiv.style.opacity = "0.7";
-  outerdiv.style.whiteSpace = "nowrap";
-	
-map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(outerdiv);	
 
-google.maps.event.addListener( map, "maptypeid_changed", function() {
-var checkmaptype = map.getMapTypeId();
-if ( checkmaptype=="OSM" || checkmaptype=="OCM") { 
-$("div#outerdiv").html(osmcopyr);
-} else { $("div#outerdiv").text(""); }
-});
-
-
-// if OSM / OCM set as default, show copyright
-$(document).ready(function() {setTimeout(function() {
-$("div#outerdiv").html(osmcopyr);
-},3000);});
-
-';
 
 
 
         //Load Markers from the XML File, Check (opsmap_process.php)			
-if ($searchtype=='archive') { 
-echo ' $.get("opsmap_process.php?archive=1", function (data) { '; } else {
-echo ' $.get("opsmap_process.php?archive=0", function (data) { '; 
-	}
-			
-			
-?>			
-            $(data).find("marker").each(function () {
-                 //Get user input values for the marker from the form
-                  var name      = $(this).attr('name');
-                  var address   = $(this).attr('address');
-                  var markertype      = $(this).attr('markertype');
-                  var point     = new google.maps.LatLng(parseFloat($(this).attr('lat')),parseFloat($(this).attr('lng')));
-				  var opsmapid  = $(this).attr('opsmapid');
+if ($searchtype=='archive') {
+    
+    
+$ajaxlocation='opsmap_process.php?archive=1';    
+}
+    else { 
+    $ajaxlocation='opsmap_process.php?archive=0';
+    }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+?>
+<script>
+
+function initialize() {
+
+    var geocoder = null;
+    var totalareas=0;
+    var markertype1=0;
+    var markertype2=0;
+    var markertype3=0;
+    var iconPath;
+
+    var element = document.getElementById("map-canvas");
+    var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"];
+    var map = new google.maps.Map(element, {
+        center: new google.maps.LatLng(<?php echo $globalprefrow['glob1']; ?>,<?php echo $globalprefrow['glob2']; ?>),
+        zoom: 11,
+        disableDoubleClickZoom: true,
+        mapTypeId: "OSM",
+		scaleControl: true,
+		mapTypeControl: true,
+        mapTypeControlOptions: {
+            mapTypeIds: mapTypeIds
+        }
+    });
+	
+    map.mapTypes.set("OSM", new google.maps.ImageMapType({
+        getTileUrl: function(coord, zoom) {
+            return "https://a.tile.openstreetmap.org/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
+        },
+        tileSize: new google.maps.Size(256, 256),
+        name: "OSM",
+        alt: "Open Street Map",
+        maxZoom: 19
+    }));	
+	
+    map.mapTypes.set("OCM", new google.maps.ImageMapType({
+        getTileUrl: function(coord, zoom) {
+                return "https://a.tile.thunderforest.com/cycle/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
+        },
+        tileSize: new google.maps.Size(256, 256),
+        name: "OCM",
+        alt: "Open Cycle Map",
+        maxZoom: 19
+    }));
+    
+    var osmcopyr="<span style='background: white; color:#444444; padding-right: 6px; padding-left: 6px; margin-right:-12px;'> &copy; <a style='color:#444444' href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors</span>";
+
+    var outerdiv = document.createElement("div");
+    outerdiv.id = "outerdiv";
+    outerdiv.style.fontSize = "10px";
+    outerdiv.style.opacity = "0.7";
+    outerdiv.style.whiteSpace = "nowrap";
+    
+    map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(outerdiv);
+
+    google.maps.event.addListener( map, "maptypeid_changed", function() {
+        var checkmaptype = map.getMapTypeId();
+        if ( checkmaptype=="OSM" || checkmaptype=="OCM") {
+            $("div#outerdiv").html(osmcopyr);
+        } else {
+            $("div#outerdiv").text("");
+        }
+    });
+
+
+    // if OSM / OCM set as default, show copyright
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("div#outerdiv").html(osmcopyr);
+        },3000);
+    });
+
+
+    $.get("<?php echo $ajaxlocation; ?>", function (data) {
+        $(data).find("marker").each(function () {  //Get user input values for the marker from the form
+            var name = $(this).attr('name');
+            var address = $(this).attr('address');
+            var markertype = $(this).attr('markertype');
+            var point = new google.maps.LatLng(parseFloat($(this).attr('lat')),parseFloat($(this).attr('lng')));
+            var opsmapid = $(this).attr('opsmapid');
 			  
-                  //call create_marker() function for xml loaded maker
-                  //create_marker(opsmapid, point, name, address, false, false, false, "<?php echo $globalprefrow['clweb3']; ?>");
-				  
+//call create_marker() function for xml loaded maker
+//create_marker(opsmapid, point, name, address, false, false, false, "<?php echo $globalprefrow['clweb3']; ?>");
 // var iconPath= 	"<?php echo $globalprefrow['clweb3']; ?>";			  
 //		alert(typeof markertype);			  
 
 
+            if (markertype==1) {
+                markertype1++;				  				  
+                iconPath= {
+                    url: "../images/info-50-50-trans.gif",
+                    scaledSize: new google.maps.Size(30, 30), // scaled size
+                    origin: new google.maps.Point(0,0),
+                    anchor: new google.maps.Point(15, 15)
+                }; 
+            } else if (markertype==2) {
+                markertype2++;
+                iconPath= {
+                    url: "../images/access-50-50-trans.gif",
+                    scaledSize: new google.maps.Size(30, 30), // scaled size
+                    origin: new google.maps.Point(0,0),
+                    anchor: new google.maps.Point(15, 15)
+                };
+            } else if (markertype==3) {
+                markertype3++;		
+                iconPath= {
+                url: "../images/alert-50-50-trans.gif",
+                scaledSize: new google.maps.Size(30, 30), // scaled size
+                origin: new google.maps.Point(0,0),
+                anchor: new google.maps.Point(15, 15)
+                }; 
+            }
+        $(document).ready(function() {
+            $("#markertype1span").html(markertype1);	
+            $("#markertype2span").html(markertype2);	
+            $("#markertype3span").html(markertype3);	
+        });
 
 
-
-				  
-if (markertype==1) {
-markertype1++;				  				  
-var iconPath= {
-	url: "../images/info-50-50-trans.gif",
- scaledSize: new google.maps.Size(30, 30), // scaled size
-    origin: new google.maps.Point(0,0),
-   anchor: new google.maps.Point(15, 15)
-}; }
-
-else if (markertype==2) {
-markertype2++;		
-	var iconPath= {
-	url: "../images/access-50-50-trans.gif",
- scaledSize: new google.maps.Size(30, 30), // scaled size
-    origin: new google.maps.Point(0,0),
-   anchor: new google.maps.Point(15, 15)
-}; }
-	
-else if (markertype==3) {
-markertype3++;		
-	var iconPath= {
-	url: "../images/alert-50-50-trans.gif",
- scaledSize: new google.maps.Size(30, 30), // scaled size
-    origin: new google.maps.Point(0,0),
-   anchor: new google.maps.Point(15, 15)
-}; }	
-	
-	
-
-$(document).ready(function() {
-$("span#markertype1span").html(markertype1);	
-$("span#markertype2span").html(markertype2);	
-$("span#markertype3span").html(markertype3);	
-});
-	
-	
-	
-	
-	
-
-				  
     //new marker
     var marker = new google.maps.Marker({
         position: point,
@@ -477,7 +478,7 @@ $( '#jssearch' ).append (totalareas);
 
 $( '#jssearch' ).append ('.</p> ');
 
-if (areasfound == 0 ) {
+if (areasfound === 0 ) {
 
 
 $( '#opstable' ).addClass( ' hidden ' );
@@ -551,7 +552,7 @@ function create_marker(opsmapid, MapPos, MapTitle, MapDesc,  InfoOpenDefault, Dr
             var mDesc  = contentString.find('textarea.save-desc')[0].value; //description input field value
             var mType = contentString.find('select.save-type')[0].value; //type of marker
             
-            if(mName =='' || mDesc =='')
+            if(mName ==='' || mDesc ==='')
             {
                 alert("Please enter Name and Description!");
             }else{
@@ -636,7 +637,7 @@ $(window).resize(function () {
           alert("Search was not successful : " + status);
         }
       });
- }
+ };
  
  $('#searchtype').change(function() { $('#searchopsmap').submit(); }); 
  
@@ -648,7 +649,7 @@ echo "
 }
 
  function formatNumber (num) {
-    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
 }
 
 

@@ -141,7 +141,6 @@ padding:5px;
 
 
 
-
 .ui-icon { 
 
 float: left; margin-right: .3em;
@@ -2070,6 +2069,16 @@ text-decoration: none;
 
 }
 
+button.menusearch {
+margin: 0 0 0 5px;
+background: transparent url("../images/refresh.png") no-repeat scroll 3px 3px / 22px 18px;
+width: 32px;
+height:28px;
+border-radius: 4px;
+float:left;
+}
+
+button.menusearch:hover {  cursor:pointer; }
 
 
 
@@ -2261,17 +2270,10 @@ input.ui-widget { width: 320px; }
 
 button.menusearch {
 margin: 0;
-background: url("../images/cojm_trans_black_60.png") repeat fixed 100% 36px transparent;
-height: 26px;
 border: 0 none;
 }
 
-img.menusearch {
-height: 20px;
-width: 22px;
-top: 2px;
-position: relative;
-}
+
 
 div.pad10 {
 
@@ -2300,27 +2302,14 @@ padding:4px 4px 35px;
 
 
 
-
 input.freetext { width: 350px; }
 
 div.cbbnewjobl {  float:left; clear:both; }
 div.cbbnewjobr { float: left;  }
 div#newjobsubmitb { display: none; }
 
-button.menusearch {
-margin: 0 0 0 5px;
-background: url("../images/cojm_trans_black_60.png") repeat fixed 100% 36px transparent;
-width: 36px;
-border-radius: 4px;
-float:left;
-}
 
-img.menusearch {
-height: 20px;
-width: 22px;
-top: 2px;
-position: relative;
-}
+
 
 div.hangleft { float:left; width: 50%; }
 div.hangright { float:right; width: 50%; }
@@ -2470,7 +2459,6 @@ padding:2px;
 }
 
 }
-
 
 
 @font-face{

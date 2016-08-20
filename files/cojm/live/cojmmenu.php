@@ -113,14 +113,20 @@ if ($id) { echo 'type="number" step="1"'; } else { echo ' type="text" '; }
 
 
 echo ' value="'.$id.'">';
-if (($filename=="order.php") or ($mobdevice=='1')) { 
 
-echo '<button class="menusearch" form="menusearch" type="submit" > <img class="menusearch" src="images/refresh.png" alt="Refresh" /></button>';
 
-} 
 
+if ($filename=="order.php") {
+
+echo '<button class="menusearch" form="menusearch" type="submit" title="Refresh"></button> ';
+
+}
 
 echo ' </form></li>';
+
+
+
+
 
 echo '
 <li>

@@ -3333,25 +3333,24 @@ function showmessage() {
 		}
 	}
 
-function sendscreensize() {
+function pageloadedfine() {
 $(document).ready(function() {
 
  setTimeout( function() {
     var hr = new XMLHttpRequest();
     var url = "ajaxkickcron.php";
-    var screenWidth = screen.width;
-    var screenHeight = screen.height;
-    var vars = "screenWidth="+screen.width+"&screenHeight="+screen.height+"&newauditid="+initialauditid;
+    var vars = "screenWidth=" + screen.width + "&screenHeight=" + screen.height + "&newauditid=" + initialauditid;
     hr.open("POST", url, true);
     hr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     // Access the onreadystatechange event for the XMLHttpRequest object
     hr.onreadystatechange = function() {
 	    if(hr.readyState == 4 && hr.status == 200) {
 		    var return_data = hr.responseText;
-			$("#activestatus").append("<br />"+return_data);
+//            $("#infotext").append("<br /> Sending screen size");	           
+			$("#activestatus").append("<br />" + return_data);
 	    }    }
     hr.send(vars); // Actually execute the request
-	$("#activestatus").append("<br /> Sending screen size");	
+
 	
 	
 	// adds sticky css polyfill for top menu

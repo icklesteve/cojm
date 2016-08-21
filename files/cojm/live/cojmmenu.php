@@ -64,19 +64,18 @@ echo '<span class="ctitle">C</span><span class="ctitle">O</span><span class="cti
 // echo '<div id="loggedinas">Logged in as '.$cyclistid.'</div>';
 
 
-if (isset($mobdevice) and ($mobdevice=='1') )  { if ($globalprefrow['showdebug']>'0') { 
+if (isset($mobdevice) and ($mobdevice=='1') )  { 
+if ($globalprefrow['showdebug']>'0') {
 $pagetext=$pagetext.$infotext; 
 
-} } else { $mobdevice='';
+} 
+} else { 
+$mobdevice='';
  }
-if (($globalprefrow['showdebug']>'0')) { 
-echo 'DEBUG MODE';
-
-echo $infotext; }
+ 
 
 
-
-if ($globalprefrow['showdebug']>'0') { echo '<div class="activestatus" id="activestatus"></div>'; }
+if ($globalprefrow['showdebug']>'0') { echo '<div id="activestatus">DEBUG MODE<br />'.$infotext.'</div>'; }
 
 
 
@@ -114,14 +113,20 @@ if ($id) { echo 'type="number" step="1"'; } else { echo ' type="text" '; }
 
 
 echo ' value="'.$id.'">';
-if (($filename=="order.php") or ($mobdevice=='1')) { 
 
-echo '<button class="menusearch" form="menusearch" type="submit" > <img class="menusearch" src="images/refresh.png" alt="Refresh" /></button>';
 
-} 
 
+if ($filename=="order.php") {
+
+echo '<button class="menusearch" form="menusearch" type="submit" title="Refresh"></button> ';
+
+}
 
 echo ' </form></li>';
+
+
+
+
 
 echo '
 <li>

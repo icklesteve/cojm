@@ -1323,7 +1323,7 @@ echo ' &'. $globalprefrow["currencysymbol"] . '</div> ';
 ?>
 
 <input id="newcost" type="text" title="excl. VAT" data-autosize-input='{ "space": 6 }' 
-class="ui-state-default ui-corner-all caps numberitems" name="newcost" 
+class="ui-state-default ui-corner-all caps" name="newcost" 
 
 <?php echo '
 
@@ -1602,6 +1602,10 @@ else { echo '<button class="deleteord" id="deleteordmob"> Delete Job </button>';
 
 
 ?>
+
+<span id="ajaxinfo"> &nbsp; </span>
+
+
 <form name='uploadpodform' id='uploadpodform' enctype="multipart/form-data">
 <input form='uploadpodform' type="hidden" name="page" value="orderaddpod">
 <input form="uploadpodform" type="hidden" name="id" value="<?php echo $ID; ?>" >
@@ -1705,7 +1709,6 @@ echo '</div> ';
  ?>
 <script>
 $(document).ready(function() {
-
 
 
  $('#jschangfavfr').bind('click', function(e) {

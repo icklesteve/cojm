@@ -3589,12 +3589,18 @@ $('#alerttext').delay(alertdelay).slideUp(alertslide);
 
 
 
-
 $("#togglenewjobchoose").click(function(){
-	
-$("#togglenewjob").slideDown(50); 
-$('div.Post').css({ 'opacity': '0.4' });
-setTimeout( function() { $("#newjobbutton").click() }, 150 ); 
+    if ($("#togglenewjob").is(':visible')) {
+        $("#togglenewjob").hide();
+        $('div.Post').css({ 'opacity': '1' });        
+    } else {
+        $("#togglenewjob").show(); 
+        $('div.Post').css({ 'opacity': '0.4' });
+        var newclientid=$("select#newjobselectclient").val();        
+        if (newclientid === "") {
+        setTimeout( function() { $("#newjobbutton").click() }, 150 );
+        }
+    }
 });
 
 

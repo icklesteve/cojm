@@ -250,7 +250,7 @@ echo '<form action="order.php" method="post" id="newjob_form" accept-charset="ut
 
 // echo '<div id="loggedinas">Logged in as '.$cyclistid.'</div>';
 
-
+// echo '</div>';
 
 // if ($globalprefrow['showdebug']>'0') { echo '<br /> DEBUG MODE'; }
 

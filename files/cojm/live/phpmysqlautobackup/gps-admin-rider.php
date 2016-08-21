@@ -41,8 +41,8 @@ $pexploded=explode( '-', $riderdate );
 $thisyear=$pexploded['0'];
 $thismonth=$pexploded['1'];
 $thisday=$pexploded['2'];
-$collecttime=gmmktime( 00, 00, 01, $thismonth, $thisday, $thisyear );
-$delivertime=gmmktime( 23, 59, 59, $thismonth, $thisday, $thisyear );
+$collecttime=mktime( 00, 00, 01, $thismonth, $thisday, $thisyear );
+$delivertime=mktime( 23, 59, 59, $thismonth, $thisday, $thisyear );
 
 $ID=$thisyear.'_'.$thismonth.'_'.$thisday.'_'.$cojmadmin_rider_id;
 

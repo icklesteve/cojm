@@ -94,7 +94,7 @@ var loadingtext=" <div class='loadingsuccess'>  Loading Results </div>";
 if (isset($_GET['orderid'])) { // 
 
 echo '	
-$("#spinner").show();		
+$("#toploader").show();		
 $("#content").html(loadingtext);
 
  setTimeout( function() {
@@ -112,7 +112,7 @@ $.ajax({
 	$("#content").html(data)
 //    alert(loadingtext); //only for testing purposes
 
-$("#spinner").hide();
+$("#toploader").hide();
     }
 });
 	
@@ -129,7 +129,7 @@ $("#spinner").hide();
 
 	    $("#rangeBa, #rangeBb").daterangepicker( {
 		onClose: function(){
-			$("#spinner").show();
+			$("#toploader").show();
 			
 $("#content").html(loadingtext);
 
@@ -162,7 +162,7 @@ $.ajax({
     data: dataString,
     success: function(data){
 	$("#content").html(data)
-	$("#spinner").hide();
+	$("#toploader").hide();
  //   alert(data); //only for testing purposes
     }
 });
@@ -173,7 +173,7 @@ $.ajax({
 $("#form").change(function() {
 	
 	
-$("#spinner").show();	
+$("#toploader").show();	
 $("#content").html(loadingtext);
 			
 			
@@ -206,7 +206,7 @@ $.ajax({
     success: function(data){
 	$("#content").html(data)
  //   alert(data); //only for testing purposes
-$("#spinner").hide(); 
+$("#toploader").hide(); 
  }
 });
 });

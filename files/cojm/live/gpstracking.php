@@ -136,6 +136,8 @@ $dend='';
 <style>
  div.info {  color:green; font-weight:bold; } 
 form#cvtc div.ui-state-highlight.ui-corner-all.p15 input.ui-autocomplete-input.ui-widget.ui-widget-content { width:200px; }
+/* starts spinner on page load, only for ajax pages  */
+#toploader { display:inline; }
 </style>
 <title>COJM GPS Tracking</title>
 <script>
@@ -831,7 +833,7 @@ if ($clientview=='cluster') { echo ' var markerCluster = new MarkerClusterer(map
     //loaded fully
     
 //    alert(" finished loading ");
-    $(".uil-gps-css").fadeOut(750);
+    $("#toploader").fadeOut(750);
     
     });
     
@@ -866,9 +868,6 @@ include "cojmmenu.php";
 
 // loading icon
 ?>
-<div class='uil-gps-css' style='transform:scale(1.5);'><div class="inner"></div><div class="outer"></div><div class="markers"><div class="markers-ib"><div class="marker"></div><div class="marker"></div><div class="marker"></div><div class="marker"></div></div></div></div>
-
-
 <div id="gmap_wrapper">
 <div class="full_map" id="search_map">
 <div id="map-canvas" class="onehundred" > </div>

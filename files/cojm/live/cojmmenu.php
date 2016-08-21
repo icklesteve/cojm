@@ -122,21 +122,9 @@ echo '<button class="menusearch" form="menusearch" type="submit" title="Refresh"
 
 }
 
-echo ' </form></li>';
-
-
-
-
-
-echo '
-<li>
-<span id="spinner"> &nbsp; </span>
-</li>
+echo ' </form></li>
+<div id="toploader"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 ';
-
-
-
-
 
 
 if ($hasforms=='1'){echo '<li><span id="cdtext"> </span></li><li><b class="hidden" id="show-time" >'. $globalprefrow['formtimeout'].'</b></li>';}

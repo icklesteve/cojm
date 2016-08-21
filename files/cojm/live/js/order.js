@@ -52,13 +52,14 @@ $(function () { // Document is ready
     "use strict";
 
 
-    function process(date) {
-//        var datetime = date.split(" ");
-//        var parts = datetime[0].split("/");
-//        var timeparts = datetime[1].split(":");
-        var newdate = new Date(date.split(" ")[0].split("/")[2], date.split(" ")[0].split("/")[1] - 1, date.split(" ")[0].split("/")[0], date.split(" ")[1].split(":")[0], date.split(" ")[1].split(":")[1]);
-        return newdate;
-    }
+    function process(date){
+    var newdate;
+	var datetime = date.split(" ");  
+    var parts = datetime[0].split("/");
+    var timeparts = datetime[1].split(":");
+    newdate = new Date(parts[2], parts[1] - 1, parts[0], timeparts[0], timeparts[1]);
+    return newdate;
+ }
 
 
     function showhidebystatus() { // or changes to time values for showing buttons for working windows
@@ -356,8 +357,8 @@ $(function () { // Document is ready
 
 
         if (initialwaitingstarttime !== "") {
-            if (initialcollectiondate !== "") {
-                var waitingminstest = parseInt((process(initialcollectiondate) - process(initialwaitingstarttime) / 1000 / 60), 10);
+            if (initialcollectiondate !== "") {               
+                var waitingminstest = parseInt(((process(initialcollectiondate) - process(initialwaitingstarttime)) / 1000 / 60), 10);
                 if (waitingminstest > waitingtimedelay) { // global test minutes more than than diff so see if waiting mins in cbb
                     if (waitingmins < 4) {
 
@@ -425,7 +426,7 @@ $(function () { // Document is ready
 
 
     function ordermapupdater() {
-        $("#spinner").show();
+        $("#toploader").show();
         showhidebystatus();
         $.ajax({
             url: 'ajaxordermap.php',
@@ -439,7 +440,7 @@ $(function () { // Document is ready
                 $('#orderajaxmap').html(data);
             },
             complete: function () {
-                $("#spinner").hide();
+            $("#toploader").fadeOut();
             }
         });
     }
@@ -904,7 +905,7 @@ $(function () { // Document is ready
             if (targetcollectiondate !== initialtargetcollectiondate) {
                 initialtargetcollectiondate=targetcollectiondate;
                 $.ajax({
-                    url: 'ajaxchangejob.php', //Server script to process data
+                    url: 'ajaxchangejob.php',
                     data: {
                         page: 'ajaxtargetcollectiondate',
                         formbirthday: formbirthday,
@@ -970,7 +971,7 @@ $(function () { // Document is ready
             var collectiondate = $("#collectiondate").val().trim();
             if (collectiondate !== initialcollectiondate) {
                 initialcollectiondate = collectiondate;  // needed to stop firing twice on time change
-                $("#spinner").show();
+                $("#toploader").show();
                 $.ajax({
                     url: 'ajaxchangejob.php',
                     data: {
@@ -1141,9 +1142,9 @@ $(function () { // Document is ready
             var ShipDate = $("#ShipDate").val().trim();
             if (ShipDate !== initialShipDate) {
                 initialShipDate = ShipDate;  // needed to stop firing twice on time change
-                $("#spinner").show();
+                $("#toploader").show();
                 $.ajax({
-                    url: 'ajaxchangejob.php', //Server script to process data
+                    url: 'ajaxchangejob.php',
                     data: {
                         page: 'ajaxShipDate',
                         formbirthday: formbirthday,
@@ -1237,7 +1238,7 @@ $(function () { // Document is ready
             if (collectionworkingwindow !== initialcollectionworkingwindow) {
                 initialcollectionworkingwindow = collectionworkingwindow;
                 $.ajax({
-                    url: 'ajaxchangejob.php', //Server script to process data
+                    url: 'ajaxchangejob.php',
                     data: {
                         page: 'ajaxcollectionworkingwindow',
                         formbirthday: formbirthday,
@@ -1526,7 +1527,7 @@ $(function () { // Document is ready
     function sendstatus() {
         var newstatus = $("select#newstatus").val();
         $.ajax({
-            url: 'ajaxchangejob.php',  //Server script to process data
+            url: 'ajaxchangejob.php',
             data: {
                 page: 'ajaxorderstatus',
                 formbirthday: formbirthday,
@@ -1562,7 +1563,29 @@ $(function () { // Document is ready
     
     
 
-    
+    $("#newrider").change(function () {
+        $("#toploader").show();
+        var newrider = $("select#newrider").val();
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajaxchangerider',
+                formbirthday: formbirthday,
+                id: id,
+                newrider: newrider
+            },
+            type: 'post',
+            success: function (data) {
+                $('#client').append(data);
+            },
+            complete: function () {
+                ordermapupdater();
+                showmessage();
+            }
+        });
+    });
+
+
     
 
     $("#newstatus").change(function () {
@@ -1582,7 +1605,7 @@ $(function () { // Document is ready
     $("#podsurname").change(function () {
         podsurname = $("#podsurname").val();
         $.ajax({
-            url: 'ajaxchangejob.php', //Server script to process data
+            url: 'ajaxchangejob.php',
             data: {
                 page: 'ajaxpodsurname',
                 formbirthday: formbirthday,
@@ -1612,7 +1635,7 @@ $(function () { // Document is ready
             cbbchecked = 0;
         }
         $.ajax({
-            url: 'ajaxchangejob.php', //Server script to process data
+            url: 'ajaxchangejob.php',
             data: {
                 page: 'ajaxcbb',
                 cbbname: cbbname,
@@ -1636,7 +1659,7 @@ $(function () { // Document is ready
 
 
     $("#opsmaparea").change(function () {
-        $("#spinner").show();
+        $("#toploader").show();
         var opsmaparea = $("select#opsmaparea").val();
         $.ajax({
             url: 'ajaxchangejob.php',
@@ -1698,7 +1721,7 @@ $(function () { // Document is ready
 
 
 
-        $("#spinner").show();
+        $("#toploader").show();
         $('progress').attr({
             value: 0,
             max: 1
@@ -1731,7 +1754,7 @@ $(function () { // Document is ready
             },
             complete: function () {
                 showmessage();
-                $("#spinner").hide();
+                $("#toploader").fadeOut(750);
             },
 
             //        error: errorHandler,
@@ -1767,9 +1790,8 @@ $(function () { // Document is ready
 
 
 
-
     $("#opsmapsubarea").change(function () {
-        $("#spinner").show();
+        $("#toploader").show();
         var opsmapsubarea = $("select#opsmapsubarea").val();
         $.ajax({
             url: 'ajaxchangejob.php',
@@ -1863,7 +1885,7 @@ $(function () { // Document is ready
     $("#clientjobreference").change(function () {
         var clientjobreference = $(this).val();
         $.ajax({
-            url: 'ajaxchangejob.php', //Server script to process data
+            url: 'ajaxchangejob.php',
             data: {
                 page: 'ajaxclientjobreference',
                 formbirthday: formbirthday,
@@ -1884,10 +1906,10 @@ $(function () { // Document is ready
 
 
     $("#numberitems").change(function () {
-        $("#spinner").show();
+        $("#toploader").show();
         var numberitems = $(this).val();
         $.ajax({
-            url: 'ajaxchangejob.php', //Server script to process data
+            url: 'ajaxchangejob.php',
             data: {
                 page: 'ajaxnumberitems',
                 formbirthday: formbirthday,
@@ -1901,7 +1923,7 @@ $(function () { // Document is ready
             complete: function () {
                 showmessage();
                 resizenewcost();
-                $("#spinner").hide();
+                $("#toploader").fadeOut(750);
             }
         });
     });
@@ -2036,7 +2058,7 @@ $(function () { // Document is ready
 
     function cancelpricelock() {
         $.ajax({
-            url: 'ajaxchangejob.php', //Server script to process data
+            url: 'ajaxchangejob.php',
             data: {
                 page: 'ajaxcancelpricelock',
                 formbirthday: formbirthday,

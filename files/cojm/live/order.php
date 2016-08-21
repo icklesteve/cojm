@@ -158,7 +158,7 @@ if ($row['ID']) {
 <script src="js/order.js" type="text/javascript"></script>
 <style>
 /* starts spinner on page load, only for ajax pages  */
-#spinner { display:inline; }
+#toploader { display:inline; }
 </style>
 <?php
 
@@ -574,11 +574,25 @@ if ( $globalprefrow["inaccuratepostcode"]=='1') {
  }
 
 
+ 
+ 
+ 
+ 
 echo '
 
 <div class="clrfix"> </div>
 
 ';
+
+
+if ($row['status']<'100') { echo ' <button class="right" form="allorder" type="submit" > Edit Addresses / Rider </button>
+
+<hr />
+
+ '; }
+ 
+
+
 
 
 
@@ -699,6 +713,10 @@ echo '</div>';
 
 
 echo '
+
+
+
+
 </div>'; // ends distance container
 
 
@@ -735,7 +753,8 @@ $cyclistquery = "SELECT CyclistID, cojmname, trackerid, isactive FROM Cyclist OR
 
 $cyclistresult_id = mysql_query ($cyclistquery, $conn_id); 
 echo '<input form="allorder" type="hidden" name="oldcyclist" value="'.$row['CyclistID'].'" >';
-echo '<select form="allorder" name="newcyclist" class="ui-state-default ui-corner-left ';
+
+echo '<select id="newrider" name="newcyclist" class="ui-state-default ui-corner-left ';
 
 if ($row['CyclistID']=='1') { echo ' blinking '; }
 
@@ -760,10 +779,8 @@ echo '</option>'; }
 print ("</select>"); 
 
 
-if ($row['CyclistID']<>'1') { 
-
-echo '<a class="showclient" title="'.$row['cojmname'].' Details" target="_blank" href="cyclist.php?thiscyclist='.$row['CyclistID'].'"> </a>';
-
+if ($row['CyclistID']<>'1') {
+echo '<a id="showriderlink" class="showclient" title="'.$row['cojmname'].' Details" target="_blank" href="cyclist.php?thiscyclist='.$row['CyclistID'].'"> </a>';
 }
 
 
@@ -773,12 +790,11 @@ if ($row['lookedatbycyclisttime']>'10') { echo ' First viewed '. date('H:i A D j
 
 
 
-if ($row['status']<'100') { echo ' <button class="right" form="allorder" type="submit" > Edit Addresses / Rider </button> '; }
- 
+
  
  
 echo '
-<hr />
+
 </div>';
 // finishes select rider
 

@@ -127,6 +127,508 @@ $message.=' ACJ Unable to edit job with current status, please change back to Ad
 
 
 
+// change rider
+// status
+if ($page=='ajaxorderstatus') {
+
+$newdate=date("d/m/Y H:i");	
+$newstatus=trim($_POST['newstatus']);
+$nextactiondatecheck='1';
+
+// $message.=' Changing order status via ajax ';
+
+$query="SELECT statusname FROM status WHERE status='$newstatus' LIMIT 0,1";
+
+// $oldstatustext = mysql_result(mysql_query("SELECT statusname FROM status WHERE status='$oldstatus' LIMIT 0,1", $conn_id), 0);
+// $newstatustext = mysql_result(mysql_query($query, $conn_id), 0);
+
+// oldstatus is now $currentstatus
+
+
+
+$sql='SELECT statusname FROM status WHERE status=?';
+$sth=$dbh->prepare($sql);
+$data=array($newstatus);
+$sth->execute($data);
+$newstatustext=$sth->fetchColumn();
+
+// $message.=$result;
+
+try {
+	
+$query = "UPDATE Orders SET status=:newstatus WHERE id=:getid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->bindParam(':newstatus', $newstatus, PDO::PARAM_INT);
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+$message.=' Status updated to '. $newstatustext.'<br />';
+$allok=1;
+// $cojmaction='recalcprice';
+$script.=' initialstatus='.$newstatus.'; ';
+
+
+if ($newstatus =='40') { $infotext.=' Adding Travel to Collection Time  ';
+try {
+$query = "UPDATE Orders SET starttravelcollectiontime=now() WHERE id=:getid LIMIT 1";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+$message.=' Travel to Collection Time Added ';
+$allok=1;
+$script.=' initialstarttravelcollectiontime="'.$newdate.'";   $("#starttravelcollectiontime").val("'.$newdate.'");  ';
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); $allok=0; }
+} // ends status = 40
+
+
+if ($newstatus =='50') { $infotext.=' Adding Waiting Start Time  ';
+try {
+// $sql = "UPDATE Orders SET waitingstarttime=now() WHERE ID='$id' LIMIT 1"; 
+$query = "UPDATE Orders SET waitingstarttime=now() WHERE id=:getid LIMIT 1";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+$message.=' Waiting Start Time Added ';
+$allok=1;
+$script.=' initialwaitingstarttime="'.$newdate.'";   $("#waitingstarttime").val("'.$newdate.'");  ';
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); $allok=0; }
+}
+
+
+if (($currentstatus <'60' ) and ($newstatus >'59')) { $infotext.=' Adding Collection Time  ';
+
+
+
+
+try {
+$query = "UPDATE Orders SET collectiondate=now() WHERE id=:getid LIMIT 1";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+$message.=' Collection Time Added ';
+$allok=1;
+$script.=' initialcollectiondate="'.$newdate.'";   $("#collectiondate").val("'.$newdate.'");  ';
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); $allok=0; }
+}
+
+
+
+if ($newstatus =='60') { $infotext.=' Adding Paused Time  ';
+try {
+// $sql = "UPDATE Orders SET waitingstarttime=now() WHERE ID='$id' LIMIT 1"; 
+$query = "UPDATE Orders SET starttrackpause=now() WHERE id=:getid LIMIT 1";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+$message.=' Pause Time Added ';
+$allok=1;
+$script.='  $("#toggleresume").show(); initialstarttrackpause="'.$newdate.'";   $("#starttrackpause").val("'.$newdate.'");  ';
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); $allok=0; }
+}
+
+
+if (($currentstatus =='60') and ($newstatus >'60')) { $infotext.=' Adding Resume Time ';
+
+try {
+// $sql = "UPDATE Orders SET waitingstarttime=now() WHERE ID='$id' LIMIT 1"; 
+$query = "UPDATE Orders SET finishtrackpause=now() WHERE id=:getid LIMIT 1";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+$message.=' Resume Time Added ';
+$allok=1;
+$script.=' initialfinishtrackpause="'.$newdate.'";   $("#finishtrackpause").val("'.$newdate.'");  ';
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); $allok=0; }
+
+
+}
+
+
+
+if (($newstatus>85) and ($currentstatus<85)) {
+$infotext.=' Adding Delivery time  ';
+try {
+$query = "UPDATE Orders SET ShipDate=now() WHERE id=:getid LIMIT 1";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+$message.=' Delivery Time Added ';
+$allok=1;
+$script.=' initialShipDate="'.$newdate.'";   $("#ShipDate").val("'.$newdate.'");  ';
+
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); $allok=0; }
+}
+
+
+
+
+
+if ($newstatus<$currentstatus) {
+
+$infotext.=' Reduction in Status ';
+
+if ($newstatus =='30') {
+
+try {
+
+$sql = "UPDATE Orders SET 
+starttravelcollectiontime='0000-00-00 00:00:00', 
+waitingstarttime ='0000-00-00 00:00:00',
+collectiondate='0000-00-00 00:00:00',
+starttrackpause = '0000-00-00 00:00:00',
+finishtrackpause ='0000-00-00 00:00:00',
+ShipDate ='0000-00-00 00:00:00'
+WHERE ID=:getid LIMIT 1"; 
+
+$stmt = $dbh->prepare($sql);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+// $script.=' ';
+$infotext.=' Times Updated ';
+$allok=1;
+
+// alert(" about to change ");
+
+$script.=' 
+initialstarttravelcollectiontime=""; $("#starttravelcollectiontime").val("");
+initialwaitingstarttime=""; $("#waitingstarttime").val("");
+initialcollectiondate=""; $("#collectiondate").val("");
+initialstarttrackpause=""; $("#starttrackpause").val("");
+initialfinishtrackpause=""; $("#finishtrackpause").val("");
+initialShipDate="";   $("#ShipDate").val(""); 
+ ';
+
+
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); $allok=0; }
+
+
+
+
+
+}
+
+if ($newstatus =='40') {
+
+try {
+
+$sql = "UPDATE Orders SET 
+waitingstarttime ='0000-00-00 00:00:00',
+collectiondate='0000-00-00 00:00:00',
+starttrackpause = '0000-00-00 00:00:00',
+finishtrackpause ='0000-00-00 00:00:00',
+ShipDate ='0000-00-00 00:00:00'
+WHERE ID=:getid LIMIT 1"; 
+
+$stmt = $dbh->prepare($sql);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+// $script.=' ';
+$infotext.=' Times Updated ';
+$allok=1;
+
+$script.=' 
+initialwaitingstarttime=""; $("#waitingstarttime").val("");
+initialcollectiondate=""; $("#collectiondate").val("");
+initialstarttrackpause=""; $("#starttrackpause").val("");
+initialfinishtrackpause=""; $("#finishtrackpause").val("");
+initialShipDate="";   $("#ShipDate").val(""); 
+ ';
+
+
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); $allok=0; }
+
+
+
+
+
+}
+
+if ($newstatus =='50') {
+
+try {
+
+$sql = "UPDATE Orders SET 
+collectiondate='0000-00-00 00:00:00',
+starttrackpause = '0000-00-00 00:00:00',
+finishtrackpause ='0000-00-00 00:00:00',
+ShipDate ='0000-00-00 00:00:00'
+WHERE ID=:getid LIMIT 1"; 
+
+$stmt = $dbh->prepare($sql);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+// $script.=' ';
+$infotext.=' Times Updated 349 ';
+$allok=1;
+
+$script.=' 
+initialcollectiondate=""; $("#collectiondate").val("");
+initialstarttrackpause=""; $("#starttrackpause").val("");
+initialfinishtrackpause=""; $("#finishtrackpause").val("");
+initialShipDate="";   $("#ShipDate").val(""); 
+ ';
+
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); $allok=0; }
+
+} // ends status
+
+if ($newstatus =='60') {
+
+try {
+
+$sql = "UPDATE Orders SET 
+finishtrackpause ='0000-00-00 00:00:00',
+ShipDate ='0000-00-00 00:00:00'
+WHERE ID=:getid LIMIT 1"; 
+
+$stmt = $dbh->prepare($sql);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+// $script.=' ';
+$infotext.=' Times Updated 381 ';
+$allok=1;
+
+$script.=' 
+initialfinishtrackpause=""; $("#finishtrackpause").val("");
+initialShipDate="";   $("#ShipDate").val(""); 
+ ';
+
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); $allok=0; }
+
+
+
+}
+
+if ($newstatus=='65') { $infotext.=' Deleting delivery time ';
+
+try {
+$query = "UPDATE Orders SET ShipDate='0000-00-00 00:00:00' WHERE id=:getid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+
+$script.=' initialShipDate="";   $("#ShipDate").val(""); ';
+
+$message.=' Delivery Time Removed ';
+$allok=1;
+
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); $allok=0; }
+
+}
+
+if (($currentstatus==100) and ($newstatus<100)) { // delete tracking cache if present
+
+$sql='SELECT ShipDate FROM Orders WHERE Orders.ID =? LIMIT 0,1';
+$sth=$dbh->prepare($sql);
+$data=array($id);
+$sth->execute($data);
+$ShipDate=$sth->fetchColumn();
+
+$testfile=__DIR__."/cache/jstrack/".date('Y',strtotime($ShipDate))."/".date('m',strtotime($ShipDate))."/".$id.'tracks.js';
+$kmltfile=__DIR__."/cache/jstrack/".date('Y',strtotime($ShipDate))."/".date('m',strtotime($ShipDate))."/".$id.'tracks.kml';
+
+if (!file_exists($testfile)) {
+ $infotext.= ' <br /> 4911 Cache does not exist, no action needed. '.$testfile;
+} else {
+$infotext.=  ' <br /> 4918 Cache exists, needs deleting. '.$testfile;	
+unlink($testfile);
+unlink($kmltfile);
+if (file_exists($testfile)) {
+	 $infotext.=  ' not deleted ';
+}
+}
+
+} // ends check to remove tracking cache if job is 100 to <100
+
+} // ends reduction in status
+
+
+
+
+
+
+
+
+
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); }
+
+} // ends page = ajax orderstatus
+
+
+
+
+
+if ($page=='ajaxchangerider') {
+if (isset($_POST['newrider'])) { $newrider = trim($_POST['newrider']); }
+try {
+    
+    // UPDATE Orders SET lookedatbycyclisttime='0', CyclistID=$newcyclist WHERE ID = $id LIMIT 1
+    
+$query = "UPDATE Orders SET lookedatbycyclisttime='0', CyclistID=:CyclistID  WHERE id=:getid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->bindParam(':CyclistID', $newrider, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+
+
+ $query = "SELECT cojmname FROM Cyclist WHERE CyclistID=:CyclistID LIMIT 0,1";
+
+ $depstmt = $dbh->prepare($query);
+ $depstmt->bindParam(':CyclistID', $newrider, PDO::PARAM_INT); 
+ $depstmt->execute();
+// $hasid = $depstmt->rowCount();
+
+$dep = $depstmt->fetchObject();
+$cojmname=$dep->cojmname;
+// $servicecomments=$dep->servicecomments;
+// $canhavemap=$dep->canhavemap;
+// $chargedbycheck=$dep->chargedbycheck;
+// $chargedbybuild=$dep->chargedbybuild;
+
+
+
+
+
+// if ($servicecomments) { $script.=' $("#servicecomments").html("'.$servicecomments.' ").show(); $("#servicecomments").show(); ';
+// } else { $script.='  $("#servicecomments").hide();  '; }
+
+// $script.=' ordermapupdater(); ';
+
+$message.="Rider changed to ".$cojmname;
+// $calcmileage=1;
+$allok=1;
+
+
+
+// $cojmaction='recalcprice';
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+// ends if if ($page=='ajaxchangerider')
+
+
+
+
+
+
+
+
+if ($page=='ajaxchangeserviceid') {
+if (isset($_POST['serviceid'])) { $serviceid = trim($_POST['serviceid']); }
+try {
+$query = "UPDATE Orders SET ServiceID=:serviceid , opsmaparea='' , opsmapsubarea='' WHERE id=:getid";
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+$stmt->bindParam(':serviceid', $serviceid, PDO::PARAM_INT); 
+$stmt->execute();
+$total = $stmt->rowCount();
+if ($total=='1') {
+$query = "SELECT Service, servicecomments, chargedbycheck, canhavemap, chargedbybuild FROM Services WHERE ServiceID = :serviceid LIMIT 0,1";
+$depstmt = $dbh->prepare($query);
+$depstmt->bindParam(':serviceid', $serviceid, PDO::PARAM_INT); 
+$depstmt->execute();
+// $hasid = $clstmt->rowCount();
+$dep = $depstmt->fetchObject();
+$Service=$dep->Service;
+$servicecomments=$dep->servicecomments;
+$canhavemap=$dep->canhavemap;
+$chargedbycheck=$dep->chargedbycheck;
+$chargedbybuild=$dep->chargedbybuild;
+
+if ($chargedbycheck=='1') { $script.= ' $("#cbb").show(); '; 
+}	else { $script.= ' $("#cbb").hide(); ';	}
+
+
+
+if ($chargedbybuild<>'1') {
+$script.= ' $("#baseservicecbb").show(); ';
+$script.= ' $("#mileagerow").hide(); ';
+} else {
+$script.= ' $("#baseservicecbb").hide(); ';
+$script.= ' $("#mileagerow").show(); ';
+}
+
+
+
+
+
+
+
+
+
+if ($canhavemap>0) {
+$script.=' $("#areaselectors").show();  ';
+} else { $script.='  $("#areaselectors").hide();  '; }
+
+
+
+
+if ($servicecomments) { $script.=' $("#servicecomments").html("'.$servicecomments.' ").show(); $("#servicecomments").show(); ';
+} else { $script.='  $("#servicecomments").hide();  '; }
+
+// $script.=' ordermapupdater(); ';
+
+$message.="Service changed to ".$Service;
+$calcmileage=1;
+$allok=1;
+
+
+
+ $cojmaction='recalcprice';
+} // ends total changed ==1 check
+} // ends try
+catch(PDOException $e) { $message.= $e->getMessage(); }
+} // ends if if ($page=='ajaxchangeserviceid') {
 
 
 
@@ -551,12 +1053,6 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 } // ends page = ajaxtargetcollectiondate
 
 
-
-
-
-
-
-
 // collectionworkingwindow
 if ($page=='ajaxcollectionworkingwindow') {
 
@@ -623,11 +1119,7 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 
 
 
-
-
-
 // starttravelcollectiontime
-
 if ($page=='ajaxstarttravelcollectiontime') {
 
 $jobrequestedtime=trim($_POST['starttravelcollectiontime']);
@@ -675,12 +1167,7 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 
 
 
-
-
-
-
 // ajaxwaitingstarttime
-
 if ($page=='ajaxwaitingstarttime') {
 
 $jobrequestedtime=trim($_POST['waitingstarttime']);
@@ -729,11 +1216,7 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 
 
 
-
-
-
 // collectiondate
-
 if ($page=='ajaxcollectiondate') {
 
 $jobrequestedtime=trim($_POST['collectiondate']);
@@ -784,8 +1267,6 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 
 
 
-
-
 if ($page=='ajaxstarttrackpause') {
 
 $jobrequestedtime=trim($_POST['starttrackpause']);
@@ -827,10 +1308,6 @@ $allok=1;
 catch(PDOException $e) { $message.= $e->getMessage(); }
 
 } // ends page = starttrackpause
-
-
-
-
 
 
 
@@ -876,12 +1353,6 @@ $allok=1;
 catch(PDOException $e) { $message.= $e->getMessage(); }
 
 } // ends page = ajaxfinishtrackpause
-
-
-
-
-
-// ajaxdeliveryworkingwindow
 
 
 
@@ -935,9 +1406,7 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 
 
 
-
-
-
+// ajaxdeliveryworkingwindow
 if ($page=='ajaxdeliveryworkingwindow') {
 
 $jobrequestedtime=trim($_POST['deliveryworkingwindow']);
@@ -1201,8 +1670,6 @@ $allok=1;
 } // ends try
 catch(PDOException $e) { $message.= $e->getMessage(); }
 } // ends if if ($page=='ajaxchangeserviceid') {
-
-
 
 
 
@@ -5103,25 +5570,7 @@ $message.='Checkbox Order updated. <br />';
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ENDS MAIN CHANGEJOB  ADDS AUDIT LOG + OUTPUTS SCRIPT
-
-
-
-
-
 
 // echo date(c).'<br />';
 // echo $_SERVER["REQUEST_TIME_FLOAT"].'<br />';

@@ -236,11 +236,9 @@ $tempdist='';
 
 if (date_default_timezone_get()=='UTC') { $nowepoch=-900000000000000; }
 
-if ($nowepoch < $globalprefrow['formtimeout']) { 
+if ($nowepoch < $globalprefrow['formtimeout']) {
 
 
-
- 
  
 if ($page=='editglobalemail') {
 
@@ -463,17 +461,6 @@ $infotext=$infotext.'<p>Status update complete</p>';
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 if ($page=="editcyclistdetails") {
 
 
@@ -629,11 +616,6 @@ if ($mobdevice) {
 
 
 
-
-
-
-
-
 if ($page=='addnewcyclist') {
 
 if (isset($_POST['CompanyName'])) { $cojmname=trim($_POST['CompanyName']); }
@@ -698,27 +680,6 @@ if ($result>'0') { $trackerid=mt_rand(99, 99999999); }
 
    
 } // ends page=addnewcyclist
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1626,42 +1587,6 @@ $pagetext=$pagetext."<p>Favourite added.</p>";
 } // ends add new
 
 } // ends $page==editnewfav
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

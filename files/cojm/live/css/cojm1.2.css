@@ -131,401 +131,130 @@ padding:10px 10px 35px;
 
 
 
-@keyframes uilsquare {
+
+:root {
+  --speed: 1.55s;
+}
+
+#toploader {
+  position: relative;
+  float:left;
+  padding-left: 8px;
+  height: 30px;
+  display:none;
+  top:-2px;
+}
+#toploader span {
+    background: #ccc;
+    width: 3px;
+    height: 0%;
+    border-radius: 14px;
+    margin-right: 1px;
+    float: left;
+}
+#toploader span:last-child {
+      margin-right: 0px;
+    }
+#toploader span:nth-child(1) {
+      animation: load var(--speed) 1.4s infinite linear;
+    }
+#toploader span:nth-child(2) {
+      animation: load var(--speed) 1.2s infinite linear;
+    }
+#toploader span:nth-child(3) {
+      animation: load var(--speed) 1s infinite linear;
+    }
+#toploader span:nth-child(4) {
+      animation: load var(--speed) 0.8s infinite linear;
+    }
+#toploader span:nth-child(5) {
+      animation: load var(--speed) 0.6s infinite linear;
+    }
+#toploader span:nth-child(6) {
+      animation: load var(--speed) 0.4s infinite linear;
+    }
+#toploader span:nth-child(7) {
+      animation: load var(--speed) 0.2s infinite linear;
+    }
+#toploader span:nth-child(8) {
+      animation: load var(--speed) 0s infinite linear;
+    }
+#toploader span:nth-child(9) {
+      animation: load var(--speed) 0.2s infinite linear;
+    }
+#toploader span:nth-child(10) {
+      animation: load var(--speed) 0.4s infinite linear;
+    }
+#toploader span:nth-child(11) {
+      animation: load var(--speed) 0.6s infinite linear;
+    }
+#toploader span:nth-child(12) {
+      animation: load var(--speed) 0.8s infinite linear;
+    }
+#toploader span:nth-child(13) {
+      animation: load var(--speed) 1s infinite linear;
+    }
+#toploader span:nth-child(14) {
+      animation: load var(--speed) 1.2s infinite linear;
+    }
+#toploader span:nth-child(15) {
+      animation: load var(--speed) 1.4s infinite linear;
+    }
+  
+
+@keyframes load {
   0% {
-    background-color: #4d4e4f;
+    background: #ccc;
+    margin-top: 25%;
+    height: 0%;
   }
-  1% {
-    background-color: #71979c;
-  }
-  11% {
-    background-color: #71979c;
-  }
-  21% {
-    background-color: #4d4e4f;
+  50% {
+    background: #444;
+    height: 100%;
+    margin-top: 0%;
   }
   100% {
-    background-color: #4d4e4f;
+    background: #ccc;
+    height: 10%;
+    margin-top: 25%;
   }
 }
-.uil-squares-css {
-  background: none;
-  position: fixed;
-  width: 200px;
-  height: 200px;
-  top:33%;
-  left:50%;
-  right:50%;
-  z-Index:3;
-}
-.uil-squares-css div {
-  position: absolute;
-  z-index: 1;
-  width: 40px;
-  height: 40px;
-  background-color: #4d4e4f;
-}
-.uil-squares-css div > div {
-  position: absolute;
-  top: 0;
-  left: 0;
-  animation: uilsquare 1.5s linear infinite;
-  width: 40px;
-  height: 40px;
-}
-.uil-squares-css > div:nth-of-type(1) {
-  top: 30px;
-  left: 30px;
-}
-.uil-squares-css > div:nth-of-type(1) > div {
-  animation-delay: 0s;
-}
-.uil-squares-css > div:nth-of-type(2) {
-  top: 30px;
-  left: 80px;
-}
-.uil-squares-css > div:nth-of-type(2) > div {
-  animation-delay: 0.1875s;
-}
-.uil-squares-css > div:nth-of-type(3) {
-  top: 30px;
-  left: 130px;
-}
-.uil-squares-css > div:nth-of-type(3) > div {
-  animation-delay: 0.375s;
-}
-.uil-squares-css > div:nth-of-type(4) {
-  top: 80px;
-  left: 130px;
-}
-.uil-squares-css > div:nth-of-type(4) > div {
-  animation-delay: 0.5625s;
-}
-.uil-squares-css > div:nth-of-type(5) {
-  top: 130px;
-  left: 130px;
-}
-.uil-squares-css > div:nth-of-type(5) > div {
-  animation-delay: 0.75s;
-}
-.uil-squares-css > div:nth-of-type(6) {
-  top: 130px;
-  left: 80px;
-}
-.uil-squares-css > div:nth-of-type(6) > div {
-  animation-delay: 0.9375s;
-}
-.uil-squares-css > div:nth-of-type(7) {
-  top: 130px;
-  left: 30px;
-}
-.uil-squares-css > div:nth-of-type(7) > div {
-  animation-delay: 1.125s;
-}
-.uil-squares-css > div:nth-of-type(8) {
-  top: 80px;
-  left: 30px;
-}
-.uil-squares-css > div:nth-of-type(8) > div {
-  animation-delay: 1.3125s;
-}
- 
 
 
-@keyframes uil-gps-inner {
-  0% {
-    opacity: 1;
-  }
-  45% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-  95% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-.uil-gps-css {
-  background: none;
-  position: fixed;
-  width: 200px;
-  height: 200px;
-  z-index: 3;
-  left:50%;
-  right:50%;
-  top:33%;
-}
-.uil-gps-css .inner {
-  position: absolute;
-  top: 60px;
-  left: 60px;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: #20211f;
-  -ms-animation: uil-gps-inner 1s linear infinite;
-  -moz-animation: uil-gps-inner 1s linear infinite;
-  -webkit-animation: uil-gps-inner 1s linear infinite;
-  -o-animation: uil-gps-inner 1s linear infinite;
-  animation: uil-gps-inner 1s linear infinite;
-}
-.uil-gps-css .outer {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  border: 10px solid #4f5c4e;
-}
-.uil-gps-css .marker {
-  position: absolute;
-  width: 20px;
-  height: 40px;
-  border-radius: 10px;
-  background: #4f5c4e;
-}
-width: 100%;
-@-webkit-keyframes uil-gps-marker {
-  0% {
-    -ms-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -webkit-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  50% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-  100% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-}
-@-webkit-keyframes uil-gps-marker {
-  0% {
-    -ms-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -webkit-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  50% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-  100% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-}
-@-moz-keyframes uil-gps-marker {
-  0% {
-    -ms-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -webkit-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  50% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-  100% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-}
-@-ms-keyframes uil-gps-marker {
-  0% {
-    -ms-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -webkit-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  50% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-  100% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-}
-@-moz-keyframes uil-gps-marker {
-  0% {
-    -ms-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -webkit-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  50% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-  100% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-}
-@-webkit-keyframes uil-gps-marker {
-  0% {
-    -ms-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -webkit-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  50% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-  100% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-}
-@-o-keyframes uil-gps-marker {
-  0% {
-    -ms-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -webkit-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  50% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-  100% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-}
-@keyframes uil-gps-marker {
-  0% {
-    -ms-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -webkit-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  50% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-  100% {
-    -ms-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -webkit-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-}
-.uil-gps-css .markers {
-  -ms-transform: translate(100px, 100px);
-  -moz-transform: translate(100px, 100px);
-  -webkit-transform: translate(100px, 100px);
-  -o-transform: translate(100px, 100px);
-  transform: translate(100px, 100px);
-}
-.uil-gps-css .markers-ib {
-  width: 0;
-  height: 0;
-  -ms-animation: uil-gps-marker 1s linear infinite;
-  -moz-animation: uil-gps-marker 1s linear infinite;
-  -webkit-animation: uil-gps-marker 1s linear infinite;
-  -o-animation: uil-gps-marker 1s linear infinite;
-  animation: uil-gps-marker 1s linear infinite;
-}
-.uil-gps-css .marker:nth-of-type(1) {
-  top: -20px;
-  left: -10px;
-  -ms-transform: rotate(0deg) translate(0, -70px);
-  -moz-transform: rotate(0deg) translate(0, -70px);
-  -webkit-transform: rotate(0deg) translate(0, -70px);
-  -o-transform: rotate(0deg) translate(0, -70px);
-  transform: rotate(0deg) translate(0, -70px);
-}
-.uil-gps-css .marker:nth-of-type(2) {
-  top: -20px;
-  left: -10px;
-  -ms-transform: rotate(90deg) translate(0, -70px);
-  -moz-transform: rotate(90deg) translate(0, -70px);
-  -webkit-transform: rotate(90deg) translate(0, -70px);
-  -o-transform: rotate(90deg) translate(0, -70px);
-  transform: rotate(90deg) translate(0, -70px);
-}
-.uil-gps-css .marker:nth-of-type(3) {
-  top: -20px;
-  left: -10px;
-  -ms-transform: rotate(180deg) translate(0, -70px);
-  -moz-transform: rotate(180deg) translate(0, -70px);
-  -webkit-transform: rotate(180deg) translate(0, -70px);
-  -o-transform: rotate(180deg) translate(0, -70px);
-  transform: rotate(180deg) translate(0, -70px);
-}
-.uil-gps-css .marker:nth-of-type(4) {
-  top: -20px;
-  left: -10px;
-  -ms-transform: rotate(270deg) translate(0, -70px);
-  -moz-transform: rotate(270deg) translate(0, -70px);
-  -webkit-transform: rotate(270deg) translate(0, -70px);
-  -o-transform: rotate(270deg) translate(0, -70px);
-  transform: rotate(270deg) translate(0, -70px);
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2368,15 +2097,6 @@ border-radius: 4px;
 
 .ZebraDialogOverlay  { background: #666666 }
 
-
-#spinner {
-background: rgba(0, 0, 0, 0) url('../images/loader.gif') no-repeat scroll 0 0;
-margin: 5px 0 0 10px;
-width: 16px;
-opacity: 0.6;
-display:none;
-float:left;
-}
 
 
 .barrel_roll {

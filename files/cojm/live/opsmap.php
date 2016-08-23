@@ -42,7 +42,7 @@ $min_lon =  '99999';
 $testc='';
 $js='';
 
-$hasforms='1';
+$hasforms='0';
 ?><!doctype html>
 <html lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -128,7 +128,7 @@ elseif ($row['type']=='2') {
 
 $tablerow.= '
 <tr id="'.$row['opsmapid'].'" >
-<td><a href="opsmap-new-area.php?page=showarea&amp;areaid='.$row['opsmapid'].'">'.$row['opsname'].'</a></td>';
+<td><a href="opsmap-new-area.php?areaid='.$row['opsmapid'].'">'.$row['opsname'].'</a></td>';
 
 $tablerow.= '<td>';
 if ($row['istoplayer']=='1') { $tablerow.= ' <span class="album" title="Has Layers"> </span> '; }
@@ -605,12 +605,17 @@ var savemarker="savemarker";
     });
 }
 
-$(window).resize(function () {
-    var h = $(window).height(),
-        offsetTop = 72; // Calculate the top offset
+    $(window).resize(function () {
+        var menuheight=0;
+        $(".top_menu_line").each(function( index ) {
+            if ($(this).is(':visible')) {
+                menuheight = menuheight + $( this ).height();
+            }
+        });
+//        var h = ;
+        $("#gmap_wrapper").css("height", ($(window).height() - menuheight));
+    }).resize();
 
-    $('#gmap_wrapper').css('height', (h - offsetTop));
-}).resize();
 
 
  geocoder = new google.maps.Geocoder(); 
@@ -657,7 +662,7 @@ google.maps.event.addDomListener(window, 'load', initialize);
     </script>
 
 </head><body>  ";
-  $adminmenu="1";
+//  $adminmenu="1";
 $filename="opsmap.php";
 include "cojmmenu.php";
 

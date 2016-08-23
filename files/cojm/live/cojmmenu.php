@@ -122,16 +122,27 @@ echo '<button class="menusearch" form="menusearch" type="submit" title="Refresh"
 
 }
 
-echo ' </form></li>
-<div id="toploader"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-';
+echo ' </form></li>';
 
 
 if ($hasforms=='1'){echo '<li><span id="cdtext"> </span></li><li><b class="hidden" id="show-time" >'. $globalprefrow['formtimeout'].'</b></li>';}
 
 
+if ($filename=='opsmap.php') { echo '<li><a href="opsmap.php" class="selected"> Ops Map</a></li>'; }
+if ($filename=="startuploadgpx.php") { echo '<li><a href="startuploadgpx.php" class="selected" >GPS</a></li>'; }
+
+
+
 
 echo '</ul>';
+
+
+echo '
+<div id="toploader"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+';
+
+
+
 
 	
 echo '</div>';
@@ -162,7 +173,9 @@ echo '> '.$globalprefrow['glob5'].'</a></li>';
 
 echo '<li><a href="opsmap.php"'; if ($filename=='opsmap.php') { echo ' class="selected"';} 
 
-echo '> Ops Map</a></li><li><a href="favusr.php"'; if ($filename=='favusr.php') { echo' class="selected"'; } echo '>Favourites</a></li>
+echo '> Ops Map</a></li>';
+
+echo '<li><a href="favusr.php"'; if ($filename=='favusr.php') { echo' class="selected"'; } echo '>Favourites</a></li>
 <li><a href="recentlyclosed.php"'; 
 if ($filename=='recentlyclosed.php') { echo ' class="selected"';} echo '>Last 100</a></li>
 <li><a href="startuploadgpx.php"'; if ($filename=='startuploadgpx.php') echo ' class="selected"'; echo '>GPS</a></li>

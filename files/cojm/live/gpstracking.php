@@ -37,6 +37,8 @@ $gmapdata='';
 $i='';
 $linecoords='';
 $loop='0';
+$latestlat='';
+$latestlon='';
 $lattot='';
 $lontot='';
 $clusterdata='';
@@ -56,6 +58,7 @@ $min_lat =  '99999';
 $max_lon = '-99999';
 $min_lon =  '99999';
 
+$testfile='';
 
 if (isset($_POST['confirmgpx'])) { $confirmgpx=trim($_POST['confirmgpx']); } else { $confirmgpx=''; }
 if (isset($_GET['from'])) { $start=trim($_GET['from']); } else { $start=''; }
@@ -837,8 +840,6 @@ if ($clientview=='cluster') { echo ' var markerCluster = new MarkerClusterer(map
     
     });
     
-    
-    
 }
 
     function comboboxchanged() { };
@@ -858,10 +859,7 @@ echo '</head><body ';
  if ($foundtracks>'0') { echo 'onload="initialize()" '; }
 echo '>';
 
-
-$agent = $_SERVER['HTTP_USER_AGENT'];
-if(preg_match('/iPhone|Android|Blackberry/i', $agent)) { $adminmenu=""; } else { $adminmenu ="1"; }
-
+$adminmenu=0;
 $filename="startuploadgpx.php";
 include "cojmmenu.php"; 
 

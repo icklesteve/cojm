@@ -43,6 +43,14 @@ overflow-x:hidden;
 
 
 
+
+.arealabel { 
+
+display:none;
+}
+
+
+
 .orderjobcomments { width: 65%; outline: none; height:20px; }
 
 span.bankhol { background-color:#a8a8a8;
@@ -101,7 +109,7 @@ background-color:#ffffff;
 float:left;
 overflow:scroll;
 position:fixed;
-top:72px;
+top:36px;
 overflow-x:hidden;
 bottom:0;
 }
@@ -142,8 +150,9 @@ padding:10px 10px 35px;
   padding-left: 8px;
   height: 30px;
   display:none;
-  top:-2px;
+  top:-7px;
 }
+
 #toploader span {
     background: #ccc;
     width: 3px;
@@ -453,7 +462,7 @@ transition: 0.2s;
 }
 
 
-.hideuntilneeded { display:none; }
+
 
 #baseservicecbbtext { padding-left:8px; }
 
@@ -1349,8 +1358,8 @@ h3, h3 a, h3 a:link, h3 a:visited, h3 a:hover
 {
 font-size: 22px;
 line-height: 22px;
-padding: 2px;
 color: #000000;
+margin: 0 0 15px;
 }
 
 h4, h4 a, h4 a:link, h4 a:visited, h4 a:hover
@@ -1829,9 +1838,9 @@ padding-left:14px;
 
 /* used in index.php and department password in newjob */
 
-select.blinking { color: red; }
-.blinking  { color: red; }
-span.blinking { color: red; }
+select.red { color: red; }
+.red  { color: red; }
+span.red { color: red; }
 
 
 html {
@@ -2203,7 +2212,7 @@ float:left;
 button.menusearch:hover {  cursor:pointer; }
 
 
-
+.hideuntilneeded, #showriderlink.hidden { display:none; }
 
 
 

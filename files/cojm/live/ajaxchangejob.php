@@ -508,9 +508,7 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 if ($page=='ajaxchangerider') {
 if (isset($_POST['newrider'])) { $newrider = trim($_POST['newrider']); }
 try {
-    
-    // UPDATE Orders SET lookedatbycyclisttime='0', CyclistID=$newcyclist WHERE ID = $id LIMIT 1
-    
+
 $query = "UPDATE Orders SET lookedatbycyclisttime='0', CyclistID=:CyclistID  WHERE id=:getid";
 $stmt = $dbh->prepare($query);
 $stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
@@ -531,19 +529,23 @@ $dep = $depstmt->fetchObject();
 $cojmname=$dep->cojmname;
 // $servicecomments=$dep->servicecomments;
 // $canhavemap=$dep->canhavemap;
-// $chargedbycheck=$dep->chargedbycheck;
-// $chargedbybuild=$dep->chargedbybuild;
-
-
-
-
-
-// if ($servicecomments) { $script.=' $("#servicecomments").html("'.$servicecomments.' ").show(); $("#servicecomments").show(); ';
-// } else { $script.='  $("#servicecomments").hide();  '; }
-
-// $script.=' ordermapupdater(); ';
 
 $message.="Rider changed to ".$cojmname;
+
+if ($newrider<>1) {
+
+$script.=' 
+$("#showriderlink").removeClass("hidden").attr("href", "cyclist.php?thiscyclist='.$newrider.'").attr("title", "'.$cojmname.' details"); 
+$("select#newrider").removeClass("red");
+';
+} else { 
+$script.=' $("#showriderlink").addClass("hidden"); $("select#newrider").addClass("red"); ';
+
+
+}
+
+
+
 // $calcmileage=1;
 $allok=1;
 
@@ -599,6 +601,8 @@ $script.= ' $("#mileagerow").show(); ';
 }
 
 
+
+$script.=' canshowareafromservice= '.$canhavemap.';  ';
 
 
 
@@ -2385,7 +2389,7 @@ $script.=' $("#arealink").hide(); ';
 
 } else {
 $message.="Ops Map changed to ".$opsname;
-$script.=' $("#arealink").show().attr("href", "opsmap-new-area.php?page=showarea&areaid='.$opsmaparea.'"); ';
+$script.=' $("#arealink").show().attr("href", "opsmap-new-area.php?areaid='.$opsmaparea.'"); ';
 
 
 }
@@ -2508,7 +2512,7 @@ $allok=1;
 
 if ($opsmapsubarea>0) {
 	
-$script.=' $("#subarealink").show().attr("href", "opsmap-new-area.php?page=showarea&areaid='.$opsmapsubarea.'"); ';
+$script.=' $("#subarealink").show().attr("href", "opsmap-new-area.php?areaid='.$opsmapsubarea.'"); ';
 $script.=' $("#subarealink").attr("title", "'.$opsname.' Details"); ';
 $script.=' $("#subarealink").show(); ';
 

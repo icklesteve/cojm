@@ -240,7 +240,7 @@ print ("value=\"$status\">$statusname</option>"); } print ("</select>");
 $query = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID"; 
 $result_id = mysql_query ($query, $conn_id); echo '<input type="hidden" name="oldcyclist" value="'.$row['CyclistID'].'" >
 <select name="newcyclist" id="cyc'. $row['ID'] .'" class="';
-if ($row['CyclistID']=='1') { echo ' blinking '; } if ( $globalprefrow['glob6']=='1' ) { if ( $countrows & '1' ) {  //odd
+if ($row['CyclistID']=='1') { echo ' red '; } if ( $globalprefrow['glob6']=='1' ) { if ( $countrows & '1' ) {  //odd
 echo ' ui-state-highlight '; } else { echo ' ui-state-default '; }} if ( $globalprefrow['glob6']=='2' ) { if ( $dayflag & '1' ) {  //odd
 echo ' ui-state-default '; } else { echo ' ui-state-highlight '; }} echo ' ui-corner-left">';
 while (list ($CyclistID, $cojmname) = mysql_fetch_row ($result_id)) { $cojmname=htmlspecialchars($cojmname);  print ("<option "); 
@@ -275,12 +275,12 @@ echo ' </td> <td> ';
 
 
  if (($row['status']) <'51' ) {
- if ($dtrgcoll<0) { echo ' <span class="blinking"> '; } echo ' Target PU'; if ($dtrgcoll<0) { echo ' </span> '; }
+ if ($dtrgcoll<0) { echo ' <span class="red"> '; } echo ' Target PU'; if ($dtrgcoll<0) { echo ' </span> '; }
 echo ' 
 </td>
 <td> 
 ';
-if ($dtrgcoll<0) { echo ' <span class="blinking" > '; }
+if ($dtrgcoll<0) { echo ' <span class="red" > '; }
 echo date('H:i A ', strtotime($targetcollectiondate)); 
 
 
@@ -368,7 +368,7 @@ $globalprefrow['currencysymbol'].($row['FreightCharge']+$row['vatcharge']).'</sp
  
  
  
- if ($dtrgdeli<0) { echo ' <span class="blinking" > '; } echo ' Target Drop '; if ($dtrgdeli<0) { echo ' </span> '; }
+ if ($dtrgdeli<0) { echo ' <span class="red" > '; } echo ' Target Drop '; if ($dtrgdeli<0) { echo ' </span> '; }
 
  echo '
  </td>
@@ -378,7 +378,7 @@ $globalprefrow['currencysymbol'].($row['FreightCharge']+$row['vatcharge']).'</sp
  
  
 // due date / time   ///////////////////////////////////////////////
-if ($dtrgdeli<0) { echo ' <span class="blinking" > '; }
+if ($dtrgdeli<0) { echo ' <span class="red" > '; }
 echo date('H:i A ', strtotime($duedate)); 
 
 if (date('U', strtotime($row['deliveryworkingwindow']))>10) { 

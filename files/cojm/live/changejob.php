@@ -239,6 +239,220 @@ if (date_default_timezone_get()=='UTC') { $nowepoch=-900000000000000; }
 if ($nowepoch < $globalprefrow['formtimeout']) {
 
 
+
+
+if (($page=='editarea') or ($page=='opsmapnewarea')) {
+
+
+if ($vertices) { // checks for anti-clockwise
+
+$pexploded=explode( ',', $vertices );
+
+foreach ($pexploded as $tv) {
+$tv=trim($tv);
+$ttransf = array(" " => ",");
+$tcoord[]= strtr($tv, $ttransf);
+}
+
+$tarrlength = count($tcoord);
+$tareax = '0';
+$twinding='0';
+
+while ( $tareax < ($tarrlength-1)) {
+$do=( explode( ',', $tcoord[$tareax+1] ) );
+$co=( explode( ',', $tcoord[$tareax] ) );
+$twinding=$twinding+ (($co[0]-$do[0]) * ($do[1]+$co[1]));
+$tareax++;
+}
+
+if ($twinding<'0') { 
+
+$infotext.= '<br /> ant-clockwise '; 
+
+$newvertices='';
+
+$tareax=($tarrlength-'1');
+while ( $tareax > '-1') {
+	
+	$co=( explode( ',', $tcoord[$tareax] )); 
+
+$newvertices.=' '.$co[0].' '.$co[1].', ';
+
+$tareax--;
+}
+
+$newvertices = ''.rtrim($newvertices, ', ').' '; 
+$vertices=$newvertices;
+}
+}
+
+
+} // ends page check
+
+
+if ($page=='editarea') {
+
+$infotext =$infotext. ' in edit ops map area ';
+if (isset($_POST['areaid'])) { $areaid=trim($_POST['areaid']);} else { $areaid=''; }
+if (isset($_POST['areaname'])) { $areaname=trim($_POST['areaname']);} else { $areaname=''; }
+if (isset($_POST['areacomments'])) { $areacomments=trim($_POST['areacomments']);} else { $areacomments=''; }
+
+if (isset($_POST['inarchive'])) { $inarchive=trim($_POST['inarchive']); } else { $inarchive='0'; } // Show Working Windows
+
+if (isset($_POST['istoplayer'])) { $istoplayer=trim($_POST['istoplayer']); } else { $istoplayer='0'; } // Show Working Windows
+if (isset($_POST['corelayer'])) { $corelayer=trim($_POST['corelayer']);} else { $corelayer='0'; }
+
+
+// echo $inarchive;
+
+if ($areaid)	{
+	
+	 if ($vertices=='') {
+$sql="UPDATE opsmap 
+SET inarchive='".$inarchive."', 
+opsname='".$areaname."' , 
+descrip='".$areacomments."' , 
+istoplayer='".$istoplayer."',
+corelayer='".$corelayer."'
+ WHERE opsmapid=".$areaid; 
+} else { 
+
+
+$sql="UPDATE opsmap 
+SET inarchive='".$inarchive."', 
+opsname='".$areaname."' , 
+descrip='".$areacomments."' , 
+g= PolygonFromText('POLYGON((".$vertices."))'),
+istoplayer='".$istoplayer."',
+corelayer='".$corelayer."'
+ WHERE opsmapid=".$areaid; 
+ }
+
+
+}
+
+else {
+
+
+$sql="INSERT INTO opsmap (type,opsname,istoplayer,corelayer,descrip";
+
+if ($vertices) { 
+$sql.=",g";
+
+}
+$sql.=") VALUES ( '2', '".
+$areaname."','".
+$istoplayer."','".
+$corelayer."','".
+$areacomments."'";
+if ($vertices) { 
+$sql.=", PolygonFromText('POLYGON(( ".$vertices."))')";
+}
+$sql.=");";
+
+
+
+
+
+}
+ 
+
+ 
+ 
+ 
+$result = mysql_query($sql, $conn_id);
+
+
+// $infotext.= $sql;
+
+ if ($result){
+	 
+$infotext=$infotext."<br />Success";
+$pagetext=$pagetext.'<p>Success</p>';
+$pagetext=$pagetext.'<p>Edited area '.$areaname.'.</p>';
+$infotext=$infotext.'<p>Edited OpsMapArea '.$areaid.' </p>'; 
+ } else {
+ $infotext=$infotext.mysql_error()." An error occured during editing area!<br>".$sql;  
+ $alerttext=$alerttext.mysql_error()." <p>An error occured during editing area!</p>".$sql;
+ } // ends 
+
+// } // ends vertices check
+
+} // ends page editarea
+
+
+
+if ($page=='opsmapnewarea') {
+	
+$infotext =$infotext. ' in new ops map area ';
+
+// if ($vertices=='') { $infotext=$infotext.'<br /> NO VERTICES PASSED'; } else {
+
+
+
+
+if (isset($_POST['areaname'])) { $areaname=trim($_POST['areaname']);} else {$areaname=''; }
+if (isset($_POST['areacomments'])) { $areacomments=trim($_POST['areacomments']);} else { $areacomments=''; }
+	
+if (isset($_POST['inarchive'])) { $inarchive=trim($_POST['inarchive']); } else { $inarchive='0'; } // Show Working Windows
+
+if (isset($_POST['istoplayer'])) { $istoplayer=trim($_POST['istoplayer']); } else { $istoplayer='0'; } // Show Working Windows
+if (isset($_POST['corelayer'])) { $corelayer=trim($_POST['corelayer']);} else { $corelayer='0'; }
+	
+	
+//	$vertices = rtrim($vertices, ',');	
+//	$infotext.='<br />'. $areaname; 	
+//  $infotext.='<br />'. $areacomments; 
+//  $infotext.='<br />'. $vertices; 
+//	$infotext.='<br />'. $output; 	
+	
+$sql="INSERT INTO opsmap (type,opsname,istoplayer,corelayer,descrip";
+
+if ($vertices) { 
+$sql.=",g";
+
+}
+$sql.=") VALUES ( '2', '".
+$areaname."','".
+$istoplayer."','".
+$corelayer."','".
+$areacomments."'";
+if ($vertices) { 
+$sql.=", PolygonFromText('POLYGON(( ".$vertices."))')";
+}
+$sql.=");";
+$infotext=$infotext. $sql;
+	
+// echo $sql;
+	
+    $result = mysql_query($sql, $conn_id);
+ if ($result){
+$infotext=$infotext."<br />Success";
+$pagetext=$pagetext.'<p>Success</p>';
+$areaid=mysql_insert_id(); 
+$pagetext=$pagetext.'<p>New area '.$areaname.' created.</p>';
+$infotext=$infotext.'<p>New OpsMapArea '.$areaid.' created.</p>'; 
+ } else {
+ $infotext=$infotext.mysql_error()." An error occured during creating new area!<br>".$sql;  
+ $alerttext=$alerttext.mysql_error()." <p>An error occured during adding new area!</p>".$sql;
+ } // ends 
+
+ $page='editarea';	
+ 
+// } // ends vertices check
+	
+
+	
+} // ends page= opsmapnewarea
+
+
+
+
+
+
+
+
+
  
 if ($page=='editglobalemail') {
 
@@ -326,9 +540,6 @@ $alerttext=$alerttext."<p><strong>An error occured during updating email setting
 
 
 
-
-
-
 if ($page=='newpostcode') {
  
  $lat=trim($_POST['lat']);
@@ -401,7 +612,6 @@ $cojmaction='recalcprice';
 
 
 } // ends page =editpostcode
-
 
 
 
@@ -2340,240 +2550,244 @@ $pagetext=$pagetext. "<h1>An error occured during client database update</h1>"; 
 
 
 
-if ($page == "createnewfromexisting" ) {
-if ($oldid) {
+    if ($page == "createnewfromexisting" ) {
+        if ($oldid) {
 
-$cojmaction=='recalcprice';
+        $cojmaction='recalcprice';
 
-if (isset($_POST['dateshift'])) { $dateshift=$_POST['dateshift']; }
+        if (isset($_POST['dateshift'])) { $dateshift=$_POST['dateshift']; }
 
-if (isset($_POST['currorsched'])) { $currorsched=trim($_POST['currorsched']); } else { $currorsched=''; }
-
-
-// $pagetext=$pagetext.'<p>New job created from ref <a href="order.php?id='.$oldid.'">'.$oldid.'</a></p>';
-$infotext=$infotext.'<br />New job created from ref <a href="order.php?id='.$oldid.'">'.$oldid.'</a>';
+        if (isset($_POST['currorsched'])) { $currorsched=trim($_POST['currorsched']); } else { $currorsched=''; }
 
 
-$query="SELECT * FROM Orders where ID = '$id' LIMIT 1";
-$result=mysql_query($query, $conn_id); $row=mysql_fetch_array($result);
-$status=$row['status']; $serviceid=$row['ServiceID']; $cost=$row['FreightCharge']; $vatcharge=$row['vatcharge']; 
-$timerequested=$row['jobrequestedtime']; $targetcollectiondate = $row['targetcollectiondate'];
+        // $pagetext=$pagetext.'<p>New job created from ref <a href="order.php?id='.$oldid.'">'.$oldid.'</a></p>';
+        $infotext.='<br />New job created from ref <a href="order.php?id='.$oldid.'">'.$oldid.'</a>';
 
-// echo "target collection date from row : "; echo $targetcollectiondate;
-// $targetcollectiondate=date("Y-m-d H:i:s");
-$temp_ar=explode("-",$targetcollectiondate); $spltime_ar=explode(" ",$temp_ar[2]); 
-$temptime_ar=explode(":",$spltime_ar[1]); 
-if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; 
-$temptime_ar[1] = 0; $temptime_ar[2] = 0; }
-$day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; $second = 00; 
-$targetcollectiondate= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year));
-
-$collectiondate = $row['collectiondate'];
-$temp_ar=explode("-",$collectiondate); $spltime_ar=explode(" ",$temp_ar[2]); 
-$temptime_ar=explode(":",$spltime_ar[1]); 
-if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
-$temptime_ar[2] = 0; }
-$day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; $second = 00; 
-$collectiondate= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year));
-
-if ($row['duedate']>20) { $duedate=$row['duedate'];
-$temp_ar=explode("-",$duedate); $spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
-if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
-$temptime_ar[2] = 0; }
-$day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
-$duedate= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
-
-if ($row['ShipDate']>20) { $deliverydate=$row['ShipDate'];
- $temp_ar=explode("-",$deliverydate); $spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
- if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
-$temptime_ar[2] = 0; }
-$day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; $second = 00; 
-$deliverydate= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
-
-if ($row['deliveryworkingwindow']>20) { $temp_ar=explode("-",$row['deliveryworkingwindow']); 
-$spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
-if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
-$temptime_ar[2] = 0; } $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
-$second = 00; $deliveryworkingwindow= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
-else { $deliveryworkingwindow=''; }
-
-if ($row['collectionworkingwindow']>20) { $row['collectionworkingwindow']; $temp_ar=explode("-",$row['collectionworkingwindow']); 
-$spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
-if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
-$temptime_ar[2] = 0; } $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
-$second = 00; $collectionworkingwindow= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
-else { $collectionworkingwindow=''; }
-
-
-if ($row['starttrackpause']>20) { $temp_ar=explode("-",$row['starttrackpause']); 
-$spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
-if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
-$temptime_ar[2] = 0; } $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
-$second = 00; $starttrackpause= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
-else { $starttrackpause=''; }
-
-if ($row['waitingstarttime']>20) { $waitingtime=$row['waitingstarttime']; $temp_ar=explode("-",$waitingtime); 
-$spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
-if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
-$temptime_ar[2] = 0; } $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
-$second = 00; $waitingtime= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
-else { $waitingtime=''; }
-
-if ($row['finishtrackpause']>20) { $finishtrackpause=$row['finishtrackpause']; $temp_ar=explode("-",$finishtrackpause); 
-$spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
-if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
-$temptime_ar[2] = 0; } $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
-$second = 00; $finishtrackpause= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
-else { $finishtrackpause=''; }
-
-if ($status <49  ){ 
-
-$nextactiondate = $targetcollectiondate; 
-$starttrackpause='';
-$finishtrackpause='';
-
-
-} else {$nextactiondate = $duedate; }
-
-$numberitems=$row['numberitems'];
-$customerid=$row['CustomerID'];
-$shippc=$row['ShipPC'];
-$requestor=$row['requestor'];
-$orderdep=$row['orderdep'];
-$fromfreeaddress=$row['fromfreeaddress'];
-$tofreeaddress=$row['tofreeaddress'];
-$collectpc=$row['CollectPC'];
-$jobcomments = $row['jobcomments'];
-$privjobcomments = $row['privatejobcomments'];
-$clientjobreference = $row['clientjobreference'];
-$distance=$row['distance'];
-$waitingmins=$row['waitingmins'];
-$clientdiscount=$row['clientdiscount'];
-$co2saving=$row['co2saving'];
-$pm10saving=$row['pm10saving'];
-$opsmaparea=$row['opsmaparea'];
-$opsmapsubarea=$row['opsmapsubarea'];
-$cbb1=$row['cbb1'];
-$cbb2=$row['cbb2'];
-$cbb3=$row['cbb3'];
-$cbb4=$row['cbb4'];
-$cbb5=$row['cbb5'];
-$cbb6=$row['cbb6'];
-$cbb7=$row['cbb7'];
-$cbb8=$row['cbb8'];
-$cbb9=$row['cbb9'];
-$cbb10=$row['cbb10'];
-$cbb11=$row['cbb11'];
-$cbb12=$row['cbb12'];
-$cbb13=$row['cbb13'];
-$cbb14=$row['cbb14'];
-$cbb15=$row['cbb15'];
-$cbb16=$row['cbb16'];
-$cbb17=$row['cbb17'];
-$cbb18=$row['cbb18'];
-$cbb19=$row['cbb19'];
-$cbb20=$row['cbb20'];
-$cbbc1=$row['cbbc1'];
-$cbbc2=$row['cbbc2'];
-$cbbc3=$row['cbbc3'];
-$cbbc4=$row['cbbc4'];
-$cbbc5=$row['cbbc5'];
-$cbbc6=$row['cbbc6'];
-$cbbc7=$row['cbbc7'];
-$cbbc8=$row['cbbc8'];
-$cbbc9=$row['cbbc9'];
-$cbbc10=$row['cbbc10'];
-$cbbc11=$row['cbbc11'];
-$cbbc12=$row['cbbc12'];
-$cbbc13=$row['cbbc13'];
-$cbbc14=$row['cbbc14'];
-$cbbc15=$row['cbbc15'];
-$cbbc16=$row['cbbc16'];
-$cbbc17=$row['cbbc17'];
-$cbbc18=$row['cbbc18'];
-$cbbc19=$row['cbbc19'];
-$cbbc20=$row['cbbc20'];
-$enrpc1=$row['enrpc1'];
-$enrpc2=$row['enrpc2'];
-$enrpc3=$row['enrpc3'];
-$enrpc4=$row['enrpc4'];
-$enrpc5=$row['enrpc5'];
-$enrpc6=$row['enrpc6'];
-$enrpc7=$row['enrpc7'];
-$enrpc8=$row['enrpc8'];
-$enrpc9=$row['enrpc9'];
-$enrpc10=$row['enrpc10'];
-$enrpc11=$row['enrpc11'];
-$enrpc12=$row['enrpc12'];
-$enrpc13=$row['enrpc13'];
-$enrpc14=$row['enrpc14'];
-$enrpc15=$row['enrpc15'];
-$enrpc16=$row['enrpc16'];
-$enrpc17=$row['enrpc17'];
-$enrpc18=$row['enrpc18'];
-$enrpc19=$row['enrpc19'];
-$enrpc20=$row['enrpc20'];
-$enrft1=$row['enrft1'];
-$enrft2=$row['enrft2'];
-$enrft3=$row['enrft3'];
-$enrft4=$row['enrft4'];
-$enrft5=$row['enrft5'];
-$enrft6=$row['enrft6'];
-$enrft7=$row['enrft7'];
-$enrft8=$row['enrft8'];
-$enrft9=$row['enrft9'];
-$enrft10=$row['enrft10'];
-$enrft11=$row['enrft11'];
-$enrft12=$row['enrft12'];
-$enrft13=$row['enrft13'];
-$enrft14=$row['enrft14'];
-$enrft15=$row['enrft15'];
-$enrft16=$row['enrft16'];
-$enrft17=$row['enrft17'];
-$enrft18=$row['enrft18'];
-$enrft19=$row['enrft19'];
-$enrft20=$row['enrft20'];
-$iscustomprice=$row['iscustomprice'];
-
-if ($iscustomprice=='1') {
-
-$pagetext=$pagetext.'<p> New job is pricelocked</p>';
-}
-
-$handoverpostcode=$row['handoverpostcode'];
-$handoverCyclistID=$row['handoverCyclistID'];
-
-if ($status>'86') { $status='86'; }
-if ($status < "59" ){ $collectiondate=""; $waitingtime=""; };
-if ($status < "70" ){ $deliverydate=""; };
-
-
-$infotext=$infotext.'<br />2469 Client Discount : '.$clientdiscount;
-
-// $infotext=$infotext.' <br>Currorsched='.$currorsched;
-
-if ($currorsched=='unsched') {
-
-$status='30';
-$collectiondate='';
-$deliverydate='';
-$nextactiondate=$targetcollectiondate;
-}
-
-
-
-
-
-
-
-
-
-
-
-$cyclist=$row['CyclistID'];
-$autostartchain=$row['autostartchain'];
-
-if ($id) {
+        
+        $query="SELECT * FROM Orders where ID = '$id' LIMIT 1";
+        $result=mysql_query($query, $conn_id); $row=mysql_fetch_array($result);
+        $status=$row['status']; $serviceid=$row['ServiceID']; $cost=$row['FreightCharge']; $vatcharge=$row['vatcharge']; 
+        $timerequested=$row['jobrequestedtime']; $targetcollectiondate = $row['targetcollectiondate'];
+        
+        // echo "target collection date from row : "; echo $targetcollectiondate;
+        // $targetcollectiondate=date("Y-m-d H:i:s");
+        $temp_ar=explode("-",$targetcollectiondate); $spltime_ar=explode(" ",$temp_ar[2]); 
+        $temptime_ar=explode(":",$spltime_ar[1]); 
+        if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; 
+        $temptime_ar[1] = 0; $temptime_ar[2] = 0; }
+        $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; $second = 00; 
+        $targetcollectiondate= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year));
+        
+        $collectiondate = $row['collectiondate'];
+        $temp_ar=explode("-",$collectiondate); $spltime_ar=explode(" ",$temp_ar[2]); 
+        $temptime_ar=explode(":",$spltime_ar[1]); 
+        if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
+        $temptime_ar[2] = 0; }
+        $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; $second = 00; 
+        $collectiondate= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year));
+        
+        if ($row['duedate']>20) { 
+            $duedate=$row['duedate'];
+            $temp_ar=explode("-",$duedate); $spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
+            if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { 
+                $temptime_ar[0] = 0; $temptime_ar[1] = 0; $temptime_ar[2] = 0; }
+            $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
+            $duedate= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year));
+        }
+        
+        if ($row['ShipDate']>20) { $deliverydate=$row['ShipDate'];
+        $temp_ar=explode("-",$deliverydate); $spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
+        if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
+        $temptime_ar[2] = 0; }
+        $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; $second = 00; 
+        $deliverydate= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
+        
+        if ($row['deliveryworkingwindow']>20) { $temp_ar=explode("-",$row['deliveryworkingwindow']); 
+        $spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
+        if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
+        $temptime_ar[2] = 0; } $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
+        $second = 00; $deliveryworkingwindow= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
+        else { $deliveryworkingwindow=''; }
+        
+        if ($row['collectionworkingwindow']>20) { $row['collectionworkingwindow']; $temp_ar=explode("-",$row['collectionworkingwindow']); 
+        $spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
+        if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
+        $temptime_ar[2] = 0; } $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
+        $second = 00; $collectionworkingwindow= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
+        else { $collectionworkingwindow=''; }
+        
+        
+        if ($row['starttrackpause']>20) { $temp_ar=explode("-",$row['starttrackpause']); 
+        $spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
+        if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
+        $temptime_ar[2] = 0; } $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
+        $second = 00; $starttrackpause= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
+        else { $starttrackpause=''; }
+        
+        if ($row['waitingstarttime']>20) { $waitingtime=$row['waitingstarttime']; $temp_ar=explode("-",$waitingtime); 
+        $spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
+        if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
+        $temptime_ar[2] = 0; } $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
+        $second = 00; $waitingtime= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
+        else { $waitingtime=''; }
+        
+        if ($row['finishtrackpause']>20) { $finishtrackpause=$row['finishtrackpause']; $temp_ar=explode("-",$finishtrackpause); 
+        $spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
+        if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
+        $temptime_ar[2] = 0; } $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
+        $second = 00; $finishtrackpause= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
+        else { $finishtrackpause=''; }
+        
+        if ($status <49  ){
+        
+            $nextactiondate = $targetcollectiondate; 
+            $starttrackpause='';
+            $finishtrackpause='';
+        
+        } 
+        else {
+            $nextactiondate = $duedate;
+        }
+        
+        $numberitems=$row['numberitems'];
+        $customerid=$row['CustomerID'];
+        $shippc=$row['ShipPC'];
+        $requestor=$row['requestor'];
+        $orderdep=$row['orderdep'];
+        $fromfreeaddress=$row['fromfreeaddress'];
+        $tofreeaddress=$row['tofreeaddress'];
+        $collectpc=$row['CollectPC'];
+        $jobcomments = $row['jobcomments'];
+        $privjobcomments = $row['privatejobcomments'];
+        $clientjobreference = $row['clientjobreference'];
+        $distance=$row['distance'];
+        $waitingmins=$row['waitingmins'];
+        $clientdiscount=$row['clientdiscount'];
+        $co2saving=$row['co2saving'];
+        $pm10saving=$row['pm10saving'];
+        $opsmaparea=$row['opsmaparea'];
+        $opsmapsubarea=$row['opsmapsubarea'];
+        $cbb1=$row['cbb1'];
+        $cbb2=$row['cbb2'];
+        $cbb3=$row['cbb3'];
+        $cbb4=$row['cbb4'];
+        $cbb5=$row['cbb5'];
+        $cbb6=$row['cbb6'];
+        $cbb7=$row['cbb7'];
+        $cbb8=$row['cbb8'];
+        $cbb9=$row['cbb9'];
+        $cbb10=$row['cbb10'];
+        $cbb11=$row['cbb11'];
+        $cbb12=$row['cbb12'];
+        $cbb13=$row['cbb13'];
+        $cbb14=$row['cbb14'];
+        $cbb15=$row['cbb15'];
+        $cbb16=$row['cbb16'];
+        $cbb17=$row['cbb17'];
+        $cbb18=$row['cbb18'];
+        $cbb19=$row['cbb19'];
+        $cbb20=$row['cbb20'];
+        $cbbc1=$row['cbbc1'];
+        $cbbc2=$row['cbbc2'];
+        $cbbc3=$row['cbbc3'];
+        $cbbc4=$row['cbbc4'];
+        $cbbc5=$row['cbbc5'];
+        $cbbc6=$row['cbbc6'];
+        $cbbc7=$row['cbbc7'];
+        $cbbc8=$row['cbbc8'];
+        $cbbc9=$row['cbbc9'];
+        $cbbc10=$row['cbbc10'];
+        $cbbc11=$row['cbbc11'];
+        $cbbc12=$row['cbbc12'];
+        $cbbc13=$row['cbbc13'];
+        $cbbc14=$row['cbbc14'];
+        $cbbc15=$row['cbbc15'];
+        $cbbc16=$row['cbbc16'];
+        $cbbc17=$row['cbbc17'];
+        $cbbc18=$row['cbbc18'];
+        $cbbc19=$row['cbbc19'];
+        $cbbc20=$row['cbbc20'];
+        $enrpc1=$row['enrpc1'];
+        $enrpc2=$row['enrpc2'];
+        $enrpc3=$row['enrpc3'];
+        $enrpc4=$row['enrpc4'];
+        $enrpc5=$row['enrpc5'];
+        $enrpc6=$row['enrpc6'];
+        $enrpc7=$row['enrpc7'];
+        $enrpc8=$row['enrpc8'];
+        $enrpc9=$row['enrpc9'];
+        $enrpc10=$row['enrpc10'];
+        $enrpc11=$row['enrpc11'];
+        $enrpc12=$row['enrpc12'];
+        $enrpc13=$row['enrpc13'];
+        $enrpc14=$row['enrpc14'];
+        $enrpc15=$row['enrpc15'];
+        $enrpc16=$row['enrpc16'];
+        $enrpc17=$row['enrpc17'];
+        $enrpc18=$row['enrpc18'];
+        $enrpc19=$row['enrpc19'];
+        $enrpc20=$row['enrpc20'];
+        $enrft1=$row['enrft1'];
+        $enrft2=$row['enrft2'];
+        $enrft3=$row['enrft3'];
+        $enrft4=$row['enrft4'];
+        $enrft5=$row['enrft5'];
+        $enrft6=$row['enrft6'];
+        $enrft7=$row['enrft7'];
+        $enrft8=$row['enrft8'];
+        $enrft9=$row['enrft9'];
+        $enrft10=$row['enrft10'];
+        $enrft11=$row['enrft11'];
+        $enrft12=$row['enrft12'];
+        $enrft13=$row['enrft13'];
+        $enrft14=$row['enrft14'];
+        $enrft15=$row['enrft15'];
+        $enrft16=$row['enrft16'];
+        $enrft17=$row['enrft17'];
+        $enrft18=$row['enrft18'];
+        $enrft19=$row['enrft19'];
+        $enrft20=$row['enrft20'];
+        $iscustomprice=$row['iscustomprice'];
+        
+        if ($iscustomprice=='1') {
+        
+            $pagetext=$pagetext.'<p> New job is pricelocked</p>';
+        }
+        
+        $handoverpostcode=$row['handoverpostcode'];
+        $handoverCyclistID=$row['handoverCyclistID'];
+        
+        if ($status>'86') { $status='86'; }
+        if ($status < "59" ){ $collectiondate=""; $waitingtime=""; };
+        if ($status < "70" ){ $deliverydate=""; };
+        
+        
+        $infotext=$infotext.'<br />2469 Client Discount : '.$clientdiscount;
+        
+        // $infotext=$infotext.' <br>Currorsched='.$currorsched;
+        
+        if ($currorsched=='unsched') {
+        
+        $status='30';
+        $collectiondate='';
+        $deliverydate='';
+        $nextactiondate=$targetcollectiondate;
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        $cyclist=$row['CyclistID'];
+        $autostartchain=$row['autostartchain'];
+        
+        if ($id) {
 
    mysql_query("LOCK TABLES Orders WRITE", $conn_id);
    mysql_query("INSERT INTO Orders 
@@ -2834,7 +3048,7 @@ $infotext=$infotext."<br />Created ". $newjobid.' from '. $id;
 
 
 $id=$newjobid;
-
+$ID=$newjobid;
 
 
 // $infotext=$infotext.'new id is'.$ID;
@@ -2844,8 +3058,8 @@ $id=$newjobid;
 
 }
 
-} // ends check for duplicate job 
-} // ends page=createnewfrom existing
+        } // ends check for duplicate job 
+    } // ends page=createnewfrom existing
 
 
 

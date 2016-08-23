@@ -58,6 +58,7 @@ zebra dialogue http://stefangabos.ro/jquery/zebra-dialog/
 Autosize http://www.jacklmoore.com/autosize
 phpMySQLAutoBackup : http://www.dwalker.co.uk/phpmysqlautobackup/
 Trackstats : https://www.openhub.net/p/trackstats
+Underscore.js 1.8.3 http://underscorejs.org (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors Underscore may be freely distributed under the MIT license.
 
 
     This program is free software: you can redistribute it and/or modify

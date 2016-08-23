@@ -170,7 +170,7 @@ $servicehtml=$servicehtml.  ("value=\"$ServiceID\">$Service</option>"); } $servi
 if ($row['deppassword']) { // echo ' Password Found';
 echo '<div class="fs">
 <div class="fsl"> Password </div>
-<span class="blinking">'.$row['deppassword'].'</span></div>'; }
+<span class="red">'.$row['deppassword'].'</span></div>'; }
 
 // echo $clientrow['defaultrequestor'];
 $fromclient='';

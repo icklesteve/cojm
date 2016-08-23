@@ -639,7 +639,7 @@ if ($lilsumtot>'0') {
 $areajs.='
 
 
- alert("'.$row['opsmapsubarea'].'");
+// alert("'.$row['opsmapsubarea'].'");
 
 
 	

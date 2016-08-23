@@ -598,7 +598,7 @@ var cent=(bounds'.$lilareaid.'.getCenter());
 		  flat: true,
           map: map,
           draggable: false,
-          content: '<div class=".'"map-sub-area-label"><a href="opsmap-new-area.php?page=showarea&amp;areaid='.$lilareaid.'">'.$lilareaname.'</a></div>'."'
+          content: '<div class=".'"map-sub-area-label"><a href="opsmap-new-area.php?areaid='.$lilareaid.'">'.$lilareaname.'</a></div>'."'
            });
 ";
  

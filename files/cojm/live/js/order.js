@@ -46,6 +46,7 @@ var formbirthday;
 var showmessage;
 var statustoohigh;
 var publictrackingref;
+var canshowareafromservice;
 
 
 $(function () { // Document is ready
@@ -1681,6 +1682,31 @@ $(function () { // Document is ready
     });
 
 
+    
+    
+    $("#opsmapsubarea").change(function () {
+        $("#toploader").show();
+        var opsmapsubarea = $("select#opsmapsubarea").val();
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajaxchangeopsmapsubarea',
+                formbirthday: formbirthday,
+                id: id,
+                opsmapsubarea: opsmapsubarea
+            },
+            type: 'post',
+            success: function (data) {
+                $('#client').append(data);
+            },
+            complete: function () {
+                showmessage();
+                ordermapupdater();
+            }
+        });
+    });
+
+
 
 
     $("#serviceid").change(function () {
@@ -1787,30 +1813,6 @@ $(function () { // Document is ready
             }
         });
     });
-
-
-
-    $("#opsmapsubarea").change(function () {
-        $("#toploader").show();
-        var opsmapsubarea = $("select#opsmapsubarea").val();
-        $.ajax({
-            url: 'ajaxchangejob.php',
-            data: {
-                page: 'ajaxchangeopsmapsubarea',
-                formbirthday: formbirthday,
-                id: id,
-                opsmapsubarea: opsmapsubarea
-            },
-            type: 'post',
-            success: function (data) {
-                $('#client').append(data);
-            },
-            complete: function () {
-                showmessage();
-            }
-        });
-    });
-
 
 
 

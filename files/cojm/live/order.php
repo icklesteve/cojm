@@ -254,7 +254,7 @@ if ($row['status']<'100') {
 
 echo '<form action="order.php#" method="post" accept-charset="utf-8" id="allorder" novalidate>
 <input type="hidden" name="formbirthday" form="allorder" value="'. date("U").'">
-<input type="hidden" name="id" id="id" form="allorder" value="'.$ID.'">
+<input type="hidden" name="id" id="id" form="allorder" value="'.$row['ID'].'">
 <input type="hidden" name="page" form="allorder" value="edituidate"></form>'; }
 
 
@@ -355,7 +355,7 @@ $pcCollectPC= str_replace(" ", "", "$CollectPC", $count);
 if (trim($row['CollectPC'])) {
 $sql = 'SELECT PZ_northing FROM  `postcodeuk` WHERE  `PZ_Postcode` LIKE  "'.$pcCollectPC.'"
 LIMIT 0 , 1';  $result = mysql_query($sql, $conn_id); $sumtot=mysql_affected_rows();
-if ($sumtot>'0'){ } else {  echo ' <a href="newpc.php?selectpc='.trim($row['CollectPC']).'&amp;id='.$ID.'">Add PC</a>';}} }
+if ($sumtot>'0'){ } else {  echo ' <a href="newpc.php?selectpc='.trim($row['CollectPC']).'&amp;id='.$row['ID'].'">Add PC</a>';}} }
 //////////////      ends check to see if postcode    /////////////////////////////////////////////////
 }
  // ends from address 
@@ -449,7 +449,7 @@ $pcprenPC= str_replace(" ", "", "$pcprenPC", $count);
 if (trim($pcprenPC)) {
  $sql = 'SELECT PZ_northing FROM  `postcodeuk` WHERE  `PZ_Postcode` LIKE  "'.$pcprenPC.'"
 LIMIT 0 , 1';  $result = mysql_query($sql, $conn_id); $sumtot=mysql_affected_rows();
- if ($sumtot>'0'){ } else {  echo ' <a href="newpc.php?selectpc='.trim($row["enrpc$i"]).'&amp;id='.$ID.'">Add Postcode</a>';}} }
+ if ($sumtot>'0'){ } else {  echo ' <a href="newpc.php?selectpc='.trim($row["enrpc$i"]).'&amp;id='.$row['ID'].'">Add Postcode</a>';}} }
 //////////////      ends check to see if postcode    /////////////////////////////////////////////////
 
 
@@ -550,7 +550,7 @@ $pcprenPC= str_replace(" ", "", "$ShipPC", $count);
 if (trim($pcprenPC)) {
  $sql = 'SELECT PZ_northing FROM  `postcodeuk` WHERE  `PZ_Postcode` LIKE  "'.$pcprenPC.'"
 LIMIT 0 , 1';  $result = mysql_query($sql, $conn_id); $sumtot=mysql_affected_rows();
- if ($sumtot>'0'){ } else {  echo ' <a href="newpc.php?selectpc='.trim($ShipPC).'&amp;id='.$ID.'">Add Postcode</a> ';}} }
+ if ($sumtot>'0'){ } else {  echo ' <a href="newpc.php?selectpc='.trim($ShipPC).'&amp;id='.$row['ID'].'">Add Postcode</a> ';}} }
 //////////////      ends check to see if postcode    /////////////////////////////////////////////////
 
 
@@ -585,7 +585,7 @@ echo '
 ';
 
 
-if ($row['status']<'100') { echo ' <button class="right" form="allorder" type="submit" > Edit Addresses / Rider </button>
+if ($row['status']<'100') { echo ' <button class="right" form="allorder" type="submit" > Edit Addresses </button>
 
 <hr />
 
@@ -642,7 +642,7 @@ echo '</option>';
 echo '</select> 
 
 <a id="arealink" class="showclient marright10 hideuntilneeded" title="Area Details" 
-target="_blank" href="opsmap-new-area.php?page=showarea&areaid='.$row['opsmaparea'].'"> </a>
+target="_blank" href="opsmap-new-area.php?areaid='.$row['opsmaparea'].'"> </a>
 
 ';
 
@@ -673,7 +673,7 @@ echo '</option>';
 echo '</select> 
 
 <a id="subarealink" class="showclient hideuntilneeded" title="Sub Area Details" 
-target="_blank" href="opsmap-new-area.php?page=showarea&areaid='.$row['opsmapsubarea'].'"> </a>
+target="_blank" href="opsmap-new-area.php?areaid='.$row['opsmapsubarea'].'"> </a>
  </div>
  <div id="areacomments" class="favcomments fsr hideuntilneeded"> '.$topdescrip;
  
@@ -756,7 +756,7 @@ echo '<input form="allorder" type="hidden" name="oldcyclist" value="'.$row['Cycl
 
 echo '<select id="newrider" name="newcyclist" class="ui-state-default ui-corner-left ';
 
-if ($row['CyclistID']=='1') { echo ' blinking '; }
+if ($row['CyclistID']=='1') { echo ' red '; }
 
 echo ' ">';
 while (list ($CyclistID, $cojmname, $trackerid, $isactive) = mysql_fetch_row ($cyclistresult_id)) {
@@ -779,14 +779,22 @@ echo '</option>'; }
 print ("</select>"); 
 
 
-if ($row['CyclistID']<>'1') {
-echo '<a id="showriderlink" class="showclient" title="'.$row['cojmname'].' Details" target="_blank" href="cyclist.php?thiscyclist='.$row['CyclistID'].'"> </a>';
+echo '<a id="showriderlink" class="showclient';
+
+if ($row['CyclistID']=='1') {
+echo ' hidden';
 }
+
+
+echo '" title="'.$row['cojmname'].' Details" target="_blank" href="cyclist.php?thiscyclist='.$row['CyclistID'].'"> </a>';
+
+
+
 
 
  if ($row['isactive']<>'1') { echo ' Inactive '; }
 
-if ($row['lookedatbycyclisttime']>'10') { echo ' First viewed '. date('H:i A D jS M', strtotime($row["lookedatbycyclisttime"])); }
+// if ($row['lookedatbycyclisttime']>'10') { echo ' First viewed '. date('H:i A D jS M', strtotime($row["lookedatbycyclisttime"])); }
 
 
 
@@ -1557,7 +1565,7 @@ echo '
 <div class="fs"><div class="fsl"> Duplicate</div> 
  <form action="order.php#" method="post">
 <input type="hidden" name="formbirthday" value="'.date("U").'">
-<input type="hidden" name="id" value="'.$ID.'">
+<input type="hidden" name="id" value="'.$row['ID'].'">
 <input type="hidden" name="page" value="createnewfromexisting">';
  
 
@@ -1624,7 +1632,7 @@ else { echo '<button class="deleteord" id="deleteordmob"> Delete Job </button>';
 
 <form name='uploadpodform' id='uploadpodform' enctype="multipart/form-data">
 <input form='uploadpodform' type="hidden" name="page" value="orderaddpod">
-<input form="uploadpodform" type="hidden" name="id" value="<?php echo $ID; ?>" >
+<input form="uploadpodform" type="hidden" name="id" value="<?php echo $row['ID']; ?>" >
 <input form="uploadpodform" type="hidden" name="publicid" value="<?php echo $row['publictrackingref']; ?>" >
 <input form="uploadpodform" type="hidden" name="formbirthday" value="<?php echo date("U"); ?>">
 </form>
@@ -1638,7 +1646,7 @@ if (!$mobdevice) {
 
 echo '<form action="index.php#" method="post" id="frmdel">
 <input type="hidden" name="formbirthday" value="'.date("U").'">
-<input type="hidden" name="id" value="'.$ID.'">
+<input type="hidden" name="id" value="'.$row['ID'].'">
 <input type="hidden" name="page" value="confirmdelete">
 </form>';
 
@@ -1646,7 +1654,7 @@ echo '<form action="index.php#" method="post" id="frmdel">
 
 echo '<form action="index.php#" method="post" id="frmdelmob">
 <input type="hidden" name="formbirthday" value="'.date("U").'">
-<input type="hidden" name="id" value="'.$ID.'">
+<input type="hidden" name="id" value="'.$row['ID'].'">
 <input type="hidden" name="page" value="confirmdeletemobile">
 </form>';
 
@@ -1671,7 +1679,7 @@ echo ' </div> <br /> '; // ends div hangright
  echo ' <div class="ui-state-highlight ui-corner-all p15" > 
 				<p><span class="ui-icon ui-icon-info"></span>
 				<strong>Hmmm, </strong> No COJM Reference with this ID located.</p> </div><br />';
-$searchid=strtoupper(trim($ID));
+$searchid=strtoupper(trim($id));
 if ($searchid) { include "ordersearch.php"; } // ends check for ID		
 } // ends else has not displayed normal order page
 
@@ -1775,12 +1783,9 @@ if (isset($drow['depname'])) { if ($drow['depname']) { echo ' $("a#clientdeplink
 
 
 if ($row['iscustomprice']=='1') {
-
-// cancelpricelock display
-
-echo ' $("#buttoncancelpricelock").show(); ';
-
- }
+    // cancelpricelock display
+    echo ' $("#buttoncancelpricelock").show(); ';
+}
 
 
 

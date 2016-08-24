@@ -108,20 +108,20 @@ $exacttime=$_POST['exacttime'];
 $showdelivery=$_POST['showdelivery'];
 $showdeliveryaddress=$_POST['showdeliveryaddress'];
 $clientid=trim($_POST['clientid']); 
-$orderselectdep = trim($_POST['orderselectdep']);
+$invoiceselectdep = trim($_POST['invoiceselectdep']);
 
 $existinginvoiceref=$_POST['existinginvoiceref'];
 $invdatemod=$_POST['invdate'];
 $invcomments=trim($_POST['invcomments']);
 $nowdate = date("Y-m-d H:i:s"); 
-$orderselectdep = trim($_POST['orderselectdep']);
+
 $addresstype= trim($_POST['addresstype']);
 $ir='';
   
 
 // Make sure that the client matches the department
-if ($orderselectdep<>'') {
-$query = "SELECT associatedclient FROM clientdep WHERE depnumber=$orderselectdep LIMIT 0,1"; 
+if ($invoiceselectdep<>'') {
+$query = "SELECT associatedclient FROM clientdep WHERE depnumber=$invoiceselectdep LIMIT 0,1"; 
 $q= $dbh->query($query);
 $completestatus = $q->fetchColumn();
 $clientid=$completestatus;
@@ -224,7 +224,7 @@ $clientid=$completestatus;
 	define ('PDF_AUTHOR', 'COJM / '.$globalprefrow["globalname"]);
 	
 	 $existinginvoiceref=$_POST['existinginvoiceref'];
-	 $invoicedept=$_POST['orderselectdep'];
+	 $invoicedept=$_POST['invoiceselectdep'];
 
 $query = "SELECT invoiceterms, CompanyName, invoiceAddress, invoiceAddress2, invoiceCity, invoiceCounty, invoicePostcode
  FROM Clients WHERE Clients.CustomerID = $clientid";
@@ -243,7 +243,7 @@ $temp2= date("Ymd", mktime($hour, $minutes, $second, $month, $day+$invdatemod, $
 $invoiceref=date("$temp2") . $clientid ;
 
 
-if ($orderselectdep) { $invoiceref=$invoiceref.$orderselectdep; }
+if ($invoiceselectdep) { $invoiceref=$invoiceref.$invoiceselectdep; }
 if ($existinginvoiceref) { $invoiceref=$existinginvoiceref; }
 $temp1=$globalprefrow["globalname"].' Invoice Ref : ' . "$invoiceref" ;
 	 $today = date("l jS F Y");  
@@ -483,12 +483,12 @@ $from = date('l jS F Y', strtotime($collectionsuntildate));
 
 
 
-if ($orderselectdep>'0') { 
+if ($invoiceselectdep>'0') { 
 
  $sql = "SELECT * FROM 
  Orders, Services 
  WHERE  Orders.ServiceID = Services.ServiceID 
- AND `Orders`.`orderdep` = '$orderselectdep' 
+ AND `Orders`.`orderdep` = '$invoiceselectdep' 
  AND `Orders`.`collectiondate` >= '$fromdate' 
  AND `Orders`.`collectiondate` <= '$collectionsuntildate'
  AND `Orders`.`status` < 110
@@ -523,9 +523,9 @@ $html = $html. '<table id="invoiceaddresses" border="0" cellspacing="2" cellpadd
 <td>'.$clientrow['CompanyName'];
 
 
- if ($orderselectdep<>'')  {
+ if ($invoiceselectdep<>'')  {
  // $infotext=$infotext.'Is Department';  
- $orderdep=$row['orderdep']; $depquery="SELECT * FROM clientdep WHERE depnumber = '$orderselectdep' LIMIT 1";
+ $orderdep=$row['orderdep']; $depquery="SELECT * FROM clientdep WHERE depnumber = '$invoiceselectdep' LIMIT 1";
  $result=mysql_query($depquery); $drow=mysql_fetch_array($result);
  // $infotext=$infotext.'<br />Dep is '.$drow['depname'];
 
@@ -590,14 +590,14 @@ $html=$html.'<th ><strong>Service</strong></th>
 <th ><strong>Total<br />Excl. VAT</strong></th></tr>'; $i='0'; 
 
 
-if ($orderselectdep) { 
+if ($invoiceselectdep) { 
 
 $sql = "SELECT * FROM 
 Orders, 
 Services ,
 Cyclist
 WHERE  Orders.ServiceID = Services.ServiceID 
-AND `Orders`.`orderdep` = '$orderselectdep' 
+AND `Orders`.`orderdep` = '$invoiceselectdep' 
 AND Orders.CustomerID = '$clientid' 
 AND Orders.CyclistID = Cyclist.CyclistID 
 AND `Orders`.`collectiondate` >= '$fromdate' 
@@ -687,9 +687,9 @@ $htmlb='';
 if ($row['hourlyothercount']) { $htmlb=$htmlb.$globalprefrow['glob5'].' : '.$row['poshname'].'. '; }
 
 
-// orderselectdep
+// invoiceselectdep
 
- if (($row['orderdep']) and ($orderselectdep==''))  {
+ if (($row['orderdep']) and ($invoiceselectdep==''))  {
  // $infotext=$infotext.'Is Department';  
  $orderdep=$row['orderdep']; $depquery="SELECT * FROM clientdep WHERE depnumber = '$orderdep' LIMIT 1";
  $result=mysql_query($depquery); $drow=mysql_fetch_array($result);

@@ -25,12 +25,6 @@
 
 
 
-
-
-
-
-
-
 $cj_time = microtime(TRUE);
 
 $origid='';
@@ -2416,10 +2410,10 @@ $clientemail = mysql_result(mysql_query("SELECT EmailAddress from Clients WHERE 
 if ($clientemail) { $pagetext=$pagetext. '<br /><a href="../live/new_cojm_client.php?clientid='.$clientid.'">'.$clientname.'</a> General Email : '.$clientemail;}
 
 
-if ($orderselectdep) { 
-$depname = mysql_result(mysql_query("SELECT depname from clientdep WHERE depnumber='$orderselectdep' LIMIT 1", $conn_id), 0);
-$depemail = mysql_result(mysql_query("SELECT depemail from clientdep WHERE depnumber='$orderselectdep' LIMIT 1", $conn_id), 0);
-if ($clientemail) { $pagetext=$pagetext. '<br /><a href="../live/new_cojm_department.php?depid='.$orderselectdep.'">'.$depname.'</a> Department Email : '.$depemail;}
+if ($invoiceselectdep) {
+$depname = mysql_result(mysql_query("SELECT depname from clientdep WHERE depnumber='$invoiceselectdep' LIMIT 1", $conn_id), 0);
+$depemail = mysql_result(mysql_query("SELECT depemail from clientdep WHERE depnumber='$invoiceselectdep' LIMIT 1", $conn_id), 0);
+if ($clientemail) { $pagetext=$pagetext. '<br /><a href="../live/new_cojm_department.php?depid='.$invoiceselectdep.'">'.$depname.'</a> Department Email : '.$depemail;}
 }
 
 $existinginvref='';
@@ -2435,85 +2429,67 @@ if ($dtrow['ref']>0) { $existinginvref='1'; }  }
 
 
 
-if ($existinginvref) { $pagetext=$pagetext. '<h3>Not changing Invoice as existing invoice with same ref.'; } else {
+if ($existinginvref) {
+    $pagetext=$pagetext. '<h3>Not changing Invoice as existing invoice with same ref.';
+    }
+    else {
+        if ($invoiceselectdep) {
+            $sql = "SELECT * FROM Orders WHERE
+            `Orders`.`orderdep` = '$invoiceselectdep'
+            AND `Orders`.`collectiondate` >= '1'
+            AND `Orders`.`collectiondate` <= '$collectionsuntildate'
+            AND `Orders`.`status` < 110
+            AND `Orders`.`status` > 90
+            ORDER BY `Orders`.`collectiondate` ASC";
+        } else {
+            $sql = "SELECT * FROM Orders WHERE
+            Orders.CustomerID = '$clientid' 
+            AND `Orders`.`collectiondate` >= '1' 
+            AND `Orders`.`collectiondate` <= '$collectionsuntildate'
+            AND `Orders`.`status` < 110
+            AND `Orders`.`status` > 90
+            ORDER BY `Orders`.`collectiondate` ASC";
+        }
+        
+        $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+        $orderupdate='';
+        
+        // table loop
+        while ($row = mysql_fetch_array($sql_result)) {
+            extract($row);
+            $updatequery = "UPDATE Orders SET status ='110', iscustomprice='1', invoiceref =$newinvoiceref WHERE ID=$row[ID]";
+            mysql_query($updatequery,$conn_id) or die(mysql_error());
+            $orderupdate++;
+        } // ends individ job row extraction
+        
+        if ($orderupdate<'1') {
+            $pagetext.= '<h1>No invoice details added to database as no jobs changed.</h1>';
+        }
+        
+        $sql = "INSERT INTO invoicing ( ref, invdate1, created, client, cost, invvatcost,invdue, invoicedept, invcomments ) 
+         VALUES ( '$newinvoiceref', '$invoicemysqldate' , now() , '$clientid' , '$tablecost', '$tablevatcost' , '$invoiceduemysqldate' , '$invoiceselectdep', '$invcomments' ) ";
+        $result = mysql_query($sql, $conn_id);
+        // $infotext= '<br />'.$sql;
+        
+        if ($result){
+            $pagetext.= '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 1em;">
+            <p>
+            <form action="../live/view_all_invoices.php" method="post">
+            New Invoice Ref : <button type="submit" >'.$newinvoiceref.'</button>
+            <input type="hidden" name="viewtype" value="individualinvoice" >
+            <input type="hidden" name="formbirthday" value="'. date("U") .'">
+            <input type="hidden" name="page" value="" >
+            <input type="hidden" name="ref" value="'.$newinvoiceref.'">
+            </form>';
+            
+            if ($orderupdate)  {
+                $pagetext=$pagetext.' Updated status to invoiced in '.$orderupdate.' job';
+                if ($orderupdate<>'1') {
+                    $pagetext=$pagetext. 's';
+                }
+            }
 
-
-if ($orderselectdep) { 
-
-$sql = "SELECT * FROM 
-Orders
-WHERE  
- `Orders`.`orderdep` = '$orderselectdep' 
-AND `Orders`.`collectiondate` >= '1' 
-AND `Orders`.`collectiondate` <= '$collectionsuntildate'
-AND `Orders`.`status` < 110
-AND `Orders`.`status` > 90
-ORDER BY `Orders`.`collectiondate` ASC";
-
-
-
-} else {
-
-$sql = "SELECT * FROM 
-Orders
-WHERE 
-Orders.CustomerID = '$clientid' 
-AND `Orders`.`collectiondate` >= '1' 
-AND `Orders`.`collectiondate` <= '$collectionsuntildate'
-AND `Orders`.`status` < 110
-AND `Orders`.`status` > 90
-ORDER BY `Orders`.`collectiondate` ASC";
-
-}
-
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-
-$orderupdate='';
-
-// table loop
-while ($row = mysql_fetch_array($sql_result)) { extract($row);
-
-
-
-$updatequery = "UPDATE Orders SET status ='110', iscustomprice='1', invoiceref =$newinvoiceref WHERE ID=$row[ID]";
-mysql_query($updatequery,$conn_id) or die(mysql_error());
-
-$orderupdate++;
-
-} // ends individ job row extraction
-
-
-
-
-if ($orderupdate<'1') { $pagetext=$pagetext. '<h1>No invoice details added to database as no jobs changed.</h1>'; }
-
-// $html=$html.'<br/><b>Updating Invoice DB</b><hr/>'. $newinvoiceref . "<br/>";
-// $sql = "DELETE from invoicing WHERE ref='$newinvoiceref'";	mysql_query($sql, $conn_id);
-$sql = "INSERT INTO invoicing ( ref, invdate1, created, client, cost, invvatcost,invdue, invoicedept, invcomments ) 
-         VALUES ( '$newinvoiceref', '$invoicemysqldate' , now() , '$clientid' , '$tablecost', '$tablevatcost' , '$invoiceduemysqldate' , '$orderselectdep', '$invcomments' ) "; 
-$result = mysql_query($sql, $conn_id);
-
-// $infotext= '<br />'.$sql;
-
-
-if ($result){ $pagetext=$pagetext.='<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 1em;"> 
-<p>
-<form action="../live/view_all_invoices.php" method="post">
-New Invoice Ref : 
-<button type="submit" >'.$newinvoiceref.'</button> 
-<input type="hidden" name="viewtype" value="individualinvoice" >
-<input type="hidden" name="formbirthday" value="'. date("U") .'">
-<input type="hidden" name="page" value="" >
-<input type="hidden" name="ref" value="'.$newinvoiceref.'">
-</form>
-';
-
-
-  if ($orderupdate)  { $pagetext=$pagetext.' Updated status to invoiced in '.$orderupdate.' job';
-  if ($orderupdate<>'1') { $pagetext=$pagetext. 's'; }
-   }
-
-$pagetext=$pagetext.'</p></div></div><br />'; 
+$pagetext.='</p></div></div><br />'; 
 } else { 
 $pagetext=$pagetext. '<h1>An error occured during invoice database update <br />'.mysql_error().'</h1>'.$sql; }
 

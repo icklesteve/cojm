@@ -145,19 +145,19 @@ padding:10px 10px 35px;
 }
 
 #toploader {
-  position: relative;
+  position: fixed;
   float:left;
   padding-left: 8px;
   height: 30px;
   display:none;
-  top:-7px;
+  top:3px;
 }
 
 #toploader span {
     background: #ccc;
     width: 3px;
     height: 0%;
-    border-radius: 14px;
+    border-radius: 2px;
     margin-right: 1px;
     float: left;
 }
@@ -1223,9 +1223,14 @@ div.toggledww { display:none; }
 
 div.toggle { display:none; }
 
-div.togglenr1 { display:none; }
+#togglenr1 { display:none; }
+#togglenr2 { display:none; }
+#togglenr3 { display:none; }
+#togglenr4 { display:none; }
+#togglenr5 { display:none; }
 
-div.togglenr2 { display:none; }
+
+
 
 
 div.addresses {
@@ -1270,7 +1275,7 @@ line-height:23px;
 background: #ffffff url(../images/ui-bg_flat_75_ffffff_40x100.png) 50% 50% repeat-x; color: #222222; }
 .ui-widget-content a { color: #222222; }
 
-.autoinputerror	{
+#clientdep input.autoinputerror	{
 background:red;
 }
 
@@ -2212,7 +2217,7 @@ float:left;
 button.menusearch:hover {  cursor:pointer; }
 
 
-.hideuntilneeded, #showriderlink.hidden { display:none; }
+.hideuntilneeded, #showriderlink.hidden, a.hideuntilneeded { display:none; }
 
 
 

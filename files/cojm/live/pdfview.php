@@ -176,7 +176,7 @@ echo '
 
 <a id="clientlink" class="showclient" title="Client Details" target="_blank" href="new_cojm_client.php"> </a>
 </fieldset>
-<fieldset><label for="orderselectdep" class="fieldLabel"> Department : </label>';
+<fieldset><label for="invoiceselectdep" class="fieldLabel"> Department : </label>';
 
 
 
@@ -199,7 +199,7 @@ $sumtot=mysql_affected_rows();
 
 // echo $sumtot.' Department(s) : ';	
 
-echo '<select class="ui-state-default ui-corner-left" id="orderselectdep" name="orderselectdep" >
+echo '<select class="ui-state-default ui-corner-left" id="invoiceselectdep" name="invoiceselectdep" >
 <option value="">All Departments</option>';
  while (list ($CustomerIDlist, $CompanyName, $clientname) = mysql_fetch_row ($result_id)) { 
 $CustomerID = htmlspecialchars ($CustomerID); 
@@ -408,7 +408,7 @@ $(document).ready(function () {
 	
 	$("#clientdeplink").click(function (e) {
         e.preventDefault();
-        var pagedepid=$("#orderselectdep").val();
+        var pagedepid=$("#invoiceselectdep").val();
         var datelink = "new_cojm_department.php?depid=" + pagedepid + "#tabs-" + pagedepid;
         if (pagedepid !== "") {  window.open(datelink,"_blank"); }
     });
@@ -423,7 +423,7 @@ $(document).ready(function () {
     $("#datesearchpreview").click(function (e) {
         e.preventDefault(); 
         var pageclientid=$("#pageclientid").val();
-        var pagedepid=$("#orderselectdep").val();
+        var pagedepid=$("#invoiceselectdep").val();
         var todate=$("#expensedate").val();
         var fromdate=$("#fromdate").val();
         var datelink = "clientviewtargetcollection.php?clientid=" + pageclientid;
@@ -456,8 +456,8 @@ $(document).ready(function () {
     });
 
 
-    $("#orderselectdep").change(function () {
-    var newdep=$("#orderselectdep").val();
+    $("#invoiceselectdep").change(function () {
+    var newdep=$("#invoiceselectdep").val();
     <? echo $depselectjs; ?>
     });
 

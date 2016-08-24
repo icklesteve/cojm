@@ -21,7 +21,7 @@ var message;
 var oktosubmit;
 var allok;
 var oldclientorder;
-var olddeporder;
+var initialdeporder;
 var initialstatus;
 var initialtargetcollectiondate;
 var initialdeliveryworkingwindow;
@@ -49,8 +49,116 @@ var publictrackingref;
 var canshowareafromservice;
 
 
+
+
+
 $(function () { // Document is ready
     "use strict";
+
+    (function( $ ) {
+        $.widget( "ui.orderselectdep", {
+            _create: function() {
+                var self = this,
+                    select = this.element.hide(),
+                    selected = select.children( ":selected" ),
+                    value = selected.val() ? selected.text() : "";
+                var input = this.input = $( "<input>" )
+                    .insertAfter( select )
+                    .val( value )
+                    .autocomplete({
+                        delay: 0,
+                        minLength: 0,
+                        source: function( request, response ) {
+                            var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
+                            response( select.children( "option" ).map(function() {
+                                var text = $( this ).text();
+                                if ( this.value && ( !request.term || matcher.test(text) ) )
+                                    return {
+                                        label: text.replace(
+                                            new RegExp(
+                                                "(?![^&;]+;)(?!<[^<>]*)(" +
+                                                $.ui.autocomplete.escapeRegex(request.term) +
+                                                ")(?![^<>]*>)(?![^&;]+;)", "gi"
+                                            ), "<strong>$1</strong>" ),
+                                        value: text,
+                                        option: this
+                                    };
+                            }) );
+                        },
+                        select: function( event, ui ) {
+                            ui.item.option.selected = true;
+                            self._trigger( "selected", event, {
+                                item: ui.item.option
+                            });
+                        depcomboboxchanged();
+                        },
+                        change: function( event, ui ) {
+                            if ( !ui.item ) {
+                                var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( $(this).val() ) + "$", "i" ),
+                                    valid = false;
+                                select.children( "option" ).each(function() {
+                                    if ( $( this ).text().match( matcher ) ) {
+                                        this.selected = valid = true;
+                                        return false;
+                                    }
+                                });
+                                if ( !valid ) {
+                                    // remove invalid value, as it didn't match anything
+                                    $( this ).val( "" );
+                                    select.val( "" );
+                                    input.data( "autocomplete" ).term = "";
+                                    return false;
+                                }
+                            }
+                        }
+                    })
+                    .addClass( "ui-widget ui-widget-content ui-corner-left" ).attr('id', 'autocompleteorderselectdep');
+                    
+                    
+                    
+                input.data( "autocomplete" )._renderItem = function( ul, item ) {
+                    return $( "<li></li>" )
+                        .data( "item.autocomplete", item )
+                        .append( "<a>" + item.label + "</a>" )
+                        .appendTo( ul );
+                };
+                this.button = $( "<button type='button'>&nbsp;</button>" )
+                    .attr( "tabIndex", -1 )
+                    .attr( "title", "Show All" )
+                    .attr( "id", "depcomboboxbutton")
+                    .insertAfter( input )
+                    .button({
+                        icons: {
+                            primary: "ui-icon-triangle-1-s"
+                        },
+                        text: false
+                    })
+                    .removeClass( "ui-corner-all" )
+                    .addClass( "ui-corner-right ui-button-icon" )
+                    .click(function() {
+                        // close if already visible
+                        if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
+                            input.autocomplete( "close" );
+                            return;
+                        }
+                        // work around a bug (likely same cause as #5265)
+                        $( this ).blur();
+                        // pass empty string as value to search for, displaying all results
+                        input.autocomplete( "search", "" );
+                            input.focus().setCursorPosition(99);
+                    });
+            },
+            destroy: function() {
+                this.input.remove();
+                this.button.remove();
+                this.element.show();
+                $.Widget.prototype.destroy.call( this );
+            }
+        });
+    })( jQuery );
+
+    
+    $("#orderselectdep").orderselectdep();
 
 
     function process(date){
@@ -64,11 +172,12 @@ $(function () { // Document is ready
 
 
     function showhidebystatus() { // or changes to time values for showing buttons for working windows
+    
 
-        if (olddeporder < 1) {
-            $("div#clientdep.fsr input.ui-autocomplete-input").addClass("autoinputerror").removeClass("");
+        if (initialdeporder < 1) {
+            $("#autocompleteorderselectdep").addClass("autoinputerror");
         } else {
-            $("div#clientdep.fsr input.ui-autocomplete-input").addClass("").removeClass("autoinputerror");
+            $("#autocompleteorderselectdep").removeClass("autoinputerror");
         }
 
 
@@ -476,6 +585,21 @@ $(function () { // Document is ready
         editnewcost();
     });
 
+    
+    
+    $("#togglenr1choose").click(function(){$("#togglenr1").slideToggle("fast");});
+    $("#togglenr2choose").click(function(){$("#togglenr2").slideToggle("fast");});
+    $("#togglenr3choose").click(function(){$("#togglenr3").slideToggle("fast");});
+    $("#togglenr4choose").click(function(){$("#togglenr4").slideToggle("fast");});
+    $("#togglenr5choose").click(function(){$("#togglenr5").slideToggle("fast");});
+    
+    
+
+    
+    
+    
+    
+    
     $("#jschangfavto").bind("click", function (e) {
         e.preventDefault();
         $.zebra_dialog("", {
@@ -1815,6 +1939,33 @@ $(function () { // Document is ready
     });
 
 
+    
+    
+    function depcomboboxchanged() {
+        var newdeporder = $("select#orderselectdep").val();
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajaxchangedep',
+                formbirthday: formbirthday,
+                id: id,
+                newdeporder: newdeporder,
+                initialdeporder: initialdeporder
+            },
+            type: 'post',
+            success: function (data) {
+                $('#client').append(data);
+            },
+            complete: function () {
+                showhidebystatus();
+                showmessage();
+            }
+        });
+    }
+    
+    
+    
+    
 
     $("#jobcomments").change(function () {
         var jobcomments = $(this).val();
@@ -2001,22 +2152,11 @@ $(function () { // Document is ready
     });
 
 
-
-    setTimeout(function () {
-        if (olddeporder < 1) {
-            $("div#clientdep.fsr input.ui-autocomplete-input").addClass("autoinputerror").removeClass("");
-        } else {
-            $("div#clientdep.fsr input.ui-autocomplete-input").addClass("").removeClass("autoinputerror");
-        }
-    }, 1100);
-
-
     $(function () {
         $(".normal").autosize();
     });
 
     $(function () {
-        $("#orderselectdep").orderselectdep();
         $("#toggle").click(function () {
             $("#orderselectdep").toggle();
         });
@@ -2125,28 +2265,6 @@ $(function () { // Document is ready
 }); // ends document ready
 
 
-
-function depcomboboxchanged() {
-    "use strict";
-    var newdeporder = $("select#orderselectdep").val();
-    $.ajax({
-        url: 'ajaxchangejob.php',
-        data: {
-            page: 'ajaxchangedep',
-            formbirthday: formbirthday,
-            id: id,
-            newdeporder: newdeporder,
-            olddeporder: olddeporder
-        },
-        type: 'post',
-        success: function (data) {
-            $('#client').append(data);
-        },
-        complete: function () {
-            showmessage();
-        }
-    });
-}
 
 function comboboxchanged() {
     "use strict";

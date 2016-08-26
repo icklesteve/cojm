@@ -77,6 +77,27 @@ AND Orders.status = status.status
 AND Orders.CyclistID = Cyclist.CyclistID 
 AND Orders.publictrackingref = ? LIMIT 0,1";
 
+
+
+$query = "SELECT *
+FROM Orders
+INNER JOIN Clients 
+INNER JOIN Services 
+INNER JOIN status 
+INNER JOIN Cyclist 
+WHERE Orders.CustomerID = Clients.CustomerID 
+AND Orders.ServiceID = Services.ServiceID 
+AND Orders.status = status.status
+AND Orders.CyclistID = Cyclist.CyclistID 
+AND Orders.publictrackingref = ? LIMIT 0,1";
+
+
+
+
+
+
+
+
 $parameters = array($postedref);
 $statement = $dbh->prepare($query);
 $statement->execute($parameters);

@@ -1003,7 +1003,7 @@ if ($hasid) {
     $jobrequestedtime = str_replace("/", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(",", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(" ", ":", "$jobrequestedtime", $count);
-    // $infotext=$infotext.'<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
+    // $infotext.='<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
     $temp_ar=explode(":",$jobrequestedtime); 
     $collectionworkingwindowday=$temp_ar['0']; 
     $collectionworkingwindowmonth=$temp_ar['1']; 
@@ -1050,7 +1050,7 @@ if ($hasid) {
     $jobrequestedtime = str_replace("/", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(",", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(" ", ":", "$jobrequestedtime", $count);
-    // $infotext=$infotext.'<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
+    // $infotext.='<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
     $temp_ar=explode(":",$jobrequestedtime); 
     $collectionworkingwindowday=$temp_ar['0']; 
     $collectionworkingwindowmonth=$temp_ar['1']; 
@@ -1116,7 +1116,7 @@ if ($hasid) {
     $jobrequestedtime = str_replace("/", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(",", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(" ", ":", "$jobrequestedtime", $count);
-    // $infotext=$infotext.'<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
+    // $infotext.='<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
     $temp_ar=explode(":",$jobrequestedtime); 
     $collectionworkingwindowday=$temp_ar['0']; 
     $collectionworkingwindowmonth=$temp_ar['1']; 
@@ -1164,7 +1164,7 @@ if ($hasid) {
     $jobrequestedtime = str_replace("/", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(",", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(" ", ":", "$jobrequestedtime", $count);
-    // $infotext=$infotext.'<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
+    // $infotext.='<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
     $temp_ar=explode(":",$jobrequestedtime); 
     $collectionworkingwindowday=$temp_ar['0']; 
     $collectionworkingwindowmonth=$temp_ar['1']; 
@@ -1213,7 +1213,7 @@ if ($hasid) {
     $jobrequestedtime = str_replace("/", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(",", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(" ", ":", "$jobrequestedtime", $count);
-    // $infotext=$infotext.'<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
+    // $infotext.='<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
     $temp_ar=explode(":",$jobrequestedtime); 
     $collectionworkingwindowday=$temp_ar['0']; 
     $collectionworkingwindowmonth=$temp_ar['1']; 
@@ -1263,7 +1263,7 @@ if ($hasid) {
     $jobrequestedtime = str_replace("/", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(",", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(" ", ":", "$jobrequestedtime", $count);
-    // $infotext=$infotext.'<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
+    // $infotext.='<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
     $temp_ar=explode(":",$jobrequestedtime); 
     $collectionworkingwindowday=$temp_ar['0']; 
     $collectionworkingwindowmonth=$temp_ar['1']; 
@@ -1307,7 +1307,7 @@ if ($hasid) {
     $jobrequestedtime = str_replace("/", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(",", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(" ", ":", "$jobrequestedtime", $count);
-    // $infotext=$infotext.'<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
+    // $infotext.='<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
     $temp_ar=explode(":",$jobrequestedtime); 
     $collectionworkingwindowday=$temp_ar['0']; 
     $collectionworkingwindowmonth=$temp_ar['1']; 
@@ -1352,7 +1352,7 @@ if ($hasid) {
     $jobrequestedtime = str_replace("/", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(",", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(" ", ":", "$jobrequestedtime", $count);
-    // $infotext=$infotext.'<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
+    // $infotext.='<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
     $temp_ar=explode(":",$jobrequestedtime); 
     $collectionworkingwindowday=$temp_ar['0']; 
     $collectionworkingwindowmonth=$temp_ar['1']; 
@@ -1403,7 +1403,7 @@ if ($hasid) {
     $jobrequestedtime = str_replace("/", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(",", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(" ", ":", "$jobrequestedtime", $count);
-    // $infotext=$infotext.'<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
+    // $infotext.='<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
     $temp_ar=explode(":",$jobrequestedtime); 
     $collectionworkingwindowday=$temp_ar['0']; 
     $collectionworkingwindowmonth=$temp_ar['1']; 
@@ -1464,7 +1464,7 @@ if ($hasid) {
     $jobrequestedtime = str_replace("/", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(",", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(" ", ":", "$jobrequestedtime", $count);
-    // $infotext=$infotext.'<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
+    // $infotext.='<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
     $temp_ar=explode(":",$jobrequestedtime); 
     $collectionworkingwindowday=$temp_ar['0']; 
     $collectionworkingwindowmonth=$temp_ar['1']; 
@@ -1530,7 +1530,7 @@ if ($hasid) {
     $jobrequestedtime = str_replace("/", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(",", ":", "$jobrequestedtime", $count);
     $jobrequestedtime = str_replace(" ", ":", "$jobrequestedtime", $count);
-    // $infotext=$infotext.'<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
+    // $infotext.='<br />Target collect from : '.$jobrequestedtime.'<br /> until '.$collectionworkingwindow;
     $temp_ar=explode(":",$jobrequestedtime); 
     $collectionworkingwindowday=$temp_ar['0']; 
     $collectionworkingwindowmonth=$temp_ar['1']; 
@@ -1784,34 +1784,29 @@ if ($hasid) {
     
             if ($page=='ajaxremovepod') {
     
-    $backupref=$id.'-'.date("U");
+                $backupref=$id.'-'.date("U");
     
-    try {
-    $query = "UPDATE cojm_pod SET id= :backupref WHERE id=:getid";
-    $stmt = $dbh->prepare($query);
-    $stmt->bindParam(':backupref', $backupref, PDO::PARAM_INT); 
-    $stmt->bindParam(':getid', $publicid, PDO::PARAM_INT); 
-    $stmt->execute();
-    $total = $stmt->rowCount();
-    if ($total=='1') {
-    $message.="POD Removed<br/>Image backed up to <a href='../podimage.php?id=".$backupref."'>".$backupref."</a>";
-    $allok=1;
-    $script.='   haspod=0; 
-    
-    $("#uploadpodfile").show();
-    $("#podimagecontainer").hide();
-    
-    
-    ';
-    
-    } // ends total changed ==1 check
-    } // ends try
-    
-    catch(PDOException $e) { 
-    $message.= $e->getMessage(); 
-    }
-    
-    } // ends page ajax ajaxremovepod
+                try {
+                    $query = "UPDATE cojm_pod SET id= :backupref WHERE id=:getid";
+                    $stmt = $dbh->prepare($query);
+                    $stmt->bindParam(':backupref', $backupref, PDO::PARAM_INT); 
+                    $stmt->bindParam(':getid', $publicid, PDO::PARAM_INT); 
+                    $stmt->execute();
+                    $total = $stmt->rowCount();
+                    if ($total=='1') {
+                        $message.="POD Removed<br/>Image backed up to <a href='../podimage.php?id=".$backupref."'>".$backupref."</a>";
+                        $allok=1;
+                        $script.='   haspod=0;
+                        $("#uploadpodfile").show();
+                        $("#podimagecontainer").hide(); alert("You will need to clear your browser cache");   ';
+                    } // ends total changed ==1 check
+                } // ends try
+                
+                catch(PDOException $e) { 
+                $message.= $e->getMessage(); 
+                }
+                
+            } // ends page ajax ajaxremovepod
     
     
     
@@ -2326,10 +2321,6 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 
 
 
-
-
-
-
             if ($page=='ajaxchangeopsmaparea') {
 if (isset($_POST['opsmaparea'])) { $opsmaparea = trim($_POST['opsmaparea']); }
 try {
@@ -2563,47 +2554,47 @@ $num_rows = mysql_num_rows($sql_result);
 if ($num_rows>0) {
 while ($row = mysql_fetch_array($sql_result)) {
 
-// $infotext=$infotext.' <br />calcmileage function 2011';
+// $infotext.=' <br />calcmileage function 2011';
 
 if ($id) {
 
 $row['enrpc0']=$row['CollectPC'];
-// $infotext=$infotext.' <br />ID found : '.$ID;
+// $infotext.=' <br />ID found : '.$ID;
 
-// $infotext=$infotext.' <br />3618 CollectPC : '.$row['CollectPC'];
+// $infotext.=' <br />3618 CollectPC : '.$row['CollectPC'];
 
-// $infotext=$infotext.' <br />enrPC0 : '.$row['enrpc0'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc1'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc2'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc3'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc4'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc5'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc6'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc7'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc8'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc9'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc10'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc11'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc12'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc13'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc14'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc15'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc16'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc17'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc18'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc19'];
-// $infotext=$infotext.' <br />enrPC : '.$row['enrpc20'];
-// $infotext=$infotext.' <br />ShipPC : '.$row['ShipPC'];
+// $infotext.=' <br />enrPC0 : '.$row['enrpc0'];
+// $infotext.=' <br />enrPC : '.$row['enrpc1'];
+// $infotext.=' <br />enrPC : '.$row['enrpc2'];
+// $infotext.=' <br />enrPC : '.$row['enrpc3'];
+// $infotext.=' <br />enrPC : '.$row['enrpc4'];
+// $infotext.=' <br />enrPC : '.$row['enrpc5'];
+// $infotext.=' <br />enrPC : '.$row['enrpc6'];
+// $infotext.=' <br />enrPC : '.$row['enrpc7'];
+// $infotext.=' <br />enrPC : '.$row['enrpc8'];
+// $infotext.=' <br />enrPC : '.$row['enrpc9'];
+// $infotext.=' <br />enrPC : '.$row['enrpc10'];
+// $infotext.=' <br />enrPC : '.$row['enrpc11'];
+// $infotext.=' <br />enrPC : '.$row['enrpc12'];
+// $infotext.=' <br />enrPC : '.$row['enrpc13'];
+// $infotext.=' <br />enrPC : '.$row['enrpc14'];
+// $infotext.=' <br />enrPC : '.$row['enrpc15'];
+// $infotext.=' <br />enrPC : '.$row['enrpc16'];
+// $infotext.=' <br />enrPC : '.$row['enrpc17'];
+// $infotext.=' <br />enrPC : '.$row['enrpc18'];
+// $infotext.=' <br />enrPC : '.$row['enrpc19'];
+// $infotext.=' <br />enrPC : '.$row['enrpc20'];
+// $infotext.=' <br />ShipPC : '.$row['ShipPC'];
 $row['enrpc21']=$row['ShipPC'];
 
-// $infotext=$infotext.' <br />enrpc21 : '.$row['enrpc21'];
+// $infotext.=' <br />enrpc21 : '.$row['enrpc21'];
 
 // start of loop
 $i='0';
 
 if ($globalprefrow['inaccuratepostcode']<>'1') {
 
-// $infotext=$infotext.' <br /> postcode flag is'.$globalprefrow['inaccuratepostcode'].'with no gap.';
+// $infotext.=' <br /> postcode flag is'.$globalprefrow['inaccuratepostcode'].'with no gap.';
 $tempdist='';
 $lastfoundpc1='';
 
@@ -2638,22 +2629,22 @@ $oGC = new GeoCalc();
 $dDist = $oGC->EllipsoidDistance($pcrow1["PZ_northing"],$pcrow1["PZ_easting"],$pcrow2["PZ_northing"],$pcrow2["PZ_easting"]);
 
 if ((!$pcrow1["PZ_easting"]) or (!$pcrow2["PZ_easting"])) {
-$infotext=$infotext. '<strong>
+$infotext.= '<strong>
 <br />Collection PC '.$pc1.' not found, or <br />Delivery PC '.$pc2.' not found for location '.$i.'</strong>';
 
 if (isset ($alerttext)) {} else { $alerttext=''; }
 
 
-$alerttext=$alerttext.'<p><strong>'.$pc1.' or '.$pc2.' not found for location '.$i.'</strong></p>';
+$alerttext.='<p><strong>'.$pc1.' or '.$pc2.' not found for location '.$i.'</strong></p>';
 
 
 
 
 }
 else {
-// $infotext=$infotext.' <br />enrgap : '.$dDist;
+// $infotext.=' <br />enrgap : '.$dDist;
 $dDistMiles = ConvKilometersToMiles($dDist); 
-// $infotext=$infotext.' <br />enrgap '.$i.' miles : '.$dDistMiles;
+// $infotext.=' <br />enrgap '.$i.' miles : '.$dDistMiles;
 $tempdist=$tempdist+$dDist;
 }
 }
@@ -2675,27 +2666,27 @@ if (isset($_POST['distance'])) { $tempdist=trim($_POST['distance']); } else { $t
 $dDistMiles = ConvKilometersToMiles($tempdist); 
 if ($distunit=='km') { $tempdist=round($tempdist, 1); } else { $tempdist=round($dDistMiles, 1); }
 
-// $infotext=$infotext. '<br />'.$tempdist.' '.$distunit;
+// $infotext.= '<br />'.$tempdist.' '.$distunit;
 
 $sql = "UPDATE Orders SET distance='$tempdist' WHERE ID = $id LIMIT 1";
 $result = mysql_query($sql);
 if ($result){ 
- $infotext=$infotext."<br />1401 Distance updated to <strong>".$tempdist.'</strong>'; 
+ $infotext.="<br />1401 Distance updated to <strong>".$tempdist.'</strong>'; 
 }
 else { 
 
-$infotext=$infotext.mysql_error()."<br> <strong>An error occured during updating distance</strong>"; 
-$alerttext=$alerttext."<p> <strong>An error occured during updating distance</strong><br />".mysql_error()."</p>"; 
+$infotext.=mysql_error()."<br> <strong>An error occured during updating distance</strong>"; 
+$alerttext.="<p> <strong>An error occured during updating distance</strong><br />".mysql_error()."</p>"; 
 
 }
 
 $co2perdist=$globalprefrow['co2perdist']*$tempdist;
 $pm10perdist=$globalprefrow['pm10perdist']*$tempdist;
 
- $infotext=$infotext."<br />co2 : ".$co2perdist;
- $infotext=$infotext."<br />pm10 : ".$pm10perdist;
+ $infotext.="<br />co2 : ".$co2perdist;
+ $infotext.="<br />pm10 : ".$pm10perdist;
 
-// $infotext=$infotext.'<br />rm : '.$row['RMcount'].' lice : '.  ($row['LicensedCount']);
+// $infotext.='<br />rm : '.$row['RMcount'].' lice : '.  ($row['LicensedCount']);
 
 if (($row['RMcount']) or ($row['LicensedCount'])) {
 
@@ -2706,14 +2697,14 @@ $pm10perdist='';
 // else { echo ($row['CO2Saved']*$row["numberitems"]); }
 // if job is hourly rate
 
-// $infotext=$infotext."<strong>Updating Emission Savings</strong><br>";
+// $infotext.="<strong>Updating Emission Savings</strong><br>";
  $sql = "UPDATE Orders SET co2saving='$co2perdist' , pm10saving='$pm10perdist' WHERE ID='$id' LIMIT 1"; 
  $result = mysql_query($sql);
-// $infotext=$infotext.'<br />'.$sql;
+// $infotext.='<br />'.$sql;
  
 if ($result){ 
- $infotext=$infotext."<br />Emission savings updated, co2 is".$co2perdist; 
-// $infotext=$infotext.'<br />'.$sql; 
+ $infotext.="<br />Emission savings updated, co2 is".$co2perdist; 
+// $infotext.='<br />'.$sql; 
  
 } 
 else { $message."<br /><strong>An error occured during updating emissions savings</strong>"; } 
@@ -2800,8 +2791,8 @@ if ($result){
 $infotext.="<br />next action time updated"; 
 
 } else {
-$infotext=$infotext."<br />error occured during updating next action time ! ".$nextactiondate."</strong>"; 
-$alerttext=$alerttext."<p>Error occured during updating next action time </p>"; 
+$infotext.="<br />error occured during updating next action time ! ".$nextactiondate."</strong>"; 
+$alerttext.="<p>Error occured during updating next action time </p>"; 
 
 }
 
@@ -2900,7 +2891,7 @@ LIMIT 1
 
  
 if ($distance>'0') {
-// $infotext=$infotext.'<br/>1st mile cost in total is : '.$cbbnewcost;
+// $infotext.='<br/>1st mile cost in total is : '.$cbbnewcost;
 $buildloopcharge=$buildloopcharge+$cbbnewcost; 
 
 
@@ -2911,7 +2902,7 @@ $buildloopcharge=$buildloopcharge+$cbbnewcost;
  cbbc1='1'
  WHERE ID='$id' LIMIT 1"; 
  $result = mysql_query($sql, $conn_id);
-// $infotext=$infotext.'<br />4561'. $sql;
+// $infotext.='<br />4561'. $sql;
 
 
 } else { 
@@ -2950,7 +2941,7 @@ $cbbnewcost=($cbbnewcost*($distance-1));
  $result = mysql_query($sql, $conn_id);
 
  
-// $infotext=$infotext.'<br />4610 '. $result;
+// $infotext.='<br />4610 '. $result;
 
 
 $buildloopcharge=$buildloopcharge+$cbbnewcost; 
@@ -2967,13 +2958,13 @@ $cbbnewcost='0.00';
  WHERE ID='$id' LIMIT 1"; 
  $result = mysql_query($sql, $conn_id);
 
-// $infotext=$infotext.'<br /> 4627 '. $sql;
+// $infotext.='<br /> 4627 '. $sql;
 
  
 }
 
 
-// $infotext=$infotext.'<br/>2nd mile sql and cost is : '.$sql.' ' .$cbbnewcost;
+// $infotext.='<br/>2nd mile sql and cost is : '.$sql.' ' .$cbbnewcost;
 
 
 // set main price to zero
@@ -2984,7 +2975,7 @@ $cbbnewcost='0.00';
 
  $infotext.='<br/>Service Price : '.$serviceprice;
 
-// $infotext=$infotext.'<br/>Number Items : '.$numberitems;
+// $infotext.='<br/>Number Items : '.$numberitems;
 
 $buildloopcharge=$buildloopcharge+($numberitems*$serviceprice);
 
@@ -3011,7 +3002,7 @@ LIMIT 1
 
  
  
-// $infotext=$infotext.'<br /> cbbc2 is '.$cbbnewcost;
+// $infotext.='<br /> cbbc2 is '.$cbbnewcost;
  
  
 
@@ -3032,7 +3023,7 @@ $sql_result = mysql_query($query,$conn_id)  or mysql_error();
 while ($cbbrow = mysql_fetch_array($sql_result)) { extract($cbbrow);
 
 
-// $infotext=$infotext.'<br/> 4689 start loop charge :'.$buildloopcharge. ' cbbrow : ' .$chargedbybuildid;
+// $infotext.='<br/> 4689 start loop charge :'.$buildloopcharge. ' cbbrow : ' .$chargedbybuildid;
 
  $calcsql="
  SELECT cbbc$chargedbybuildid 
@@ -3042,7 +3033,7 @@ while ($cbbrow = mysql_fetch_array($sql_result)) { extract($cbbrow);
 ";
   $docalc = mysql_result(mysql_query($calcsql, $conn_id), 0);
  
-// $infotext=$infotext.'<br />  tickbox for cbb'.$chargedbybuildid .' is '.$docalc;
+// $infotext.='<br />  tickbox for cbb'.$chargedbybuildid .' is '.$docalc;
 
 
 
@@ -3050,10 +3041,10 @@ while ($cbbrow = mysql_fetch_array($sql_result)) { extract($cbbrow);
 if ($chargedbybuildid=='3') {
 // if ($docalc=='1') {
 
-// $infotext=$infotext.'<br/>Waiting time per 5 mins is : '.$cbbcost;
+// $infotext.='<br/>Waiting time per 5 mins is : '.$cbbcost;
 $cbbcost=(($cbbwaitingcost/5)*$cbbcost);
 
-// $infotext=$infotext.'<br/>Waiting cost docalc : '.$docalc.' in total is : '.$cbbcost;
+// $infotext.='<br/>Waiting cost docalc : '.$docalc.' in total is : '.$cbbcost;
 $buildloopcharge=$buildloopcharge+$cbbcost;
 
  $sql = "UPDATE Orders 
@@ -3062,7 +3053,7 @@ $buildloopcharge=$buildloopcharge+$cbbcost;
  
  $result = mysql_query($sql, $conn_id);
  if ($result){ 
- // $infotext=$infotext."<br />Order was updated ". $newcost .""; 
+ // $infotext.="<br />Order was updated ". $newcost .""; 
  } 
  else { $infotext.="<br /><strong>An error occured during updating cbb price</strong>"; } 
 // }
@@ -3071,7 +3062,7 @@ $buildloopcharge=$buildloopcharge+$cbbcost;
 if ($chargedbybuildid>3) {
 if ($docalc=='1') { 
 
-// $infotext=$infotext.'<br/>Found charge  : '.$cbbmod.' '.$cbbcost;
+// $infotext.='<br/>Found charge  : '.$cbbmod.' '.$cbbcost;
 
 if ($cbbmod=='x') {
 $cbbcost=($cbbcost/'100');
@@ -3085,7 +3076,7 @@ $cbbcost=(($buildloopcharge*$cbbcost)-$buildloopcharge);
  
  $result = mysql_query($sql, $conn_id);
  if ($result){ 
-// $infotext=$infotext."<br />cbb ".$chargedbybuildid."  was updated ". $cbbcost .""; 
+// $infotext.="<br />cbb ".$chargedbybuildid."  was updated ". $cbbcost .""; 
  } 
  else { $infotext.="<br /><strong>An error occured during updating cbb price</strong>"; } 
 
@@ -3100,7 +3091,7 @@ if ($docalc<>'1') {
  
  $result = mysql_query($sql, $conn_id);
  if ($result){ 
- // $infotext=$infotext."<br />Order was updated ". $newcost .""; 
+ // $infotext.="<br />Order was updated ". $newcost .""; 
  } 
  else { $infotext.="<br /><strong>An error occured during updating cbb price</strong>"; } 
 
@@ -3109,22 +3100,22 @@ if ($docalc<>'1') {
 } // ends loop for jobs
 
 
-// $infotext=$infotext.'<br/>Total Build charge  : '.$buildloopcharge;
+// $infotext.='<br/>Total Build charge  : '.$buildloopcharge;
 
 
 }  // ends using tick boxes
 
 
-// $infotext=$infotext.'<br/>Temp charge : '.$pricebeforediscount;
+// $infotext.='<br/>Temp charge : '.$pricebeforediscount;
 
-// $infotext=$infotext.'<br/>Client Discount Percentage : '.$cdiscount;
+// $infotext.='<br/>Client Discount Percentage : '.$cdiscount;
 
 $cdiscount=((100-$cdiscount)*0.01);
 $priceexvat=$cdiscount*$buildloopcharge;
 $clientdiscount=$buildloopcharge-$priceexvat;
 
-// $infotext=$infotext.'<br/>5260 Discount to client : '.$clientdiscount;
-// $infotext=$infotext.'<br/>5262 New ex-VAT Charge : '.$priceexvat;
+// $infotext.='<br/>5260 Discount to client : '.$clientdiscount;
+// $infotext.='<br/>5262 New ex-VAT Charge : '.$priceexvat;
 
 // get services vatband
 $newvatcost='0.000'; 
@@ -3190,7 +3181,7 @@ $priceexvat=number_format (($priceexvat), 2, '.', '');
  
 } // ends check for main charge <>0.00
  
-// $infotext=$infotext.'<br />5300 discount : '.$clientdiscount;
+// $infotext.='<br />5300 discount : '.$clientdiscount;
 } else { // ends check for not to change if a custom price
 
 $priceexvat=$orgiFreightCharge;
@@ -3350,7 +3341,7 @@ WHERE `Orders`.`id` = :getid LIMIT 0,1";
 $cbstmt = $dbh->prepare($query);
 $cbstmt->bindParam(':getid', $id, PDO::PARAM_INT); 
 $cbstmt->execute();
-while($row = $cbstmt->fetch(PDO::FETCH_ASSOC)) {
+while ($row = $cbstmt->fetch(PDO::FETCH_ASSOC)) {
  $i=1;
 while ( $i<21) {
   
@@ -3782,7 +3773,7 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 }
 
 
-if ($globalname=='glob6') {
+if ($globalname=='glob6') { // unused former checkbox
  try {
 $query = "UPDATE globalprefs SET glob6=:newvalue WHERE settingsid=:settingsid";
 $stmt = $dbh->prepare($query);
@@ -5552,7 +5543,7 @@ $message.='Checkbox Order updated. <br />';
 $agent = $_SERVER['HTTP_USER_AGENT']; 
 
 if(preg_match('/iPhone|Android|Blackberry/i', $agent)) {
-// $infotext=$infotext.'<br />Mobile device'; 
+// $infotext.='<br />Mobile device'; 
 $mobdevice='1';
 } else { $mobdevice=''; }
 

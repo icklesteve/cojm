@@ -47,6 +47,7 @@ var showmessage;
 var statustoohigh;
 var publictrackingref;
 var canshowareafromservice;
+var initialhassubarea;
 
 
 
@@ -280,8 +281,13 @@ $(function () { // Document is ready
             } else {
                 $("#opsmapsubarea").show();
             }
-        } else {
-            $("#opsmapsubarea").show();
+        }
+        else {
+            if (initialhassubarea === 1) {
+                $("#opsmapsubarea").show();
+            } else {
+                $("#opsmapsubarea").hide();                
+            }
         }
 
 
@@ -534,7 +540,6 @@ $(function () { // Document is ready
 
 
 
-
     function ordermapupdater() {
         $("#toploader").show();
         showhidebystatus();
@@ -554,7 +559,6 @@ $(function () { // Document is ready
             }
         });
     }
-
 
 
 
@@ -592,11 +596,6 @@ $(function () { // Document is ready
     $("#togglenr3choose").click(function(){$("#togglenr3").slideToggle("fast");});
     $("#togglenr4choose").click(function(){$("#togglenr4").slideToggle("fast");});
     $("#togglenr5choose").click(function(){$("#togglenr5").slideToggle("fast");});
-    
-    
-
-    
-    
     
     
     
@@ -1028,6 +1027,7 @@ $(function () { // Document is ready
         if (initialstatus < 100) {
             var targetcollectiondate = $("#targetcollectiondate").val().trim();
             if (targetcollectiondate !== initialtargetcollectiondate) {
+                $("#toploader").show();
                 initialtargetcollectiondate=targetcollectiondate;
                 $.ajax({
                     url: 'ajaxchangejob.php',
@@ -1042,6 +1042,7 @@ $(function () { // Document is ready
                         $('#emissionsaving').append(data);
                     },
                     complete: function () {
+                        ordermapupdater();
                         testtimes();
                         showmessage();
                     }
@@ -1131,6 +1132,7 @@ $(function () { // Document is ready
         if (initialstatus < 100) {
             var starttrackpause = $("#starttrackpause").val().trim();
             if (starttrackpause !== initialstarttrackpause) {
+                $("#toploader").show();
                 initialstarttrackpause = starttrackpause;
                 $.ajax({
                     url: 'ajaxchangejob.php',
@@ -1145,6 +1147,7 @@ $(function () { // Document is ready
                         $('#emissionsaving').append(data);
                     },
                     complete: function () {
+                        ordermapupdater();
                         testtimes();
                         showmessage();
                     }
@@ -1165,6 +1168,7 @@ $(function () { // Document is ready
         if (initialstatus < 100) {
             var finishtrackpause = $("#finishtrackpause").val().trim();
             if (finishtrackpause !== initialfinishtrackpause) {
+                $("#toploader").show();
                 initialfinishtrackpause = finishtrackpause;
                 $.ajax({
                     url: 'ajaxchangejob.php',
@@ -1179,6 +1183,7 @@ $(function () { // Document is ready
                         $('#emissionsaving').append(data);
                     },
                     complete: function () {
+                        ordermapupdater();
                         testtimes();
                         showmessage();
                     }
@@ -1199,7 +1204,7 @@ $(function () { // Document is ready
         if (initialstatus < 100) {
             var duedate = $("#duedate").val().trim();
             if (duedate !== initialduedate) {
-                
+                $("#toploader").show();
                 initialduedate = duedate;
                 
                 $.ajax({
@@ -1217,6 +1222,7 @@ $(function () { // Document is ready
                     complete: function () {
                         testtimes();
                         showmessage();
+                        ordermapupdater();
                     }
                 });
             } // times different

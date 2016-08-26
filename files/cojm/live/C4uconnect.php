@@ -41,6 +41,11 @@ define('DBPASS', $password );
 define('DBNAME',  $db_name );
 define('DB_CHARSET', 'utf8'); 
  
+ 
+
+ 
+ 
+ 
 // $dbh=new PDO("mysql:dbname=$db_name;host=$host_name;charset=utf8", $user_name, $password);
 // $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 // $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
@@ -49,28 +54,24 @@ define('DB_CHARSET', 'utf8');
  
  
 try {
-        $dbh = new PDO(
-            'mysql' . ':host=' . DBHOST . ';dbname=' . DBNAME . ';charset=' . DB_CHARSET,
-            DBUSER,
-            DBPASS,
-            [
-                PDO::ATTR_PERSISTENT            => true,
-                PDO::ATTR_ERRMODE               => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_EMULATE_PREPARES    => false
-
-            ]
-        );
-    } catch ( PDOException $e ) {
-        echo 'ERROR!';
-        print_r( $e );
-    } 
+    $dbh = new PDO(
+        'mysql' . ':host=' . DBHOST . ';dbname=' . DBNAME . ';charset=' . DB_CHARSET,
+        DBUSER,
+        DBPASS,
+        [
+            PDO::ATTR_PERSISTENT            => true,
+            PDO::ATTR_ERRMODE               => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_EMULATE_PREPARES    => false
+        ]
+    );
+} catch ( PDOException $e ) {
+    echo 'ERROR!';
+    print_r( $e );
+} 
  
  
  
- 
- 
- 
-	$conn_id = @mysql_connect ($host_name, $user_name, $password);
+$conn_id = @mysql_connect ($host_name, $user_name, $password);
 	if (!$conn_id)
 	{
 		# If mysql_errno()/mysql_error() work for failed connections, use

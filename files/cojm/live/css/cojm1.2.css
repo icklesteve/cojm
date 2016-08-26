@@ -53,7 +53,7 @@ display:none;
 
 .orderjobcomments { width: 65%; outline: none; height:20px; }
 
-span.bankhol { background-color:#a8a8a8;
+span.bankhol { background-color:#5c6;
 padding: 0px 5px 1px;
 }
 
@@ -145,12 +145,13 @@ padding:10px 10px 35px;
 }
 
 #toploader {
-  position: fixed;
-  float:left;
-  padding-left: 8px;
-  height: 30px;
-  display:none;
-  top:3px;
+    position: relative;
+    float:left;
+    padding-left: 8px;
+    height: 34px;
+    display:none;
+    margin-top: -8px;
+  
 }
 
 #toploader span {
@@ -214,13 +215,13 @@ padding:10px 10px 35px;
 @keyframes load {
   0% {
     background: #ccc;
-    margin-top: 25%;
+    margin-top: 25%; 
     height: 0%;
   }
   50% {
     background: #444;
     height: 100%;
-    margin-top: 0%;
+    margin-top: 0%; 
   }
   100% {
     background: #ccc;

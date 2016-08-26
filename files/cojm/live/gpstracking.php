@@ -139,8 +139,8 @@ $dend='';
 <style>
  div.info {  color:green; font-weight:bold; } 
 form#cvtc div.ui-state-highlight.ui-corner-all.p15 input.ui-autocomplete-input.ui-widget.ui-widget-content { width:200px; }
-/* starts spinner on page load, only for ajax pages  */
-#toploader { display:inline; }
+
+#toploader { display:block; }
 </style>
 <title>COJM GPS Tracking</title>
 <script>
@@ -639,6 +639,7 @@ if ($clientview=='cluster') {
         
         google.maps.event.addListener(marker, "mouseover", (function(marker, i) {
             return function() {
+                $("#toploader").show();
                 infowindow.setContent(" <div class='info'> " + <?php echo $markervar; ?>[i][0] + "<div class='ajaxinfowin'></div> </div>");
                 var markervar = <?php echo $markervar; ?>[i][3];
                 var dataString = "markervar=" + markervar;
@@ -648,7 +649,10 @@ if ($clientview=='cluster') {
                     data: dataString,
                     success: function(data){
                         $(".ajaxinfowin").html(data);
-                    }
+                    },
+                    complete: function (){
+                        $("#toploader").fadeOut();
+                    },
                 });
                 infowindow.setOptions({ disableAutoPan: true });
                 infowindow.open(map, marker);
@@ -944,6 +948,10 @@ echo '
 ?>
 
 <br />
+<hr />
+<p>Mouseover info points to see jobs which are / were en route. </p>
+
+<hr />
 <br />
 </div> 
 </div> 

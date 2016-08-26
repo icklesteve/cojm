@@ -21,481 +21,507 @@
 
 $alpha_time = microtime(TRUE);
 
-$showasap='';
-$showcargo='';
-$seeifnextday='';
-$hasforms='1';
-$javascript='';
-$dayflag='0';
-$countrows='0';
-$tempfirstrun='';
-
-// phpinfo();
-
 include "C4uconnect.php";
 
-
-if ($globalprefrow['forcehttps']>'0') {
-if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
-
-
-
+if ($globalprefrow['forcehttps']>'0') { if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
 
 include "changejob.php";
  
-
 echo '<!DOCTYPE html> <html lang="en"> <head> 
-<meta http-equiv="Content-Type" 
- content="text/html; charset=utf-8"> ';
-
-// echo ' <meta name="viewport" content="width=device-width, maximum-scale=1.0, minimum-scale=1.0, initial-scale=1.0, user-scalable=no" "> ';
-
- echo ' 
- <meta name="viewport" content="width=device-width, height=device-height" > ';
-
-
-
-
-echo '
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, height=device-height" >
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <META HTTP-EQUIV="Refresh" CONTENT="'. $globalprefrow['formtimeout'].'; URL=index.php"> 
-
 <link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
-<script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>';
+<script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
+<title>COJM : '. ($cyclistid).'</title>
+</head>
+<body id="bodytop" >';
 
-
-
-
-
-
- echo '<title>COJM : '. ($cyclistid).'</title></head><body id="bodytop" >';
-
+$hasforms='1';
 $filename="index.php";
 include "cojmmenu.php"; 
 
 echo '<div id="Post" class="Post c9 lh16">';
 
-if($mobdevice) { $numberofresults=$globalprefrow['numjobsm']; } else {$numberofresults=$globalprefrow['numjobs']; } 
-if ($page == "showall" ) { $numberofresults='10000'; }  
 
-$sql = "
-SELECT * FROM Orders 
-INNER JOIN Clients 
-INNER JOIN Services
-INNER JOIN Cyclist 
-ON 
-Orders.CustomerID = Clients.CustomerID 
-AND Orders.ServiceID = Services.ServiceID 
-AND Orders.CyclistID  = Cyclist.CyclistID 
+$totsumtot = $dbh->query("SELECT count(1) FROM Orders WHERE `Orders`.`status` <70 ")->fetchColumn();
+
+if($mobdevice) { $numberofresults=$globalprefrow['numjobsm']; } else {$numberofresults=$globalprefrow['numjobs']; } 
+if ($page == "showall" ) { $numberofresults='1000'; }
+
+
+$cbbasapdata = $dbh->query('SELECT chargedbybuildid from chargedbybuild WHERE cbbasap = "1" and cbbcost <> 0 ')->fetchAll(PDO::FETCH_COLUMN);
+    
+$cbbcargodata = $dbh->query('SELECT chargedbybuildid from chargedbybuild WHERE cbbcargo = "1" and cbbcost <> 0 ')->fetchAll(PDO::FETCH_COLUMN);
+    
+
+$query = "SELECT statusname, status FROM status WHERE activestatus=1 AND status<101 ORDER BY status ASC";   
+$statusdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
+
+$query = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID"; 
+$riderdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);    
+    
+    
+$query = "SELECT bankholcomment, bankholdate FROM bankhols WHERE bankholdate >= CURRENT_DATE";
+$bankholdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
+
+
+$seeifnextday='';
+$javascript='';
+$dayflag='0';
+$tempfirstrun='';
+
+
+
+$query='
+SELECT *
+FROM Orders
+INNER JOIN Clients ON Orders.CustomerID = Clients.CustomerID
+INNER JOIN Services ON Orders.ServiceID = Services.ServiceID
+left join clientdep ON Orders.orderdep = clientdep.depnumber
 WHERE `Orders`.`status` <70 
 ORDER BY `Orders`.`nextactiondate` , ID
-LIMIT 0 , $numberofresults";
+LIMIT :numberofresults';
+
+$stmt = $dbh->prepare($query);
+$stmt->bindParam(':numberofresults', ($numberofresults), PDO::PARAM_INT);
+$stmt->execute();
+$sumtot = $stmt->rowCount();
+
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+
+    $seeifnextnewday=date('z', strtotime($row['nextactiondate']));
+    if (($seeifnextday<>$seeifnextnewday) and ($seeifnextday<>'')) {
+        echo '<div class="linevpad"> </div>';
+        $dayflag++;
+    }
+    if ( $dayflag & '1' ) {  //odd , sets $dayclass
+        $dayclass= 'ui-state-default';
+    } else {
+        $dayclass= 'ui-state-highlight';
+    }
+    
+    
+
+    $showasap='';
+    $showcargo='';
+    $shortcomments = (substr($row['jobcomments'],0,40));
+    $privateshortcomments = (substr($row['privatejobcomments'],0,40));
+	
+    $latecoll = (time()-(strtotime($row['targetcollectiondate']))); // high if collection running late
+    if (date('U', strtotime($row['collectionworkingwindow']))>10) {    
+    $latecoll = (time()-(strtotime($row['collectionworkingwindow']))); // high if collection running late
+    }
+    
+    $latedeli = (time()-(strtotime($row['duedate']))); // high if delivery running late
+    if (date('U', strtotime($row['deliveryworkingwindow']))>10) {
+    $latedeli = (time()-(strtotime($row['deliveryworkingwindow']))); // high if delivery running late    
+    }
+
+    $javascript.="$('#stat". $row['ID']."').change(function() { $('#".$row['ID']."').submit(); });
+    $('#cyc".$row['ID']."').change(function() { $('#".$row['ID']."').submit(); }); ";
+
+    $i='0';
+    $showcargo=''; 
+    $showasap='';
+
+    echo '<div class="ui-corner-all '.$dayclass.'"  > ';
+
+
+    
+
+        
+    /////  CHECK TO SEE TO DISPLAY JUST 1 ASAP OR CARGOBIKE LOGO     ////////////////////////////////////
+    while ($i<21) {
+        if (($row["cbb$i"])<>0) { // order cbb has price 
+            if (in_array("$i", $cbbasapdata)) {
+                $showasap='1';
+            }
+            
+            if (in_array("$i", $cbbcargodata)) {
+                $showcargo='1';
+            }
+        }
+        $i++;
+    }
+
+    if ($row['asapservice']=='1') { $showasap='1'; }
+    if ($row['cargoservice']=='1') { $showcargo='1'; }
+
+
+    echo ' <span class="indexorder"><a href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> ';
+
+    
+    if ($showasap=='1') {
+        echo '<img class="indexicon" title="ASAP" alt="ASAP" src="'.$globalprefrow['image5'].'">';
+    }
+        
+    if ($showcargo=='1') {
+        echo '<img class="indexicon" title="Cargobike " alt="Cargo" src="'.$globalprefrow['image6'].'">';
+    }
+    
+    
+    ////////////     COMMENT TEXT ///////////////////////////////////////////////////////////////
+
+
+    echo ' <a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'.$row['CompanyName'].'</a>';
+
+    if ($row['orderdep']>0) { echo ' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$row['depname'].'</a>) '; }
+    
+    
+    if ($row['batchdropcount']<>'1') {
+        echo ' '.trim(strrev(ltrim(strrev($row['numberitems']), '0')),'.').' x '. $row['Service'] .' ';
+    }
+    
+    $n=0;
+    $i=1;
+    while ($i<21) { // get number of via addresses
+        if (((trim($row["enrpc$i"]))<>'') or (trim($row["enrft$i"]<>''))) { $n++; } $i++; }
+    
+    if ($n==1) { // via 1 stop
+        echo ' via '.htmlspecialchars($row["enrft1"]) .' '.htmlspecialchars($row["enrpc1"]).'';
+    }
+    else if ($n>1) { // via n stops
+        echo ' via '.$n.' stops ';
+    }
+    
+    if (($shortcomments)) {
+        echo ' - '.$shortcomments;
+    }
+    
+    if ($privateshortcomments) {
+        echo ' - '.$privateshortcomments;
+    }
+
+    
+    echo '
+    </span>
+    
+    <table class="index">
+    <tbody> <tr>';
+    
+    if ($mobdevice<>'1') { // td rowspan=2
+        echo ' <td rowspan="2"> ';
+    }
+    else { // td colspan=3
+        echo ' <td colspan="3"> ';
+    }
+    
+
+
+    /////////////      STATUS SELECT   //////////////////////////////////////
+    echo '<form action="#" method="post" id="'. $row['ID'] .'" autocomplete="off">
+        <input type="hidden" name="formbirthday" value="'. date("U") .'">
+        <input type="hidden" name="oldstatus" value="'. $row['status'].'">
+        <input type="hidden" name="page" value="editstatus"><input type="hidden" name="id" value="'. $row['ID'] .'">';
+    
+    echo '<select id="stat'. $row['ID'] .'" class="'.$dayclass.' ui-corner-left" name="newstatus" >';
+    
+    foreach($statusdata as $loopstatusname => $loopstatusnum) {
+        print ("<option ");
+        if ($row['status'] == $loopstatusnum) { echo 'selected="selected" ';}
+        print ("value=\"$loopstatusnum\">$loopstatusname</option>"); 
+    }
+    print ("</select>");
 
 
 
-$sql_result = mysql_query($sql,$conn_id) or die (mysql_error()); $sumtot=mysql_affected_rows();
+    
+    //////////     CYCLIST   DROPDOWN     ///////////////////////////////////
+    echo '<input type="hidden" name="oldcyclist" value="'.$row['CyclistID'].'" >
+    <select name="newcyclist" id="cyc'. $row['ID'] .'" class="'.$dayclass.' ui-corner-left';
 
-while ($row = mysql_fetch_array($sql_result)) { extract($row);
+    if ($row['CyclistID']=='1') { echo ' red'; }
+    echo '">';
 
-$shortcomments = (substr($row['jobcomments'],0,40));
-$privateshortcomments = (substr($row['privatejobcomments'],0,40));
-$bankholtext=' ';
-$seeifnextnewday=date('z', strtotime($nextactiondate));
-$countrows=$countrows+'1';
-$numberitems= trim(strrev(ltrim(strrev($numberitems), '0')),'.');
-$CollectPC=trim($CollectPC);
-$ShipPC=trim($ShipPC);
-$cyclistname=$row['cojmname']; 
-$date4 = strtotime($nextactiondate); 
-$date2 = time();
-$diffdate= ($date4 - $date2 );		
-$dtrgcoll = (strtotime($targetcollectiondate)-time()); 
-$dtrgdeli = (strtotime($duedate)-time()); 
-$linkShipPC = str_replace(" ", "+", "$ShipPC", $count);
-$linkCollectPC = str_replace(" ", "+", "$CollectPC", $count);
- $fromfreeaddresslink=$row["fromfreeaddress"];
- $fromfreeaddresslink= str_replace(" ", "+", "$fromfreeaddresslink", $count);
- $tofreeaddresslink=$row["tofreeaddress"];
- $tofreeaddresslink= str_replace(" ", "+", "$tofreeaddresslink", $count);
-$temp='';
-if ( $globalprefrow['glob6']=='1' ) {  } //  value="1"> Colour alternates on Individual job </option>
-if ( $globalprefrow['glob6']=='2' ) {  } //  value="2"> Colour alternates on Day Difference </option>
+    foreach ($riderdata as $ridernum => $ridername) {
+        $ridername=htmlspecialchars($ridername);
+        print ("<option ");
+        if ($row['CyclistID'] == $ridernum) { echo ' selected="selected" '; }
+        if ($ridernum == '1') { echo ' class="unalo" '; }
+        print ("value=\"$ridernum\">$ridername</option>");
+    }
+    echo '</select></form> ';
+    
+    
+    if ($mobdevice=='1') {
+        echo ' </td></tr><tr><td> ';
+    } else {
+        echo ' </td> <td> ';
+    }
+    
+    
+    if (($row['status']) <'51' ) {
+        if ($latecoll>0) { echo '<span class="red">';}
+        echo 'Target PU';
+        if ($latecoll>0) { echo '</span>'; }
+        
+        echo '</td>
+        <td>';
+    
+        if ($latecoll>0) { echo ' <span class="red" >'; }
 
-	 
-if (($seeifnextday<>$seeifnextnewday) and ($tempfirstrun=='1')) {	 
-echo '<div class="linevpad"> </div>'; 
-// echo ' FLIP COLOUR SCHEME FLAG + 1 DAY ';
-$dayflag++; }
-$tempfirstrun='1';
-$i='0';
-$showcargo=''; 
-$showasap='';
+        echo date('H:i', strtotime($row['targetcollectiondate']));
+        if (date('U', strtotime($row['collectionworkingwindow']))>10) {
+            echo '-'.date('H:i ', strtotime($row['collectionworkingwindow']));
+        }
+    
+        $today=date('z');
+        $check=date('z', strtotime($row['targetcollectiondate']));
+        $month=date('M', strtotime($row['targetcollectiondate']));
+        $cmont=date('M');
+        $year=date('Y', strtotime($row['targetcollectiondate']));
+        $cyea=date('Y');
+        if ($check==($today-'1')) {
+            echo ' Yesterday ';
+        } else
+        if ($check==$today) {
+            echo ' Today ';
+        }
+        else if ($check==($today+'1')) {
+            echo ' Tomorrow ';
+        }
+        else {
+            echo date(' l ', strtotime($row['targetcollectiondate']));
+        }
+        
+        echo date(' jS ', strtotime($row['targetcollectiondate']));
+        if (($month<>$cmont) or ($year<>$cyea)) {
+            echo date(' M ', strtotime($row['targetcollectiondate']));
+        }
+        if ($year<>$cyea) {
+            echo date(' Y ', strtotime($row['targetcollectiondate']));
+        }
+        if ($latecoll>0) { echo '</span> '; }
+    }
+    else { // ends collection due , now  collected
+        echo ' PU was at 
+        </td>
+        <td> '. date('H:i', strtotime($row['collectiondate']));
+        $today=date('z');
+        $check=date('z', strtotime($row['collectiondate'])); 
+        $month=date('M', strtotime($row['collectiondate']));
+        $cmont=date('M');
+        $year=date('Y', strtotime($row['collectiondate']));
+        $cyea=date('Y');
+        if ($check==($today-'1')) {
+            echo ' Yesterday ';
+        }
+        else if ($check==$today) {
+            echo ' Today ';
+        }
+        else if ($check==($today+'1')) {
+            echo ' Tomorrow ';
+        }
+        else {
+            echo date(' l ', strtotime($row['collectiondate']));
+        } 
+        echo date(' jS ', strtotime($row['collectiondate']));
+        if (($month<>$cmont) or ($year<>$cyea)) {
+            echo date(' M ', strtotime($row['collectiondate']));
+        }
+        if ($year<>$cyea) {
+            echo date(' Y ', strtotime($row['collectiondate']));
+        }
+        
+    } // ends collection due / collected
+    
+    
+    
+    
+    $testdate = substr($row['targetcollectiondate'],0,10);
+    $bhtext=(array_search("$testdate", $bankholdata));
+    if ($bhtext) { echo '<span class="bankhol">'.$bhtext.'</span>'; }
+    
 
-echo '<div class="ui-corner-all '; if ( $globalprefrow['glob6']=='1' ) { if ( $countrows & '1' ) {  //odd
-echo ' ui-state-highlight '; } else { echo ' ui-state-default '; }} if ( $globalprefrow['glob6']=='2' ) { if ( $dayflag & '1' ) {  //odd
-echo ' ui-state-default '; } else { echo ' ui-state-highlight '; }} echo '"  > ';
-
-
-/////  CHECK TO SEE TO DISPLAY JUST 1 ASAP OR CARGOBIKE LOGO     ////////////////////////////////////
-while ($i<'50') {
-if (isset($row["cbb$i"])) {
-if (($row["cbb$i"])>'0.01') {  // echo 'cbb row '.$i.' found active'; 
-$asapcbb = mysql_result(mysql_query("
- SELECT cbbasap
- from chargedbybuild 
- WHERE `chargedbybuild`.`chargedbybuildid`=$i 
- LIMIT 0,1
-", $conn_id), 0);
-if ($asapcbb>'0.01') { // echo 'FOUND ASAP CBB'; 
-$showasap='1'; }
-
-$asapcbb = mysql_result(mysql_query("
- SELECT cbbcargo
- from chargedbybuild 
- WHERE `chargedbybuild`.`chargedbybuildid`=$i 
- LIMIT 0,1
-", $conn_id), 0);
-if ($asapcbb>'0.01') { // echo 'FOUND GARGO CBB'; 
-$showcargo='1';
-}}} $i++; } // ends loop,  also checks in service settings
-if ($row['asapservice']=='1') { $showasap='1'; }
-if ($row['cargoservice']=='1') { $showcargo='1'; }
+    echo ' </td> <td> ';
+    
 
 
 
 
+    
+    if ((trim($row['CollectPC'])) or ($row['fromfreeaddress'])) {
+        if ( $globalprefrow["inaccuratepostcode"]=='1') { // echo ' full address link '; 
+            echo ' <a class="newwin" target="_blank" href="https://www.google.com/maps/?q='.
+            str_replace(" ", "+", trim($row['fromfreeaddress'])).'+'.str_replace(" ", "+", trim($row['CollectPC'])) .'">'.$row["fromfreeaddress"].' '.trim($row['CollectPC']).'</a> ';
+        }
+        else { // uk style address link
+            echo $row['fromfreeaddress'].' ';
+            if (trim($row['CollectPC'])) {
+                echo '<a target="_blank" class="newwin" href="https://www.google.com/maps/?q='.
+                str_replace(" ", "+", trim($row['CollectPC'])).'">'.trim($row['CollectPC']) .'</a> ';
+            }
+        }
+    } // ends check to see if needs to display links and From
+    
+    
+    //// CASH PAYMENT CHECK    ////////////////////////////////////////////////////
+    if ($row['invoicetype']=='3') {
+        echo " <span title='Incl. VAT' style='". $globalprefrow['courier6']."'>Payment on PU &". 
+        $globalprefrow['currencysymbol'].($row['FreightCharge']+$row['vatcharge']).'</span>';
+    }
+    
+    
+    echo ' &nbsp; 
+    </td>
+    
+    
+    
+    
+    
+    
+    </tr>
+    
+    <tr>
+    
+    
+    
+    
+    
+    
+    <td> 
+    ';
+    
+    
+    
+    if ($latedeli>0) { echo ' <span class="red" >'; }
+    
+    echo 'Target Drop';
+    
+    if ($latedeli>0) { echo '</span> '; }
+    
+    echo '
+    </td>
+    
+    
+    
+    
+    <td>
+    ';
+    
+    
+    
+    // due date / time   ///////////////////////////////////////////////
+    if ($latedeli>0) { echo ' <span class="red" >'; }
+    echo date('H:i', strtotime($row['duedate'])); 
+    
+    if (date('U', strtotime($row['deliveryworkingwindow']))>10) {
+        echo '-'.date('H:i', strtotime($row['deliveryworkingwindow']));
+    }
+    
+    
+    $today=date('z');
+    $check=date('z', strtotime($row['duedate']));
+    $month=date('M', strtotime($row['duedate']));
+    $cmont=date('M');
+    $year=date('Y', strtotime($row['duedate']));
+    $cyea=date('Y');
+
+    if ($check==($today-'1')) { echo ' Yesterday '; }
+    else if ($check==$today) { echo ' Today '; }
+    else if ($check==($today+'1')) { echo ' Tomorrow '; }
+    else { echo date(' l ', strtotime($row['duedate'])); }
+    
+    echo date(' jS ', strtotime($row['duedate']));
+    
+    if (($month<>$cmont) or ($year<>$cyea)) {
+        echo date(' M ', strtotime($row['duedate']));
+    }
+    if ($year<>$cyea) {
+        echo date(' Y ', strtotime($row['duedate']));
+    }
+    if ($latedeli>0) { echo '</span> '; }
+    
+    
+    
+    
+    
+    $testdate = substr($row['duedate'],0,10);
+    $bhtext=(array_search("$testdate", $bankholdata));
+    if ($bhtext) { echo '<span class="bankhol">'.$bhtext.'</span>'; }
+    
+    echo '
+    </td>
+    <td>
+    ';
+    
+    
+    if ((trim($row['ShipPC'])) or ($row['tofreeaddress'])) {
+        if ( $globalprefrow["inaccuratepostcode"]=='1'){
+            echo '<a target="_blank" class="newwin" href="https://www.google.com/maps/?q='.
+            str_replace(" ", "+", trim($row["tofreeaddress"])).'+'. str_replace(" ", "+", trim($row['ShipPC'])).'">'.$row['tofreeaddress'].' '. $ShipPC.'</a> ';
+        }
+        else { // uk address
+            echo $row['tofreeaddress'];
+            if (trim($row['ShipPC'])) {
+                echo ' <a target="_blank" class="newwin" href="https://www.google.com/maps/?q=';
+                echo str_replace(" ", "+", trim($row['ShipPC'])).'">'. trim($row['ShipPC']).'</a> ';
+            }
+        }
+    }
+
+    
+    if ($row['invoicetype']=='4') { // echo payment on drop
+        echo " <span style='". $globalprefrow['courier6']."'>Payment on Drop   &". 
+        $globalprefrow['currencysymbol'].($row['FreightCharge']+$row['vatcharge']).'</span>';
+    }
+    
+    
+    echo ' &nbsp; 
+    </td> 
+    </tr> 
+    </tbody>
+    </table> 
+    </div>
+    ';
+    
+    $seeifnextday=date('z', strtotime($row['nextactiondate']));
+    
+
+} // ends individual job loop
 
 
 
-echo ' 
-<span class="indexorder">
-
-<a href="order.php?id='. $ID.'">'. $ID.'</a> ';
 
 
-if ($showasap=='1') { echo '<img class="indexicon" title="ASAP" alt="ASAP" src="'.$globalprefrow['image5'].'">'; } 
-if ($showcargo=='1') { echo '<img class="indexicon" title="Cargobike " alt="Cargo" src="'.$globalprefrow['image6'].'">'; } 
-if (($row['CyclistID']<>'1') and ($row['lookedatbycyclisttime']>10)) { echo '<img class="indexicon" alt="Viewed" title="Viewed '.
-date('H:i A D jS M', strtotime($row["lookedatbycyclisttime"])) .'" src="'.$globalprefrow['viewedicon'].'">'; 
-} else { 
-// echo '<img class="indexicon" title= "Unviewed" alt="Unviewed" src="'.$globalprefrow['unviewedicon'].'">'; 
-
+if ($totsumtot=='0') { // show no jobs message
+    echo '<div class="linevpad "></div><div class="ui-state-highlight ui-corner-all p15" > 
+    <p><strong> No future or active jobs found on system.</strong>.</p></div><div class="vpad "></div>';
 }
 
 
-
-////////////     COMMENT TEXT ///////////////////////////////////////////////////////////////
-
-
-echo ' <a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'.$CompanyName.'</a>';
-
-
-if ($row['orderdep']) { $depname = mysql_result(mysql_query("SELECT depname FROM clientdep WHERE depnumber = '$orderdep' LIMIT 0,1 ", $conn_id), 0);
-
-echo ' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$depname.'</a>) ';
-
-} 
-
-
-
-if ($row['batchdropcount']<'1') { echo ', '.$numberitems.' x '. $Service .' '; }
-$n='0'; $i='1'; while ($i<'21') { if (((trim($row["enrpc$i"]))<>'') or (trim($row["enrft$i"]<>''))) { $n++; } $i++; }
-if ($n=='1') { $temp=$temp. ' via '.htmlspecialchars($row["enrft1"]) .' '.htmlspecialchars($row["enrpc1"]).''; }
-if ($n>'1') { $temp=$temp. ' via '.$n.' stops '; }
-if (($shortcomments)) { $temp=$temp. ' - '.$shortcomments; }
-if ($privateshortcomments) { $temp=$temp. ' - '.$privateshortcomments; }  echo ' '.$temp.' ';
-
-
-
-
-echo '
-</span>
-<table class="index">
-<tbody> <tr>';
-
-if ($mobdevice<>'1') { echo ' <td rowspan="2"> '; } else { echo ' <td colspan="3"> '; }
-
-
-
-/////////////      STATUS SELECT   //////////////////////////////////////
-$oldstatus=$row['status'];
-echo '<form action="#" method="post" id="'. $row['ID'] .'" autocomplete="off">
-<input type="hidden" name="formbirthday" value="'. date("U") .'">
-<input type="hidden" name="oldstatus" value="'. $oldstatus.'">
-<input type="hidden" name="page" value="editstatus"><input type="hidden" name="id" value="'. $row['ID'] .'">';
- $query = "SELECT statusname, status FROM status WHERE activestatus=1 AND status<101 ORDER BY status ASC"; 
-$result_id = mysql_query ($query, $conn_id); echo '<select id="stat'. $row['ID'] .'" class="';
- if ( $globalprefrow['glob6']=='1' ) { if ( $countrows & '1' ) {  //odd
-echo ' ui-state-highlight '; } else { echo ' ui-state-default '; }}
-if ( $globalprefrow['glob6']=='2' ) { if ( $dayflag & '1' ) {  //odd
-echo ' ui-state-default '; } else { echo ' ui-state-highlight '; }}
-echo ' ui-corner-left" name="newstatus" >';
-while (list ($statusname, $status) = mysql_fetch_row ($result_id)) { $status = htmlspecialchars ($status); 
-$statusname = htmlspecialchars ($statusname); print ("<option "); { if ($row['status'] == $status) echo ' selected="selected" '; } 
-print ("value=\"$status\">$statusname</option>"); } print ("</select>");
-
-
-//////////     CYCLIST   DROPDOWN     ///////////////////////////////////
-$query = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID"; 
-$result_id = mysql_query ($query, $conn_id); echo '<input type="hidden" name="oldcyclist" value="'.$row['CyclistID'].'" >
-<select name="newcyclist" id="cyc'. $row['ID'] .'" class="';
-if ($row['CyclistID']=='1') { echo ' red '; } if ( $globalprefrow['glob6']=='1' ) { if ( $countrows & '1' ) {  //odd
-echo ' ui-state-highlight '; } else { echo ' ui-state-default '; }} if ( $globalprefrow['glob6']=='2' ) { if ( $dayflag & '1' ) {  //odd
-echo ' ui-state-default '; } else { echo ' ui-state-highlight '; }} echo ' ui-corner-left">';
-while (list ($CyclistID, $cojmname) = mysql_fetch_row ($result_id)) { $cojmname=htmlspecialchars($cojmname);  print ("<option "); 
-
-if ($row['CyclistID'] == $CyclistID) {echo ' selected="selected" '; } 
-
-if ($CyclistID == '1') {echo ' class="unalo" '; } 
-
-print ("value=\"$CyclistID\">$cojmname</option>"); } 
-
-print ("</select>"); 
-$javascript=$javascript."$('#stat". $row['ID']."').change(function() { $('#".$row['ID']."').submit(); }); $('#cyc".$row['ID'].
-"').change(function() { $('#".$row['ID']."').submit(); }); ";
-
-
-
-echo '</form> ';
-
-
-
-
-if ($mobdevice=='1') { 
-
-echo ' </td></tr><tr><td> ';
-
-
-} else {
-
-echo ' </td> <td> ';
-
- }
-
-
- if (($row['status']) <'51' ) {
- if ($dtrgcoll<0) { echo ' <span class="red"> '; } echo ' Target PU'; if ($dtrgcoll<0) { echo ' </span> '; }
-echo ' 
-</td>
-<td> 
-';
-if ($dtrgcoll<0) { echo ' <span class="red" > '; }
-echo date('H:i A ', strtotime($targetcollectiondate)); 
-
-
-if (date('U', strtotime($row['collectionworkingwindow']))>10) {
-
-echo '- '.date('H:i A ', strtotime($collectionworkingwindow)); }
-
-
- 
-
- $today=date('z');  $check=date('z', strtotime($targetcollectiondate)); $month=date('M', strtotime($targetcollectiondate));
- $cmont=date('M'); $year=date('Y', strtotime($targetcollectiondate)); $cyea=date('Y'); if ($check==($today-'1')) { echo ' Yesterday '; } else
-if ($check==$today) { echo ' Today '; } else if ($check==($today+'1')) { echo ' Tomorrow '; } else { echo date(' l ', strtotime($targetcollectiondate)); }
-echo date(' jS ', strtotime($targetcollectiondate)); if (($month<>$cmont) or ($year<>$cyea)) { echo date(' M ', strtotime($targetcollectiondate)); }
-if ($year<>$cyea) { echo date(' Y ', strtotime($targetcollectiondate)); } if ($dtrgcoll<0) { echo ' </span> '; }
-}  else { // ends collection due , now  collected
- echo ' PU was at 
- </td>
- <td> 
- '. date('H:i A ', strtotime($row['collectiondate'])); $today=date('z'); $check=date('z', strtotime($collectiondate)); 
- $month=date('M', strtotime($collectiondate)); $cmont=date('M'); $year=date('Y', strtotime($collectiondate));
- $cyea=date('Y'); if ($check==($today-'1')) { echo ' Yesterday '; } else if ($check==$today) { echo ' Today '; } else  
-if ($check==($today+'1')) { echo ' Tomorrow '; } else { echo date(' l ', strtotime($collectiondate));  } 
-echo date(' jS ', strtotime($collectiondate)); if (($month<>$cmont) or ($year<>$cyea)) { echo date(' M ', strtotime($collectiondate));   }
-if ($year<>$cyea) { echo date(' Y ', strtotime($collectiondate));   } } // ends collection due / collected
-
-
-
-
-///   check if bank hols
-$query = "SELECT * FROM bankhols"; $result_id = mysql_query ($query, $conn_id); 
-$bankhol_result = mysql_query($query,$conn_id) or die (mysql_error()); 
-while ($bhrow = mysql_fetch_array($bankhol_result)) { extract($bhrow); 
-$temp_ar=explode("-",$targetcollectiondate);$spltime_ar=explode(" ",$temp_ar['2']); $temptime_ar=explode(":",$spltime_ar['1']); 
-if (($temptime_ar['0']=='')||($temptime_ar['1']=='')||($temptime_ar['2']=='')){$temptime_ar['0']='0';$temptime_ar['1']='0';$temptime_ar['2']='0';}
-$day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; 
-$coldatetocheck=$year.'-'.$month.'-'.$day;
-if ($coldatetocheck==$bhrow['bankholdate']) { 
-$tempflag='1';
-echo '<span class="bankhol" > '. $bhrow['bankholcomment'].'</span>'; 
+if ($page=="showall") { // show number of jobs displayed
+    echo '<div class="linevpad "></div><div class="ui-state-highlight ui-corner-all p15" > 
+    <p>	<strong> All '.$sumtot.' jobs displayed</strong>.</p></div><div class="vpad "></div>';
 }
-} // ends bankhol loop
-// ends check for bank hols
-
-
-
-echo ' </td> <td> ';
  
  
- if ((($CollectPC) =="" ) and ($row['fromfreeaddress']=="" )) {  } else {
-
-if ( $globalprefrow["inaccuratepostcode"]=='1') {
-
-
-
-// echo ' full address link '; 
-echo ' <a class="newwin" target="_blank" href="https://www.google.com/maps/?q='.$fromfreeaddresslink.'+'.$linkCollectPC .'">'.$row["fromfreeaddress"].' '.$CollectPC.'</a> ';
- } else { echo $row['fromfreeaddress'].' ';
- 
- if ($CollectPC) {
- 
- echo '<a '; if ($CyclistID=='1') { echo ' style="'.$globalprefrow["highlightcolourno"].'"'; } 
- echo ' target="_blank" class="newwin" href="https://www.google.com/maps/?q='. $linkCollectPC .'">'. $CollectPC .'</a> '; 
- }
- 
- 
-}} // ends check to see if needs to display links and From
-
-
-
-
-//// CASH PAYMENT CHECK    ////////////////////////////////////////////////////
-if ($row['invoicetype']=='3') { echo " <span style='". $globalprefrow['courier6']."'>Payment on PU &". 
-$globalprefrow['currencysymbol'].($row['FreightCharge']+$row['vatcharge']).'</span>'; }
- 
-
-
- echo ' &nbsp; 
- </td>
- </tr> 
- <tr>
- <td> 
- ';
- 
- 
- 
- 
- if ($dtrgdeli<0) { echo ' <span class="red" > '; } echo ' Target Drop '; if ($dtrgdeli<0) { echo ' </span> '; }
-
- echo '
- </td>
- <td>
- ';
-
- 
- 
-// due date / time   ///////////////////////////////////////////////
-if ($dtrgdeli<0) { echo ' <span class="red" > '; }
-echo date('H:i A ', strtotime($duedate)); 
-
-if (date('U', strtotime($row['deliveryworkingwindow']))>10) { 
-echo '- '.date('H:i A ', strtotime($deliveryworkingwindow)); } 
-
-
-$today=date('z'); $check=date('z', strtotime($duedate)); $month=date('M', strtotime($duedate));
-$cmont=date('M'); $year=date('Y', strtotime($duedate)); $cyea=date('Y');
-if ($check==($today-'1')) { echo ' Yesterday '; } else if ($check==$today) { echo ' Today '; } else  
-if ($check==($today+'1')) { echo ' Tomorrow '; } else { echo date(' l ', strtotime($duedate));  } echo date(' jS ', strtotime($duedate)); 
-if (($month<>$cmont) or ($year<>$cyea)) { echo date(' M ', strtotime($duedate));   } if ($year<>$cyea) { echo date(' Y ', strtotime($duedate)); }
-if ($dtrgdeli<'0') { echo ' </span> '; }
-
-
-
-
+if ($totsumtot>$sumtot) { // show all jobs button
+    echo '<div class="linevpad "></div><div class="ui-state-highlight ui-corner-all p15" > 
+    <form action="#" method="post">
+    <input type="hidden" name="page" value="showall" />
+    <p><strong> Next '.$numberofresults.' jobs displayed out of a total of '.$totsumtot.'.
+    <button type="submit" >Show all jobs</button>
+    </strong>
+    </p>
+    </form>
+    </div>';
+}
   
-// check if bank hols   /////////////////////////////////////////////////////////
-$query = "SELECT * FROM bankhols"; $result_id = mysql_query ($query, $conn_id); 
-$bankhol_result = mysql_query($query,$conn_id) or die (mysql_error()); while ($bhrow = mysql_fetch_array($bankhol_result)) { extract($bhrow);
-$temp_ar=explode("-",$duedate); $spltime_ar=explode(" ",$temp_ar['2']); $temptime_ar=explode(":",$spltime_ar['1']); 
-if (($temptime_ar['0']=='')||($temptime_ar['1']=='')||($temptime_ar['2']=='')){$temptime_ar['0']='0';$temptime_ar['1']='0';$temptime_ar['2']='0';} 
-$day=$spltime_ar['0']; $month=$temp_ar['1']; $year=$temp_ar['0']; $hour=$temptime_ar['0']; $minutes=$temptime_ar['1'];
-$deldatetocheck=$year.'-'.$month.'-'.$day; 
-if ($deldatetocheck==$bhrow['bankholdate']) {
- echo '<span class="bankhol"> '. $bhrow['bankholcomment'].'</span>'; 
-}
-} // loop 
-
-
-
- echo '
- </td>
- <td>
- ';
-  
- 
-if (($ShipPC) or ($row['tofreeaddress'])) {
-if ( $globalprefrow["inaccuratepostcode"]=='1'){ echo ' ';
-
-
-echo '<a '; 
-if ($CyclistID=='1') { echo ' style="'.$globalprefrow["highlightcolourno"].'"'; } 
-
-echo ' target="_blank" class="newwin" href="https://www.google.com/maps/?q='.$tofreeaddresslink.'+'. $linkShipPC.'">'.$row['tofreeaddress'].' '. $ShipPC.'</a> '; 
-
-} else {
-
- echo $row['tofreeaddress'];
-
- 
-if ($ShipPC)  {
-
-echo ' <a'; if ($CyclistID=='1') { echo ' style="'.$globalprefrow["highlightcolourno"].'"'; } 
- echo ' target="_blank" class="newwin" href="https://www.google.com/maps/?q='; echo $linkShipPC.'">'. $ShipPC.'</a> '; 
-
-}
-
- } }
-
-
- 
-if ($row['invoicetype']=='4') { echo " <span style='". $globalprefrow['courier6']."'>Payment on Drop   &". 
-$globalprefrow['currencysymbol'].($row['FreightCharge']+$row['vatcharge']).'</span>'; } 
-
-
-
-
-
- echo ' &nbsp; 
- </td> 
- </tr> 
- </tbody>
- </table> 
+echo '<div class="linevpad"></div>
 </div>
-';
 
-$seeifnextday=date('z', strtotime($nextactiondate));
-
-
-} // ends end of individual job, ie $row['variable']
-
-
-
-
-
-
-
-
-
-$sql = "SELECT ID FROM Orders WHERE `Orders`.`status` <70 ";
-$sql_result = mysql_query($sql,$conn_id) or die (mysql_error());
-$totsumtot=mysql_affected_rows(); // echo $totsumtot.' jobs undelivered '. $sumtot.' '.$numberofresults;
-
-if ($totsumtot=='0') { echo '<div class="linevpad "></div><div class="ui-state-highlight ui-corner-all p15" > 
-<p><strong> No future or active jobs found on system.</strong>.</p></div><div class="vpad "></div>'; }
-
-
-
-if ($page=="showall") { echo '<div class="linevpad "></div><div class="ui-state-highlight ui-corner-all p15" > 
-<p>	<strong> All '.$sumtot.' jobs displayed</strong>.</p></div><div class="vpad "></div>'; }
- 
- 
- if ($totsumtot>$sumtot) { echo '<div class="linevpad "></div><div class="ui-state-highlight ui-corner-all p15" > 
-<form action="#" method="post"><input type="hidden" name="page" value="showall" /><p><strong> Next '.$numberofresults.
-' jobs displayed out of a total of '.$totsumtot.'.<button type="submit" >Show all jobs</button></strong></p></form></div>';} 
-  
-  
-  echo '<div class="linevpad"></div></div>
   <script type="text/javascript">
   $(document).ready(function() {
   '.$javascript. '
   });
   </script> ';
   
- 
-	include "footer.php";
+include "footer.php";
   
-  echo ' </body></html> ';
- mysql_close(); 
+echo ' </body></html>';
+mysql_close();
+$dbh=null;

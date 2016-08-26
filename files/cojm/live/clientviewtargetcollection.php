@@ -134,9 +134,9 @@ echo '
 <meta name="HandheldFriendly" content="true" >
 <meta name="viewport" content="width=device-width, height=device-height" >
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
-<meta http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" /> <!----  for ie table floathead   -->
-<script type="text/javascript" src="js/jquery-ui.1.8.7.min.js"></script>  <!----  for table floathead   -->
-<script type="text/javascript" src="js/jquery.floatThead.js"></script>  <!----  for table floathead   -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<script type="text/javascript" src="js/jquery-ui.1.8.7.min.js"></script>
+<script type="text/javascript" src="js/jquery.floatThead.js"></script>
 <title><?php print ($title); ?> View by Client and Date</title>
 </head>
 <body>
@@ -1072,16 +1072,16 @@ $(document).ready(function() {
 			$( "#combobox" ).toggle();
 		});
 	    $("#rangeBa, #rangeBb").daterangepicker();  
+        
+    
+var menuheight=$("#sticky_navigation").height();
+$("#clientviewtargetcollection").floatThead({
+    position: "fixed",
+    top: menuheight
+});
 			 });
 
-function comboboxchanged() { }			 
-			
-
-
-$("#clientviewtargetcollection").floatThead({
-	position: "fixed",
-	top: 36
-});			
+function comboboxchanged() { }
 
 </script>';
 

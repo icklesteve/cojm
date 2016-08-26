@@ -172,21 +172,6 @@ echo getHostByName(getHostName());
 
 
 
-<fieldset><label class="fieldLabel"> Index display Style </label> 
-<select class="ui-state-default ui-corner-all pad" id="glob6" >
-<option <?php if ( $globalprefrow['glob6']=='1' ) { echo 'SELECTED'; } ?> value="1"> Colour alternates on Individual job </option>
-<option <?php if ( $globalprefrow['glob6']=='2' ) { echo 'SELECTED'; } ?> value="2"> Colour alternates on Day Difference </option>
-</select>
-</fieldset>
-
-
-
-
-
-
-
-
-
 <fieldset><label class="fieldLabel"> Number jobs on <?php echo $globalprefrow['glob5']; ?> home </label> 
 <input class="ui-state-default ui-corner-all pad" type="text" size="3" id="courier2" value="<? echo $globalprefrow['courier2']; ?>"></fieldset>
 
@@ -1567,12 +1552,6 @@ changedvar();
 });
 
 
-$("#glob6").change(function () {
- globalname='glob6';	
- newvalue=$("#glob6").val();	
-//  alert(globalname +' ' + newvalue);
-changedvar();
-});
 
 
 $("#courier2").change(function () {

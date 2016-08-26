@@ -94,15 +94,32 @@ function time2str($ts) { //Relative Date Function  // used in order.php and ajax
 }
 
 
-$query="SELECT * FROM Orders, Clients, Services, status, Cyclist
+$query = "SELECT *
+FROM Orders
+INNER JOIN Clients 
+INNER JOIN Services 
+INNER JOIN status 
+INNER JOIN Cyclist 
+left join clientdep ON Orders.orderdep = clientdep.depnumber
 WHERE Orders.CustomerID = Clients.CustomerID 
 AND Orders.ServiceID = Services.ServiceID 
-AND Orders.status = status.status 
+AND Orders.status = status.status
 AND Orders.CyclistID = Cyclist.CyclistID
-AND Orders.ID = '$id' LIMIT 1"; $result=mysql_query($query, $conn_id); $row=mysql_fetch_array($result);
+AND Orders.ID = ? LIMIT 0,1";
+
+
+
+$parameters = array($id);
+$statement = $dbh->prepare($query);
+$statement->execute($parameters);
+$row = $statement->fetch(PDO::FETCH_ASSOC);
+
 
 
 $cojmid=$id;
+
+
+
 ?><!doctype html><html lang="en"><head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="HandheldFriendly" content="true" >
@@ -115,12 +132,6 @@ $cojmid=$id;
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
 <?php 
 if ($row['ID']) {
-    if (($row['isdepartments']=='1')) {
-        $orderdep=$row['orderdep']; $depquery="SELECT * FROM clientdep WHERE depnumber = '$orderdep' LIMIT 1";
-        $result=mysql_query($depquery); $drow=mysql_fetch_array($result);
-    }
-
-    
     
     $query = "SELECT * FROM cojm_pod WHERE id = :getid LIMIT 0,1";
     $stmt = $dbh->prepare($query);
@@ -149,6 +160,8 @@ if ($row['ID']) {
 
     ?>
 <script>
+
+
 var id='<?php echo $row['ID']; ?>';
 var publictrackingref='<?php echo $row['publictrackingref']; ?>';
 var allok=1;
@@ -195,7 +208,7 @@ var initialprivatejobcomments<?php if ($row["privatejobcomments"]) { echo '=1'; 
 <script src="js/richmarker.js" type="text/javascript"></script>
 <style>
 /* starts spinner on page load, only for ajax pages  */
-#toploader { display:inline; }
+#toploader { display:block; }
 </style>
 
 <?php
@@ -607,13 +620,17 @@ if ($row['ID']) {
     
     
     if ($row['status']<'100') {
-        echo ' <button class="right" form="allorder" type="submit" > Edit Addresses </button><hr />';
+        echo ' <button form="allorder" type="submit" > Edit Addresses </button><hr />';
     }
  
 
 
     // starts area selectors
-    echo '<div id="areaselectors" class="hideuntilneeded">';
+    echo '<div id="areaselectors" ';
+    if ($row['canhavemap']<>'1') {
+        echo 'class="hideuntilneeded" ';
+    }
+    echo '>';
     $showsubarea='0';
     if ($row['opsmaparea']) {
         $opsmaparea=$row['opsmaparea'];
@@ -631,7 +648,7 @@ if ($row['ID']) {
     $topareaqueryres = mysql_query ($topareaquery, $conn_id);
     echo '<div class="fs"><div class="fsl"> </div> 
     <select id="opsmaparea" name="opsmaparea" class="ui-state-default ui-corner-left">
-    <option value="" > Choose Area </option>';
+    <option value="0" > Choose Area </option>';
     
     while (list ($listopsmapid, $listopsname, $descrip, $istoplayer ) = mysql_fetch_row ($topareaqueryres)) {
         print ("<option ");
@@ -649,13 +666,30 @@ if ($row['ID']) {
         echo '</option>';
     }
     echo '</select>
-    <a id="arealink" class="showclient marright10 hideuntilneeded" title="Area Details" target="_blank" href="opsmap-new-area.php?areaid='.$row['opsmaparea'].'"> </a>';
+    <a id="arealink" class="showclient marright10';
+
+    if ($row['opsmaparea']<1) {
+        echo ' hideuntilneeded';
+    }
+    echo '" title="Area Details" target="_blank" href="opsmap-new-area.php?areaid='.$row['opsmaparea'].'"> </a>';
 
 
     $btmareaquery = "SELECT opsmapid, opsname, descrip  FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer='".$row['opsmaparea']."' "; 
     $btmareaqueryres = mysql_query ($btmareaquery, $conn_id);
     
-    echo ' <select id="opsmapsubarea" name="opsmapsubarea" class="ui-state-default ui-corner-left hideuntilneeded">
+    
+    echo '<script> var initialhassubarea='.$showsubarea.'; </script>';
+
+    echo ' <select id="opsmapsubarea" name="opsmapsubarea" class="ui-state-default ui-corner-left';
+
+
+if ($showsubarea<>'1') {
+    
+    
+    
+    echo '    hideuntilneeded';
+}
+    echo '">
     <option value="" > Choose Sub Area </option>';
     while (list ($listopsmapid, $listopsname, $descrip ) = mysql_fetch_row ($btmareaqueryres)) {
         print ("<option "); 
@@ -670,7 +704,11 @@ if ($row['ID']) {
     }
 
     echo '</select>
-    <a id="subarealink" class="showclient hideuntilneeded" title="Sub Area Details" target="_blank" href="opsmap-new-area.php?areaid='.$row['opsmapsubarea'].'"> </a>
+    <a id="subarealink" class="showclient';
+    if ($row['opsmapsubarea']<1) {
+        echo 'hideuntilneeded';
+    }
+    echo '" title="Sub Area Details" target="_blank" href="opsmap-new-area.php?areaid='.$row['opsmapsubarea'].'"> </a>
     </div>
     <div id="areacomments" class="favcomments fsr';
     
@@ -1027,13 +1065,15 @@ if ($row['ID']) {
     $result_id = mysql_query ($query, $conn_id); 
     $i='1';
 
-    echo ' <table id="cbb" class="ord hideuntilneeded" ><tbody> ';
-    echo ' <tr id="baseservicecbb" class="hideuntilneeded" ><td id="baseservicecbbtext"> ';
-    echo ' '.$numberitems.' x '.$selectedservicename.' </td><td> &'.$globalprefrow["currencysymbol"].'
-    <span id="baseservicecbbprice">'. ( $numberitems * $row["Price"]) .'</span></td> 
-
+    echo ' <table id="cbb" class="ord';
+    if ($row['chargedbycheck']<>'1') {
+        echo ' hideuntilneeded';
+    }
+    echo '" ><tbody> ';
+    echo ' <tr id="baseservicecbb" class="hideuntilneeded" >
+    <td id="baseservicecbbtext">'.$numberitems.' x '.$selectedservicename.' </td><td> &'.$globalprefrow["currencysymbol"].
+    '<span id="baseservicecbbprice">' . number_format(($numberitems * $row["Price"]), 2, '.', '') .'</span></td>
     <td colspan="2"> </td>
-
     </tr> ';
 
 
@@ -1052,7 +1092,7 @@ if ($row['ID']) {
                 echo ' checked ';
             }
             echo'> '. $cbbname. '</label></td>
-            <td id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"]. $row["cbb$chargedbybuildid"]. ' </td> ';
+            <td id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"]. ' ' . $row["cbb$chargedbybuildid"]. ' </td> ';
             if ($i%2) {
             }
             else {
@@ -1071,7 +1111,7 @@ if ($row['ID']) {
                 echo ' checked ';
             } 
             echo'> '.$cbbname.'</label></td>
-            <td id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"].$row["cbb$chargedbybuildid"]. ' </td> ';
+            <td id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"].' '.$row["cbb$chargedbybuildid"]. ' </td> ';
             if ($i%2) {
             }
             else {
@@ -1095,7 +1135,7 @@ if ($row['ID']) {
             }
             echo '</select>';
             echo' mins waiting time </td><td id="cbb'.$chargedbybuildid.'"> 
-            &'.$globalprefrow["currencysymbol"].$row["cbb$chargedbybuildid"].'</td>';
+            &'.$globalprefrow["currencysymbol"] . ' ' . $row["cbb$chargedbybuildid"].'</td>';
             if ($i%2) {
             } else {
                 echo '</tr>';
@@ -1114,7 +1154,7 @@ if ($row['ID']) {
             }
             echo '> '.$cbbname.'</label>
             </td>
-            <td id="cbb'.$chargedbybuildid.'">&'.$globalprefrow["currencysymbol"].$row["cbb$chargedbybuildid"].'</td>';
+            <td id="cbb'.$chargedbybuildid.'">&'.$globalprefrow["currencysymbol"].' '.$row["cbb$chargedbybuildid"].'</td>';
 
 
             if ($i%2) {
@@ -1157,7 +1197,13 @@ if ($row['ID']) {
     <input id="newcost" type="text" title="excl. VAT" '; ?>data-autosize-input='{ "space": 6 }' <?php 
     echo 'class="ui-state-default ui-corner-all caps" name="newcost" value="'.$row["FreightCharge"].'">
     
-    <button id="buttoncancelpricelock" class="cancelpricelock hideuntilneeded" title="Cancel Pricelock">&nbsp;</button>
+    <button id="buttoncancelpricelock" class="cancelpricelock';
+    
+    if ($row['iscustomprice']<>'1') { 
+        echo ' hideuntilneeded';
+    }
+    
+    echo '" title="Cancel Pricelock">&nbsp;</button>
     <span id="pricerow">';
     if ($row['FreightCharge']<>'0.00') {
         if ($row['vatcharge']<>'0.00') {
@@ -1250,13 +1296,18 @@ if ($row['ID']) {
     }
 
     echo '" > '. $row['Notes'].' </div> ';
-    echo '  <div id="clientdep" class="fs hideuntilneeded">
+    echo '  <div id="clientdep" class="fs';
+    
+    if ($row['isdepartments']<>1) {
+        echo '    hideuntilneeded';
+    }
+    echo '">
     <div class="fsl">
     <a id="clientdeplink" class="showclient';
     if ($row['orderdep']<'1') {
         echo ' hideuntilneeded';
     }
-    echo '" title="'.$drow['depname'].' Details" 
+    echo '" title="'.$row['depname'].' Details" 
     target="_blank" href="new_cojm_department.php?depid='.$row['orderdep'].'"> </a>
     </div>';
     $query = "SELECT depnumber, depname , isactivedep FROM clientdep 
@@ -1282,9 +1333,9 @@ if ($row['ID']) {
     
     echo '</div>
     <div id="clientdepnotes" class="fsr favcomments">';
-    if (isset($drow['depcomment'])) {
-        if (trim($drow['depcomment'])) {
-            echo $drow['depcomment'];
+    if (isset($row['depcomment'])) {
+        if (trim($row['depcomment'])) {
+            echo $row['depcomment'];
         }
     }
     echo '</div>';
@@ -1497,32 +1548,18 @@ $(document).ready(function() {
 			}]
         });
     $("#selectfavbox").focus();
-	});	
-
-
-    
+	});	    
 ';
 
 
 
-if ($row['chargedbycheck']=='1') { echo ' $("#cbb").show(); '; }
-if ($row['isdepartments']==1) {  echo ' $("#clientdep").show();  '; }
-if ($row['canhavemap']=='1') { echo ' $("#areaselectors").show(); '; } // canhavemap from service
-if ($row['opsmaparea']) { echo ' $("#arealink").show(); '; } else { echo ' $("#arealink").hide(); '; }
-if ($showsubarea=='1') { echo ' $("#opsmapsubarea").show(); '; }
-if ($row['opsmapsubarea']) { echo ' $("#subarealink").show(); '; } else { echo ' $("#subarealink").hide(); '; }
+
+
+
+
 
 if ((date('U', strtotime($row['starttrackpause']))>10) or (date('U',strtotime($row['finishtrackpause']))>10)) { 
 echo ' $("#toggleresume").show(); '; }
-
-
-
-
-
-if ($row['iscustomprice']=='1') { 
-    echo ' $("#buttoncancelpricelock").show(); ';
-}
-
 
 
 

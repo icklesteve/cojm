@@ -1726,7 +1726,8 @@ $(function(){  $.konami(function(){
 		// Browser globals: jQuery or jQuery-like library, such as Zepto
 		factory(window.jQuery || window.$);
 	}
-}(function ($) {
+}
+(function ($) {
 	var
 	defaults = {
 		className: 'autosizejs',
@@ -3208,24 +3209,65 @@ $.fn.setCursorPosition = function (pos) {
 
 
 
+
+
+
+
+
+
+// Returns a function, that, as long as it continues to be invoked, will not
+// be triggered. The function will be called after it stops being called for
+// N milliseconds. If `immediate` is passed, trigger the function on the
+// leading edge, instead of the trailing.
+function debounce(func, wait, immediate) {
+	var timeout;
+	return function() {
+		var context = this, args = arguments;
+		var later = function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		};
+		var callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) func.apply(context, args);
+	};
+};
+
+
+// eg 
+var myEfficientFn = debounce(function() {
+	// All the taxing stuff you do
+    
+    
+    if ($(this).scrollTop() > 700) {
+		$("#back-top").fadeIn(249);
+	} else {
+		$("#back-top").fadeOut(249);
+	}
+    
+    
+}, 250);
+
+
+
 	
 
-$(function () { $(window).scroll(function () { 	// fade in #back-top
-			if ($(this).scrollTop() > 100) {
-				$("#back-top").fadeIn();
-			} else {
-				$("#back-top").fadeOut();
-			}
-		});
+$(window).scroll(function () { 	// fade in #back-top
+
+myEfficientFn();
+
+
+});
 
 		// scroll body to 0px on click
-		$("#back-top a").click(function () {
-			$("body,html").animate({
-				scrollTop: 0
-			}, 800);
-			return false;
-		});
-	});
+$("#back-top").click(function () {
+    $("body,html").animate({
+		scrollTop: 0
+		}, 800);
+	return false;
+});
+
  
 
 $("#menusearch").autosizeInput();
@@ -3241,6 +3283,7 @@ $('#alerttext').delay(alertdelay).slideUp(alertslide);
 
 
 $("#togglenewjobchoose").click(function(){
+    $( "#togglenewjobchoose" ).toggleClass( "selected" )
     if ($("#togglenewjob").is(':visible')) {
         $("#togglenewjob").hide();
         $('div.Post').css({ 'opacity': '1' });        
@@ -3258,11 +3301,26 @@ $("#togglenewjobchoose").click(function(){
 
 
 
-$("#togglesettingsmenuchoose").click(function(){$("#togglesettingsmenu").slideToggle("fast");});
-$("#toggleinvoicemenuchoose").click(function(){$("#toggleinvoicemenu").slideToggle("fast");});
+$("#togglesettingsmenuchoose").click(function(){
+    $( "#togglesettingsmenuchoose" ).toggleClass( "selected" );
+    $("#togglesettingsmenu").slideToggle("fast");
+});
+$("#toggleinvoicemenuchoose").click(function(){
+    $( "#toggleinvoicemenuchoose" ).toggleClass( "selected" );
+    $("#toggleinvoicemenu").slideToggle("fast");
+});
+
+$( "#menusearchinput" ).focus(function() {
+    $("#menuds").show();
+    
+    
+//  alert( "Handler for .focus() called." );
+  
+  
+  
+});
 
 $('#sticky_navigation').Stickyfill();	
-
 
 
 }); // ends doc ready

@@ -2,7 +2,7 @@
 
 /*
     COJM Courier Online Operations Management
-	checkdep.php - New Job Ajax Helper for Clients with Departments
+	ajaxcheckdep.php - New Job Ajax Helper for Clients with Departments
     Copyright (C) 2016 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify

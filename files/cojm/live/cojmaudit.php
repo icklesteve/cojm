@@ -1,27 +1,44 @@
 <?php 
 
+/*
+    COJM Courier Online Operations Management
+	cojmaudit.php - Shows audit log via ajax
+    Copyright (C) 2016 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+
 $alpha_time = microtime(TRUE);
 
 error_reporting( E_ERROR | E_WARNING | E_PARSE );
 include "C4uconnect.php";
-
-
 
 $inputstart='';
 $inputend='';
 
 include "changejob.php";
 
-if (isset($_GET['orderid'])) { $orderid=trim($_GET['orderid']); } else { 
-$orderid=''; 
-
-$inputstart=date("j/n/Y");
-$inputend=date("j/n/Y");
-
-
+if (isset($_GET['orderid'])) {
+    $orderid=trim($_GET['orderid']);
+    } else {
+    $orderid='';
+    $inputstart=date("j/n/Y");
+    $inputend=date("j/n/Y");
 }
-
-// include "changejob.php";
 
 $adminmenu = "1";
 $title='COJM Audit';
@@ -35,10 +52,6 @@ echo '
 <link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
-
-<script>
-var showtimes=0;
-</script>
 ';
 
 ?>
@@ -57,13 +70,12 @@ include "cojmmenu.php";
 ?>
 <div class="Post">
 <form id="form" action="#" method="post"> 
-<div class="ui-widget ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;"><p>
+<div class="ui-widget ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
+<p>Actions From 
+<input id="rangeBa" form="form" class="ui-state-highlight ui-corner-all pad" size="10" type="text" name="from" value="<?php echo $inputstart; ?>" />
 
-Actions From 
-<input form="form" class="ui-state-highlight ui-corner-all pad" size="10" type="text" name="from" value="<?php echo $inputstart; ?>" id="rangeBa" />			
-To		
-<input form="form" class="ui-state-highlight ui-corner-all pad"  size="10" type="text" name="to" value="<?php echo $inputend; ?>" id="rangeBb" />
-
+To
+<input id="rangeBb" form="form" class="ui-state-highlight ui-corner-all pad"  size="10" type="text" name="to" value="<?php echo $inputend; ?>"  />
 
 <select id="page" name="page" class="ui-state-highlight ui-corner-left">
 <option value=""> All Actions</option>
@@ -78,138 +90,98 @@ To
 <input class="ui-state-highlight ui-corner-all pad" id="orderid" name="orderid" placeholder="Search by job ref" value="<?php echo $orderid; ?>" />
 <input type="checkbox" name="showtimes" class="showtimes" value="1"  > Show Page Creation Times
 <input type="checkbox" name="showdebug" class="showdebug" value="1"  > Show Debug Text
+<input type="checkbox" name="showpageviews" id="showpageviews" value="1"  > Include Page Views
 
-</p></div></form>
+</p>
+</div>
+</form>
 
 <div class="vpad"></div>
 <div id="content"></div>
 <br /></div>
-<script type="text/javascript">
+<script>
+
 $(document).ready(function() {
 	
-var loadingtext=" <div class='loadingsuccess'>  Loading Results </div>"; 
+    var auditpage="cojmaudit";
+    var showtimes=0;
+    var showpageviews=0; 
+    var showdebug=0;
+    var from;
+    var to;
+    var client;
+    var auditpage;
+    var dataString;
+    var loadingtext=" <div class='loadingsuccess'>  Loading Results </div>"; 
+    var orderid<?php if ($orderid>0) { echo ' ='.$orderid; } ?>;
+
+    function refreshpage() {
+
+        $("#toploader").show();
+        $("#content").html(loadingtext);
+        
+        showdebug = $('input.showdebug:checked').map(function() {
+            return this.value;
+        }).get()
+
+        showtimes = $('input.showtimes:checked').map(function() {
+            return this.value;
+        }).get()
+        
+        showpageviews = $('input#showpageviews:checked').map(function() {
+            return this.value;
+        }).get()
+
+        from = $("#rangeBa").val();
+        to = $("#rangeBb").val();
+        client = $("#page").val();
+        orderid = $("#orderid").val();
+        
+        dataString = "auditpage=" + auditpage + 
+        "&from=" + from + 
+        "&to=" + to + 
+        "&page=" + client + 
+        "&orderid=" + orderid + 
+        "&showtimes=" + showtimes + 
+        "&showdebug=" + showdebug +
+        "&showpageviews=" + showpageviews;
+
+        $.ajax({
+            type: "POST",
+            url:"ajaxaudit.php",
+            data: dataString,
+            success: function (data){
+                $("#content").html(data)
+            },
+            complete: function () {
+                $("#toploader").hide();
+            }
+        });
+
+}
 
 <?php
-
-if (isset($_GET['orderid'])) { // 
-
-echo '	
-$("#toploader").show();		
-$("#content").html(loadingtext);
-
- setTimeout( function() {
- var from = $("#rangeBa").val();
-var to = $("#rangeBb").val();
-var client = $("#page").val();
-var auditpage="cojmaudit";
-var orderid = '.$_GET['orderid'].';
-var dataString = "auditpage=" + auditpage + "&from=" + from + "&to=" + to + "&page=" + client + "&orderid=" + orderid +"&showtimes=" + showtimes;
-$.ajax({
-    type: "POST",
-    url:"ajaxaudit.php",
-    data: dataString,
-    success: function(data){
-	$("#content").html(data)
-//    alert(loadingtext); //only for testing purposes
-
-$("#toploader").hide();
-    }
-});
-	
-	}, 50 );
-';
-
-
-} // ends check for 1st time form submittal
-
-// both posts are needed as not picking up on date changes
-
+if (isset($_GET['orderid'])) { // check for 1st time form submittal
+    echo '	
+    $("#toploader").show();		
+    $("#content").html(loadingtext);
+    setTimeout( function() {
+        refreshpage();
+    }, 50 );';
+}
 ?>
 
 
-	    $("#rangeBa, #rangeBb").daterangepicker( {
-		onClose: function(){
-			$("#toploader").show();
-			
-$("#content").html(loadingtext);
+	$("#rangeBa, #rangeBb").daterangepicker( {
+        onClose: function(){
+            refreshpage();
+        }
+    });
 
 
-     var showdebug = $('input.showdebug:checked').map(function(){
-             return this.value;
-        }).get()
-
-		     var showtimes = $('input.showtimes:checked').map(function(){
-             return this.value;
-        }).get()
-		
-		
-
-	//    alert(" test 110 " ); //only for testing purposes
-var from = $("#rangeBa").val();
-var to = $("#rangeBb").val();
-var client = $("#page").val();
-var auditpage="cojmaudit";
-var orderid = $("#orderid").val();
-var showtimes= $("#showtimes").val();
-
-
-
-var dataString = "auditpage=" + auditpage + "&from=" + from + "&to=" + to + "&page=" + client + "&orderid=" + orderid + "&showtimes=" + showtimes + "&showdebug=" + showdebug ;
-
-$.ajax({
-    type: "POST",
-    url:"ajaxaudit.php",
-    data: dataString,
-    success: function(data){
-	$("#content").html(data)
-	$("#toploader").hide();
- //   alert(data); //only for testing purposes
-    }
-});
- }
-})
-
-
-$("#form").change(function() {
-	
-	
-$("#toploader").show();	
-$("#content").html(loadingtext);
-			
-			
-	
-	
-
-     var showdebug = $('input.showdebug:checked').map(function(){
-             return this.value;
-        }).get()
-		
-		
-			     var showtimes = $('input.showtimes:checked').map(function(){
-             return this.value;
-        }).get()
-
-	
-
-	
-var from = $("#rangeBa").val();
-var to = $("#rangeBb").val();
-var client = $("#page").val();
-var auditpage="cojmaudit";
-
-var orderid = $("#orderid").val();
-var dataString = "auditpage=" + auditpage + "&from=" + from + "&to=" + to + "&page=" + client + "&orderid=" + orderid + "&showtimes=" + showtimes + "&showdebug=" + showdebug ;
-$.ajax({
-    type: "POST",
-    url:"ajaxaudit.php",
-    data: dataString,
-    success: function(data){
-	$("#content").html(data)
- //   alert(data); //only for testing purposes
-$("#toploader").hide(); 
- }
-});
-});
+    $("#form").change(function() {
+        refreshpage();
+    });
 });
 </script>
 <?php

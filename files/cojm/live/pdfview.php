@@ -143,7 +143,7 @@ $trow=$trow.$tarow;
 
 
 include "cojmmenu.php"; 
-echo '<div class="Post">
+echo '<div class="Post clearfix">
 
 <div class="hangleft ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
 
@@ -471,8 +471,7 @@ $(document).ready(function () {
 <?php
 echo '</div>
 
-<!-- all divs are float so orderfoot pads the bottom out for menu etc to display ok -->
-<div class="orderfoot"> &nbsp; </div>
+
 ';
 
 include "footer.php";

@@ -20,9 +20,7 @@
 */
 
 
-
-$agent = $_SERVER['HTTP_USER_AGENT'];
-if(preg_match('/iPhone|Android|Blackberry/i', $agent)) {  $mobdevice="1";} else { $mobdevice=''; }
+if(preg_match('/iPhone|Android|Blackberry/i', $_SERVER['HTTP_USER_AGENT'])) {  $mobdevice="1";} else { $mobdevice=''; }
 if (isset($hasforms)) { $hasforms='1'; } else { $hasforms=''; }
 if ((isset($adminmenu)) and ($adminmenu=='1')) { $adminmenu='1'; } else { $adminmenu=''; }		
 if ((isset($settingsmenu)) and ($settingsmenu=='1')) { $settingsmenu='1'; } else { $settingsmenu=''; }		
@@ -61,91 +59,74 @@ alertdelay=15000;
 echo ' <div id="infotext" class="infotext" >';
 echo '<span class="ctitle">C</span><span class="ctitle">O</span><span class="ctitle">J</span><span class="ctitle">M</span>';
 
-// echo '<div id="loggedinas">Logged in as '.$cyclistid.'</div>';
+if (($mobdevice=='1') and ($globalprefrow['showdebug']>'0')) {
+        $pagetext.=$infotext;
+}
 
-
-if (isset($mobdevice) and ($mobdevice=='1') )  { 
 if ($globalprefrow['showdebug']>'0') {
-$pagetext=$pagetext.$infotext; 
-
-} 
-} else { 
-$mobdevice='';
- }
- 
-
-
-if ($globalprefrow['showdebug']>'0') { echo '<div id="activestatus">DEBUG MODE<br />'.$infotext.'</div>'; }
-
-
-
+    echo '<div id="activestatus">DEBUG MODE<br />'.$infotext.'</div>';
+}
 echo '</div>'; //ends infotext div
 
 
+// echo '<div id="loggedinas">Logged in as '.$cyclistid.'</div>';
 
 
 
 
+
+echo '<div class="top_menu_line clearfix" id="sticky_navigation">
+<ul>
+<li><a href="index.php"'; if ($filename=='index.php') { echo ' class="selected"'; } echo ' >Home</a></li>';
+echo '<li><a title="New Job. If open, re-click to hide" id="togglenewjobchoose" href="#">New </a></li>'; 
+echo '<li><a href="whereis3.php"'; if ($filename=='whereis3.php') { echo ' class="selected"';}  echo '>Map</a></li>'; 
 
 echo '
-<div class="top_menu_line" id="sticky_navigation">
-
-<ul><li><a href="index.php"'; 
-if ($filename=='index.php') echo ' class="selected"'; echo ' >Home</a></li>';
-echo '<li><a id="togglenewjobchoose" href="#">New </a></li>'; 
- echo '<li><a href="whereis3.php"'; 
-if ($filename=='whereis3.php') { echo ' class="selected"';}  echo '>Map</a></li>'; 
-echo '<li><a href="clientviewtargetcollection.php"'; if ($filename=='clientviewtargetcollection.php') { echo ' class="selected"'; } 
-echo '>Date Search</a></li>
-<li><a href="fwr.php"'; if ($filename=='fwr.php') { echo ' class="selected"'; } echo '>Admin</a></li>
+<li id="adminlink"><a href="fwr.php"'; if ($filename=='fwr.php') { echo ' class="selected"'; } echo '>Admin</a></li>
 <li><form action="order.php" id="menusearch" method="get" >
-<input class="menuorder ui-state-default ui-corner-all" placeholder="Search" ';
-
-
-?>
-	data-autosize-input='{ "space": 14 }' 
-<?php
-
-
+<input class="ui-corner-all topbox" id="menusearchinput" placeholder="Search" '; ?>data-autosize-input='{ "space": 14 }'<?php 
 echo ' name="id" ';
-
 if ($id) { echo 'type="number" step="1"'; } else { echo ' type="text" '; }
-
-
 echo ' value="'.$id.'">';
 
 
 
-if ($filename=="order.php") {
 
-echo '<button class="menusearch" form="menusearch" type="submit" title="Refresh"></button> ';
 
-}
 
+
+if ($filename=="order.php") { echo '<button class="menusearch topbox" form="menusearch" type="submit" title="Refresh"></button> '; }
 echo ' </form></li>';
 
 
-if ($hasforms=='1'){echo '<li><span id="cdtext"> </span></li><li><b class="hidden" id="show-time" >'. $globalprefrow['formtimeout'].'</b></li>';}
 
+echo '<li><a id="menuds" href="clientviewtargetcollection.php" class="';
+if ($filename=='clientviewtargetcollection.php') { echo 'selected'; } else { echo 'hideuntilneeded'; }
+echo '">Date Search</a></li>';
+
+
+
+if ($hasforms=='1'){
+    echo '<li><span id="cdtext"> </span></li><li><b class="hidden" id="show-time" >'. $globalprefrow['formtimeout'].'</b></li>';
+}
 
 if ($filename=='opsmap.php') { echo '<li><a href="opsmap.php" class="selected"> Ops Map</a></li>'; }
-if ($filename=="startuploadgpx.php") { echo '<li><a href="startuploadgpx.php" class="selected" >GPS</a></li>'; }
+if ($filename=="gpstracking.php") { echo '<li><a href="startuploadgpx.php" class="selected" >GPS</a></li>'; }
 
+echo '<li> &nbsp; </li>';
 
 
 
 echo '</ul>';
 
 
-echo '
-<div id="toploader"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-';
+echo '<div id="toploader" class="clearfix"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>';
 
 
 
 
 	
-echo '</div>';
+echo '</div>'; // id sticky navigation
 
 
 
@@ -165,9 +146,9 @@ if ((isset($alerttext)) and ($alerttext)) { } else { echo ' style="display:none;
 
 
 if ((isset($adminmenu)) and ($adminmenu=='1')) {
-echo '<div class="top_menu_line"><ul>';
-echo '<li><div id="toggleinvoicemenuchoose" ><a href="#">Finance</a></div></li><li><a href="new_cojm_client.php"'; 
-if ($filename=='new_cojm_client.php') { echo ' class="selected"'; } echo '>Client</a></li>';
+echo '<div class="top_menu_line clearfix"><ul>';
+echo '<li><a id="toggleinvoicemenuchoose" href="#">Finance</a></li>
+<li><a href="new_cojm_client.php"'; if ($filename=='new_cojm_client.php') { echo ' class="selected"'; } echo '>Client</a></li>';
 echo '<li><a href="cyclist.php"'; if ($filename=='cyclist.php') { echo ' class="selected"';} 
 echo '> '.$globalprefrow['glob5'].'</a></li>';
 
@@ -181,8 +162,12 @@ if ($filename=='recentlyclosed.php') { echo ' class="selected"';} echo '>Last 10
 <li><a href="startuploadgpx.php"'; if ($filename=='startuploadgpx.php') echo ' class="selected"'; echo '>GPS</a></li>
 <li><a href="dashboard.php"'; if ($filename=='dashboard.php') echo ' class="selected"'; echo '>Stats</a></li>
 <li><a href="help.php"'; if ($filename=='help.php') { echo ' class="selected"'; } echo '>Help</a></li>';
- if ($settingsmenu<>'1') { echo '<li><div id="togglesettingsmenuchoose" ><a href="#" >Settings</a></div></li>'; }
-echo '</ul></div>'; 
+ if ($settingsmenu<>'1') { echo '<li><a href="#" id="togglesettingsmenuchoose" >Settings</a></li>'; }
+echo '</ul>';
+
+
+
+echo '</div>'; 
 }
 
 
@@ -190,8 +175,8 @@ echo '</ul></div>';
 if (($settingsmenu<>'1') and ($invoicemenu<>'1') and ($adminmenu<>'1')) {} else {
 echo '<div '; 
 if ($invoicemenu<>'1') { echo 'id="toggleinvoicemenu" '; }
-echo ' class="top_menu_line ';
-if ($invoicemenu<>'1') { echo 'toggleinvoicemenu '; }
+echo ' class="top_menu_line clearfix';
+if ($invoicemenu<>'1') { echo ' toggleinvoicemenu'; }
 
 
 echo ' ">
@@ -201,7 +186,11 @@ echo '<li><a style="float:left;" href="pdfview.php"'; if ($filename=='pdfview.ph
 echo '<li><a style="float:left;" href="expenseview.php"'; if ($filename=='expenseview.php') echo ' class="selected"'; echo '> Expenses</a></li>';
 echo '<li><a style="float:left;" href="expenses.php?page=createnew"'; if ($filename=='expenses.php') echo ' class="selected"'; echo '>New Expense</a></li>';
 echo '<li><a style="float:left;" href="pandl.php"'; if ($filename=='pandl.php') echo ' class="selected"'; echo '>P+L</a></li> 
-</ul></div>';
+</ul>';
+
+
+
+echo '</div>';
 } 
  
  
@@ -213,7 +202,7 @@ echo '<div ';
 if ($settingsmenu<>'1') { echo 'id="togglesettingsmenu" '; }
 
 
-echo ' class="top_menu_line ';
+echo ' class="top_menu_line clearfix';
 
 if ($settingsmenu<>'1') { echo ' togglesettingsmenu '; }
 
@@ -233,25 +222,35 @@ echo '<li><a href="newpc.php"'; if ($filename=='newpc.php') echo ' class="select
 echo '<li><a href="backupinfo.php"'; if ($filename=='backupinfo.php') echo ' class="selected"'; echo '>Backups</a></li>';
 echo '<li><a href="cojmaudit.php"'; if ($filename=='cojmaudit.php') echo ' class="selected"'; echo '>System Log</a></li>';
 
-echo '</ul></div>'; }
+echo '</ul>';
 
 
 
-echo '<div id="togglenewjob" class="newjobfrommenu ui-widget spaceout ui-state-highlight ui-corner-all innerpad" >';
+
+echo '</div>'; }
+
+
+
+echo '<div id="togglenewjob" class="ui-widget spaceout ui-state-highlight ui-corner-all innerpad clearfix" >';
+
 $query = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName"; 
-$result_id = mysql_query ($query, $conn_id); $CustomerID='';
+$result_id = mysql_query ($query, $conn_id); 
+
+$CustomerID='';
+
 echo '<form action="order.php" method="post" id="newjob_form" accept-charset="utf-8"><input type="hidden" name="formbirthday" value="'. date("U").'" />
+
 <input type="hidden" name="page" value="newjobfromajax" />
-<div class="fsl"> Client </div><div class="left">
-<select class="caps ui-state-default ui-corner-all" id="newjobselectclient" name="newjobselectclient" ><option value="">Select one...</option>';
- while (list ($CustomerIDlist, $CompanyName) = mysql_fetch_row ($result_id)) { $CompanyName = htmlspecialchars ($CompanyName); 
- print'<option value="'.$CustomerIDlist.'">'.$CompanyName.'</option>';} echo '</select> </div>  <div id="afterclientselect" class="left">
-<a href="#" title="Add Inactive Clients" class="showinactiveclient" id="showinactiveclient"> </a> </div> 
- <div id="status"></div> <div id="depstatus"></div> </form> </div>';
+<div class="fsl"> Client </div>
+<div class="left">
+<select class="caps ui-state-default ui-corner-all" id="newjobselectclient" name="newjobselectclient" >
+<option value="">Select one...</option>';
 
-// echo '<div id="loggedinas">Logged in as '.$cyclistid.'</div>';
-
-// echo '</div>';
-
-// if ($globalprefrow['showdebug']>'0') { echo '<br /> DEBUG MODE'; }
-
+while (list ($CustomerIDlist, $CompanyName) = mysql_fetch_row ($result_id)) {
+     $CompanyName = htmlspecialchars ($CompanyName);
+     print'<option value="'.$CustomerIDlist.'">'.$CompanyName.'</option>';
+}
+echo '</select> </div>  
+<div id="afterclientselect" class="left">
+<a href="#" title="Add Inactive Clients" class="showinactiveclient" id="showinactiveclient"> </a> </div>
+<div id="status"></div> <div id="depstatus"></div> </form> </div>';

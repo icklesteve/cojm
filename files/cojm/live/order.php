@@ -214,7 +214,7 @@ var initialprivatejobcomments<?php if ($row["privatejobcomments"]) { echo '=1'; 
 <?php
 } // ends check for valid job ID
 ?>
-</head><body >
+</head><body class="orderpage">
 <?php
 
 $filename='order.php'; 
@@ -222,7 +222,7 @@ include "cojmmenu.php";
 
 if ($row['ID']) {
 
-    echo '<div id="Post" class="Post lh24">';
+    echo '<div id="Post" class="Post lh24 clearfix">';
 
     if ($row['status']<'100') { // get rid of this when fully ajaxed :-)
     echo '<form action="order.php#" method="post" accept-charset="utf-8" id="allorder" novalidate>
@@ -632,8 +632,11 @@ if ($row['ID']) {
     }
     echo '>';
     $showsubarea='0';
-    if ($row['opsmaparea']) {
+    $checkifarchivearea=0;
+    if ($row['opsmaparea']>0) {
         $opsmaparea=$row['opsmaparea'];
+
+        
         $checkifarchivearea=mysql_result(mysql_query("SELECT inarchive FROM opsmap WHERE opsmapid=$opsmaparea LIMIT 1 ", $conn_id), 0);
         // echo ' aa:'.$checkifarchivearea;
     }
@@ -865,9 +868,14 @@ if ($showsubarea<>'1') {
         echo date('d/m/Y H:i', strtotime($row['collectiondate']));
     }
     echo '" />
-
-
-    <button id="toggleresumechoose" class="toggleresumechoose" title="Add Pause / Resume"> &nbsp; </button> 
+    <button id="toggleresumechoose" class="toggleresumechoose';
+    
+    if ((date('U', strtotime($row['starttrackpause']))<10) or (date('U',strtotime($row['finishtrackpause']))<10)) { 
+        echo ' hideuntilneeded';
+    }
+    
+    
+    echo '" title="Add Pause / Resume"> &nbsp; </button> 
     <span id="collectiondatetext"></span> 
     </div>  
     <div id="toggleresume" class="toggleresume fs" >
@@ -952,7 +960,8 @@ if ($showsubarea<>'1') {
     
     echo '
     <div class="ui-corner-all ui-state-highlight addresses"> 
-    <div class="fs"><div class="fsl">
+    <div class="fs">
+    <div class="fsl" id="ordernumberitemscontainer">
     <input id="numberitems" class="ui-state-default ui-corner-left pad numberitems" '; ?>data-autosize-input='{ "space": 6 }' <?php
     echo ' name="numberitems" ';
     
@@ -1052,6 +1061,22 @@ if ($showsubarea<>'1') {
     echo '<div class="ui-corner-all ui-state-highlight addresses">';
 
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     /////////////       CHARGED BY BUILD / CHECK SETTINGS             ////////////////////////////////
     $query = "
@@ -1063,67 +1088,74 @@ if ($showsubarea<>'1') {
     WHERE cbbcost <> '0.00'
     ORDER BY cbborder"; 
     $result_id = mysql_query ($query, $conn_id); 
-    $i='1';
+    $i=1;
 
     echo ' <table id="cbb" class="ord';
-    if ($row['chargedbycheck']<>'1') {
-        echo ' hideuntilneeded';
+    if ($row['chargedbycheck']<>'1') { echo ' hideuntilneeded'; 
     }
-    echo '" ><tbody> ';
+    echo '" ><thead> ';
+
     echo ' <tr id="baseservicecbb" class="hideuntilneeded" >
-    <td id="baseservicecbbtext">'.$numberitems.' x '.$selectedservicename.' </td><td> &'.$globalprefrow["currencysymbol"].
-    '<span id="baseservicecbbprice">' . number_format(($numberitems * $row["Price"]), 2, '.', '') .'</span></td>
-    <td colspan="2"> </td>
-    </tr> ';
+
+    <td  id="baseservicecbbtext">'.$numberitems.' x '.$selectedservicename.'
+    <span class="cbbprice" id="baseservicecbbprice"> &'.$globalprefrow["currencysymbol"].
+    number_format(($numberitems * $row["Price"]), 2, '.', '') .'</span></td>
+    <td></td>
+    </tr> </thead><tbody>';
 
 
+    
+    
+    
+    
+    
     while (list ($chargedbybuildid, $cbbname, $cbbcost) = mysql_fetch_row ($result_id)) {
         $cbbname = htmlspecialchars ($cbbname);
-        if ($chargedbybuildid=='1') {
-            if ($i%2) {
-                echo ' <tr ';
-                if ($i=='1') {
-                    echo ' id="mileagerow" ';
+        
+        
+        $seeifnewtr='';
+        $seeifnewtrend='';
+        $tidytrloop='';
+        
+        if ($i%2) {
+            $seeifnewtr = ' <tr> ';
+            $tidytrloop='<td> </td> ';
+                if ($i==1) {
+                    $seeifnewtr=' <tr id="mileagerow"> ';
                 }
-                echo ' > ';
-            }
-            echo'<td> <label><input type="checkbox" name="cbbc'. $chargedbybuildid .'" value="1" class="cbbcheckbox"';
+       
+        }
+        else {
+            $seeifnewtrend='</tr>';
+        }
+        
+        echo $seeifnewtr.'<td> ';
+        
+        
+        
+        if ($chargedbybuildid==1) {
+   
+            echo'<label><input type="checkbox" name="cbbc'. $chargedbybuildid .'" value="1" class="cbbcheckbox"';
             if ($row["cbbc$chargedbybuildid"]<>'0.00') {
                 echo ' checked ';
             }
-            echo'> '. $cbbname. '</label></td>
-            <td id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"]. ' ' . $row["cbb$chargedbybuildid"]. ' </td> ';
-            if ($i%2) {
-            }
-            else {
-                echo ' </tr>  ';
-            }
+            echo'> '. $cbbname. '
+            <span class="cbbprice" id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"] . $row["cbb$chargedbybuildid"]. ' </span> </label> ';
+
         } // ends buildid=1
         
-        if ($chargedbybuildid=='2') {
-            if ($i%2) {
-                echo ' <tr> ';
-            }
-            echo ' <td> ';
-
+        if ($chargedbybuildid==2) {
             echo ' <label><input type="checkbox" name="cbbc'.$chargedbybuildid.'" value="1" class="cbbcheckbox" '; 
             if ($row["cbbc$chargedbybuildid"]<>'0.00') { 
                 echo ' checked ';
             } 
-            echo'> '.$cbbname.'</label></td>
-            <td id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"].' '.$row["cbb$chargedbybuildid"]. ' </td> ';
-            if ($i%2) {
-            }
-            else {
-                echo ' </tr> ';
-            }
+            echo'> '.$cbbname.'
+            <span class="cbbprice" id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"].$row["cbb$chargedbybuildid"]. '  </span> </label> ';
+
         }
 
-        if ($chargedbybuildid=='3') {
-            if ($i%2) {
-                echo '<tr>';
-            }
-            echo '<td> <select class="ui-state-default ui-corner-left wspeca cbbcheckbox" name="waitingmins" id="waitingmins" > '; 
+        if ($chargedbybuildid==3) {
+            echo ' <select class="ui-state-default ui-corner-left wspeca cbbcheckbox" name="waitingmins" id="waitingmins" > '; 
             $waitmin='0';
             while ( $waitmin<100 ) {
                 echo '<option'; 
@@ -1134,56 +1166,41 @@ if ($showsubarea<>'1') {
                 $waitmin=$waitmin+'5';
             }
             echo '</select>';
-            echo' mins waiting time </td><td id="cbb'.$chargedbybuildid.'"> 
-            &'.$globalprefrow["currencysymbol"] . ' ' . $row["cbb$chargedbybuildid"].'</td>';
-            if ($i%2) {
-            } else {
-                echo '</tr>';
-            }
+            echo' mins waiting time
+            <span class="cbbprice" id="cbb'.$chargedbybuildid.'"> 
+            &'.$globalprefrow["currencysymbol"]  . $row["cbb$chargedbybuildid"].' </span> ';
+
         }
         
-        if ($chargedbybuildid>'3' ) {
-            if ($i%2) { 
-                echo ' <tr> ';
-            }
-
-            echo '<td>
-            <label><input type="checkbox" name="cbbc'.$chargedbybuildid.'" value="1" class="cbbcheckbox" '; 
+        if ($chargedbybuildid>3) {
+            echo ' <label><input type="checkbox" name="cbbc'.$chargedbybuildid.'" value="1" class="cbbcheckbox" '; 
             if ($row["cbbc$chargedbybuildid"]<>'0') {
                 echo ' checked ';
             }
-            echo '> '.$cbbname.'</label>
-            </td>
-            <td id="cbb'.$chargedbybuildid.'">&'.$globalprefrow["currencysymbol"].' '.$row["cbb$chargedbybuildid"].'</td>';
+            echo '> '.$cbbname.' <span id="cbb'.$chargedbybuildid.'" class="cbbprice"> &'.$globalprefrow["currencysymbol"].$row["cbb$chargedbybuildid"].' </span> </label>';
 
 
-            if ($i%2) {
-            }
-            else {
-                echo ' </tr> ';
-            }
+
         }
+        
+        echo '</td> '.$seeifnewtrend;
 
-        $i=$i+'1';
+        $i++;
 
     } // ends loop for cbb loop
 
-    if ($i%2) {
-        echo '<tr><td colspan="4"> ';
-    }
-    else {
-        echo ' <td> ';
-    }
-
-    echo '</td>
-    <td> </td>
-    </tr>';
-
+    echo $tidytrloop;
     echo '</tbody></table>';
     /////////////////////////////////// ends cbb job
 
 
 
+    
+    
+    
+    
+    
+    
 
     echo '<div class="fs" ><div class="fsl">
     <span id="pricerowleft">';
@@ -1558,8 +1575,6 @@ $(document).ready(function() {
 
 
 
-if ((date('U', strtotime($row['starttrackpause']))>10) or (date('U',strtotime($row['finishtrackpause']))>10)) { 
-echo ' $("#toggleresume").show(); '; }
 
 
 
@@ -1584,9 +1599,6 @@ echo '
 }); // ends document ready
 
 </script>
-
-<!-- all divs are float so orderfoot pads the bottom out for menu etc to display ok -->
-<div class="orderfoot"> &nbsp; </div>
 ';
 
 

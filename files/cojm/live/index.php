@@ -86,7 +86,15 @@ ORDER BY `Orders`.`nextactiondate` , ID
 LIMIT :numberofresults';
 
 $stmt = $dbh->prepare($query);
-$stmt->bindParam(':numberofresults', ($numberofresults), PDO::PARAM_INT);
+
+
+$pdonumberofresults = NULL;
+// $numberofresults
+
+$stmt->bindParam(':numberofresults', ($pdonumberofresults), PDO::PARAM_INT);
+
+$pdonumberofresults = $numberofresults;
+
 $stmt->execute();
 $sumtot = $stmt->rowCount();
 
@@ -123,18 +131,14 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $javascript.="$('#stat". $row['ID']."').change(function() { $('#".$row['ID']."').submit(); });
     $('#cyc".$row['ID']."').change(function() { $('#".$row['ID']."').submit(); }); ";
 
-    $i='0';
+    $i=1;
     $showcargo=''; 
     $showasap='';
 
     echo '<div class="ui-corner-all '.$dayclass.'"  > ';
 
 
-    
-
-        
-    /////  CHECK TO SEE TO DISPLAY JUST 1 ASAP OR CARGOBIKE LOGO     ////////////////////////////////////
-    while ($i<21) {
+    while ($i<21) { /////  CHECK TO SEE TO DISPLAY JUST 1 ASAP OR CARGOBIKE LOGO     //
         if (($row["cbb$i"])<>0) { // order cbb has price 
             if (in_array("$i", $cbbasapdata)) {
                 $showasap='1';
@@ -501,7 +505,7 @@ if ($page=="showall") { // show number of jobs displayed
  
 if ($totsumtot>$sumtot) { // show all jobs button
     echo '<div class="linevpad "></div><div class="ui-state-highlight ui-corner-all p15" > 
-    <form action="#" method="post">
+    <form action="" method="get">
     <input type="hidden" name="page" value="showall" />
     <p><strong> Next '.$numberofresults.' jobs displayed out of a total of '.$totsumtot.'.
     <button type="submit" >Show all jobs</button>

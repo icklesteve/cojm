@@ -17,7 +17,26 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+    
+    + see bottom browser detection,
+    // Taken from 
+// http://www.awcore.com/archive?file=571&path=Browser.php
+
+
+     * File: Browser.php
+     * Author: Chris Schuld (http://chrisschuld.com/)
+     * Last Modified: August 20th, 2010
+     * @version 1.9
+     * @package PegasusPHP
+    
+    
+    
+    
+    
+    
 */
+
+
 include "C4uconnect.php";
 
 
@@ -69,6 +88,7 @@ if (isSet($_GET['page'])) { $page=$_GET['page']; } elseif (isSet($_POST['page'])
 if (isSet($_POST['showdebug'])) { $showdebug=$_POST['showdebug']; } else { $showdebug=''; }
 if (isSet($_POST['showtimes'])) { $showtimes=$_POST['showtimes']; } else { $showtimes=''; }
 if (isSet($_GET['orderid'])) { $orderid=$_GET['orderid'];   } else { $orderid=$_POST['orderid']; }
+
 
 
 // print_r($_POST);
@@ -174,6 +194,8 @@ if  (isset($_POST['clientid'])) { $clientid=trim($_POST['clientid']); } else { $
 if  (isset($_POST['clientview'])) { $clientview=trim($_POST['clientview']); } else { $clientview=''; }
 if  (isset($_POST['newcyclistid'])) { $newcyclistid=trim($_POST['newcyclistid']); } else { $newcyclistid=''; }
 if (isset($_POST['viewselectdep'])) { $viewselectdep=trim($_POST['viewselectdep']); } else { $viewselectdep=''; }
+if (isSet($_POST['showpageviews'])) { $showpageviews=$_POST['showpageviews'];   } else { $showpageviews=''; }
+
 
 if  (isset($_POST['from'])) { $start=trim($_POST['from']); 
 
@@ -268,11 +290,15 @@ $queryextra=" AND `auditorderid` ='".$orderid."'" ;
 
 
 
- $audquery=" SELECT * 
-FROM  `cojm_audit` 
-WHERE (( `auditpage` <>'') OR  (`audittext` <>'' ))
-AND `auditdatetime` >= '$sqlstart' 
-AND `auditdatetime` <= '$sqlend' ";
+ $audquery=" SELECT * FROM  `cojm_audit` ";
+
+  $audquery.=" WHERE `auditdatetime` >= '$sqlstart' AND `auditdatetime` <= '$sqlend' ";
+
+ if ($showpageviews<>1) {
+ 
+ $audquery.=" AND (( `auditpage` <>'') OR  (`audittext` <>'' )) ";
+ 
+ }
 
 if ($page) { 
 
@@ -290,16 +316,22 @@ ORDER BY  `cojm_audit`.`auditdatetime` DESC LIMIT 0,".$maxresults;
  
  $audresult=mysql_query($audquery, $conn_id); 
 
-// echo '<br />'.$audquery.'<br />';
- 
+
  $sumtot=mysql_affected_rows(); 
 
 
- 
+ if ($globalprefrow['showdebug']>0) {
+
+echo ' <br /> '.$audquery.' <br /> ';
+
+}
  
  if ($sumtot>'0') {
  
-echo '<div class="success"> '.$sumtot.' result';
+echo '<div class="success"> '.$sumtot.' result ';
+
+
+
 
 if ($sumtot=='1') {} else { echo 's'; }
 

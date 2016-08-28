@@ -963,13 +963,26 @@ $("#printbutton").click(function() {
 	
 $("#btn-enter-full-screen").click(function() {
 
+
+
+    var menuheight=0;
+    var screenheight=$(window).height();
+    $(".top_menu_line").each(function( index ) {
+        if ($(this).is(':visible')) {
+            menuheight = menuheight + $( this ).height();
+        } 
+    });
+    screenheight = screenheight - menuheight;   
+
+
+
     $("#map-container").css({
         position: "fixed",
         left: "0",
-		top: "36px",
+		top: menuheight,
         width: "100%",
         backgroundColor: "white",
-		height: "calc(100% - 36px)"
+		height: screenheight
     });
 
     $("#ordermap").css({

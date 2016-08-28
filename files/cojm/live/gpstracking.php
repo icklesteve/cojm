@@ -26,8 +26,7 @@ $alpha_time = microtime(TRUE);
 
 
 include "C4uconnect.php";
-if ($globalprefrow['forcehttps']>0) {
-if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
+if ($globalprefrow['forcehttps']>0) { if ($serversecure=='') { header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
 
 include "changejob.php";
 $title='COJM : '.$cyclistid;
@@ -72,54 +71,50 @@ $thisCyclistID=$CyclistID;
 if (isset($_GET['clientview'])) { $clientview=trim($_GET['clientview']); } else { $clientview=''; }
 
 
-if ($start) {
-
-$trackingtext='';
-$tstart = str_replace("%2F", ":", "$start", $count);
-$tstart = str_replace("/", ":", "$start", $count);
-$tstart = str_replace(",", ":", "$tstart", $count);
-$temp_ar=explode(":","$tstart"); 
-$day=$temp_ar['0']; 
-$month=$temp_ar['1']; 
-$year=$temp_ar['2']; 
-$hour='00';
-$minutes='00';
-$second='00';
-$sqlstart= date("Y-m-d H:i:s", mktime($hour, $minutes, $second, $month, $day, $year));
-$dstart= date("U", mktime($hour, $minutes, $second, $month, $day, $year));
-if ($year) { $inputstart=$day.'/'.$month.'/'.$year; }
+if ($start) { // $inputstart
+    $trackingtext='';
+    $tstart = str_replace("%2F", ":", "$start", $count);
+    $tstart = str_replace("/", ":", "$start", $count);
+    $tstart = str_replace(",", ":", "$tstart", $count);
+    $temp_ar=explode(":","$tstart"); 
+    $day=$temp_ar['0']; 
+    $month=$temp_ar['1']; 
+    $year=$temp_ar['2']; 
+    $hour='00';
+    $minutes='00';
+    $second='00';
+    $sqlstart= date("Y-m-d H:i:s", mktime($hour, $minutes, $second, $month, $day, $year));
+    $dstart= date("U", mktime($hour, $minutes, $second, $month, $day, $year));
+    if ($year) { $inputstart=$day.'/'.$month.'/'.$year; }
 } else  { // nothing posted
-$inputstart='';
-$sqlstart='';
-}
-
-// $error.=' sqlstart is '. $sqlstart .'<br />';
+    $inputstart='';
+    $sqlstart='';
+} // $error.=' sqlstart is '. $sqlstart .'<br />';
 
 
-if ($end) {
 
-$tend = str_replace("%2F", ":", "$end", $count);
-$tend = str_replace("/", ":", "$end", $count);
-$tend = str_replace(",", ":", "$tend", $count);
-$temp_ar=explode(":",$tend); 
-$day=$temp_ar['0'];
-$month=$temp_ar['1'];
-$year=$temp_ar['2'];
-$hour='23';
-$minutes= '59';
-$second='59';
-if ($year) { $inputend=$day.'/'.$month.'/'.$year; }
-$sqlend= date("Y-m-d H:i:s", mktime(23, 59, 59, $month, $day, $year));
-$dend=date("U", mktime(23, 59, 59, $month, $day, $year));
 
-}
+if ($end) { // $dend
 
-else { 
+    $tend = str_replace("%2F", ":", "$end", $count);
+    $tend = str_replace("/", ":", "$end", $count);
+    $tend = str_replace(",", ":", "$tend", $count);
+    $temp_ar=explode(":",$tend); 
+    $day=$temp_ar['0'];
+    $month=$temp_ar['1'];
+    $year=$temp_ar['2'];
+    $hour='23';
+    $minutes= '59';
+    $second='59';
+    if ($year) { $inputend=$day.'/'.$month.'/'.$year; }
+    $sqlend= date("Y-m-d H:i:s", mktime(23, 59, 59, $month, $day, $year));
+    $dend=date("U", mktime(23, 59, 59, $month, $day, $year));
+    
+} else { 
 
 $sqlend='3000-12-25 23:59:59'; 
 $inputend=''; 
 $dend='';
-
 }
 
 
@@ -828,10 +823,7 @@ if ($clientview=='cluster') { echo ' var markerCluster = new MarkerClusterer(map
     $("#javastotals").html("Total " + sum(markercount) + " infopoints, " + sum(lineplotscount) + " plots.");
 
 
-    $(document).ready(function() { // js for date range picker & rider selector
-        $( "#combobox" ).combobox();
-        $("#rangeBa, #rangeBb").daterangepicker();  
-    });
+ 
 
 
     
@@ -845,10 +837,13 @@ if ($clientview=='cluster') { echo ' var markerCluster = new MarkerClusterer(map
     });
     
 }
+ 
 
+  $(document).ready(function() { // js for date range picker & rider selector needs to be out of initialise in case of 0 rows
+        $( "#combobox" ).combobox();
+        $("#rangeBa, #rangeBb").daterangepicker();  
+    });
     function comboboxchanged() { };
-
-
 
 
 
@@ -864,7 +859,7 @@ echo '</head><body ';
 echo '>';
 
 $adminmenu=0;
-$filename="startuploadgpx.php";
+$filename="gpstracking.php";
 include "cojmmenu.php"; 
 
 
@@ -906,9 +901,10 @@ To		<input class="ui-state-default ui-corner-all pad"  size="10" type="text" nam
  <button type="submit" >Search</button> </div></form>';
 
  
-if ($foundtracks=='0') { echo ' <h1> No Results Found </h1> '; 
+if ($foundtracks=='0') { echo ' <h1> No Results Found </h1> '; }
+
 if ($tableerror) { echo '<table><tbody>'.$tableerror.'</tbody></table>'; }
-}
+
  
    echo $error;
 
@@ -942,6 +938,18 @@ echo '
 <tr><td colspan="5"><span id="javastotals"> </span></td></tr>
 </tbody></table>
 ';
+
+}
+else { 
+
+
+echo '
+<script>
+$("#toploader").hide();
+</script>
+
+';
+
 
 }
 

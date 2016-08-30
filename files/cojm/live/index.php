@@ -64,7 +64,7 @@ $query = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' ORD
 $riderdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);    
     
     
-$query = "SELECT bankholcomment, bankholdate FROM bankhols WHERE bankholdate >= CURRENT_DATE";
+$query = "SELECT bankholcomment, bankholdate FROM bankhols WHERE bankholdate >= ( CURRENT_DATE - interval 1 week ) ";
 $bankholdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
 
 
@@ -155,7 +155,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     if ($row['cargoservice']=='1') { $showcargo='1'; }
 
 
-    echo ' <span class="indexorder"><a href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> ';
+    echo ' <span class="indexorder"><a class="indexjoblink" href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> ';
 
     
     if ($showasap=='1') {

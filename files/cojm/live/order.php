@@ -109,6 +109,11 @@ AND Orders.ID = ? LIMIT 0,1";
 
 
 
+
+// add placeholders + titles to most elements
+
+
+
 $parameters = array($id);
 $statement = $dbh->prepare($query);
 $statement->execute($parameters);
@@ -130,6 +135,11 @@ $cojmid=$id;
 <link id="pagestyle" rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
 <link rel="stylesheet" href="css/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
+<style>
+
+  
+  
+</style>
 <?php 
 if ($row['ID']) {
     
@@ -651,7 +661,7 @@ if ($row['ID']) {
     $topareaqueryres = mysql_query ($topareaquery, $conn_id);
     echo '<div class="fs"><div class="fsl"> </div> 
     <select id="opsmaparea" name="opsmaparea" class="ui-state-default ui-corner-left">
-    <option value="0" > Choose Area </option>';
+    <option value="" > Choose Area </option>';
     
     while (list ($listopsmapid, $listopsname, $descrip, $istoplayer ) = mysql_fetch_row ($topareaqueryres)) {
         print ("<option ");
@@ -709,7 +719,7 @@ if ($showsubarea<>'1') {
     echo '</select>
     <a id="subarealink" class="showclient';
     if ($row['opsmapsubarea']<1) {
-        echo 'hideuntilneeded';
+        echo ' hideuntilneeded';
     }
     echo '" title="Sub Area Details" target="_blank" href="opsmap-new-area.php?areaid='.$row['opsmapsubarea'].'"> </a>
     </div>
@@ -1024,10 +1034,9 @@ if ($showsubarea<>'1') {
 
     ///////////               pod stuff
 
-
-    echo '
-
-    <div id="podcontainer" class="ui-corner-all ui-state-highlight addresses';
+    
+    
+    echo '<div id="podcontainer" class="ui-corner-all ui-state-highlight addresses';
 
     if (($row['status']<'99') or (($row['status']>'99') and (($haspod==1) or ($row["podsurname"]<>'')))) {
     }
@@ -1036,13 +1045,28 @@ if ($showsubarea<>'1') {
     }
     echo '">
     <div id="podsurnamecontainer" class="fs"><div class="fsl">POD </div>
-    <input type="text" id="podsurname" class="caps ui-state-default ui-corner-all" name="podsurname" size="25" maxlength="40" value="'.$row["podsurname"].'">
+    <input type="text" id="podsurname" class="caps ui-state-default ui-corner-all" name="podsurname" size="25" maxlength="40" value="'.$row["podsurname"].'">';
+    
+    
+    
+    echo '
+    <input type="file" form="uploadpodform" name="file" id="uploadpodfile" ';
 
-
-    <input type="file"  form="uploadpodform" name="file" id="uploadpodfile" accept="image/png, image/gif, image/jpeg" />
+    
+    
+    if ($haspod==1) {
+    echo ' class="hideuntilneeded" ';
+    }
+    
+    echo '    
+    accept="image/png, image/gif, image/jpeg" />
     <div class="fsr hideuntilneeded" id="uploadpodprogress" ><progress></progress></div>
     </div>
-    <div id="podimagecontainer" class="fsr hideuntilneeded"> 
+    <div id="podimagecontainer" class="fsr';
+    if ($haspod<1) {
+    echo ' hideuntilneeded';
+    }
+    echo '"> 
     <span id="ajaxremovepod" title="Remove POD" > &nbsp; </span>
     <img id="orderpod" class="orderpod" alt="POD" ';
 
@@ -1068,17 +1092,22 @@ if ($showsubarea<>'1') {
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
     /////////////       CHARGED BY BUILD / CHECK SETTINGS             ////////////////////////////////
+    echo ' <table id="cbb" class="ord';
+    if ($row['chargedbycheck']<>'1') { echo ' hideuntilneeded'; }
+    echo '" ><thead> ';
+
+    echo ' <tr id="baseservicecbb" ';
+    if ($row['chargedbybuild']=='1') { echo 'class="hideuntilneeded" '; }
+    echo '>
+
+    <td><span id="baseservicecbbtext">'.$numberitems.' x '.$selectedservicename.'</span>
+    <span class="cbbprice" id="baseservicecbbprice"> &'.$globalprefrow["currencysymbol"].
+    number_format(($numberitems * $row["Price"]), 2, '.', '') .'</span></td>
+    <td></td>
+    </tr> </thead><tbody>';
+
     $query = "
     SELECT 
     chargedbybuildid, 
@@ -1086,22 +1115,56 @@ if ($showsubarea<>'1') {
     cbbcost 
     FROM chargedbybuild 
     WHERE cbbcost <> '0.00'
+    AND chargedbybuildid < '3'
+    ORDER BY chargedbybuildid ASC"; 
+    $result_id = mysql_query ($query, $conn_id); 
+
+    echo '<tr id="mileagerow"'; 
+    if ($row['chargedbybuild']<>'1') { echo 'class="hideuntilneeded" '; }
+    echo '>';
+    while (list ($chargedbybuildid, $cbbname, $cbbcost) = mysql_fetch_row ($result_id)) {
+        $cbbname = htmlspecialchars ($cbbname);
+    
+    
+            if ($chargedbybuildid==1) {
+            echo '<td> '. $cbbname. ' 
+            <span class="cbbprice" id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"] . $row["cbb$chargedbybuildid"]. ' </span> </td>';
+
+        } // ends buildid=1
+        
+        if ($chargedbybuildid==2) {
+            echo '<td> '.$cbbname.'
+            <span class="cbbprice" id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"].$row["cbb$chargedbybuildid"]. '  </span> </td>';
+
+        }
+
+    }    
+    
+    
+    echo '</tr>';
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    $query = "
+    SELECT 
+    chargedbybuildid, 
+    cbbname, 
+    cbbcost 
+    FROM chargedbybuild 
+    WHERE cbbcost <> '0.00'
+    AND chargedbybuildid <> '1'
+    AND chargedbybuildid <> '2'
     ORDER BY cbborder"; 
     $result_id = mysql_query ($query, $conn_id); 
     $i=1;
-
-    echo ' <table id="cbb" class="ord';
-    if ($row['chargedbycheck']<>'1') { echo ' hideuntilneeded'; 
-    }
-    echo '" ><thead> ';
-
-    echo ' <tr id="baseservicecbb" class="hideuntilneeded" >
-
-    <td  id="baseservicecbbtext">'.$numberitems.' x '.$selectedservicename.'
-    <span class="cbbprice" id="baseservicecbbprice"> &'.$globalprefrow["currencysymbol"].
-    number_format(($numberitems * $row["Price"]), 2, '.', '') .'</span></td>
-    <td></td>
-    </tr> </thead><tbody>';
 
 
     
@@ -1120,41 +1183,18 @@ if ($showsubarea<>'1') {
         if ($i%2) {
             $seeifnewtr = ' <tr> ';
             $tidytrloop='<td> </td> ';
-                if ($i==1) {
-                    $seeifnewtr=' <tr id="mileagerow"> ';
-                }
-       
         }
         else {
             $seeifnewtrend='</tr>';
         }
         
-        echo $seeifnewtr.'<td> ';
+        echo $seeifnewtr;
         
         
         
-        if ($chargedbybuildid==1) {
-   
-            echo'<label><input type="checkbox" name="cbbc'. $chargedbybuildid .'" value="1" class="cbbcheckbox"';
-            if ($row["cbbc$chargedbybuildid"]<>'0.00') {
-                echo ' checked ';
-            }
-            echo'> '. $cbbname. '
-            <span class="cbbprice" id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"] . $row["cbb$chargedbybuildid"]. ' </span> </label> ';
-
-        } // ends buildid=1
-        
-        if ($chargedbybuildid==2) {
-            echo ' <label><input type="checkbox" name="cbbc'.$chargedbybuildid.'" value="1" class="cbbcheckbox" '; 
-            if ($row["cbbc$chargedbybuildid"]<>'0.00') { 
-                echo ' checked ';
-            } 
-            echo'> '.$cbbname.'
-            <span class="cbbprice" id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"].$row["cbb$chargedbybuildid"]. '  </span> </label> ';
-
-        }
 
         if ($chargedbybuildid==3) {
+            echo '<td> ';
             echo ' <select class="ui-state-default ui-corner-left wspeca cbbcheckbox" name="waitingmins" id="waitingmins" > '; 
             $waitmin='0';
             while ( $waitmin<100 ) {
@@ -1173,6 +1213,7 @@ if ($showsubarea<>'1') {
         }
         
         if ($chargedbybuildid>3) {
+            echo '<td> ';
             echo ' <label><input type="checkbox" name="cbbc'.$chargedbybuildid.'" value="1" class="cbbcheckbox" '; 
             if ($row["cbbc$chargedbybuildid"]<>'0') {
                 echo ' checked ';
@@ -1401,7 +1442,25 @@ if ($showsubarea<>'1') {
     </div>
     </div>
     <div class="hangright">
+    
+    
+     <div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses hideuntilneeded clearfix"></div>
+    
+    
+    
     <div class="ui-corner-all ui-state-highlight addresses">
+    
+    
+    
+    
+       
+    
+    
+    
+    
+    
+    
+    
     <div class="fs"><div class="fsl"> Duplicate</div>
     <form action="order.php#" method="post">
     <input type="hidden" name="formbirthday" value="'.date("U").'">
@@ -1492,8 +1551,7 @@ if ($showsubarea<>'1') {
     echo '</div>
     </div>
      
-    <div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses hideuntilneeded"></div>
-    
+
     </div> <br /> '; // ends div hangright
     
     $tmp= '<input type="email" id="email" name="email">';
@@ -1577,22 +1635,6 @@ $(document).ready(function() {
 
 
 
-
-if ($haspod>0) {
-    echo ' $("#uploadpodfile").hide(); $("#podimagecontainer").show(); ';
-} else {
-    echo ' $("#uploadpodfile").show(); $("#podimagecontainer").hide(); ';
-}
-
-
-if ($row['chargedbybuild']<>'1') { 
-    echo ' $("#baseservicecbb").show(); ';
-    echo ' $("#mileagerow").hide(); ';
-}
-else { 
-    echo ' $("#baseservicecbb").hide(); ';
-    echo ' $("#mileagerow").show(); ';
-}
 
 echo '
 

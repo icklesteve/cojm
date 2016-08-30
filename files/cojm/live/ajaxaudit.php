@@ -19,20 +19,12 @@
 
     
     + see bottom browser detection,
-    // Taken from 
-// http://www.awcore.com/archive?file=571&path=Browser.php
-
 
      * File: Browser.php
      * Author: Chris Schuld (http://chrisschuld.com/)
      * Last Modified: August 20th, 2010
      * @version 1.9
      * @package PegasusPHP
-    
-    
-    
-    
-    
     
 */
 
@@ -43,11 +35,10 @@ include "C4uconnect.php";
 
 if ($globalprefrow['showdebug']>0) {
 
-// error handler function
-function myErrorHandler($errno, $errstr, $errfile, $errline)
-{
-    if (!(error_reporting() & $errno)) {
-        // This error code is not included in error_reporting
+    // error handler function
+    function myErrorHandler($errno, $errstr, $errfile, $errline){
+        if (!(error_reporting() & $errno)) {    
+            // This error code is not included in error_reporting
         return;
     }
 
@@ -82,112 +73,15 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
 $old_error_handler = set_error_handler("myErrorHandler");
 }
 
+$maxresults='5000';
 
-if (isSet($_GET['auditpage'])) { $auditpage=$_GET['auditpage']; } else { $auditpage=$_POST['auditpage']; }
+if (isSet($_GET['auditpage'])) { $view=$_GET['auditpage']; } else { $view=$_POST['auditpage']; }
 if (isSet($_GET['page'])) { $page=$_GET['page']; } elseif (isSet($_POST['page'])) { $page=$_POST['page']; }
 if (isSet($_POST['showdebug'])) { $showdebug=$_POST['showdebug']; } else { $showdebug=''; }
 if (isSet($_POST['showtimes'])) { $showtimes=$_POST['showtimes']; } else { $showtimes=''; }
 if (isSet($_GET['orderid'])) { $orderid=$_GET['orderid'];   } else { $orderid=$_POST['orderid']; }
 
-
-
 // print_r($_POST);
-
-if ($auditpage==='order') {
-
-// echo '<br /> Page is Order';
-
-
- $query="SELECT * FROM Orders WHERE Orders.ID = '$orderid' LIMIT 1"; $result=mysql_query($query, $conn_id); $row=mysql_fetch_array($result);
-
-if ($row['ID']) {
-
-// SELECT * FROM cojm_audit WHERE orderauditid =  
- 
- $audquery=" SELECT * 
-FROM  `cojm_audit` 
-WHERE  `auditorderid` ='".$orderid."'
-AND (( `auditpage` <>'') OR  (`audittext` <>'' ))
-ORDER BY  `cojm_audit`.`auditdatetime` DESC ";
-
-
-
- $audresult=mysql_query($audquery, $conn_id); 
-
-// echo $audquery;
- 
- $sumtot=mysql_affected_rows(); 
-
- if ($sumtot>'0') {
-
- echo '
- <table class="orderaudit">
- <tr>
- <th>Time</th>
- <th>User</th>
- <th>Action</th>
- <th>Text</th>
- <th>Page</th>
- <th></th>
- </tr>';
- 
- 
- 
- while ($audrow = mysql_fetch_array($audresult)) { extract($audrow); 
-
- 
-// $browsercheck=$audrow['auditbrowser'];
-$rowbrowser = new Browser($agent_string=$audrow['auditbrowser']); 
-  
- 
- // date('H:i A D jS', strtotime($ShipDate))
- 
- echo '
- <tr>
- <td>'.date('H:i D jS M Y', strtotime($audrow['auditdatetime'])).'</td>
- <td>'.$audrow['audituser'].'</td>
- <td>'.$audrow['auditpage'].'</td>
- <td>'.$audrow['audittext'].'</td>
- <td>'.$audrow['auditfilename'].'</td>
- <td>';
- 
- if ($audrow['auditmobdevice']=='1') {  echo'<span class="mobileonline" title="Mobile Device" ></span>'; } 
- else { echo '<span class="desktoponline" title="Desktop" ></span>'; }
- 
-
- echo '</td>
- </tr> ';
- 
-} // ends row extract
-
-echo '</table>';
-
-echo '<a href="cojmaudit.php?orderid='.$orderid.'" >Full Audit Log</a>';
-
-}
-
-echo '
-<br />';
-
-
-
-echo $row['caud'];
-
-}
-
-
-
-} // ends auditpage = order
-
-
-// echo ' <br />AJAX Response from ajaxaudit.php auditpage is : '.$auditpage;
-
-
-
-
-if ($auditpage=='cojmaudit') {
-
-// echo '<h1> Found </h1>';
 
 
 if  (isset($_POST['clientid'])) { $clientid=trim($_POST['clientid']); } else { $clientid=''; }
@@ -195,298 +89,260 @@ if  (isset($_POST['clientview'])) { $clientview=trim($_POST['clientview']); } el
 if  (isset($_POST['newcyclistid'])) { $newcyclistid=trim($_POST['newcyclistid']); } else { $newcyclistid=''; }
 if (isset($_POST['viewselectdep'])) { $viewselectdep=trim($_POST['viewselectdep']); } else { $viewselectdep=''; }
 if (isSet($_POST['showpageviews'])) { $showpageviews=$_POST['showpageviews'];   } else { $showpageviews=''; }
+if  (isset($_POST['from'])) {
+    
+    $start=trim($_POST['from']); 
+    
 
+    if ($start) {
 
-if  (isset($_POST['from'])) { $start=trim($_POST['from']); 
-
-if ($start) {
-
-if ($clientid=='') { $clientid='all'; }
-
-
-$trackingtext='';
-$tstart = str_replace("%2F", ":", "$start", $count);
-$tstart = str_replace("/", ":", "$start", $count);
-$tstart = str_replace(",", ":", "$tstart", $count);
-$temp_ar=explode(":","$tstart"); 
-$day=$temp_ar['0']; 
-$month=$temp_ar['1']; 
-$year=$temp_ar['2']; 
-$hour='00';
-$minutes='00';
-$second='00';
-$sqlstart= date("Y-m-d H:i:s", mktime($hour, $minutes, $second, $month, $day, $year));
-$dstart= date("U", mktime($hour, $minutes, $second, $month, $day, $year));
-if ($year) { $inputstart=$day.'/'.$month.'/'.$year; }
-} else { $inputstart=''; $sqlstart=''; }
+        if ($clientid=='') { $clientid='all'; }
+    
+        $trackingtext='';
+        $tstart = str_replace("%2F", ":", "$start", $count);
+        $tstart = str_replace("/", ":", "$start", $count);
+        $tstart = str_replace(",", ":", "$tstart", $count);
+        $temp_ar=explode(":","$tstart"); 
+        $day=$temp_ar['0']; 
+        $month=$temp_ar['1']; 
+        $year=$temp_ar['2']; 
+        $hour='00';
+        $minutes='00';
+        $second='00';
+        $sqlstart= date("Y-m-d H:i:s", mktime($hour, $minutes, $second, $month, $day, $year));
+        $dstart= date("U", mktime($hour, $minutes, $second, $month, $day, $year));
+        if ($year) { $inputstart=$day.'/'.$month.'/'.$year; }
+    } else { $inputstart=''; $sqlstart=''; }
 
 } else { // nothing posted
-$inputstart='';
-$sqlstart='';
-
+    $inputstart='';
+    $sqlstart='';
 }
 
 if (isset($_POST['to'])) {
-$end=trim($_POST['to']);
+    $end=trim($_POST['to']);
 
-if ($end) {
+    if ($end) {
 
-$tend = str_replace("%2F", ":", "$end", $count);
-$tend = str_replace("/", ":", "$end", $count);
-$tend = str_replace(",", ":", "$tend", $count);
-$temp_ar=explode(":",$tend); 
-$day=$temp_ar['0']; 
-$month=$temp_ar['1']; 
-$year=$temp_ar['2']; 
-$hour='23';
-$minutes= '59';
-$second='59';
-if ($year) { $inputend=$day.'/'.$month.'/'.$year; }
-$sqlend= date("Y-m-d H:i:s", mktime(23, 59, 59, $month, $day, $year));
-$dend=date("U", mktime(23, 59, 59, $month, $day, $year));
-
-}
-
-else { $sqlend='3000-12-25 23:59:59'; $inputend=''; }
+        $tend = str_replace("%2F", ":", "$end", $count);
+        $tend = str_replace("/", ":", "$end", $count);
+        $tend = str_replace(",", ":", "$tend", $count);
+        $temp_ar=explode(":",$tend); 
+        $day=$temp_ar['0']; 
+        $month=$temp_ar['1']; 
+        $year=$temp_ar['2']; 
+        $hour='23';
+        $minutes= '59';
+        $second='59';
+        if ($year) { $inputend=$day.'/'.$month.'/'.$year; }
+        $sqlend= date("Y-m-d H:i:s", mktime(23, 59, 59, $month, $day, $year));
+        $dend=date("U", mktime(23, 59, 59, $month, $day, $year));
+    }
+    else {
+        $sqlend='3000-12-25 23:59:59'; $inputend='';
+    }
 
 } else { 
 
-$inputend='';
-$sqlend='';
-
+    $inputend='';
+    $sqlend='';
 }
-
-// echo $sqlstart.$sqlend;
-
-
-
-
-
-
-
-
 
 
 $idlocated='';
 $queryextra='';
 
-
 if ($orderid) {
 
- $query="SELECT * FROM Orders WHERE Orders.ID = '$orderid' LIMIT 1"; $result=mysql_query($query, $conn_id); $row=mysql_fetch_array($result);
+    $query="SELECT * FROM Orders WHERE Orders.ID = '$orderid' LIMIT 1";
+    $result=mysql_query($query, $conn_id);
+    $row=mysql_fetch_array($result);
 
-if ($row['ID']) {  
+    if ($row['ID']) {  
 
-// echo ' id located ';
+        // echo ' id located ';
+        $idlocated='1';
 
-$idlocated='1';
-
-$queryextra=" AND `auditorderid` ='".$orderid."'" ;
-
-
-} // ends located
+        $queryextra=" AND `auditorderid` ='".$orderid."'" ;
+    } // ends located
 } // ends orderid present
 
 
+$audquery=" SELECT * FROM  `cojm_audit` WHERE `auditdatetime` <>'' ";
 
+if ($sqlstart<>'') {
+    $audquery.=" AND `auditdatetime` >= '$sqlstart' AND `auditdatetime` <= '$sqlend' ";
+}
 
- $audquery=" SELECT * FROM  `cojm_audit` ";
-
-  $audquery.=" WHERE `auditdatetime` >= '$sqlstart' AND `auditdatetime` <= '$sqlend' ";
-
- if ($showpageviews<>1) {
- 
- $audquery.=" AND (( `auditpage` <>'') OR  (`audittext` <>'' )) ";
- 
- }
-
-if ($page) { 
-
-$audquery=$audquery." AND `auditpage` ='".$page."' ";
-
+if ($showpageviews<>1) {
+    $audquery.=" AND (( `auditpage` <>'') OR  (`audittext` <>'' )) ";
 }
 
 
-$maxresults='5000';
-
-$audquery=$audquery.$queryextra."
-ORDER BY  `cojm_audit`.`auditdatetime` DESC LIMIT 0,".$maxresults;
-
-
- 
- $audresult=mysql_query($audquery, $conn_id); 
-
-
- $sumtot=mysql_affected_rows(); 
-
-
- if ($globalprefrow['showdebug']>0) {
-
-echo ' <br /> '.$audquery.' <br /> ';
-
-}
- 
- if ($sumtot>'0') {
- 
-echo '<div class="success"> '.$sumtot.' result ';
-
-
-
-
-if ($sumtot=='1') {} else { echo 's'; }
-
-echo ' found ';
-
-if ($sumtot==$maxresults) {echo ' ( limited to '.$maxresults.' ) '; }
-
-
-echo ' </div><br />'; 
-  
- 
-  
-
- echo '
- <table class="orderaudit">
- <tr>
- <th>Time</th>
- <th>User</th>';
- 
- if ($idlocated=='') {
- 
-  echo ' <th>Job Ref</th>';
- 
- }
-
- echo '
-
- <th>Text</th>';
- 
-if ($showdebug) {
-echo ' <th>Debug Text</th>'; }
- 
- 
- echo '';
-
- 
-echo ' <th>Page</th>
- <th>Action</th>';
-
-if ($showtimes) { echo '<th> CJ ms</th><th> MID ms</th><th> PAGE ms</th>';  }
- 
- 
-echo ' <th colspan="2">Screen Size</th>
- <th>OS</th>
- <th>Browser</th>
- </tr>';
- 
- 
- 
- while ($audrow = mysql_fetch_array($audresult)) { extract($audrow); 
-
- 
-// $browsercheck=$audrow['auditbrowser'];
-$rowbrowser = new Browser($agent_string=$audrow['auditbrowser']); 
-  
- 
- // date('H:i A D jS', strtotime($ShipDate))
- 
- echo '
- <tr>
- <td>'.date('H:i D jS M Y', strtotime($audrow['auditdatetime'])).'</td>
- <td>'.$audrow['audituser'].'</td>';
- 
- if ($idlocated=='') { 
- 
-// echo '<td>'.$audrow['auditorderid'].'</td>'; 
- echo '<td>';
- if ($audrow['auditorderid']<>'0') {
- 
-
-
-echo '<a target="_blank" class="newwin" href="order.php?id='. $audrow['auditorderid'].'">'. $audrow['auditorderid'].'</a>';
- }
- 
- echo '</td>';
- 
- }
- 
- echo '
-
- <td >'.$audrow['audittext'].'</td>';
- 
- if ($showdebug) { 
- 
- echo '
- <td>'.$audrow['auditinfotext'].'</td>';
- }
-
-
-
-
-
- 
- echo '
- <td>'.$audrow['auditfilename'].'</td>
-  <td>'.$audrow['auditpage'].'</td>';
-  
-  
-if ($showtimes) {
-	echo '<td>';
-
-if ($auditcjtime) { echo	$auditcjtime; }
-
-echo ' </td> <td>';
-
-if ($auditmidtime) { echo $auditmidtime; }
-
-echo ' </td><td> ';
-
-
-if ($auditpagetime) { echo $auditpagetime; }
-echo '</td> ';	
-}
-  
-  echo ' <td>';
- 
- 
- if ($audrow['auditmobdevice']=='1') {  echo'<span class="mobileonline" title="Mobile Device" ></span>'; } 
- else { echo '<span class="desktoponline" title="Desktop" ></span>'; }
- 
- echo '</td>
- <td>';
- 
- if (($audrow['auditscreenwidth']) or ($audrow['auditscreenheight'])) {  echo $audrow['auditscreenwidth'].' x '.$audrow['auditscreenheight']; }
- 
- echo '</td> <td>';
-  
-  
-  
-
-echo ' ',$rowbrowser->getPlatform(), '</td>
-<td ';
-
-if ($rowbrowser->getVersion()) { echo ' title="Ver ',$rowbrowser->getVersion(),'"  '; }
-
-echo '   >',$rowbrowser->getBrowser(),'</td>';
- 
- 
- echo ' </tr>';
- 
-
-} // ends row extract
-
-echo '</table><br />';
-
-
-} else { 
-
-
-echo ' <div class="successinfo" >No Results Found. </div> ';
-
+if ($page) {
+    $audquery=$audquery." AND `auditpage` ='".$page."' ";
 }
 
 
-} // endsauditpage==cojmaudit
+
+$audquery=$audquery.$queryextra." ORDER BY  `cojm_audit`.`auditdatetime` DESC LIMIT 0,".$maxresults;
+
+
+$audresult=mysql_query($audquery, $conn_id);
+$sumtot=mysql_affected_rows();
+if ($globalprefrow['showdebug']>0) {
+    echo ' <br /> '.$audquery.' <br /> ';
+}
+
+if ($sumtot>'0') {
+
+    echo '<div class="success"> '.$sumtot.' result';
+    if ($sumtot<>'1') { echo 's '; }
+
+    echo ' found ';
+
+    if ($sumtot==$maxresults) {
+        echo ' ( limited to '.$maxresults.' ) ';
+    }
+
+
+    echo ' </div><br />'; 
+
+
+    echo '
+    <table class="orderaudit">
+    <thead>
+    <tr>
+    <th>Time</th>
+    <th>User</th>';
+
+    if ($idlocated=='') {
+        echo ' <th>Job Ref</th>';
+    }
+
+    echo ' <th>Text</th>';
+
+    if ($showdebug) {
+        echo ' <th>Debug Text</th>';
+    }
+    
+    echo ' <th>Page</th>
+    <th>Action</th>';
+
+    if ($showtimes) {
+        echo '<th> CJ ms</th><th> MID ms</th><th> PAGE ms</th>';
+    }
+
+
+    echo ' <th colspan="2">Screen Size</th>
+    <th>OS</th>
+    <th>Browser</th>
+    </tr>
+    </thead>
+    <tbody>';
+
+
+
+    while ($audrow = mysql_fetch_array($audresult)) {
+        extract($audrow);
+
+        $rowbrowser = new Browser($agent_string=$audrow['auditbrowser']); 
+        $rowplatform=$rowbrowser->getPlatform();
+        $rowversion=$rowbrowser->getVersion();
+        $rowbrowsername=$rowbrowser->getBrowser();
+        
+
+        echo '
+        <tr>
+        <td>'.date('H:i D jS M Y', strtotime($audrow['auditdatetime'])).'</td>
+        <td>'.$audrow['audituser'].'</td>';
+
+        if ($idlocated=='') {
+            echo '<td>';
+            if ($audrow['auditorderid']<>'0') {
+                echo '<a target="_blank" class="newwin" href="order.php?id='. $audrow['auditorderid'].'">'. $audrow['auditorderid'].'</a>';
+            }
+
+            echo '</td>';
+        }
+
+        echo ' <td >'.$audrow['audittext'].'</td>';
+
+        if ($showdebug) {
+
+            echo '<td>'.$audrow['auditinfotext'].'</td>';
+        }
+
+
+
+        echo '
+        <td>'.$audrow['auditfilename'].'</td>
+        <td>'.$audrow['auditpage'].'</td>';
+
+
+        if ($showtimes) {
+            echo '<td>';
+
+            if ($auditcjtime) { echo $auditcjtime; }
+
+            echo ' </td> <td>';
+
+            if ($auditmidtime) { echo $auditmidtime; }
+
+            echo ' </td><td> ';
+
+            if ($auditpagetime) { echo $auditpagetime; }
+            echo '</td> ';	
+        }
+    
+        echo ' <td>';
+
+
+        if ($audrow['auditmobdevice']=='1') {
+            echo'<span class="mobileonline" title="Mobile Device" ></span>';
+        }
+        else {
+            echo '<span class="desktoponline" title="Desktop" ></span>';
+        }
+            
+        echo '</td>
+        <td>';
+
+        if (($audrow['auditscreenwidth']) or ($audrow['auditscreenheight'])) {
+            echo $audrow['auditscreenwidth'].' x '.$audrow['auditscreenheight'];
+        }
+
+
+
+        echo '</td> ';
+        echo '<td>' . $rowplatform . ' </td> <td> '.$rowbrowsername;
+        
+        if ($rowversion) { echo ' <br /> v '.$rowversion; }
+        
+        
+        echo '</td>';
+
+
+        echo ' </tr>';
+
+    } // ends row extract
+
+    echo '</tbody>
+    </table>
+    <br />';
+    
+
+    
+    if ($view=='order') {
+        echo '<a href="cojmaudit.php?orderid='.$orderid.'" >Full Audit Log</a>';
+    }
+    
+//    echo ' auditpage = '.$auditpage;
+    
+}
+else {
+    echo ' <div class="successinfo" >No Results Found. </div> ';
+}
 
 
 
@@ -527,11 +383,6 @@ echo ' <div class="successinfo" >No Results Found. </div> ';
 // Date when the current page was last time accessed
 // The IP of the current visitor
 	
-// $msie = strpos($_SERVER["HTTP_USER_AGENT"], 'MSIE') ? true : false;
-// $firefox = strpos($_SERVER["HTTP_USER_AGENT"], 'Firefox') ? true : false;
-// $safari = strpos($_SERVER["HTTP_USER_AGENT"], 'Safari') ? true : false;
-// $chrome = strpos($_SERVER["HTTP_USER_AGENT"], 'Chrome') ? true : false;
-// if ($chrome|$firefox) { echo ''; }
 
 
 
@@ -549,14 +400,12 @@ echo ' <div class="successinfo" >No Results Found. </div> ';
 
 
 
-
-
-// Taken from 
-// http://www.awcore.com/archive?file=571&path=Browser.php
 
 
 
 /**
+// http://www.awcore.com/archive?file=571&path=Browser.php
+
      * File: Browser.php
      * Author: Chris Schuld (http://chrisschuld.com/)
      * Last Modified: August 20th, 2010
@@ -588,104 +437,6 @@ echo ' <div class="successinfo" >No Results Found. </div> ';
      *
      * This implementation is based on the original work from Gary White
      * http://apptools.com/phptools/browser/
-     *
-     * UPDATES:
-     *
-     * 2010-08-20 (v1.9):
-     *  + Added MSN Explorer Browser (legacy)
-     *  + Added Bing/MSN Robot (Thanks Rob MacDonald)
-     *  + Added the Android Platform (PLATFORM_ANDROID)
-     *  + Fixed issue with Android 1.6/2.2 (Thanks Tom Hirashima)
-     *
-     * 2010-04-27 (v1.8):
-     *  + Added iPad Support
-     *
-     * 2010-03-07 (v1.7):
-     *  + *MAJOR* Rebuild (preg_match and other "slow" routine removal(s))
-     *  + Almost allof Gary's original code has been replaced
-     *  + Large PHPUNIT testing environment created to validate new releases and additions
-     *  + Added FreeBSD Platform
-     *  + Added OpenBSD Platform
-     *  + Added NetBSD Platform
-     *  + Added SunOS Platform
-     *  + Added OpenSolaris Platform
-     *  + Added support of the Iceweazel Browser
-     *  + Added isChromeFrame() call to check if chromeframe is in use
-     *  + Moved the Opera check in front of the Firefox check due to legacy Opera User Agents
-     *  + Added the __toString() method (Thanks Deano)
-     *
-     * 2009-11-15:
-     *  + Updated the checkes for Firefox
-     *  + Added the NOKIA platform
-     *  + Added Checks for the NOKIA brower(s)
-     *  
-     * 2009-11-08:
-     *  + PHP 5.3 Support
-     *  + Added support for BlackBerry OS and BlackBerry browser
-     *  + Added support for the Opera Mini browser
-     *  + Added additional documenation
-     *  + Added support for isRobot() and isMobile()
-     *  + Added support for Opera version 10
-     *  + Added support for deprecated Netscape Navigator version 9
-     *  + Added support for IceCat
-     *  + Added support for Shiretoko
-     *
-     * 2010-04-27 (v1.8):
-     *  + Added iPad Support
-     *
-     * 2009-08-18:
-     *  + Updated to support PHP 5.3 - removed all deprecated function calls
-     *  + Updated to remove all double quotes (") -- converted to single quotes (')
-     *
-     * 2009-04-27:
-     *  + Updated the IE check to remove a typo and bug (thanks John)
-     *
-     * 2009-04-22:
-     *  + Added detection for GoogleBot
-     *  + Added detection for the W3C Validator.
-     *  + Added detection for Yahoo! Slurp
-     *
-     * 2009-03-14:
-     *  + Added detection for iPods.
-     *  + Added Platform detection for iPhones
-     *  + Added Platform detection for iPods
-     *
-     * 2009-02-16: (Rick Hale)
-     *  + Added version detection for Android phones.
-     *
-     * 2008-12-09:
-     *  + Removed unused constant
-     *
-     * 2008-11-07:
-     *  + Added Google's Chrome to the detection list
-     *  + Added isBrowser(string) to the list of functions special thanks to
-     *    Daniel 'mavrick' Lang for the function concept (http://mavrick.id.au)
-     *
-     *
-     * Gary White noted: "Since browser detection is so unreliable, I am
-     * no longer maintaining this script. You are free to use and or
-     * modify/update it as you want, however the author assumes no
-     * responsibility for the accuracy of the detected values."
-     *
-     * Anyone experienced with Gary's script might be interested in these notes:
-     *
-     *   Added class constants
-     *   Added detection and version detection for Google's Chrome
-     *   Updated the version detection for Amaya
-     *   Updated the version detection for Firefox
-     *   Updated the version detection for Lynx
-     *   Updated the version detection for WebTV
-     *   Updated the version detection for NetPositive
-     *   Updated the version detection for IE
-     *   Updated the version detection for OmniWeb
-     *   Updated the version detection for iCab
-     *   Updated the version detection for Safari
-     *   Updated Safari to remove mobile devices (iPhone)
-     *   Added detection for iPhone
-     *   Added detection for robots
-     *   Added detection for mobile devices
-     *   Added detection for BlackBerry
-     *   Removed Netscape checks (matches heavily with firefox & mozilla)
      *
      */
  
@@ -1605,18 +1356,6 @@ echo ' <div class="successinfo" >No Results Found. </div> ';
  
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ?>

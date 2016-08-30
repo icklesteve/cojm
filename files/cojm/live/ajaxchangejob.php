@@ -484,8 +484,6 @@ if ($hasid) {
                 
                 
         
-    
-    
             if ($page=='ajaxchangerider') {
     if (isset($_POST['newrider'])) { $newrider = trim($_POST['newrider']); }
     try {
@@ -542,78 +540,76 @@ if ($hasid) {
     
     
     
-    
-    
-    
-    
             if ($page=='ajaxchangeserviceid') {
-    if (isset($_POST['serviceid'])) { $serviceid = trim($_POST['serviceid']); }
-    try {
-    $query = "UPDATE Orders SET ServiceID=:serviceid , opsmaparea='' , opsmapsubarea='' WHERE id=:getid";
-    $stmt = $dbh->prepare($query);
-    $stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
-    $stmt->bindParam(':serviceid', $serviceid, PDO::PARAM_INT); 
-    $stmt->execute();
-    $total = $stmt->rowCount();
-    if ($total=='1') {
-    $query = "SELECT Service, servicecomments, chargedbycheck, canhavemap, chargedbybuild FROM Services WHERE ServiceID = :serviceid LIMIT 0,1";
-    $depstmt = $dbh->prepare($query);
-    $depstmt->bindParam(':serviceid', $serviceid, PDO::PARAM_INT); 
-    $depstmt->execute();
-    // $hasid = $clstmt->rowCount();
-    $dep = $depstmt->fetchObject();
-    $Service=$dep->Service;
-    $servicecomments=$dep->servicecomments;
-    $canhavemap=$dep->canhavemap;
-    $chargedbycheck=$dep->chargedbycheck;
-    $chargedbybuild=$dep->chargedbybuild;
-    
-    if ($chargedbycheck=='1') { $script.= ' $("#cbb").show(); '; 
-    }	else { $script.= ' $("#cbb").hide(); ';	}
-    
-    
-    
-    if ($chargedbybuild<>'1') {
-    $script.= ' $("#baseservicecbb").show(); ';
-    $script.= ' $("#mileagerow").hide(); ';
-    } else {
-    $script.= ' $("#baseservicecbb").hide(); ';
-    $script.= ' $("#mileagerow").show(); ';
-    }
-    
-    
-    if ($canhavemap=='') { $canhavemap='0'; }
-    $script.=' canshowareafromservice=' . $canhavemap . ';  ';
-    
-    
-    
-    
-    
-    
-    
-    if ($canhavemap>0) {
-    $script.=' $("#areaselectors").show();  ';
-    } else { $script.='  $("#areaselectors").hide();  '; }
-    
-    
-    
-    
-    if ($servicecomments) { $script.=' $("#servicecomments").html("'.$servicecomments.' ").show(); $("#servicecomments").show(); ';
-    } else { $script.='  $("#servicecomments").hide();  '; }
-    
-    // $script.=' ordermapupdater(); ';
-    
-    $message.="Service changed to ".$Service;
-    $calcmileage=1;
-    $allok=1;
-    
-    
-    
-    $cojmaction='recalcprice';
-    } // ends total changed ==1 check
-    } // ends try
+                if (isset($_POST['serviceid'])) { $serviceid = trim($_POST['serviceid']); }
+                try {
+                    $query = "UPDATE Orders SET ServiceID=:serviceid , opsmaparea='' , opsmapsubarea='' WHERE id=:getid";
+                    $stmt = $dbh->prepare($query);
+                    $stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+                    $stmt->bindParam(':serviceid', $serviceid, PDO::PARAM_INT); 
+                    $stmt->execute();
+                    $total = $stmt->rowCount();
+                    if ($total=='1') {
+                        $query = "SELECT Service, servicecomments, Price, chargedbycheck, canhavemap, chargedbybuild FROM Services WHERE ServiceID = :serviceid LIMIT 0,1";
+                        $depstmt = $dbh->prepare($query);
+                        $depstmt->bindParam(':serviceid', $serviceid, PDO::PARAM_INT); 
+                        $depstmt->execute();
+                        // $hasid = $clstmt->rowCount();
+                        $dep = $depstmt->fetchObject();
+                        $Service=$dep->Service;
+                        $Price=$dep->Price;
+                        $servicecomments=$dep->servicecomments;
+                        $canhavemap=$dep->canhavemap;
+                        $chargedbycheck=$dep->chargedbycheck;
+                        $chargedbybuild=$dep->chargedbybuild;
+                    
+                        if ($chargedbycheck=='1') {
+                            $script.= ' $("#cbb").show(); '; 
+                        } else { $script.= ' $("#cbb").hide(); ';	}
+                    
+                    
+                    
+                        if ($chargedbybuild<>'1') {
+                            $script.= ' $("#baseservicecbb").show(); ';
+                            $script.= ' $("#mileagerow").hide(); ';
+                        } else {
+                            $script.= ' $("#baseservicecbb").hide(); ';
+                            $script.= ' $("#mileagerow").show(); ';
+                        }
+                    
+                    
+                        if ($canhavemap=='') { $canhavemap='0'; }
+                        $script.=' canshowareafromservice=' . $canhavemap . ';  ';
+                    
+                        if ($canhavemap>0) {
+                            $script.=' $("#areaselectors").show();  ';
+                        } else {
+                            $script.='  $("#areaselectors").hide();  ';
+                        }
+                    
+                    
+                    
+                    
+                        if ($servicecomments) {
+                            $script.=' $("#servicecomments").html("'.$servicecomments.' ").show(); $("#servicecomments").show(); ';
+                        } else {
+                            $script.='  $("#servicecomments").hide();  ';
+                        }
+                    
+                        // $script.=' ordermapupdater(); ';
+                        $script.=' $("#baseservicecbbtext").html(" '.$Service.' "); ';
+                        $script.=' $("#baseservicecbbprice").html(" &'.$globalprefrow["currencysymbol"]. number_format(($Price), 2, '.', ',').' "); ';
+                        $message.="Service changed to ".$Service;
+                        $calcmileage=1;
+                        $allok=1;
+                    
+                    
+                    
+                        $cojmaction='recalcprice';
+                    } // ends total changed ==1 check
+                } // ends try
     catch(PDOException $e) { $message.= $e->getMessage(); }
-    } // ends if if ($page=='ajaxchangeserviceid') {
+    }
     
     
     
@@ -2322,117 +2318,100 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 
 
             if ($page=='ajaxchangeopsmaparea') {
-if (isset($_POST['opsmaparea'])) { $opsmaparea = trim($_POST['opsmaparea']); }
-try {
-$query = "UPDATE Orders SET opsmaparea=:opsmaparea, opsmapsubarea='0' WHERE id=:getid";
-$stmt = $dbh->prepare($query);
-$stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
-$stmt->bindParam(':opsmaparea', $opsmaparea, PDO::PARAM_INT); 
-$stmt->execute();
-$total = $stmt->rowCount();
-if ($total=='1') {
+                if (isset($_POST['opsmaparea'])) { $opsmaparea = trim($_POST['opsmaparea']); }
+                try {
+                    $query = "UPDATE Orders SET opsmaparea=:opsmaparea, opsmapsubarea='' WHERE id=:getid";
+                    $stmt = $dbh->prepare($query);
+                    $stmt->bindParam(':getid', $id, PDO::PARAM_INT); 
+                    $stmt->bindParam(':opsmaparea', $opsmaparea, PDO::PARAM_INT); 
+                    $stmt->execute();
+                    $total = $stmt->rowCount();
+                    if ($total=='1') {
 
-
-$query = "SELECT opsname, descrip, istoplayer FROM opsmap WHERE opsmapid = :opsmaparea LIMIT 0,1";
-$depstmt = $dbh->prepare($query);
-$depstmt->bindParam(':opsmaparea', $opsmaparea, PDO::PARAM_INT); 
-$depstmt->execute();
-// $hasid = $clstmt->rowCount();
-$dep = $depstmt->fetchObject();
-$opsname=$dep->opsname;
-$descrip=$dep->descrip;
-$istoplayer=$dep->istoplayer;
-
-if ($opsmaparea==0) { 
-$message.="Ops Map Removed";
-$script.=' $("#arealink").hide(); ';
-
-} else {
-$message.="Ops Map changed to ".$opsname;
-$script.=' $("#arealink").show().attr("href", "opsmap-new-area.php?areaid='.$opsmaparea.'"); ';
-
-
-}
-
-$allok=1;
-
-$script.=' $("#arealink").attr("title", "'.$opsname.' Details"); ';
-$script.=' $("#subarealink").hide(); ';
-
-if ($descrip) { 
-$script.=' $("#areacomments").html("'.$descrip.'<span id=\"subareacomments\"></span>").show(); ';
-} else {
-$script.='$("#areacomments").hide(); ';	
-}
-
-
-
-
-
-
-
-if ($istoplayer>0) { 
-
-
-$query = "SELECT depnumber, depname , isactivedep FROM clientdep WHERE associatedclient = :CustomerID ORDER BY isactivedep DESC, depname"; 
-
-
-$query = "SELECT opsmapid, opsname, descrip  FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer=:opsmaparea ";
-$deprowstmt   = $dbh->prepare($query);
-$deprowstmt->bindParam(':opsmaparea', $opsmaparea, PDO::PARAM_INT); 
-$deprowstmt->execute();
-$deprow = $deprowstmt->fetchAll();
-
-
-
-$script.='
-
-toAppendto= "<option value=0 >Choose SubArea</option>" + ';
-
-foreach ($deprow as $drow ) {
-	
-$script.='"<option value='.$drow['opsmapid'].' >'.$drow['opsname'];
-
-// if ($drow['isactivedep']<>'1') { $script.=' Inactive '; }
-
-$script.='</option>" +
-';	
-	
-	}
-
-$script.=' ""
-
-$("#opsmapsubarea").val("");
-$("#opsmapsubarea").html(toAppendto);	
-$("#opsmapsubarea").show();
-';
-
-} else {
-	
-	
-
-$script.='
-
-$("#opsmapsubarea").hide();
-$("#subarealink").hide();
-';	
-	
-}
-
-
-
-
-$script.='
-
-// ordermapupdater();
-
-';
-
-// $cojmaction='recalcprice';
-} // ends total changed ==1 check
-} // ends try
-catch(PDOException $e) { $message.= $e->getMessage(); }
-} // ends if ($page=='ajaxchangeopsmaparea') 
+                        $query = "SELECT opsname, descrip, istoplayer FROM opsmap WHERE opsmapid = :opsmaparea LIMIT 0,1";
+                        $depstmt = $dbh->prepare($query);
+                        $depstmt->bindParam(':opsmaparea', $opsmaparea, PDO::PARAM_INT); 
+                        $depstmt->execute();
+                        // $hasid = $clstmt->rowCount();
+                        $dep = $depstmt->fetchObject();
+                        $opsname=$dep->opsname;
+                        $descrip=$dep->descrip;
+                        $istoplayer=$dep->istoplayer;
+                        
+                        if ($opsmaparea<1) {
+                            $message.="Ops Map Removed";
+                            $script.=' $("#arealink").hide(); ';
+                            $script.=' $("#subarealink").hide(); ';
+                            $script.=' $("select#opsmapsubarea").hide(); initialhassubarea=""; ';
+                            
+                        } else {
+                            $message.="Ops Map changed to ".$opsname;
+                            $script.=' $("#arealink").show().attr("href", "opsmap-new-area.php?areaid='.$opsmaparea.'"); ';
+                        }
+                        
+                        $allok=1;
+                        
+                        $script.=' $("#arealink").attr("title", "'.$opsname.' Details"); ';
+                        $script.=' $("#subarealink").hide(); ';
+                        
+                        if ($descrip) {
+                            $script.=' $("#areacomments").html("'.$descrip.'<span id=\"subareacomments\"></span>").show(); ';
+                        } else {
+                            $script.='$("#areacomments").hide(); ';	
+                        }
+                        
+                        
+                        if ($istoplayer>0) {
+                        
+                        
+                            $query = "SELECT depnumber, depname , isactivedep FROM clientdep WHERE associatedclient = :CustomerID ORDER BY isactivedep DESC, depname"; 
+                        
+                        
+                            $query = "SELECT opsmapid, opsname, descrip  FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer=:opsmaparea ";
+                            $deprowstmt   = $dbh->prepare($query);
+                            $deprowstmt->bindParam(':opsmaparea', $opsmaparea, PDO::PARAM_INT); 
+                            $deprowstmt->execute();
+                            $deprow = $deprowstmt->fetchAll();
+                        
+                        
+                        
+                            $script.='
+                            initialhassubarea=1;
+                            toAppendto= "<option value=0 >Choose SubArea</option>" + ';
+                        
+                            foreach ($deprow as $drow ) {
+                            
+                                $script.='"<option value='.$drow['opsmapid'].' >'.$drow['opsname'];
+                        
+                                // if ($drow['isactivedep']<>'1') { $script.=' Inactive '; }
+                        
+                                $script.='</option>" + ';	
+                            
+                            }
+                        
+                            $script.=' ""
+                        
+                            $("#opsmapsubarea").val("");
+                            $("#opsmapsubarea").html(toAppendto);	
+                            $("#opsmapsubarea").show(); ';
+                        
+                        } else {
+                            
+                            
+                        
+                            $script.='
+                        
+                            $("#opsmapsubarea").hide();
+                            $("#subarealink").hide();
+                            ';	
+                            
+                        }
+                        
+                    
+                    }
+                }
+                catch(PDOException $e) { $message.= $e->getMessage(); }
+            } // ends if ($page=='ajaxchangeopsmaparea') 
 
 
 	

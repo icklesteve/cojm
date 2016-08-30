@@ -37,20 +37,7 @@ include "C4uconnect.php";
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
 <script type="text/javascript" src="js/jquery-ui.1.8.7.min.js"></script>
 <title><?php print ($title); ?> Core Pricing</title>
-<style>
-.ui-sortable tr {
-    cursor:pointer;
-}    
-.ui-sortable tr:hover {
-    background:rgba(244,251,17,0.45);
-}
-	
-.mod {  
-width:15px;   
-display:inline-flex;
-}	
-	
-
+<style>	
 
 </style>
 </head><body>
@@ -72,6 +59,7 @@ include "cojmmenu.php";
 <p>Pricing to exclude any VAT or tax element.  This and other factors are defined within the services.</p>
 <p>On calculating the price, the order set here will define which price modifier is processed first.</p>
 <p>Drag and Drop each row to change the order.</p>
+<p>Whatever order you select to price by, the mileage rates will always show first in the individual job screen.<p>
 <p>Value for cost and percentage can be both positive and negative.</p>
 <p>Percentages are calculated as 100 being 100% of the cost of the step before, 150 would be price in previous step +50%.</p>
 <p>Items with a zero cost will not be displayed (except First and subsequent mileage), use this as a means of disabling in the menus.</p>
@@ -104,7 +92,8 @@ $query = "SELECT * FROM chargedbybuild ORDER BY cbborder ASC";
 
 $idmax=1;
 $sql_result = mysql_query($query,$conn_id)  or mysql_error(); 
-while ($row = mysql_fetch_array($sql_result)) { extract($row);
+while ($row = mysql_fetch_array($sql_result)) {
+    extract($row);
 
 ?>
 <tr id="<?php echo $row['chargedbybuildid']; ?>">
@@ -119,21 +108,11 @@ type="text" size="30" maxlength="30" value="<?php echo $cbbname; ?>">
 </td>
 
 <td>
-
 <span id="plus<?php echo $row['chargedbybuildid']; ?>" class="mod"><?php if ( $cbbmod=='+') { echo " &".$globalprefrow['currencysymbol']; } ?> &nbsp; </span>
-
-
-<?php // if ( $row['cbbmod']=='+') { echo ' &'. $globalprefrow['currencysymbol']; } 
-?>
-
 
 <input data-id="<?php echo $row['chargedbybuildid']; ?>" data-type="cbbcost" class="ui-state-default ui-corner-all pad" 
 type="text" size="7" maxlength="8" value="<?php echo $row['cbbcost']; ?>">
-
-
 <span id="times<?php echo $row['chargedbybuildid']; ?>" class="mod"><?php if ( $cbbmod=='x') { echo " % "; } ?> &nbsp; </span>
-
-
 </td>
 
 <td>

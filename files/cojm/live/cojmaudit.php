@@ -88,9 +88,9 @@ To
 </select>
 
 <input class="ui-state-highlight ui-corner-all pad" id="orderid" name="orderid" placeholder="Search by job ref" value="<?php echo $orderid; ?>" />
-<input type="checkbox" name="showtimes" class="showtimes" value="1"  > Show Page Creation Times
-<input type="checkbox" name="showdebug" class="showdebug" value="1"  > Show Debug Text
-<input type="checkbox" name="showpageviews" id="showpageviews" value="1"  > Include Page Views
+<input type="checkbox" name="showtimes" class="showtimes" value="1"  > Times
+<input type="checkbox" name="showdebug" class="showdebug" value="1"  > Debug Text
+<input type="checkbox" name="showpageviews" id="showpageviews" value="1"  > Include Views
 
 </p>
 </div>
@@ -171,13 +171,11 @@ if (isset($_GET['orderid'])) { // check for 1st time form submittal
 }
 ?>
 
-
 	$("#rangeBa, #rangeBb").daterangepicker( {
         onClose: function(){
             refreshpage();
         }
     });
-
 
     $("#form").change(function() {
         refreshpage();

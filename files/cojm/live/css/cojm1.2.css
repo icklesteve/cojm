@@ -1217,7 +1217,7 @@ display:none;
 
 div.toggleaww { display:none; }
 div.toggledww { display:none; }
-#toggleresume { display:none; }
+
 
 div.toggle { display:none; }
 
@@ -1667,7 +1667,7 @@ background-color: #f3f2f2;
 
 
 table.acc thead, tr#baseservicecbb { color:#111111; }
-table.acc thead, tr#baseservicecbb { background-color:#c0c0c0; }
+table.acc thead, tr#baseservicecbb, .ord tr#baseservicecbb td { background-color:#c0c0c0; }
 
 
 
@@ -2290,6 +2290,7 @@ float:left;
 
 .top_menu_line ul li a, .topbox { 
     box-shadow: 0 0 3px -1px #111111;
+    font-weight:500;
 }
 
 .top_menu_line ul li a.selected {
@@ -2665,10 +2666,19 @@ text-align:left;
 .ord tr td {  display:table-row; }
 
 
+
+.acc tbody tr { 
+    display:block;
+    margin-bottom:15px;
+    padding:15px 10px;
+}
+.acc tr td {  display:table-row; }
+
+#fwr thead {  display:none; }
+
+
 table#cbb.ord tbody tr td { 
-
 padding-left:20px;
-
 }
 
 span.cbbprice {

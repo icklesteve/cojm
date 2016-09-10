@@ -880,7 +880,8 @@ if ($showsubarea<>'1') {
     echo '" />
     <button id="toggleresumechoose" class="toggleresumechoose';
     
-    if ((date('U', strtotime($row['starttrackpause']))<10) or (date('U',strtotime($row['finishtrackpause']))<10)) { 
+    if (
+    ($row['status']<60)or(($row['starttrackpause']<'10')and(date('U', strtotime($row['finishtrackpause']))<10)and($row['status']>99))) { 
         echo ' hideuntilneeded';
     }
     
@@ -888,7 +889,14 @@ if ($showsubarea<>'1') {
     echo '" title="Add Pause / Resume"> &nbsp; </button> 
     <span id="collectiondatetext"></span> 
     </div>  
-    <div id="toggleresume" class="toggleresume fs" >
+    <div id="toggleresume" class="toggleresume fs';
+    
+    if (($row['starttrackpause']<'10') and (date('U', strtotime($row['finishtrackpause']))<10)) {
+        echo ' hideuntilneeded';
+    }
+
+        
+    echo '" >
     <div class="fsl">
     <span class="toggleresumechoose" title="Pause / Resume"> &nbsp; </span>
     Paused

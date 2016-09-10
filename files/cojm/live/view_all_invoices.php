@@ -26,9 +26,7 @@ $trow='';
 
 
 include "C4uconnect.php";
-if ($globalprefrow['forcehttps']>'0') {
-if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
-
+if ($globalprefrow['forcehttps']>'0') { if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
 
 include('changejob.php');
 
@@ -85,14 +83,12 @@ $collectionsuntildate = $year . "-" . $month . "-" . $day . " " . $hour . ":" . 
 
 
 if (isset($_POST['deliveryear'])) {
-
-$year=$_POST['deliveryear'];
-$month=$_POST['delivermonth'];
-$day=$_POST['deliverday'];
-$hour="00";
-$minutes="00";
-$collectionsfromdate = $year . "-" . $month . "-" . $day . " " . $hour . ":" . $minutes . ":00";
-
+    $year=$_POST['deliveryear'];
+    $month=$_POST['delivermonth'];
+    $day=$_POST['deliverday'];
+    $hour="00";
+    $minutes="00";
+    $collectionsfromdate = $year . "-" . $month . "-" . $day . " " . $hour . ":" . $minutes . ":00";
 }
 
 
@@ -111,27 +107,18 @@ if (isset($_POST['to'])) { $end=trim($_POST['to']); }
 
 
 if (($tstart) and ($end)) {
-
-$tstart = str_replace("%2F", ":", "$tstart", $count);
-$tstart = str_replace("/", ":", "$tstart", $count);
-$tstart = str_replace(",", ":", "$tstart", $count);
-$temp_ar=explode(":",$tstart); 
-$day=$temp_ar['0']; 
-$month=$temp_ar['1']; 
-$year=$temp_ar['2']; 
-$hour= '00';
-$minutes= '00';
-$second='00';
-
-// echo ' day   : '.$day;
-// echo ' month : '.$month;
-// echo ' year  : '.$year;
-// echo ' hour : '.$hour;
-// echo ' min : '.$minutes.'<br />';
-// $sqlstart= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year));
-$sqlstart= date("Y-m-d H:i:s", mktime(00, 00, 00, $month, $day, $year)); }
-
-else { $sqlstart=''; $end=''; } 
+    $tstart = str_replace("%2F", ":", "$tstart", $count);
+    $tstart = str_replace("/", ":", "$tstart", $count);
+    $tstart = str_replace(",", ":", "$tstart", $count);
+    $temp_ar=explode(":",$tstart); 
+    $day=$temp_ar['0']; 
+    $month=$temp_ar['1']; 
+    $year=$temp_ar['2']; 
+    $hour= '00';
+    $minutes= '00';
+    $second='00';
+    $sqlstart= date("Y-m-d H:i:s", mktime(00, 00, 00, $month, $day, $year));
+} else { $sqlstart=''; $end=''; } 
 
 
 
@@ -139,360 +126,279 @@ if ($year) { $inputstart=$day.'/'.$month.'/'.$year; } else { $inputstart=''; }
 // $infotext=$infotext. '<br />start : '.$sqlstart;
 
 if ($end) {
-$tend = str_replace("%2F", ":", "$end", $count);
-$tend = str_replace("/", ":", "$tend", $count);
-$tend = str_replace(",", ":", "$tend", $count);
-$temp_ar=explode(":",$tend); 
-$day=$temp_ar['0']; 
-$month=$temp_ar['1']; 
-$year=$temp_ar['2']; 
-$second='59';
+    $tend = str_replace("%2F", ":", "$end", $count);
+    $tend = str_replace("/", ":", "$tend", $count);
+    $tend = str_replace(",", ":", "$tend", $count);
+    $temp_ar=explode(":",$tend); 
+    $day=$temp_ar['0']; 
+    $month=$temp_ar['1']; 
+    $year=$temp_ar['2']; 
+    $second='59';
 }
 
-if ($year) { $inputend=$day.'/'.$month.'/'.$year;
+if ($year) {
+    $inputend=$day.'/'.$month.'/'.$year;
+    $sqlend= date("Y-m-d H:i:s", mktime(23, 59, 59, $month, $day, $year));
+} else { $inputend=''; $sqlend=''; }
 
-$sqlend= date("Y-m-d H:i:s", mktime(23, 59, 59, $month, $day, $year));
- } else { $inputend=''; $sqlend=''; }
-
-// echo ' day   : '.$day;
-// echo ' month : '.$month;
-// echo ' year  : '.$year;
-// echo ' hour : '.$hour;
-// echo ' min : '.$minutes.'<br />';
-// $sqlstart= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year));
-
-// $infotext=$infotext. '<br />end : '.$sqlend;
-// if (($sqlstart) and (!$year) and ($clientid)) { $sqlend=''; }
 
 
 
 if ($viewtype=='') {
 
 
-$bview='';
+    $bview='';
 
-$tablecost='0';
-$todayDate = date("Y-m-d");// current date
-//Add one day to today
+    $tablecost='0';
+    $todayDate = date("Y-m-d");// current date
+    //Add one day to today
 
-$dateOneMonthAdded = strtotime(date("Y-m-d", strtotime($todayDate)) . "");
+    $dateOneMonthAdded = strtotime(date("Y-m-d", strtotime($todayDate)) . "");
 
-$dateamonthago = date('Y-m-d H:i:s', $dateOneMonthAdded);
+    $dateamonthago = date('Y-m-d H:i:s', $dateOneMonthAdded);
 
-   $sql = "SELECT * FROM invoicing 
-   INNER JOIN Clients 
-   ON invoicing.client = Clients.CustomerID 
-   WHERE (`invoicing`.`paydate` =0 ) 
-   AND (`invoicing`.`invdue` < '$dateamonthago' ) 
-   ORDER BY `invoicing`.`invdue` ASC ";
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
+    $sql = "SELECT * FROM invoicing 
+    INNER JOIN Clients 
+    ON invoicing.client = Clients.CustomerID 
+    WHERE (`invoicing`.`paydate` =0 ) 
+    AND (`invoicing`.`invdue` < '$dateamonthago' ) 
+    ORDER BY `invoicing`.`invdue` ASC ";
+    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
 	 
-	 $num_rows = mysql_num_rows($sql_result);
-	 if ($num_rows>'0') {
+	$num_rows = mysql_num_rows($sql_result);
+	if ($num_rows>'0') {
+        $a='<tr>
+        <th scope="col">Invoice Ref</th>
+        <th scope="col">Client</th>
+        <th scope="col" class="rh" >Net Amount</th>
+        <th scope="col">Date Sent</th>
+        <th scope="col">Due Date</th>
+        <th scope="col">Reminded</th>
+        <th scope="col">2nd Reminder</th>
+        <th scope="col">3rd Reminder</th>
+        <th style="width: 20%;" scope="col">Comments</th>
+        </tr> ';
 
-
-
-$a='<tr>
-<th scope="col">Invoice Ref</th>
-<th scope="col">Client</th>
-<th scope="col" class="rh" >Net Amount</th>
-<th scope="col">Date Sent</th>
-<th scope="col">Due Date</th>
-<th scope="col">Reminded</th>
-<th scope="col">2nd Reminder</th>
-<th scope="col">3rd Reminder</th>
-<th style="width: 20%;" scope="col">Comments</th>
-</tr>
-<tr><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>';
-
-while ($row = mysql_fetch_array($sql_result)) { extract($row); 
-
-$a=$a. '<tr><td>
-<form action="view_all_invoices.php#" method="post"> 
-<input type="hidden" name="viewtype" value="individualinvoice" >
-<input type="hidden" name="formbirthday" value="'. date("U") .'">
-<input type="hidden" name="page" value="" >
-<input type="hidden" name="ref" value="'.$ref.'">
-<input type="hidden" name="from" value="'. $inputstart.'">
-<input type="hidden" name="to" value="'. $inputend.'">
-<input type="hidden" name="clientid" value="'.$clientid.'" />
-<button type="submit" >'.$ref.'</button></form>
-</td><td>';
-
-// echo $CompanyName;
-
-
-$a=$a. ' <a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'.$CompanyName.'</a>';
-
-$tempdep=$row['invoicedept'];
-
-if ($tempdep) {
-
-$dclientname = mysql_result(mysql_query("SELECT depname FROM clientdep WHERE depnumber='$tempdep' LIMIT 0,1"), '0');
-$a=$a. ' (<a href="new_cojm_department.php?depid='.$tempdep.'">'.$dclientname.'</a>) ';
-	
-}
-
-
-
-
-$a=$a. '</td><td class="rh">&'. $globalprefrow['currencysymbol']. number_format(($cost+$invvatcost), 2, '.', ',').'</td>
-<td>'. date('D j M Y', strtotime($invdate1)) .'</td><td>'.date('D j M Y', strtotime($invdue)).'</td><td>'; 
- if ($chasedate>'2') { $a=$a. date('D j M Y', strtotime($chasedate));} 
+        while ($row = mysql_fetch_array($sql_result)) {
+            extract($row);
+            $a.= '<tr><td>
+            <form action="view_all_invoices.php#" method="post"> 
+            <input type="hidden" name="viewtype" value="individualinvoice" >
+            <input type="hidden" name="formbirthday" value="'. date("U") .'">
+            <input type="hidden" name="page" value="" >
+            <input type="hidden" name="ref" value="'.$ref.'">
+            <input type="hidden" name="from" value="'. $inputstart.'">
+            <input type="hidden" name="to" value="'. $inputend.'">
+            <input type="hidden" name="clientid" value="'.$clientid.'" />
+            <button type="submit" >'.$ref.'</button></form>
+            </td><td>';
+            
+            $a.= ' <a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'.$CompanyName.'</a>';
+            $tempdep=$row['invoicedept'];
+            if ($tempdep) {
+                $dclientname = mysql_result(mysql_query("SELECT depname FROM clientdep WHERE depnumber='$tempdep' LIMIT 0,1"), '0');
+                $a.= ' (<a href="new_cojm_department.php?depid='.$tempdep.'">'.$dclientname.'</a>) ';
+            }
+    
+            $a.= '</td><td class="rh">&'. $globalprefrow['currencysymbol']. number_format(($cost+$invvatcost), 2, '.', ',').'
+            </td><td>'. date('D j M Y', strtotime($invdate1)) .'</td><td>'.date('D j M Y', strtotime($invdue)).'</td><td>'; 
+    
+            if ($chasedate>'2') { $a.=date('D j M Y', strtotime($chasedate)); }
  
- $a=$a. '</td><td>'; 
- if ($chasedate2>'2') { $a=$a. date('D j M Y', strtotime($chasedate2));} 
-$a=$a. '</td><td>'; 
-if ($chasedate3>'2') {$a=$a. date('D j M Y', strtotime($chasedate3));} 
- $a=$a. '</td><td>'.$row['invcomments'].'</td></tr>';
+            $a.= '</td><td>'; 
+            if ($chasedate2>'2') { $a.= date('D j M Y', strtotime($chasedate2));} 
+            $a.= '</td><td>'; 
+            if ($chasedate3>'2') { $a.= date('D j M Y', strtotime($chasedate3));} 
+            $a.= '</td><td>'.$row['invcomments'].'</td></tr>';
+            $tablecost=$tablecost+$cost+$invvatcost;
+        }
 
-$tablecost=$tablecost+$cost+$invvatcost; } 
+        $invcount=$num_rows;
+        $costcount=$tablecost;
 
-$invcount=$num_rows;
-$costcount=$tablecost;
 
+        $tablecost= number_format($tablecost, 2, '.', ','); 
 
-$tablecost= number_format($tablecost, 2, '.', ','); 
 
+        $bview.='<table class="acc" >
+        <tbody>
+        <caption> <h3>'.$num_rows.' Overdue Invoices (&'. $globalprefrow['currencysymbol']. $tablecost.')</h3></caption>'. 
+        $a. '</tbody></table><div class="vpad line"></div>';
+
+
+        $toptext.=' '.$num_rows.' Overdue Invoices (&'. $globalprefrow['currencysymbol']. $tablecost.'). ';
+    } // ends check for overdue
+
+
+    $todayDate = date("Y-m-d");// current date
+    //Add one day to today
+    $dateOneMonthAdded = strtotime(date("Y-m-d", strtotime($todayDate)) . "-1 month");
+    $dateOneMonthAdded = strtotime(date("Y-m-d", strtotime($todayDate)) . "");
+
+    $dateamonthago = date('Y-m-d H:i:s', $dateOneMonthAdded);
+
+    $tablecost='0';
+
+    $sql = "SELECT CompanyName, ref, invdate1, cost, invoicedept, invdue, CustomerID, invcomments FROM invoicing 
+    INNER JOIN Clients 
+    ON invoicing.client = Clients.CustomerID 
+    WHERE (`invoicing`.`paydate` =0 ) 
+    AND (`invoicing`.`invdue` > '$dateamonthago' ) 
+    ORDER BY `invoicing`.`invdue` ASC ";
+    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
+
+
+	$num_rows = mysql_num_rows($sql_result);
+	if ($num_rows>'0') {
+        $b= '
+        <tr>
+        <th scope="col">Invoice Ref</th>
+        <th scope="col">Client</th>
+        <th scope="col" class="rh" >Net Amount</th>
+        <th scope="col">Date Sent</th>
+        <th scope="col">Due Date</th>
+        <th scope="col">Comments</th>
+        </tr>';
+        $trow='';
+        $tempthree='';
+        
+        while ($row = mysql_fetch_array($sql_result)) {
+            extract($row);
+            $b.= '<tr><td>
+            <form action="view_all_invoices.php#" method="post"> 
+            <input type="hidden" name="viewtype" value="individualinvoice" >
+            <input type="hidden" name="formbirthday" value="'. date("U") .'">
+            <input type="hidden" name="page" value="" >
+            <input type="hidden" name="ref" value="'.$ref.'">
+            <input type="hidden" name="from" value="'. $inputstart.'">
+            <input type="hidden" name="to" value="'. $inputend.'">
+            <input type="hidden" name="clientid" value="'.$clientid.'" />
+            <button type="submit" >'.$row['ref'].'</button></form>
+            </td><td><a href="new_cojm_client.php?clientid='.$CustomerID.'">'.$CompanyName.'</a>';
+            
+            $tempdep=$row['invoicedept'];
+            if ($tempdep) {
+                $dclientname = mysql_result(mysql_query("SELECT depname FROM clientdep WHERE depnumber='$tempdep' LIMIT 0,1"), '0');
+                $b.= ' (<a href="new_cojm_department.php?depid='.$tempdep.'">'.$dclientname.'</a>) ';
+            }
+
+            // $tablecost= number_format($tablecost, 2, '.', ''); 
+
+            $b.= '</td>
+            <td class="rh">&'. $globalprefrow['currencysymbol'] .number_format(($cost), 2, '.', ','). '</td>
+            <td>'. date('D j M Y', strtotime($invdate1)).'</td><td>'. date('D j M Y', strtotime($invdue)). 
+            '</td><td>'.$row['invcomments'].'</td></tr>';
+            $tablecost=$tablecost+$cost;
+        }
+
+        $intimecost= number_format($tablecost, 2, '.', ',');
+
+        $bview.= '<div class="vpad"></div>
+        <div class="ui-widget">	<div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
+        <table  class="acc" >
+        <caption><h3>'.$num_rows.' within time limit (&'. $globalprefrow['currencysymbol']. ($intimecost).')</h3></caption>
+        <tbody>'.$b.'</tbody></table>
+        </div></div>
+        <div class=" vpad line"></div>';
+
+
+        $toptext.=' '.($num_rows+$invcount).' in total, (&'. $globalprefrow['currencysymbol']. number_format(($costcount+$tablecost), 2, '.', ',').'). ';
+
+    } // ends check for rows
+
 
-$bview=$bview.'<table class="acc" >
-<tbody>
-<caption> <h3>'.$num_rows.' Overdue Invoices (&'. $globalprefrow['currencysymbol']. $tablecost.')</h3></caption>
-'. $a. '</tbody></table><div class="vpad line"></div>';
 
 
-$toptext=$toptext.' '.$num_rows.' Overdue Invoices (&'. $globalprefrow['currencysymbol']. $tablecost.'). ';
 
 
 
-} // ends check for overdue
 
+    // starts check for awaiting invoicing
+    $awcount='';
+    $sql = "SELECT CustomerID, CompanyName, lastinvoicedate FROM Clients ORDER BY lastinvoicedate";
+    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
+    while ($row = mysql_fetch_array($sql_result)) {
+        extract($row);
+        $CustomerID = $row['CustomerID'];
+        $lastdate = "
+        SELECT collectiondate FROM Orders 
+        WHERE CustomerID=$CustomerID 
+        AND status < '108' 
+        AND status > '98' 
+        ORDER BY collectiondate DESC 
+        LIMIT 0 , 1";
 
+        $sql_result_last = mysql_query($lastdate,$conn_id) or die(mysql_error());
+        while ($lastrow = mysql_fetch_array($sql_result_last)) {
+            extract($lastrow); 
+            $tarow= '<tr><td><a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'.$row['CompanyName'].'</a></td><td>';
+            if ($row['lastinvoicedate']<>'0000-00-00 00:00:00') {
+                $tarow=$tarow.date('D j M Y', strtotime($row['lastinvoicedate']));
+            }
 
+            $tarow.='</td><td>';
 
 
+            $firstdate = mysql_result(mysql_query("SELECT collectiondate FROM Orders WHERE CustomerID=$CustomerID AND status < '108' AND status > '98' ORDER BY collectiondate ASC LIMIT 0 , 1"), '0');
+            $tarow.=date('D j M Y', strtotime($firstdate));
+            $tarow.='</td><td>';
+            $tarow.= date('D j M Y', strtotime($lastrow['collectiondate'])).'</td><td class="rh">  &'. $globalprefrow['currencysymbol']; $temptwo='';
+            $tempdate=$lastrow['collectiondate']; 
+            $sqlcostage = "SELECT FreightCharge, vatcharge FROM Orders WHERE CustomerID = '$CustomerID' 
+            AND status > '98' 
+            AND status < '108' 
+            AND collectiondate <= '$tempdate' ";
 
 
+            $sql_resultcost = mysql_query($sqlcostage,$conn_id)  or mysql_error(); 
+            while ($costrow = mysql_fetch_array($sql_resultcost)) {
+                extract($costrow);
+                $temptwo=$temptwo+$costrow['FreightCharge']+$costrow['vatcharge']; $awcount++;
+            }
 
-
-$todayDate = date("Y-m-d");// current date
-//Add one day to today
-$dateOneMonthAdded = strtotime(date("Y-m-d", strtotime($todayDate)) . "-1 month");
-$dateOneMonthAdded = strtotime(date("Y-m-d", strtotime($todayDate)) . "");
-
-$dateamonthago = date('Y-m-d H:i:s', $dateOneMonthAdded);
-
-
-
-
-$tablecost='0';
-
-
-
-
-
-
-
-
-
-   $sql = "SELECT CompanyName, ref, invdate1, cost, invoicedept, invdue, CustomerID, invcomments FROM invoicing 
-   INNER JOIN Clients 
-   ON invoicing.client = Clients.CustomerID 
-   WHERE (`invoicing`.`paydate` =0 ) 
-   AND (`invoicing`.`invdue` > '$dateamonthago' ) 
-   ORDER BY `invoicing`.`invdue` ASC ";
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
-
-
-	 $num_rows = mysql_num_rows($sql_result);
-	 if ($num_rows>'0') {
-
-
-$b= '
-<tr>
-<th scope="col">Invoice Ref</th>
-<th scope="col">Client</th>
-<th scope="col" class="rh" >Net Amount</th>
-<th scope="col">Date Sent</th>
-<th scope="col">Due Date</th>
-<th scope="col">Comments</th>
-</tr>
-';
-
-
-$trow='';
-$tempthree='';
-
-
-while ($row = mysql_fetch_array($sql_result)) { extract($row); 
-
-
-
-
-$b=$b. '<tr><td>
-
-<form action="view_all_invoices.php#" method="post"> 
-<input type="hidden" name="viewtype" value="individualinvoice" >
-<input type="hidden" name="formbirthday" value="'. date("U") .'">
-<input type="hidden" name="page" value="" >
-<input type="hidden" name="ref" value="'.$ref.'">
-<input type="hidden" name="from" value="'. $inputstart.'">
-<input type="hidden" name="to" value="'. $inputend.'">
-<input type="hidden" name="clientid" value="'.$clientid.'" />
-<button type="submit" >'.$row['ref'].'</button></form>
-
-
-</td><td><a href="new_cojm_client.php?clientid='.$CustomerID.'">'.$CompanyName.'</a>';
-
-
-
-$tempdep=$row['invoicedept'];
-
-if ($tempdep) {
-
-$dclientname = mysql_result(mysql_query("SELECT depname FROM clientdep WHERE depnumber='$tempdep' LIMIT 0,1"), '0');
-$b=$b. ' (<a href="new_cojm_department.php?depid='.$tempdep.'">'.$dclientname.'</a>) ';
-	
-}
-
-// $tablecost= number_format($tablecost, 2, '.', ''); 
-
-$b=$b. '</td>
-<td class="rh">&'. $globalprefrow['currencysymbol'] .number_format(($cost), 2, '.', ','). '</td>
-<td>'. date('D j M Y', strtotime($invdate1)).'</td><td>'. date('D j M Y', strtotime($invdue)). 
-'</td><td>'.$row['invcomments'].'</td></tr>';
- $tablecost=$tablecost+$cost; }
-
-$intimecost= number_format($tablecost, 2, '.', ',');
-
-$bview=$bview. '<div class="vpad"></div>
-<div class="ui-widget">	<div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
-<table  class="acc" >
-<caption><h3>'.$num_rows.' within time limit (&'. $globalprefrow['currencysymbol']. ($intimecost).')</h3></caption>
-<tbody>'.$b.'</tbody></table>
-</div></div>
-<div class=" vpad line"></div>';
-
-
-$toptext=$toptext.' '.($num_rows+$invcount).' in total, (&'. $globalprefrow['currencysymbol']. number_format(($costcount+$tablecost), 2, '.', ',').'). ';
-
-} // ends check for rows
-
-
-
-
-
-
-
-
-// starts check for awaiting invoicing
-$awcount='';
-$sql = "SELECT CustomerID, CompanyName, lastinvoicedate FROM Clients ORDER BY lastinvoicedate";
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
-while ($row = mysql_fetch_array($sql_result)) { extract($row);
-$CustomerID = $row['CustomerID'];
-$lastdate = "
-SELECT collectiondate FROM Orders 
-WHERE CustomerID=$CustomerID 
-AND status < '108' 
-AND status > '98' 
-ORDER BY collectiondate DESC 
-LIMIT 0 , 1";
-
-$sql_result_last = mysql_query($lastdate,$conn_id) or die(mysql_error()); while ($lastrow = mysql_fetch_array($sql_result_last)) { extract($lastrow); 
-
-$tarow='';
-
-
-$tarow=$tarow. '<tr><td><a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'.$row['CompanyName'].'</a></td><td>';
-
-
-if ($row['lastinvoicedate']<>'0000-00-00 00:00:00') {
-$tarow=$tarow.date('D j M Y', strtotime($row['lastinvoicedate']));
-}
-
-$tarow=$tarow.'</td><td>';
-
-
-$firstdate = mysql_result(mysql_query("SELECT collectiondate FROM Orders WHERE CustomerID=$CustomerID AND status < '108' AND status > '98' ORDER BY collectiondate ASC LIMIT 0 , 1"), '0');
-$tarow=$tarow.date('D j M Y', strtotime($firstdate));
-
-
-$tarow=$tarow.'</td><td>';
-
-
-
-
-$tarow=$tarow. date('D j M Y', strtotime($lastrow['collectiondate'])).'</td><td class="rh">  &'. $globalprefrow['currencysymbol']; 
-
-
-
-
-$temptwo=''; $tempdate=$lastrow['collectiondate']; 
-$sqlcostage = "SELECT FreightCharge, vatcharge FROM Orders WHERE CustomerID = '$CustomerID' 
-AND status > '98' 
-AND status < '108' 
-AND collectiondate <= '$tempdate' ";
-
-
-$sql_resultcost = mysql_query($sqlcostage,$conn_id)  or mysql_error(); 
-while ($costrow = mysql_fetch_array($sql_resultcost)) { extract($costrow); $temptwo=$temptwo+$costrow['FreightCharge']+$costrow['vatcharge']; $awcount++; }
-
-$tempthree=$tempthree+$temptwo;
+            $tempthree=$tempthree+$temptwo;
  
-$temptwo= number_format($temptwo, 2, '.', ',');
-$tarow=$tarow. $temptwo; 
+            $temptwo= number_format($temptwo, 2, '.', ',');
+            $tarow.=$temptwo. '</td></tr>';
+
+            if ($temptwo<>'0.00') {
+                $trow=$trow.$tarow;
+            }
+        }
+    }
+
+    $tempthree= number_format($tempthree, 2, '.', ',');
 
 
 
+    $bview.= '
+    <div class="vpad"> </div>
+    <div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
+    <table class="acc" >
+    <caption>
+    <h3>'.$awcount.' Jobs Require Invoicing ('. '&'.$globalprefrow['currencysymbol'].$tempthree. ' Net ) </h3>
+    </caption>
+    <tbody>
+    <tr>
+    <th scope="col">Client</th>
+    <th scope="col">Last Invoiced</th>
+    <th scope="col">Invoice from</th>
+    <th scope="col">Last Collected</th>
+    <th scope="col" class="rh" title="Incl. VAT" >Net Amount</th>
+    </tr>'. $trow. '
+    <tr><td> </td><td> </td><td></td><td class="rh"> Total : </td><td class="rh"> &'.$globalprefrow['currencysymbol'].$tempthree.'</td></tr>
+    </tbody></table>
+    </div>';
 
-$tarow=$tarow. '</td></tr>';
-
-if ($temptwo<>'0.00')
-{ $trow=$trow.$tarow;
-}
-}
-}
-
-$tempthree= number_format($tempthree, 2, '.', ',');
-
-
-
-$bview=$bview. '
-<div class="vpad"> </div>
-<div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
-<table class="acc" >
-<caption>
-<h3>'.$awcount.' Jobs Require Invoicing ('. '&'.$globalprefrow['currencysymbol'].$tempthree. ' Net ) </h3>
-</caption>
-<tbody>
-<tr>
-<th scope="col">Client</th>
-<th scope="col">Last Invoiced</th>
-<th scope="col">Invoice from</th>
-<th scope="col">Last Collected</th>
-<th scope="col" class="rh" title="Incl. VAT" >Net Amount</th>
-</tr>'. $trow. '
-<tr><td> </td><td> </td><td></td><td class="rh"> Total : </td><td class="rh"> &'.$globalprefrow['currencysymbol'].$tempthree.'</td></tr>
-</tbody></table>
-</div>';
-
-$toptext=$toptext.' '.$awcount.' Jobs awaiting Invoicing (&'.$globalprefrow['currencysymbol'].$tempthree.' Net ) ';
+    $toptext.=' '.$awcount.' Jobs awaiting Invoicing (&'.$globalprefrow['currencysymbol'].$tempthree.' Net ) ';
 
 } // ends page==''
 
-
-// Platform 11: 1W51 (Rear) - 2P05 (Front)
-// Platform 12: 2T13 (Rear) - 1W53 (Front)
+if ($viewtype=='individualinvoice') { $hasforms='1'; } // adds a page timeout
 
 
 
 
-if ($viewtype=='individualinvoice') {   $hasforms='1';   }
-
-
-
-$adminmenu ="0";
 $filename='view_all_invoices.php';
 
 ?><!doctype html>
@@ -507,8 +413,8 @@ $filename='view_all_invoices.php';
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
 </head>
 <body>';
-
- include "cojmmenu.php"; 
+$adminmenu ="0";
+include "cojmmenu.php"; 
 
 
 
@@ -521,33 +427,26 @@ echo '<div class="Post">
 Invoices Sent From <input class="ui-state-highlight ui-corner-all pad" size="11" type="text" name="from" value="'. $inputstart.'" id="rangeBa" />			
 To <input class="ui-state-highlight ui-corner-all pad" size="11" type="text" name="to" value="'. $inputend.'" id="rangeBb" />			
 <input type="hidden" name="formbirthday" value="'. date("U").'">
-';
-
-
-// echo ' clientid '.$clientid.'<br />';
-
-
-echo '
 Client : <select id="combobox" class="ui-state-highlight" name="clientid">
 <option value="">Select one...</option>
-<option '; if ($clientid=="all") {echo ' SELECTED ';} echo ' value="all">All</option>';
+<option ';
+
+if ($clientid=="all") {echo ' SELECTED ';} echo ' value="all">All</option>';
 
 
-if ($showinactive>'0') { 
-$query = "SELECT CustomerID, CompanyName FROM Clients ORDER BY CompanyName";
+if ($showinactive>'0') {
+    $query = "SELECT CustomerID, CompanyName FROM Clients ORDER BY CompanyName";
 } else {
-$query = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName";
+    $query = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName";
 }
 $result_id = mysql_query ($query, $conn_id);
-while (list ($CustomerID, $CompanyName) = mysql_fetch_row ($result_id))
-{
+while (list ($CustomerID, $CompanyName) = mysql_fetch_row ($result_id)) {
 	$CustomerID = htmlspecialchars ($CustomerID);
 	$CompanyName = htmlspecialchars ($CompanyName);
-		print"<option ";
-	if ($CustomerID == $clientid) {echo "SELECTED "; } ;
-		print ("value=\"$CustomerID\">$CompanyName</option>\n");
+	print"<option ";
+	if ($CustomerID == $clientid) { echo "SELECTED "; }
+    print ("value=\"$CustomerID\">$CompanyName</option>\n");
 }
-
 echo '</select>	';
 
 
@@ -555,30 +454,22 @@ echo ' Show Inactive Clients? <input type="checkbox" name="showinactive" value="
  if ($showinactive>0) { echo 'checked';} 
 echo ' /> ';
 
-
 $query = "SELECT depnumber, depname FROM clientdep WHERE associatedclient = '$clientid' ORDER BY depname"; 
 $result_id = mysql_query ($query, $conn_id) or mysql_error();  
-
 $sumtot=mysql_affected_rows();
 
-// echo $sumtot.' Department(s) : '.$viewselectdep;	
 
 if ($sumtot>'0') {
-
-echo '<select class="ui-state-default ui-corner-left" name="viewselectdep" >
-<option value="">All Departments</option>';
- while (list ($CustomerIDlist, $CompanyName) = mysql_fetch_row ($result_id)) { 
- 
- $CustomerID = htmlspecialchars ($CustomerID); 
-$CompanyName = htmlspecialchars($CompanyName); 
-print'<option ';
-
-if ($CustomerIDlist==$viewselectdep) { echo ' SELECTED '; }
-
-echo 'value= "'.$CustomerIDlist.'" >'.$CompanyName.'</option>';} 
-
-echo '</select> ';
-
+    echo '<select class="ui-state-default ui-corner-left" name="viewselectdep" >
+    <option value="">All Departments</option>';
+    while (list ($CustomerIDlist, $CompanyName) = mysql_fetch_row ($result_id)) {
+        $CustomerID = htmlspecialchars ($CustomerID); 
+        $CompanyName = htmlspecialchars($CompanyName); 
+        print'<option ';
+        if ($CustomerIDlist==$viewselectdep) { echo ' SELECTED '; }
+        echo 'value= "'.$CustomerIDlist.'" >'.$CompanyName.'</option>';
+    }
+    echo '</select> ';
 
 } else { $viewselectdep=''; }  // ends end of check for sumtot
 
@@ -593,22 +484,10 @@ echo '
 <option  value="normal">Normal View</option>
 <option ';
 
-if ($clientview=='client') { 
-
-echo ' SELECTED="SELECTED" ';
-
-}
+if ($clientview=='client') { echo ' SELECTED="SELECTED" '; }
 
 echo ' value="client">Copy / Paste </option>
 </select>
-
-	';
-
-
-
-
-
-echo '
 <button type="submit"> Search </button><br />
 '.$toptext.'
 <input type="hidden" name="viewtype" value="searchinvoice" />
@@ -1327,23 +1206,6 @@ echo '
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// echo $viewtype;
 
 if ($viewtype=='searchinvoice' ) {
 

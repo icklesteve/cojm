@@ -2178,71 +2178,56 @@ $alerttext.='<p>Payment details NOT removed on Invoice ref '.$invoiceref.'</p>';
 
 
     if ($page=='deletegps') {
-if ((isset($_POST['newcyclist'])) and (isset($_POST['gpsdeletedate']))) {
-$infotext.='<br />Delete Tracking Positions ' .$_POST['newcyclist'].'<br />';
-
-
-// $infotext.='gpsdeletedate = '.$_POST['gpsdeletedate'];
-
-$startdate=$_POST['gpsdeletedate'];
-$startdate=$startdate.' 00:00:00';
-$infotext.='<br /> Posted Start date : '.$startdate; 
-$startdate=strtotime($startdate); 
-$infotext.='<br /> Start date : '.$startdate; 
-
-
-$finishdate=$_POST['gpsdeletedate'];
-$finishdate=$finishdate.' 23:59:59';
-$infotext.='<br /> Posted finish date : '.$finishdate; 
-$finishdate=strtotime($finishdate); 
-$infotext.='<br /> Finish date : '.$finishdate; 
-
-
-
-
-$sql="DELETE FROM instamapper WHERE device_key=".$_POST['newcyclist']." AND timestamp > ".$startdate." AND timestamp < ".$finishdate;
-$result = mysql_query($sql, $conn_id);
-
-if (mysql_affected_rows()>'0') {
-	
-	
-
-$alerttext.="". mysql_affected_rows().' tracking positions deleted.<br>';
-$infotext.="". mysql_affected_rows().' tracking positions deleted.<br>';
-
-
-
-$testfile="cache/jstrack/".date('Y/m', $startdate).'/'.date('Y_m_d', $startdate).'_'.$_POST['newcyclist'].'.js';
-$infotext.=" 2343 test file : ". $testfile.' <br />';
-if (!file_exists($testfile)) {
- $infotext.= ' <br /> cj 2349 Cache does not exist, no action needed. '.$testfile;
-} else {
-$infotext.=  ' <br /> cj 2351 Cache exists, needs deleting. '.$testfile;	
-unlink($testfile);
-if (file_exists($testfile)) {
-	 $infotext.=  ' not deleted ';
-}
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-} else { $pagetext.='Tracking data unchanged.'; }
-
-
-
-}
-}
+        if ((isset($_POST['newcyclist'])) and (isset($_POST['gpsdeletedate']))) {
+            $infotext.='<br />Delete Tracking Positions ' .$_POST['newcyclist'].'<br />';
+            $thisCyclistID = $_POST['newcyclist'];
+            $stmt = $dbh->prepare("SELECT trackerid FROM Cyclist WHERE CyclistID=?");
+            $stmt->execute([$thisCyclistID]);
+            $device_key = $stmt->fetchColumn();
+            $infotext.= ' thiscyclistid= '. $thisCyclistID .' dev key is '.$device_key.'. ';
+    
+            if ($device_key>0) {
+                // $infotext.='gpsdeletedate = '.$_POST['gpsdeletedate'];
+        
+                $startdate=$_POST['gpsdeletedate'];
+                $startdate=$startdate.' 00:00:00';
+                $infotext.='<br /> Posted Start date : '.$startdate; 
+                $startdate=strtotime($startdate); 
+                $infotext.='<br /> Start date : '.$startdate; 
+        
+        
+                $finishdate=$_POST['gpsdeletedate'];
+                $finishdate=$finishdate.' 23:59:59';
+                $infotext.='<br /> Posted finish date : '.$finishdate; 
+                $finishdate=strtotime($finishdate); 
+                $infotext.='<br /> Finish date : '.$finishdate; 
+        
+                $sql="DELETE FROM instamapper WHERE device_key=".$device_key." AND timestamp > ".$startdate." AND timestamp < ".$finishdate;
+                $result = mysql_query($sql, $conn_id);
+        
+                if (mysql_affected_rows()>'0') {
+                    $alerttext.="". mysql_affected_rows().' tracking positions deleted.<br>';
+                    $infotext.="". mysql_affected_rows().' tracking positions deleted.<br>';
+        
+                    $testfile="cache/jstrack/".date('Y/m', $startdate).'/'.date('Y_m_d', $startdate).'_'.$device_key.'.js';
+                    $infotext.=" 2343 test file : ". $testfile.' <br />';
+                    if (!file_exists($testfile)) {
+                        $infotext.= ' <br /> cj 2349 Cache does not exist, no action needed. '.$testfile;
+                    } else {
+                        $infotext.=  ' <br /> cj 2351 Cache exists, needs deleting. '.$testfile;	
+                        unlink($testfile);
+                        if (file_exists($testfile)) {
+                            $infotext.=  ' not deleted ';
+                        }
+                    }
+        
+                } else {
+                    $pagetext.='Tracking data unchanged.';
+                    $infotext.=' Tracking data unchanged.';
+                }
+            }
+        }
+    }
 
 
 } // finishes epoch time

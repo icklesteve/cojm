@@ -56,15 +56,55 @@ echo '<div id="Post" class="Post">';
 $fwrcost='0.00';
 $html='';
 
- $sql = "SELECT * FROM Orders 
- INNER JOIN Clients 
- INNER JOIN Services 
- INNER JOIN Cyclist 
- ON Orders.CustomerID = Clients.CustomerID 
- AND Orders.ServiceID = Services.ServiceID 
- AND Orders.CyclistID  = Cyclist.CyclistID 
- WHERE (`Orders`.`status` =86 ) 
- ORDER BY `Orders`.`ShipDate` ";
+ $sql = "
+ SELECT 
+p.ID,
+p.status,
+p.ShipDate,
+p.ShipPC,
+p.CollectPC,
+p.tofreeaddress,
+p.fromfreeaddress,
+p.opsmaparea,
+p.opsmapsubarea,
+p.CustomerID,
+p.CyclistID,
+p.jobcomments,
+p.privatejobcomments,
+u.CompanyName,
+p.orderdep,
+l.depname,
+p.numberitems,
+t.Service,
+p.FreightCharge,
+p.vatcharge,
+p.CyclistID,
+r.cojmname,
+y.opsname,
+y.descrip,
+z.opsname AS `subareaname`,
+z.descrip AS `subareadescrip`,
+e.type
+
+FROM Orders p
+INNER JOIN Clients u ON p.CustomerID = u.CustomerID
+INNER JOIN Services t ON p.ServiceID = t.ServiceID
+left join clientdep l ON p.orderdep = l.depnumber
+INNER JOIN Cyclist r ON p.CyclistID = r.CyclistID
+left join opsmap y ON p.opsmaparea = y.opsmapid
+left join opsmap z on p.opsmapsubarea = z.opsmapid
+left join cojm_pod e ON p.publictrackingref = e.id
+
+WHERE `p`.`status` = 86
+ORDER BY `p`.`ShipDate` ASC";
+ 
+
+
+
+//      $query = "SELECT * FROM cojm_pod WHERE id = :getid LIMIT 0,1";
+
+
+ 
  $sql_result = mysql_query($sql,$conn_id)
      or die(mysql_error()); 
 	 $sumtot=mysql_affected_rows();
@@ -77,43 +117,37 @@ if ($sumtot>"0") {
     while ($row = mysql_fetch_array($sql_result)) {
         extract($row);
         $numberitems= trim(strrev(ltrim(strrev($numberitems), '0')),'.');
-        $rhtml.='<tr><td><a target="_blank" class="newwin" href="order.php?id='. $ID.'">'. $ID.'</a> ';
+        $rhtml.='<tr><td><a target="_blank" class="newwin" href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> ';
         // if different month show month AND date
-        if (date('M')<>(date('M', strtotime($ShipDate)))) { 
-            $rhtml.= date('H:i A D jS M', strtotime($ShipDate));
+        if (date('M')<>(date('M', strtotime($row['ShipDate'])))) { 
+            $rhtml.= date('H:i A D jS M', strtotime($row['ShipDate']));
         } else {
-            $rhtml.= date('H:i A D jS', strtotime($ShipDate));
+            $rhtml.= date('H:i A D jS', strtotime($row['ShipDate']));
         }
         
         $rhtml.= '</td><td>';
         
-        if ((trim($fromfreeaddress)) or (trim($row['CollectPC']))) {
+        if ((trim($row['fromfreeaddress'])) or (trim($row['CollectPC']))) {
             $linkCollectPC = strtoupper(str_replace(' ','+',$row['CollectPC'])); 
-            $rhtml.= 'PU '.$fromfreeaddress.' <a target="_blank" class="newwin" href="http://maps.google.com/maps?q='. 
+            $rhtml.= 'PU '.$row['fromfreeaddress'].' <a target="_blank" class="newwin" href="http://maps.google.com/maps?q='. 
             $linkCollectPC. '">'. $row['CollectPC'].'</a> ';
         }
         
-        if (((trim($fromfreeaddress)) or (trim($row['CollectPC']))) and ((trim($tofreeaddress)) or (trim($row['ShipPC'])))) {
+        if (((trim($row['fromfreeaddress'])<>'') or (trim($row['CollectPC'])<>'')) and ((trim($row['tofreeaddress'])<>'') or (trim($row['ShipPC'])<>''))) {
             $rhtml=$rhtml. '<br />';
         }
         
-        if ((trim($tofreeaddress)) or (trim($row['ShipPC']))) {
+        if ((trim($row['tofreeaddress'])) or (trim($row['ShipPC']))) {
             $rhtml.= 'To ';
             $linkShipPC = strtoupper(str_replace(' ','+',$row['ShipPC']));
-            $rhtml.= ''.$tofreeaddress.' <a target="_blank" class="newwin" href="http://maps.google.com/maps?q='. 
+            $rhtml.= ''.$row['tofreeaddress'].' <a target="_blank" class="newwin" href="http://maps.google.com/maps?q='. 
             $linkShipPC.'">'. $row['ShipPC'].'</a>';
         }
         
         if ($row['opsmaparea']) {
-            $opsmaparea=$row['opsmaparea'];
-            $areaquery = "SELECT opsmapid, opsname, descrip, istoplayer FROM opsmap WHERE opsmapid='$opsmaparea' ";
-            $areaqueryres = mysql_query ($areaquery, $conn_id);
-            
-            while (list ($listopsmapid, $listopsname, $descrip, $istoplayer ) = mysql_fetch_row ($areaqueryres)) {
-                $rhtml.= '<br/>To '.$listopsname.' ';
-                if ($row['opsmapsubarea']) {
-                    $rhtml.=' ( Sub Area ) '. $row['opsmapsubarea'];
-                }
+            $rhtml.= ' To '.$row['opsname'].' ';
+            if ($row['opsmapsubarea']) {
+                $rhtml.=' ( '. $row['subareaname'].' ) ';
             }
         }
         
@@ -121,11 +155,8 @@ if ($sumtot>"0") {
         <td><a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'.$row['CompanyName'].'</a>';
         
         if ($row['orderdep']) {
-            $orderdep=$row['orderdep'];
-            $depquery="SELECT depname FROM clientdep WHERE depnumber = '$orderdep' LIMIT 1";
-            $result=mysql_query($depquery); $drow=mysql_fetch_array($result);
-            $rhtml.=' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$drow['depname'].'</a>) ';
-        } // ends department check
+            $rhtml.=' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$row['depname'].'</a>) ';
+        }
  
         $rhtml.='</td>
         <td>'.formatmoney($row["numberitems"]).' x '. $row['Service'].'</td>
@@ -138,24 +169,18 @@ if ($sumtot>"0") {
             
         $rhtml.='</td></td><td>';
 
-
-        $query = "SELECT * FROM cojm_pod WHERE id = :getid LIMIT 0,1";
-        $stmt = $dbh->prepare($query);
-        $stmt->bindParam(':getid', $row['publictrackingref'], PDO::PARAM_INT); 
-        $stmt->execute();
-        $total = $stmt->rowCount();
-        if ($total=='1') {
+        if ($row['type']<>'') {
             $rhtml.=' <img src="images/noteb_pod_20x21.png" alt="POD" title="POD" > ';
         }
         
-        $rhtml.= ''.$jobcomments.' '.$privatejobcomments.'</tr>';
+        $rhtml.= ''.$row['jobcomments'].' '.$row['privatejobcomments'].'</tr>';
         $fwrcost=$fwrcost+$row['FreightCharge']+$row['vatcharge'];
     } // end row loop
 
 
     $html= '
-    <table style="width:100%;" class="acc">
-    <tbody>
+    <table class="acc" id="fwr">
+    <thead>
     <tr>
     <th STYLE="min-width:  130px">Delivery Time</th>
     <th scope="col">To / From</th>
@@ -164,7 +189,9 @@ if ($sumtot>"0") {
     <th scope="col">Ex VAT Cost</th>
     <th scope="col">'.$globalprefrow['glob5'].'</th>
     <th scope="col">Comments</th>
-    </tr>';
+    </tr>
+    </thead>
+    <tbody>';
 
 
     $html.=$rhtml;
@@ -230,42 +257,7 @@ echo '<strong>Tracking last updated</strong> '.date('H:i A, l jS M', $timestamp)
     </div>		
     <div class="vpad"> </div>
     <div class="line "></div>
-    <div class="vpad"> </div>
-    ';
-
-
-
-
-// jobs with customer id at 0
-$sql = "SELECT * FROM Orders WHERE `Orders`.`CustomerID`=0 ";
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
-$sumtot=mysql_affected_rows();
-if ($sumtot>0)  { 
-    echo '<div class="vpad"> </div>
-        <div class="ui-widget">
-		<div class="ui-state-error ui-corner-all" style="padding: 0.5em;"> 
-		<p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-		<strong> '.$sumtot.' Job(s) with Customer ID at 0 </strong> 
-    ';
-        
-    while ($row = mysql_fetch_array($sql_result)) {
-        extract($row);
-        echo '<div class="vpad"> </div>'. $ID.'';
-    }
-    echo '</p></div></div>';
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
+    <div class="vpad"> </div> ';
 
 
 
@@ -287,7 +279,7 @@ echo $html.'<div class="vpad"> </div>';
 
 
 // cyclist birthdays
-$sql = "SELECT * FROM Cyclist 
+$sql = "SELECT cojmname, DOB FROM Cyclist 
 	WHERE isactive='1' AND CyclistID>1 AND DOB > 0
 	ORDER BY `DOB` ";
 
@@ -536,6 +528,21 @@ echo $numberitems.' x '. $Service.'</td><td>&'. $globalprefrow['currencysymbol']
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+if ($globalprefrow['showdebug']>0) {
+
+
+
 // jobs with no collection or delivery date
 $sql = "SELECT ID FROM Orders 
 	WHERE (((`Orders`.`status` >99 ) AND (`Orders`.`collectiondate` <110 ))
@@ -599,6 +606,25 @@ if ($sumtot>0) {
 
 
 
+// jobs with customer id at 0
+$sql = "SELECT * FROM Orders WHERE `Orders`.`CustomerID`=0 ";
+$sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+$sumtot=mysql_affected_rows();
+if ($sumtot>0)  { 
+    echo '<div class="vpad"> </div>
+        <div class="ui-widget">
+		<div class="ui-state-error ui-corner-all" style="padding: 0.5em;"> 
+		<p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+		<strong> '.$sumtot.' Job(s) with Customer ID at 0 </strong> 
+    ';
+        
+    while ($row = mysql_fetch_array($sql_result)) {
+        extract($row);
+        echo '<div class="vpad"> </div>'. $ID.'';
+    }
+    echo '</p></div></div>';
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -612,8 +638,6 @@ if ($sumtot>0) {
 
 
 
-
-if ($globalprefrow['showdebug']>0) {
 
 
 
@@ -678,22 +702,6 @@ echo '</tbody></table><div class="line"></div>';
 
 
 } // ends check if debug mode
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -789,11 +797,6 @@ if ($flag==1) {
 
 
 
-
-
- 
- 
-  // jobs with working window times when unchecked, or ww checked and no times
 $sql = "SELECT * FROM Orders 
  WHERE `Orders`.`status` <>'30'  
  AND `Orders`.`status` <>'40'
@@ -830,6 +833,11 @@ if ($sumtot>0)  {
  
  
  
+
+// jobs with status as invoiced but no invoice ref for jobs within the last year
+
+if ($globalprefrow['showdebug']>0) {
+
  
  
  
@@ -869,11 +877,6 @@ if ($sumtot>'0')  {
 
 
 
-// jobs with status as invoiced but no invoice ref for jobs within the last year
-
-if ($globalprefrow['showdebug']>0) {
-
-
  $sql = "SELECT * FROM Orders 
  WHERE `Orders`.`status`>'100' 
  AND `Orders`.`invoiceref`='0' 
@@ -894,16 +897,51 @@ echo '<br />
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+
+
+
+
+
+
+
+
+// JOBS WITH DODGY DEPARTMENT
+
+$sql="SELECT * FROM `Orders` INNER JOIN `clientdep` WHERE `Orders`.`orderdep` = `clientdep`.`depnumber` ";
+
+// $sql="SELECT * FROM `Orders` ";
+
+
+
+$sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+$sumtot=mysql_affected_rows();
+if ($sumtot>'0') {
+    while ($row = mysql_fetch_array($sql_result)) {
+        extract($row);
+        if ($row['orderdep']>'0') {
+    
+    
+            if ($row['CustomerID']<>$row['associatedclient']) { 
+                echo '
+                <br />
+                <div class="ui-widget">
+                <div class="ui-state-error ui-corner-all" style="padding: 1em;"> 
+                <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+                <strong> Job with wrong department </strong> '; 
+    
+                echo '<br />'.$row['ID'].' orderclient :'.$row['CustomerID'];
+    
+                echo ' '.$row['associatedclient'];
+    
+                echo '</p></div></div>';
+            }
+        }
+        //  echo '<br />'. $row['ID'].' '.$row['associatedclient'].' '.$row['CustomerID'];
+    } 
+}
+
+
 } // ends check if debug mode
-
-
-
-
-
-
-
-
-
 
 
 
@@ -926,7 +964,7 @@ while ($row = mysql_fetch_array($sql_result)) {
  
 
 
-if ($cronissue=='10') { 
+if ($cronissue=='10') {
 
     // echo $oldtime.' ';
     // echo date('U', strtotime($oldtime));
@@ -1017,59 +1055,6 @@ if ($cronissue=='10') {
     echo $transfer_backup_infotext;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// JOBS WITH DODGY DEPARTMENT
-
-$sql="SELECT * FROM `Orders` INNER JOIN `clientdep` WHERE `Orders`.`orderdep` = `clientdep`.`depnumber` ";
-
-// $sql="SELECT * FROM `Orders` ";
-
-
-
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
-$sumtot=mysql_affected_rows();
-if ($sumtot>'0') {
-    while ($row = mysql_fetch_array($sql_result)) {
-        extract($row);
-        if ($row['orderdep']>'0') {
-    
-    
-            if ($row['CustomerID']<>$row['associatedclient']) { 
-                echo '
-                <br />
-                <div class="ui-widget">
-                <div class="ui-state-error ui-corner-all" style="padding: 1em;"> 
-                <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-                <strong> Job with wrong department </strong> '; 
-    
-                echo '<br />'.$row['ID'].' orderclient :'.$row['CustomerID'];
-    
-                echo ' '.$row['associatedclient'];
-    
-                echo '</p></div></div>';
-            }
-        }
-        //  echo '<br />'. $row['ID'].' '.$row['associatedclient'].' '.$row['CustomerID'];
-    } 
-}
-
-
-
-
 
 
 

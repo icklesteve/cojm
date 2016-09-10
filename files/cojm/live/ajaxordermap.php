@@ -666,7 +666,7 @@ if (($sumtot>'0.5') or ($row['opsmaparea'] <>'')) {
     if ($mainareaname)  {
         echo '<p>'.$mainareaname;
         if ($mainareadescrip)  {
-            echo '('.$mainareadescrip.')';
+    //        echo '('.$mainareadescrip.')';
         } echo '</p>';
     }
  
@@ -674,7 +674,7 @@ if (($sumtot>'0.5') or ($row['opsmaparea'] <>'')) {
     if ($subareaname) {
         echo '<p> '.$subareaname;
         if ($subareadescrip) {
-            echo ' ('.$subareadescrip.') ';
+    //        echo ' ('.$subareadescrip.') ';
         }
         echo '</p>';
     }
@@ -826,7 +826,6 @@ function currentpositionsuccess(position) {
 }
  
  
- 
 function zeroPad(num, places) {
   var zero = places - num.toString().length + 1;
   return Array(+(zero > 0 && zero)).join("0") + num;
@@ -849,12 +848,8 @@ mymarker.setTitle(mytitle);
 		    $("#mylocation").css({ opacity: "1"});
   }
   
-  
-  
-  
+
 function errorCallback_highAccuracy(position) {
-//	 alert(" function every min position failed fired ");	 
-//	   $("#mylocation").hide();
 	     $("#mylocation").css({ opacity: "0.4"});
 		 $('#mylocation').prop('title', 'Unable to locate you');
 }
@@ -881,7 +876,6 @@ function center_map(size) {
         $("#map-container").css({
             top: "0" });
 	<?php
-	
 	if ($areaid) { // set fill options for print view
         echo 'poly'.$areaid.'.setOptions({
             fillColor: "white",
@@ -889,7 +883,6 @@ function center_map(size) {
         });';
     }	
 		?>
-        
         google.maps.event.trigger(map, "resize");
         map.setCenter(lastPos);
         return true;
@@ -962,7 +955,6 @@ $("#printbutton").click(function() {
   });
 	
 $("#btn-enter-full-screen").click(function() {
-
 
 
     var menuheight=0;

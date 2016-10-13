@@ -133,7 +133,6 @@ $cojmid=$id;
 <title><?php echo $id; ?> COJM</title>
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <link id="pagestyle" rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
-<link rel="stylesheet" href="css/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
 <style>
 
@@ -213,9 +212,9 @@ var initialjobcomments<?php if ($row["jobcomments"]) { echo '=1'; } ?>;
 var initialprivatejobcomments<?php if ($row["privatejobcomments"]) { echo '=1'; } ?>;
 </script>
 
-<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;key=<?php echo $globalprefrow['googlemapapiv3key']; ?>" type="text/javascript"></script>
-<script src="js/order.js" type="text/javascript"></script>
-<script src="js/richmarker.js" type="text/javascript"></script>
+<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;key=<?php echo $globalprefrow['googlemapapiv3key']; ?>" type="text/javascript"defer ></script>
+<script src="js/order.js" type="text/javascript" defer></script>
+<script src="js/richmarker.js" type="text/javascript" defer></script>
 <style>
 /* starts spinner on page load, only for ajax pages  */
 #toploader { display:block; }
@@ -232,7 +231,10 @@ include "cojmmenu.php";
 
 if ($row['ID']) {
 
-    echo '<div id="Post" class="Post lh24 clearfix">';
+    echo '<div id="Post" class="Post lh24 clearfix';
+    if ($row['status']>99) { echo ' complete'; }
+    
+    echo '">';
 
     if ($row['status']<'100') { // get rid of this when fully ajaxed :-)
     echo '<form action="order.php#" method="post" accept-charset="utf-8" id="allorder" novalidate>
@@ -1640,17 +1642,16 @@ $(document).ready(function() {
 
 
 
-
-
-
-
 echo '
 
 }); // ends document ready
 
 </script>
-';
 
+
+
+<link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
+';
 
 include "footer.php";
 mysql_close();

@@ -255,13 +255,9 @@ echo '</select> ';
 <fieldset title="Leave Blank to include All Jobs" ><label for="fromdate" class="fieldLabel"> Date to Invoice From</label> 
 <input class="ui-state-default ui-corner-all caps" type="text" id="fromdate" size="12" name="fromdate"></fieldset>
 
-
-<fieldset><label for="expensedate" class="fieldLabel"> Date to Invoice Until</label> 
+<fieldset title="Including jobs on selected date"><label for="invoicetodate" class="fieldLabel"> Date to Invoice up-to </label> 
 <input class="ui-state-default ui-corner-all caps" type="text" value="<?php echo date('d-m-Y', strtotime('now')); ?>"
-
-
-
-id="expensedate" size="12" name="expensedate"></fieldset>
+id="invoicetodate" size="12" name="invoicetodate"></fieldset>
 
 <fieldset><label for="existinginvoiceref" class="fieldLabel"> Existing invoice ref ? </label>
 <input placeholder="Existing Invoice Ref" type="text" class="ui-state-default ui-corner-all caps" name="existinginvoiceref" id="existinginvoiceref"
@@ -308,15 +304,19 @@ id="expensedate" size="12" name="expensedate"></fieldset>
 
 
 
-<fieldset><label for="invdate" class="fieldLabel"> Invoice Date : </label>
-<select class="ui-state-default ui-corner-left" name="invdate" id="invdate">
-<option selected value="0" >Today</option>
-<option value="1" >Tomorrow</option>
-<option value="2" >Day After</option>
-<option value="7" >7 Days</option>
-<option value="-1" >Yesterday</option>
-<option value="-2" >Day before Yesterday</option>
-</select></fieldset>
+
+<fieldset><label for="newinvdate" class="fieldLabel"> Invoice Date </label> 
+<input class="ui-state-default ui-corner-all caps" type="text" value="<?php echo date('d-m-Y', strtotime('now')); ?>"
+id="newinvdate" size="12" name="newinvdate"></fieldset>
+
+
+
+
+
+
+
+
+
 <br>Invoice Comments : '<?php echo $globalprefrow['invoicefooter2']; ?>
 <br>
 <TEXTAREA class="ui-state-default ui-corner-left normal " style="padding-left:3px;" name="invcomments" rows="2" cols="50"></TEXTAREA> 
@@ -378,24 +378,20 @@ $("label").width((max+15));
 $(document).ready(function () {
 	
     
+    
+    $(function () { // fromdate
+		var newinvdatepicker = $( "#newinvdate" ).datepicker({
+        });
+	});    
+    
     $(function () { // fromdate
 		var fromdatepicker = $( "#fromdate" ).datepicker({
-            numberOfMonths: 1,
-            changeYear:false,
-            firstDay: 1,
-            dateFormat: "dd-mm-yy",
-            changeMonth:false
         });
 	});
     
     
-   	$(function () { // todate ( expensedate )
-		var dates = $( "#expensedate" ).datepicker({
-			numberOfMonths: 1,
-			changeYear:false,
-			firstDay: 1,
-            dateFormat: "dd-mm-yy",
-			changeMonth:false
+   	$(function () { // todate ( invoicetodate )
+		var dates = $( "#invoicetodate" ).datepicker({
 		});
 	});
 	
@@ -424,7 +420,7 @@ $(document).ready(function () {
         e.preventDefault(); 
         var pageclientid=$("#pageclientid").val();
         var pagedepid=$("#invoiceselectdep").val();
-        var todate=$("#expensedate").val();
+        var todate=$("#invoicetodate").val();
         var fromdate=$("#fromdate").val();
         var datelink = "clientviewtargetcollection.php?clientid=" + pageclientid;
         datelink = datelink + "&viewselectdep=" + pagedepid;
@@ -469,10 +465,7 @@ $(document).ready(function () {
 
 </script>
 <?php
-echo '</div>
-
-
-';
+echo '</div> ';
 
 include "footer.php";
 

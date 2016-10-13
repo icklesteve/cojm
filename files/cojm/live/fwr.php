@@ -41,7 +41,6 @@ echo '<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, height=device-height" >
 <link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
-<script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
 <title>'. $title.' ADMIN</title></head><body>';
 
 $filename="fwr.php";
@@ -182,13 +181,13 @@ if ($sumtot>"0") {
     <table class="acc" id="fwr">
     <thead>
     <tr>
-    <th STYLE="min-width:  130px">Delivery Time</th>
+    <th>Delivery Time</th>
     <th scope="col">To / From</th>
     <th scope="col">Client</th>
     <th scope="col">Service</th>
     <th scope="col">Ex VAT Cost</th>
     <th scope="col">'.$globalprefrow['glob5'].'</th>
-    <th scope="col">Comments</th>
+    <th scope="col" style="width:24%;">Comments</th>
     </tr>
     </thead>
     <tbody>';
@@ -1065,10 +1064,28 @@ if ($cronissue=='10') {
 echo '<br /><br />
 </div>';
 
+
+
+?>
+
+<script type="text/javascript">
+function downloadJSAtOnload() {
+var element = document.createElement("script");
+
+element.src = "js/<?php echo $globalprefrow['glob9']; ?>";
+document.body.appendChild(element);
+
+}
+if (window.addEventListener)
+window.addEventListener("load", downloadJSAtOnload, false);
+else if (window.attachEvent)
+window.attachEvent("onload", downloadJSAtOnload);
+else window.onload = downloadJSAtOnload;
+</script>
+
+<?php
+
 include "footer.php";
-
-
-
 
 mysql_close();
 ?></body></html>

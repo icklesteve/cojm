@@ -46,6 +46,4 @@ $browser=$_SERVER["HTTP_USER_AGENT"];
  '$browser','$pagetext','$cj_msec','$lapse_msec','','$infotext')";
  mysql_query($newpoint, $conn_id) or mysql_error(); $newauditid=mysql_insert_id();
  if (mysql_error()) { echo '<div class="moreinfotext"><h1> Problem saving audit log </h1></div>'.$newpoint; } // ends error
-echo ' <script> var initialauditid='.$newauditid.'; $(document).ready(function () { setTimeout( function () { pageloadedfine(); }, 950 ); ';
-if ($globalprefrow['showdebug']>'0') { echo ' setTimeout( function () { $("#activestatus").slideUp(1500); }, 20000 );'; }
-echo '}); </script>';
+echo ' <script> var initialauditid='.$newauditid.'; </script>';

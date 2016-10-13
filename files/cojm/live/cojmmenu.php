@@ -40,9 +40,9 @@ var alertdelay=8000;
 var alertslide=1000;
 var allok=1;
 var message="";
+var showdebug='.$globalprefrow['showdebug'].';
 </script>
 ';
-
 
 // set a longer timesout if in debug mode
 if ($globalprefrow['showdebug']=='1') { 
@@ -147,7 +147,7 @@ if ((isset($alerttext)) and ($alerttext)) { } else { echo ' style="display:none;
 
 if ((isset($adminmenu)) and ($adminmenu=='1')) {
 echo '<div class="top_menu_line clearfix"><ul>';
-echo '<li><a id="toggleinvoicemenuchoose" href="#">Finance</a></li>
+echo '<li><a id="toggleinvoicemenuchoose" href="#">Finance ▼</a></li>
 <li><a href="new_cojm_client.php"'; if ($filename=='new_cojm_client.php') { echo ' class="selected"'; } echo '>Client</a></li>';
 echo '<li><a href="cyclist.php"'; if ($filename=='cyclist.php') { echo ' class="selected"';} 
 echo '> '.$globalprefrow['glob5'].'</a></li>';
@@ -162,7 +162,7 @@ if ($filename=='recentlyclosed.php') { echo ' class="selected"';} echo '>Last 10
 <li><a href="startuploadgpx.php"'; if ($filename=='startuploadgpx.php') echo ' class="selected"'; echo '>GPS</a></li>
 <li><a href="dashboard.php"'; if ($filename=='dashboard.php') echo ' class="selected"'; echo '>Stats</a></li>
 <li><a href="help.php"'; if ($filename=='help.php') { echo ' class="selected"'; } echo '>Help</a></li>';
- if ($settingsmenu<>'1') { echo '<li><a href="#" id="togglesettingsmenuchoose" >Settings</a></li>'; }
+ if ($settingsmenu<>'1') { echo '<li><a href="#" id="togglesettingsmenuchoose" >Settings ▼</a></li>'; }
 echo '</ul>';
 
 

@@ -32,10 +32,10 @@ $postedref = substr($postedref, 0, 13);  // abcdef
 
 if (ctype_alnum($postedref)) {
        // echo " 1 ";
-    } else {
+} else {
       //  echo " 2 ";
 	  $postedref='';
-    }
+}
 
 $query="SELECT * FROM Orders
 INNER JOIN Clients 
@@ -59,13 +59,76 @@ AND Orders.publictrackingref = ? LIMIT 0,1";
 
 
 $query = "SELECT 
-numberitems, ID, ShipDate, trackerid, publictrackingref, publicstatusname, Orders.status, poshname, Service, jobcomments, CollectPC,
- ShipPC, fromfreeaddress,
- enrpc1, enrpc2, enrpc3, enrpc4, enrpc5, enrpc6, enrpc7, enrpc8, enrpc9, enrpc10, enrpc11, enrpc12, enrpc13, enrpc14, enrpc15,
- enrpc16, enrpc17, enrpc18, enrpc19, enrpc20, enrft1, enrft2, enrft3, enrft4, enrft5, enrft6, enrft7, enrft8, enrft9, enrft10,
- enrft11, enrft12, enrft13, enrft14, enrft15, enrft16, enrft17, enrft18, enrft19, enrft20, tofreeaddress , targetcollectiondate, 
- duedate, deliveryworkingwindow, starttravelcollectiontime, waitingstarttime, collectiondate, starttrackpause, finishtrackpause, 
- podsurname, distance, co2saving, CO2Saved, pm10saving, PM10Saved, opsmaparea, opsmapsubarea
+numberitems, 
+ID, 
+ShipDate, 
+trackerid, 
+publictrackingref, 
+publicstatusname, 
+Orders.status, 
+poshname, 
+Service, 
+jobcomments, 
+CollectPC,
+ ShipPC, 
+ fromfreeaddress,
+ enrpc1, 
+ enrpc2, 
+ enrpc3, 
+ enrpc4, 
+ enrpc5, 
+ enrpc6, 
+ enrpc7, 
+ enrpc8, 
+ enrpc9, 
+ enrpc10, 
+ enrpc11, 
+ enrpc12, 
+ enrpc13, 
+ enrpc14, 
+ enrpc15,
+ enrpc16,
+ enrpc17, 
+ enrpc18, 
+ enrpc19, 
+ enrpc20, 
+ enrft1, 
+ enrft2, 
+ enrft3, 
+ enrft4, 
+ enrft5, 
+ enrft6, 
+ enrft7, 
+ enrft8, 
+ enrft9, 
+ enrft10,
+ enrft11, 
+ enrft12, 
+ enrft13, 
+ enrft14, 
+ enrft15, 
+ enrft16, 
+ enrft17, 
+ enrft18, 
+ enrft19, 
+ enrft20, 
+ tofreeaddress , 
+ targetcollectiondate, 
+ duedate, 
+ deliveryworkingwindow, 
+ starttravelcollectiontime,
+ waitingstarttime, 
+ collectiondate, 
+ starttrackpause, 
+ finishtrackpause, 
+ podsurname, 
+ distance, 
+ co2saving, 
+ CO2Saved, 
+ pm10saving, 
+ PM10Saved, 
+ opsmaparea, 
+ opsmapsubarea
 FROM Orders
 INNER JOIN Clients 
 INNER JOIN Services 
@@ -148,9 +211,15 @@ echo $completestatus;
 
 
 
-echo '</th></tr>
-<tr><td>'.$globalprefrow['glob5'].'</td><td>'. $row['poshname'].'</td></tr>
+echo '</th></tr>';
 
+
+if ($row['CyclistID']>1) {
+
+echo '<tr><td>'.$globalprefrow['glob5'].'</td><td>'. $row['poshname'].'</td></tr>';
+}
+
+echo '
 <tr><td>Service </td><td> '. $numberitems .' x ' .$row['Service'] .'</td></tr>';
 
 if ($row['jobcomments']) { echo '<tr><td>Comments </td><td>'. $row['jobcomments'] .'</td></tr>';  } 

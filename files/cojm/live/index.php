@@ -61,7 +61,7 @@ $query = "SELECT statusname, status FROM status WHERE activestatus=1 AND status<
 $statusdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
 
 $query = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID"; 
-$riderdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);    
+$riderdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
     
     
 $query = "SELECT bankholcomment, bankholdate FROM bankhols WHERE bankholdate >= ( CURRENT_DATE - interval 1 week ) ";
@@ -76,13 +76,107 @@ $tempfirstrun='';
 
 
 $query='
-SELECT *
-FROM Orders
-INNER JOIN Clients ON Orders.CustomerID = Clients.CustomerID
-INNER JOIN Services ON Orders.ServiceID = Services.ServiceID
-left join clientdep ON Orders.orderdep = clientdep.depnumber
-WHERE `Orders`.`status` <70 
-ORDER BY `Orders`.`nextactiondate` , ID
+SELECT
+p.ID,
+p.nextactiondate,
+p.jobcomments,
+p.privatejobcomments,
+p.targetcollectiondate,
+p.collectionworkingwindow,
+p.duedate,
+p.deliveryworkingwindow,
+p.cbb1,
+p.cbb2,
+p.cbb3,
+p.cbb4,
+p.cbb5,
+p.cbb6,
+p.cbb7,
+p.cbb8,
+p.cbb9,
+p.cbb10,
+p.cbb11,
+p.cbb12,
+p.cbb13,
+p.cbb14,
+p.cbb15,
+p.cbb16,
+p.cbb17,
+p.cbb18,
+p.cbb19,
+p.cbb20,
+p.CustomerID,
+p.orderdep,
+p.numberitems,
+p.CollectPC,
+p.fromfreeaddress,
+p.enrpc1,
+p.enrpc2,
+p.enrpc3,
+p.enrpc4,
+p.enrpc5,
+p.enrpc6,
+p.enrpc7,
+p.enrpc8,
+p.enrpc9,
+p.enrpc10,
+p.enrpc11,
+p.enrpc12,
+p.enrpc13,
+p.enrpc14,
+p.enrpc15,
+p.enrpc16,
+p.enrpc17,
+p.enrpc18,
+p.enrpc19,
+p.enrpc20,
+p.enrft1,
+p.enrft2, 
+p.enrft3, 
+p.enrft4, 
+p.enrft5, 
+p.enrft6, 
+p.enrft7, 
+p.enrft8, 
+p.enrft9, 
+p.enrft10, 
+p.enrft11, 
+p.enrft12, 
+p.enrft13, 
+p.enrft14, 
+p.enrft15, 
+p.enrft16, 
+p.enrft17, 
+p.enrft18, 
+p.enrft19, 
+p.enrft20, 
+p.status, 
+p.CyclistID, 
+p.collectiondate, 
+p.FreightCharge, 
+p.vatcharge,
+p.ShipPC,
+p.tofreeaddress,
+t.asapservice,
+t.cargoservice,
+u.CompanyName,
+t.batchdropcount,
+t.Service,
+u.invoicetype,
+y.opsname,
+y.descrip,
+z.opsname AS `subareaname`,
+z.descrip AS `subareadescrip`,
+l.depname
+
+FROM Orders p
+INNER JOIN Clients u ON p.CustomerID = u.CustomerID
+INNER JOIN Services t ON p.ServiceID = t.ServiceID
+left join clientdep l ON p.orderdep = l.depnumber
+left join opsmap y ON p.opsmaparea = y.opsmapid
+left join opsmap z on p.opsmapsubarea = z.opsmapid
+WHERE `p`.`status` <70 
+ORDER BY `p`.`nextactiondate` , ID
 LIMIT :numberofresults';
 
 $stmt = $dbh->prepare($query);
@@ -97,6 +191,7 @@ $pdonumberofresults = $numberofresults;
 
 $stmt->execute();
 $sumtot = $stmt->rowCount();
+
 
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
@@ -453,6 +548,10 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     ';
     
     
+    
+    if ($row['opsname']<>'') {  echo '<span title="'.$row['descrip'].'">'.$row['opsname'].'</span> '; }
+    if ($row['subareaname']<>'') {  echo ' <span title="'.$row['subareadescrip'].'">('.$row['subareaname'].')</span> '; }
+    
     if ((trim($row['ShipPC'])) or ($row['tofreeaddress'])) {
         if ( $globalprefrow["inaccuratepostcode"]=='1'){
             echo '<a target="_blank" class="newwin" href="https://www.google.com/maps/?q='.
@@ -467,6 +566,8 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         }
     }
 
+    
+    
     
     if ($row['invoicetype']=='4') { // echo payment on drop
         echo " <span style='". $globalprefrow['courier6']."'>Payment on Drop   &". 

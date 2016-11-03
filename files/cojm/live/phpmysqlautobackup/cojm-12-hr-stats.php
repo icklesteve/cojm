@@ -199,7 +199,7 @@ $msg.="\r\n\r\n";
 
 
 
-if (($error>3)or($globalprefrow['showdebug']>0)){
+if (($error>5)or($globalprefrow['showdebug']>0)){
 
 
 

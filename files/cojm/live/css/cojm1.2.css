@@ -316,7 +316,16 @@ background:#111;
 cursor:pointer;
 }
 
-#map-container { z-index:1; }
+#map-container {
+    z-index:1;
+}
+
+#orderajaxmap {
+    
+    display:block;
+    
+}
+
 
 .ui-menu .ui-menu-item a {
 text-decoration:none;
@@ -391,12 +400,15 @@ margin-right:10px;
 
 
 
-
 div.map-sub-area-label {
-background-color: rgba(255, 255, 255, .6);
+background-color: rgba(255, 255, 255, .8);
 padding:5px;
 border-radius:2px;
-font-size: 13px;
+font-size: 16px;
+}
+
+div.map-sub-area-label a {
+color: rgba(0, 0, 0, 1);
 }
 
 
@@ -595,6 +607,8 @@ right: 200px;
 z-index: 12;
 cursor:default;
 }
+
+div.info { font-weight:bold; }
 
 
 #ajaxremovepod {
@@ -1874,14 +1888,10 @@ color: #212121;
     }
     
     
-#Post.complete .ui-state-highlight
-{
-    
+#Post.complete .ui-state-highlight {
     border: 1px solid #bbbbbb; 
     background: #dddddd; 
-    color: #111111; 
-    
-    
+    color: #111111;
 }
     
     
@@ -2241,6 +2251,7 @@ text-align: right;
 padding-right: 5px;
 }
 
+#singleexpense fieldset label { width:130px; }
 
 fieldset { line-height: 24px; }
 
@@ -2399,8 +2410,41 @@ background: rgba(255,255,255,0.55) url("../images/refresh.png") no-repeat scroll
 
 button.menusearch:hover {  cursor:pointer; }
 
+#orderajaxmap.addresses.hideuntilneeded,
+.hideuntilneeded, 
+#showriderlink.hidden, 
+a.hideuntilneeded, 
+a#menuds.hideuntilneeded { 
+    display:none;
+}
 
-.hideuntilneeded, #showriderlink.hidden, a.hideuntilneeded, a#menuds.hideuntilneeded { display:none; }
+
+img.opsmapicon {
+    height:30px;
+vertical-align:bottom;
+width:30px;
+    
+}
+
+div.fsli  {
+    width:50px;   float: left;
+    min-height: 1px;
+    padding-right: 8px;
+    position: relative;
+    text-align: right;
+    top: 2px; }
+
+.w170 {  width:170px;  }
+
+
+table.nolines td { 
+font-size:18px;
+padding:1px;
+
+}
+
+
+
 
 
 a#back-top {
@@ -2422,13 +2466,13 @@ background: #777 url(../images/up-arrow6.png) no-repeat scroll 3px -4px;
 
 
 
+
 div.hangleft { float:left; width: 50%; }
 div.hangright { float:right; width: 50%; }
 
 
 div.cbbnewjobl {  float:left; clear:both; }
 div.cbbnewjobr { float: left;  }
-
 
 div.innerpad {
 padding: 10px;
@@ -2459,6 +2503,12 @@ margin-right:30px;
 }
 
 
+
+
+
+.osmcopyr, .osmcopyr a {
+    background: white; color:#444444; padding-right: 6px; padding-left: 6px; margin-right:-12px;
+}
 
 
 

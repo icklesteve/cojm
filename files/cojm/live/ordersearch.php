@@ -197,7 +197,7 @@ if ($num_rows>'0') {
  if ($num_rows>'49') { echo 'At least '; } echo $num_rows.' Job';
  if ($num_rows<>'1') { echo 's'; } echo ' found with '.$searchid.' in expense description.</h3>';
  while ($row = mysql_fetch_array($sql_result)) { extract($row);
- echo '<p><a href="expenses.php?page=selectexpense&expenseref='.$row['expenseref'].'">'.$row['expenseref'].'</a> 
+ echo '<p><a href="singleexpense.php?expenseref='.$row['expenseref'].'">'.$row['expenseref'].'</a> 
 
 '.$row['description'].'
 

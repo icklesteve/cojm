@@ -2240,9 +2240,6 @@ $(function() { $( "#newjobselectclient" ).newjobcombobox();
 								}
 							}
 						
-//	alert("2102 Client Changed on screen, not DB"); 						
-// comboboxchanged();
-
 	
 						}
 						
@@ -2291,7 +2288,12 @@ $(function() { $( "#newjobselectclient" ).newjobcombobox();
 				this.button.remove();
 				this.element.show();
 				$.Widget.prototype.destroy.call( this );
-			}
+			},
+
+                        autocomplete : function(value,value2) {
+    this.element.val(value);
+    this.input.val(value2);
+}
 		});
 	})( jQuery );
 	

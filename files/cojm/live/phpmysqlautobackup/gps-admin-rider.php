@@ -20,8 +20,6 @@
 */
 
 
-
-
 $infotext.= ' <br /> In gps-admin-rider.php ln 4';
 
 $gpsadmin = mysql_query("
@@ -46,7 +44,7 @@ $delivertime=mktime( 23, 59, 59, $thismonth, $thisday, $thisyear );
 
 $ID=$thisyear.'_'.$thismonth.'_'.$thisday.'_'.$cojmadmin_rider_id;
 
-$infotext.= '<br /> rider  '.$cojmadmin_rider_id.' to be done '.$riderdate.' admin ref '.$cojm_admin_ref.'.  ';
+$infotext.= '<br /> rider  '.$cojmadmin_rider_id.' to be done '.$riderdate.' admin ref '.$cojm_admin_ref.'.  '.$ID;
 
 $query =  " update cojm_admin set cojmadminstart = now() where cojmadmin_id ='$cojm_admin_ref'";	
 mysql_query($query, $conn_id);
@@ -59,7 +57,7 @@ $query="SELECT cojmname FROM Cyclist WHERE trackerid = '$cojmadmin_rider_id' LIM
  AND `timestamp` >= '$collecttime'  AND `timestamp` <= '$delivertime' 
  ORDER BY `timestamp` ASC"; 
  
- $infotext.='<br /> 47 '.$sql.'<br />';
+ $infotext.='<br /> query: '.$sql.'<br />';
  
  
  
@@ -70,7 +68,7 @@ $sumtot=mysql_affected_rows();
 $infotext.=' <br /> sumtot is '.$sumtot;
 
 
-if ($sumtot>'0.5') {
+if ($sumtot>0.5) {
 
  $linecoords='';
  $prevts='';
@@ -166,29 +164,13 @@ $infotext.= " <br />created JS CacheFile ".$filename." <br /> ". $markercount." 
 
 } // sumtot > 0.5 positions found check
 
-
-
-  $query =  "update cojm_admin set cojm_admin_stillneeded=0 where cojmadmin_id ='$cojm_admin_ref'";	
+$query =  "update cojm_admin set cojm_admin_stillneeded=0 where cojmadmin_id ='$cojm_admin_ref'";	
 mysql_query($query, $conn_id);
-
-
-
-
-
 
 
 
 $query =  " update cojm_admin set cojmadminfinish = now() where cojmadmin_id ='$cojm_admin_ref'";	
 mysql_query($query, $conn_id);
-
-
-
-
-
-
-
-
-
 
 
 

@@ -158,7 +158,11 @@ if ($sumtot>"0") {
         }
  
         $rhtml.='</td>
-        <td>'.formatmoney($row["numberitems"]).' x '. $row['Service'].'</td>
+        <td>';
+        if ((formatmoney($row["numberitems"])<>0) and (formatmoney($row["numberitems"])<>1)) {
+            $rhtml.=formatmoney($row["numberitems"]).' x ';
+        }
+        $rhtml.= $row['Service'].'</td>
         <td>&'.$globalprefrow['currencysymbol'].' '.$row['FreightCharge'].'</td>
         <td>';
 
@@ -948,23 +952,17 @@ if ($sumtot>'0') {
 
 // Issues with backups
 $cronissue='0';
-$sql = "SELECT auditfilename, auditdatetime FROM cojm_audit
- WHERE `cojm_audit`.`auditpage` = 'cojmcron.php' ORDER by auditid desc limit 0, 10";
+$sql = "SELECT ID, time_last_fired FROM cojm_cron
+ WHERE `currently_running` = '1' ";
  
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); $sumtot=mysql_affected_rows(); 
+$sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+$sumtot=mysql_affected_rows(); 
 while ($row = mysql_fetch_array($sql_result)) {
     extract($row); 
     // echo '1184 in rows in audit ';
-    if ($row['auditfilename'] == 'No Cron Ran' ) {
-        $cronissue++;// oldest time
-        $oldtime=$row['auditdatetime'];
-    }
-}
- 
 
-
-if ($cronissue=='10') {
-
+    $oldtime=$row['time_last_fired'];
+    
     // echo $oldtime.' ';
     // echo date('U', strtotime($oldtime));
     // echo ' '.date("U");
@@ -974,21 +972,14 @@ if ($cronissue=='10') {
     echo ' '. ($crondiff).'mins ago ';
     if ($crondiff>5) {
         echo ' Oldest >5mins ago, resetting cron.';
-        // loop gets around sql safe mode
-        
-        $i=1;
 
-        while ($i<21) {
-            $sql = "UPDATE cojm_cron SET currently_running=0 WHERE id=".$i;
-            $sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
-            $i++;
-        }
-    }
+        $sql = "UPDATE cojm_cron SET currently_running=0 WHERE id=".$row['ID'];
+        $sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+    
 
 
 
-
-    echo ' '. $cronissue.' of the last 10 cojmcron checks failed as already running.  
+    echo ' Cron check failed as already running.  
     If oldest was more than 5 mins ago this was reset, 
     however you need to contact your admin if you get this message too often.';
 
@@ -1000,8 +991,8 @@ if ($cronissue=='10') {
     $plainbodytext=$oldtime.' was oldest time';
 
     $plainbodytext.=' There may be an issue with COJMCron, which schedules background jobs.  
-    Further info is available in the main audit log. '.
-    $cronissue.' of the last 10 cojmcron checks failed as already running, cron reset. ';
+    Further info is available in the main audit log.
+    Cron checks failed as already running, cron reset. ';
     $headers = 'From: '.$from. PHP_EOL;
     $headers =$headers. 'Return-path: '.$to. PHP_EOL; 
     $headers = $headers . 'Repy-To: '.$to . PHP_EOL.
@@ -1053,8 +1044,8 @@ if ($cronissue=='10') {
     if ($ok) {  $transfer_backup_infotext=" Mail sent "; } else { $transfer_backup_infotext= " Message not sent. "; }
     echo $transfer_backup_infotext;
 
+    }
 }
-
 
 
 

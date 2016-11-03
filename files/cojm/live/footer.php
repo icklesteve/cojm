@@ -21,7 +21,10 @@
 */
 
 
-$omega_time = microtime(TRUE); $lapse_time = $omega_time - $alpha_time; $lapse_msec = $lapse_time * '1000.0'; $lapse_echo = number_format($lapse_msec, 1);
+$omega_time = microtime(TRUE); 
+$lapse_time = $omega_time - $alpha_time; 
+$lapse_msec = $lapse_time * '1000.0'; 
+$lapse_echo = number_format($lapse_msec, 1);
 if ($mobdevice<>'1') { echo '  
 <a id="back-top" href="#bodytop"></a>
 <div class="cojmcopyright">Logged in as '.$cyclistid.'

@@ -102,6 +102,7 @@ $exacttime=$_POST['exacttime'];
 
 
 $showdelivery=$_POST['showdelivery'];
+if ($showdelivery<>1) { $showdelivery=0; }
 $showdeliveryaddress=$_POST['showdeliveryaddress'];
 $clientid=trim($_POST['clientid']); 
 $invoiceselectdep = trim($_POST['invoiceselectdep']);
@@ -385,9 +386,17 @@ $html.='<th ><strong>Service</strong></th>
 $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
 
 $i='0'; 
+
+$invoicejobarray=array();
+
 // table loop
 while ($row = mysql_fetch_array($sql_result)) {
     extract($row);
+    
+    
+    array_push($invoicejobarray,$row['ID']);
+
+
     
     
     $query = "SELECT * FROM cojm_pod WHERE id = :getid LIMIT 0,1";
@@ -688,7 +697,13 @@ while ($row = mysql_fetch_array($sql_result)) {
 $totalincvat=$tablevatcost+$tablecost;
 
 
-$html.=$htmlnew.'<tr><td colspan="2"> </td>';
+
+$topmiddlehtml=$html; // the bit to get stored in the database
+
+
+
+
+$html.= '<tr><td colspan="2"> </td>';
 
 if ($showdelivery=='1') {
     $html.='<td> </td>';
@@ -777,7 +792,7 @@ if ($showdelivery) {
 
 
 $html.='
-    <td style="
+    <td id="tdvat" style="
     border-left-width:   1px; 
     border-left-color: #32649b; 
     border-left-style: Solid;
@@ -793,7 +808,7 @@ $html.='
     background-color: #'.$globalprefrow['invoicetotalcolour'].';" >
     <strong>&'.$globalprefrow["currencysymbol"].number_format($tablevatcost, 2, '.', ',').'</strong></td>
 
-    <td style="
+    <td id="tdnovat" style="
     border-left-width:   1px; 
     border-left-color: #32649b; 
     border-left-style: Solid;
@@ -809,7 +824,7 @@ $html.='
     background-color: #'.$globalprefrow['invoicetotalcolour'].';" >
     <strong>&'.$globalprefrow["currencysymbol"].number_format($tablecost, 2, '.', ',').'</strong></td>
 
-    <td style="
+    <td id="tdtotal" style="
     border-left-width:   1px; 
     border-left-color: #32649b; 
     border-left-style: Solid;
@@ -1199,6 +1214,8 @@ if ($page=='createpdf') {
  
 }
 else {
+    
+    include "changejob.php";
    
     echo '<!DOCTYPE html> 
         <html lang="en"> 

@@ -82,7 +82,7 @@ $totalorders='0';
 #cojmcron.php
 
 $sumtot='';
-
+$backupruntype='COJMCron.php';
 $infotext.= ' started cojmcron, ';
 // $infotext.= '<br /> Now is '.$nowsecs.' <br /> ';
 
@@ -90,6 +90,8 @@ require "cronstats.php";
 
 // echo ' sumtot : '.$sumtot;
 // $sumtot='0';  // comment out when not testing
+
+$ranacron=0;
 
 if ($sumtot) {
     $infotext.=  ' already running '.$sumtot;
@@ -118,7 +120,7 @@ if ($sumtot) {
 
 
     if (($lastran1)<($shouldhavelastran1)) {
-
+        $ranacron=1;
         $sql = "UPDATE cojm_cron SET currently_running=1 WHERE ID='1' LIMIT 1";
         $result = mysql_query($sql, $conn_id);
         if ($result){
@@ -138,7 +140,7 @@ if ($sumtot) {
 	
     }
     elseif (($lastran2)<($shouldhavelastran4)) {
-          
+        $ranacron=1;          
         $sql = "UPDATE cojm_cron SET currently_running=1 WHERE ID='2' LIMIT 1";
         $result = mysql_query($sql, $conn_id);
         if ($result){ $infotext.=  ' starting run2.php '; }  else { $infotext.=  " failed 159 "; }
@@ -151,6 +153,7 @@ if ($sumtot) {
         if ($result){ $infotext.=  ' finished run2.php once / hr backup'; }  else { $infotext.=  " failed 164 "; }
     }
     elseif ((($lastran6)<($shouldhavelastran6))) {
+        $ranacron=1;
         $sql = "UPDATE cojm_cron SET currently_running=1 WHERE ID='6' LIMIT 1";
         $result = mysql_query($sql, $conn_id);
         if ($result){ $infotext.=  ' changed 141'; }  else { $infotext.=  " failed 141 "; }
@@ -164,6 +167,7 @@ if ($sumtot) {
 	
     }
     elseif ((($lastran13)<($shouldhavelastran5))) {
+        $ranacron=1;        
         $sql = "UPDATE cojm_cron SET currently_running=1 WHERE ID='13' LIMIT 1";
         $result = mysql_query($sql, $conn_id);
         if ($result){ $infotext.=  ' changed 312'; }  else { $infotext.=  " failed 312 "; }
@@ -176,6 +180,7 @@ if ($sumtot) {
         if ($result){ $infotext.=  ' changed 320'; }  else { $infotext.=  " failed 320 "; }
     }
     elseif ((($lastran3)<($shouldhavelastran7))) {
+        $ranacron=1;        
         $sql = "UPDATE cojm_cron SET currently_running=1 WHERE ID='3' LIMIT 1";
         $result = mysql_query($sql, $conn_id);
         if ($result){ $infotext.=  ' changed 312'; }  else { $infotext.=  " failed 312 "; }
@@ -219,6 +224,7 @@ if ($sumtot) {
 	
 
         if ($gpsrideradmintotal>'0') {
+            $ranacron=1;            
             $sql = "UPDATE cojm_cron SET currently_running=1 WHERE ID='5' LIMIT 1";
             $result = mysql_query($sql, $conn_id);
             if ($result){ $infotext.=  ' changed 168'; }  else { $infotext.=  " failed 168 "; }
@@ -231,6 +237,7 @@ if ($sumtot) {
 
         }
         if ($gpsadmintotal>'0')	 {
+            $ranacron=1;            
             $sql = "UPDATE cojm_cron SET currently_running=1 WHERE ID='4' LIMIT 1";
             $result = mysql_query($sql, $conn_id);
             if ($result){ $infotext.=  ' changed cron to start run individ job gps'; }  else { $infotext.=  " FAILED to changed cron to start run individ job gps "; }
@@ -254,14 +261,16 @@ $infotext.=  '<br /> finished cojmcron in '.$cj_echo.'ms. ';
 
 $backupdescription= $backupdescription.'<br />'.$transfer_backup_infotext;
 
+    $auditinfotext = str_replace("'", ":", "$infotext", $count);
+    $auditinfotext = str_replace("'", ":", "$infotext", $count);
 
-if ($backupruntype)	{
-    $newpoint="INSERT INTO cojm_audit (auditid,audituser,auditorderid,auditpage,auditfilename,auditmobdevice,
-    auditbrowser,audittext,auditcjtime,auditpagetime,auditmidtime,auditinfotext)   
-    VALUES ('','CojmCron','','cojmcron.php','$backupruntype','',
-    '','$backupdescription','','$cj_echo','','$infotext')";
-    mysql_query($newpoint, $conn_id) or mysql_error(); $newauditid=mysql_insert_id();
-    if (mysql_error()) { echo '<div class="moreinfotext"><h1> Problem saving audit log </h1></div>'; }
+
+if ($ranacron==1)	{
+    $newpoint="INSERT INTO cojm_audit (audituser,auditpage,auditfilename,audittext,auditpagetime,auditinfotext,auditorderid)
+    VALUES ('CojmCron','cojmcron.php','$backupruntype','$backupdescription','$cj_echo','$auditinfotext','0')";
+    mysql_query($newpoint, $conn_id) or mysql_error();
+    $newauditid=mysql_insert_id();
+    if (mysql_error()) { echo '<div class="moreinfotext"><h1> Problem saving audit log </h1><h2>'.mysql_error().'</h2></div>'; }
 }
 
 if ($globalprefrow['showdebug']>0) { echo $backupdescription.'<hr />' . $infotext; }

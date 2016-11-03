@@ -445,7 +445,7 @@ echo "</select>\n";
 
 
 <select class="ui-state-default ui-corner-left" name="incomeselect">
-<option <?php if ($incomeselect=='invoicein') { echo ' selected '; } ?> value="invoicein">View by Invoice Paid</option>
+<option <?php if ($incomeselect=='invoicein') { echo ' selected '; } ?> value="invoicein">View by Reconciled Invoice</option>
 <option <?php if ($incomeselect=='tarcollect') { echo ' selected '; } ?> value="tarcollect">Operations View</option>
 </select>
 
@@ -684,7 +684,7 @@ $m=date('m', strtotime($row['paydate'])); // echo $m;
  
 }
 
-echo '<tr><td>Paid Invoices Exc VAT</td>
+echo '<tr><td>Reconciled Invoices Exc VAT</td>
  <td> '; if ($injan) { echo '&'.$globalprefrow['currencysymbol'].number_format(($injan), 2, '.', ','); } echo '</td>
  <td> '; if ($infeb) { echo '&'.$globalprefrow['currencysymbol'].number_format(($infeb), 2, '.', ','); } echo '</td>
  <td> '; if ($inmar) { echo '&'.$globalprefrow['currencysymbol'].number_format(($inmar), 2, '.', ','); } echo '</td>
@@ -750,7 +750,7 @@ $intot=$intot+$vattot;
 
 echo '
  <tr>
- <td title="Incl. VAT">Total Net Income</td>
+ <td title="Incl. VAT">Total Net Reconciled</td>
 
  <td> '; if ($injan) { echo '&'.$globalprefrow['currencysymbol'].number_format(($injan), 2, '.', ','); } echo '</td>
  <td> '; if ($infeb) { echo '&'.$globalprefrow['currencysymbol'].number_format(($infeb), 2, '.', ','); } echo '</td>

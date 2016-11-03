@@ -46,7 +46,7 @@ if (isset($_GET['viewcomments'])) { $viewcomments=trim($_GET['viewcomments']);} 
 if (isset($_GET['timetype'])) { $timetype=trim($_GET['timetype']);} else { $timetype='tarcollect'; }
 if (isset($_GET['servicetype'])) { $servicetype=trim($_GET['servicetype']);} else { $servicetype='all'; }
 if (isset($_GET['statustype'])) { $statustype=trim($_GET['statustype']);} else { $statustype='all'; }
-
+if (isset($_GET['areaid'])) { $areaid=trim($_GET['areaid']);} else { $areaid='all'; }
 
 
 
@@ -238,14 +238,8 @@ echo ' <select name="timetype" class="ui-state-highlight ui-corner-left">
 
 echo ' <input class="ui-state-default ui-corner-all pad" size="10" type="text" name="from" value="'. $inputstart .'" id="rangeBa" />			
 To		<input class="ui-state-default ui-corner-all pad"  size="10" type="text" name="to" value="'.  $inputend.'" id="rangeBb" />			
-';
 
-
-
-
-
-
-// ends end of check for departments
+<button class="newjobsubmit" type="submit" >Search</button> ';
 
 
 echo '<hr />';
@@ -343,9 +337,38 @@ echo ' <select name="statustype" class="ui-state-highlight ui-corner-left">
 
 
 
-echo '
-<button class="newjobsubmit" type="submit" >Search</button>
-</div></form>';
+
+echo ' <select name="areaid" class="ui-state-highlight ui-corner-left">';
+echo ' <option value="all" > Choose Area </option> ';
+
+$topareaquery = "SELECT opsmapid, opsname, descrip, istoplayer FROM opsmap WHERE type=2 AND corelayer='0' ";
+$topareaqueryres = mysql_query ($topareaquery, $conn_id);
+
+
+    while (list ($listopsmapid, $listopsname, $descrip, $istoplayer ) = mysql_fetch_row ($topareaqueryres)) {
+        print ("<option ");
+        if ($listopsmapid==$areaid) {
+            echo ' selected="selected" ';
+            $showsubarea=$istoplayer;
+            $topname=$listopsname;
+            $topdescrip=$descrip;
+        } 
+
+        echo 'value="'.$listopsmapid.'" >' .$listopsname;
+        if ($istoplayer=='1') { 
+            echo ' ++ ';
+        }
+        echo '</option>';
+    }
+
+
+
+echo '</select>';
+
+
+
+
+echo '</div></form>';
 
 
  $sql = "
@@ -360,67 +383,48 @@ AND Orders.status = status.status
 AND Orders.CustomerID = Clients.CustomerID 
 
 WHERE 
-
 ";
 
 
- if ($timetype=='collect') { $sql=$sql."  
- 
-( ( Orders.collectiondate > '$sqlstart' AND Orders.collectiondate < '$sqlend'  ) 
- 
- or (
- 
- 
- Orders.finishtrackpause > '$sqlstart' AND Orders.finishtrackpause < '$sqlend' 
- 
- 
- ) )
- 
- 
- "; }
+if ($timetype=='collect') {
+    $sql=$sql." ( ( Orders.collectiondate > '$sqlstart' AND Orders.collectiondate < '$sqlend'  ) 
+ or ( Orders.finishtrackpause > '$sqlstart' AND Orders.finishtrackpause < '$sqlend' ) ) ";
+}
 
 
 
- if ($timetype=='deliver') { $sql=$sql."  
- 
- ( Orders.ShipDate > '$sqlstart' AND Orders.ShipDate < '$sqlend'  ) 
- 
- "; } 
+if ($timetype=='deliver') {
+    $sql=$sql."  ( Orders.ShipDate > '$sqlstart' AND Orders.ShipDate < '$sqlend'  ) ";
+} 
  
  
  
-  if ($timetype=='tarcollect') { $sql=$sql."  
+if ($timetype=='tarcollect') {
+    $sql=$sql." ( Orders.targetcollectiondate > '$sqlstart' AND Orders.targetcollectiondate < '$sqlend'  ) ";
+} 
  
- ( Orders.targetcollectiondate > '$sqlstart' AND Orders.targetcollectiondate < '$sqlend'  ) 
- 
- "; } 
- 
- 
-   if ($timetype=='actualcollect') { $sql=$sql."  
- 
- ( Orders.collectiondate > '$sqlstart' AND Orders.collectiondate < '$sqlend'  ) 
- 
- "; } 
+
+if ($timetype=='actualcollect') {
+    $sql.=" ( Orders.collectiondate > '$sqlstart' AND Orders.collectiondate < '$sqlend'  ) ";
+}
  
  
  
-  if ($timetype=='tardeliver') { $sql=$sql."  
- 
- ( Orders.duedate > '$sqlstart' AND Orders.duedate < '$sqlend'  ) 
- 
- "; } 
+if ($timetype=='tardeliver') {
+    $sql.=" ( Orders.duedate > '$sqlstart' AND Orders.duedate < '$sqlend'  ) ";
+} 
  
 
  
- if ($statustype=='notinvoiced') { 
- $sql.=  " AND Orders.status < '110' ";
- }
+if ($statustype=='notinvoiced') {
+    $sql.=  " AND Orders.status < '110' ";
+}
 
  
  
- if ($statustype=='notinvoicedcomp') { 
+if ($statustype=='notinvoicedcomp') { 
  $sql.=  " AND Orders.status < '110' AND Orders.status > '99' ";
- } 
+} 
  
  
  
@@ -429,16 +433,20 @@ WHERE
  
 
 
-if ($clientid<>'all') { $sql = $sql. " AND Orders.CustomerID = '$clientid' "; }
-if ($viewselectdep<>'') { $sql = $sql. " AND Orders.orderdep = '$viewselectdep' "; }
-if ($newcyclistid<>'all') { $sql=$sql. " AND Orders.CyclistID = '$newcyclistid' "; }
-if ($deltype=='licensed') { $sql=$sql." AND Services.LicensedCount ='1' "; }
-if ($deltype=='deliveries') { $sql=$sql." AND Services.UnlicensedCount='1' "; }
-if ($deltype=='hourly') { $sql=$sql." AND Services.hourlyothercount='1' "; }
-if ($deltype=='other') { $sql=$sql." AND Services.UnlicensedCount<>'1' AND Services.hourlyothercount<>'1' AND Services.LicensedCount <>'1' "; }
+if ($clientid<>'all') { $sql.= " AND Orders.CustomerID = '$clientid' "; }
+if ($viewselectdep<>'') { $sql.= " AND Orders.orderdep = '$viewselectdep' "; }
+if ($newcyclistid<>'all') { $sql.= " AND Orders.CyclistID = '$newcyclistid' "; }
+if ($deltype=='licensed') { $sql.= " AND Services.LicensedCount ='1' "; }
+if ($deltype=='deliveries') { $sql.= " AND Services.UnlicensedCount='1' "; }
+if ($deltype=='hourly') { $sql.= " AND Services.hourlyothercount='1' "; }
+if ($deltype=='other') { $sql.= " AND Services.UnlicensedCount<>'1' AND Services.hourlyothercount<>'1' AND Services.LicensedCount <>'1' "; }
 
-if ($servicetype<>'all') { $sql=$sql." AND Services.ServiceID ='$servicetype' "; }
+if ($servicetype<>'all') { $sql.= " AND Services.ServiceID ='$servicetype' "; }
 
+
+if ($areaid<>'all') {
+    $sql.=" AND Orders.opsmaparea = '$areaid' ";
+}
 
 
 
@@ -523,7 +531,7 @@ echo '<th scope="col">Service</th>';
 if ($clientview<>'client') { echo '<th title="Incl. VAT" scope="col">Net Cost</th>'; }
 
 echo '<th scope="col">Job Status</th>
-<th scope="col">To / From</th>
+<th title="Including Area" scope="col">To / From</th>
 <th scope="col">Target Collection</th>
 <th scope="col">Collection</th>
 <th scope="col">Target Delivery</th>

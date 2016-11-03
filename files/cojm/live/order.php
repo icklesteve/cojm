@@ -1310,10 +1310,12 @@ if ($showsubarea<>'1') {
         }
     }
     
+    
+
     echo '</span>
     <span id="orderinvoice">';
     if ($row['status']>'100') { // show invoice link
-        echo $row['statusname'].'<a href="view_all_invoices.php?viewtype=individualinvoice&amp;formbirthday='. date("U").
+        echo $row['statusname'].' <a href="view_all_invoices.php?viewtype=individualinvoice&amp;formbirthday='. date("U").
         '&amp;clientid='.$row['CustomerID'].'&amp;ref='.$row['invoiceref'].'">'.$row['invoiceref'].'</a> ';
     }
     
@@ -1458,17 +1460,7 @@ if ($showsubarea<>'1') {
     
     
     
-    <div class="ui-corner-all ui-state-highlight addresses">
-    
-    
-    
-    
-       
-    
-    
-    
-    
-    
+    <div class="ui-corner-all ui-state-highlight addresses">    
     
     
     <div class="fs"><div class="fsl"> Duplicate</div>

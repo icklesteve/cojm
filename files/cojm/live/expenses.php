@@ -194,7 +194,7 @@ id="expensedate" size="12" name="expensedate"></fieldset>
 
 
 <fieldset><label class="fieldLabel">Description </label>
-<TEXTAREA class="ui-state-default ui-corner-all" name="description" rows="2" cols="50"> <?php echo $row['description']; ?></TEXTAREA></fieldset>
+<TEXTAREA id="description" class="ui-state-default ui-corner-all" name="description" rows="2" cols="50"> <?php echo $row['description']; ?></TEXTAREA></fieldset>
 
 <div class="vpad"> </div>
 
@@ -275,7 +275,11 @@ $(document).ready(function() {
             max = $(this).width();    
     });
     $("label").width((max+20));
-
+    
+    $(function (){ // autosize
+        $("#description").autosize();
+    });
+    
 	$(function() {
 		var dates = $( "#expensedate" ).datepicker({
 			numberOfMonths: 1,

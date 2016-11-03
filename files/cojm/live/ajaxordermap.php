@@ -44,7 +44,7 @@ $bankholdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
 
 
 
-echo '<script> $("#orderajaxmap").show(); </script> ';
+echo '<script>  </script> ';
 
 
 
@@ -272,13 +272,14 @@ LIMIT 1";
 $sql_result = mysql_query($findlast,$conn_id)  or mysql_error(); 
 while ($foundlast = mysql_fetch_array($sql_result)) {
     extract($foundlast);
-    $englishlast= date('H:i jS', $foundlast['timestamp']); 
+    $englishlast= date('H:i', $foundlast['timestamp']); 
     $englishlastd=date('jS', $foundlast['timestamp']);
+    $englishlastda=date('H:i jS', $foundlast['timestamp']);    
     if ($englishlastd==$englishfirstd) {
-        $trackingtext= ' Tracking ' . $englishfirstda . '-' . $englishlast . '';
+        $trackingtext= ' ' . $englishfirstda . '-' . $englishlast . '';
     }
     else {
-        $trackingtext= ' Tracking ' . $englishfirst . ' - ' . $englishlast . '';
+        $trackingtext= ' ' . $englishfirst . ' - ' . $englishlastda . '';
     }
 }
   
@@ -621,7 +622,7 @@ if (($sumtot>'0.5') or ($row['opsmaparea'] <>'')) {
                 poly'.$lilareaid.' = new google.maps.Polygon({
                 paths: [polymarkers'.$lilareaid.'],
                 strokeWeight: 3,
-                strokeOpacity: 0.2,
+                strokeOpacity: 0.3,
                 strokeColor: "#000000",
                 fillOpacity: 0,
                 clickable: false,
@@ -633,6 +634,8 @@ if (($sumtot>'0.5') or ($row['opsmaparea'] <>'')) {
                 for (i = 0; i < polymarkers'.$lilareaid.'.length; i++) {
                     bounds'.$lilareaid.'.extend(polymarkers'.$lilareaid.'[i]);
                 }
+                
+                
                 var cent=(bounds'.$lilareaid.'.getCenter());
     
                 marker'.$lilareaid.' = new RichMarker({
@@ -650,6 +653,13 @@ if (($sumtot>'0.5') or ($row['opsmaparea'] <>'')) {
     } // ends main area
 
 
+    if ($sumtot>'0.5') {
+        echo '<div class="fsl">Tracking</div><div id="map-comments" >'.$trackingtext.' '.$sumtot.' waypoints, '.$loop.' infopoints.</div>';
+    }    
+    
+    
+    
+    
 
     echo '
     <div id="map-container" >
@@ -690,9 +700,7 @@ if (($sumtot>'0.5') or ($row['opsmaparea'] <>'')) {
 
 
  
-    if ($sumtot>'0.5') {
-        echo ' <a href="../createkml.php?id='. $row['publictrackingref'].'">'.$trackingtext.'</a>, '.$sumtot.' waypoints, '.$loop.' infopoints.';
-    }
+
     
     echo ' </div> ';
  
@@ -701,6 +709,8 @@ if (($sumtot>'0.5') or ($row['opsmaparea'] <>'')) {
  
  ?>
 <script>
+ 
+ $("#orderajaxmap").removeClass("hideuntilneeded");
  
 // $("#geocodeaddress").hide();
 var element = document.getElementById("ordermap");
@@ -1061,6 +1071,9 @@ function swapStyleSheet(sheet){
         }
       });
 });
+
+
+
 </script>
 <?php
 
@@ -1069,7 +1082,7 @@ function swapStyleSheet(sheet){
 else { // no tracking OR maps
 	
 echo '<script>
-$("#orderajaxmap").hide();
+$("#orderajaxmap").addClass("hideuntilneeded");
 </script>';	
 	
 }

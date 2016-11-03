@@ -53,33 +53,12 @@ $hasforms='0';
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>';
  ?>
 
-<style> div.info { font-weight:bold; }
+<style> 
 
 div.marker-info-win { max-width:250px; }
 h1.marker-heading { padding:0; }
 
-div.fsli  { width:50px;   float: left;
-    min-height: 1px;
-    padding-right: 8px;
-    position: relative;
-    text-align: right;
-    top: 2px; }
-.w170 {  width:170px;  }
 
-
-img.opsmapicon { 
-
-height:30px;
-vertical-align:bottom;
-width:30px;
-
-}
-
-table.nolines td { 
-font-size:18px;
-padding:1px;
-
-}
 
 </style>
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >

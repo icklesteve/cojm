@@ -1654,133 +1654,127 @@ $pagetext.="<p>Favourite added.</p>";
 
     if ($page=="editexpense") {
 
-$infotext.='<p><strong>Editing expense details</strong></p>';
+        $infotext.='<p><strong>Editing expense details</strong></p>';
 
-
-
-
-$expenseref=trim($_POST['expenseref']);
-$expensecost=trim($_POST['expensecost']);
-$expensevat=trim($_POST['expensevat']);
-$expensecode=trim($_POST['expensecode']);
-$whoto=trim(htmlspecialchars($_POST['whoto']));
-$description=trim(htmlspecialchars($_POST['description']));
-$cyclistref=trim($_POST['cyclistref']);
-$paid=trim($_POST['paid']);
-$chequeref=trim(htmlspecialchars($_POST['chequeref']));
-$paymentmethod=trim($_POST['paymentmethod']);
-
- $whoto = str_replace("'", "&#39;", "$whoto");
-  $description = str_replace("'", "&#39;", "$description");
-  $chequeref = str_replace("'", "&#39;", "$chequeref");
-
-if (isset($_POST['newfromoldexpense'])) { $newfromoldexpense=trim($_POST['newfromoldexpense']); } else { $newfromoldexpense=''; }
-
-
-if (isset($_POST['expensedate'])) { $expensedate=trim($_POST['expensedate']); } else { $expensedate=''; }
-
-if ($expensedate) {
-$expensedate = str_replace("/", ":", "$expensedate", $count);
-$expensedate = str_replace(",", ":", "$expensedate", $count);
-$expensedate = str_replace("-", ":", "$expensedate", $count);
-$temp_ar=explode(":",$expensedate); 
-$startday=$temp_ar[0]; 
-$startmonth=$temp_ar[1]; 
-$startyear=$temp_ar[2];
-$expensedate=date("Y-m-d H:i:s", mktime(01, 01, 01, $startmonth, $startday, $startyear));
-}
- 
-if ($paid=='Yes') { $paid=1;}
-if ($paid=='No') { $paid=0;}
-if ($paymentmethod=='expc1') { $expc1=$expensecost; } else { $expc1=''; }
-if ($paymentmethod=='expc2') { $expc2=$expensecost; } else { $expc2=''; }
-if ($paymentmethod=='expc3') { $expc3=$expensecost; } else { $expc3=''; }
-if ($paymentmethod=='expc4') { $expc4=$expensecost; } else { $expc4=''; }
-if ($paymentmethod=='expc5') { $expc5=$expensecost; } else { $expc5=''; }
-if ($paymentmethod=='expc6') { $expc6=$expensecost; } else { $expc6=''; }
-
-if ($expenseref) {
-if ($newfromoldexpense) {
-
-$description='Created from ref '.$expenseref.' '.$description;
-
-$infotext.='<br />New Expense '; 
-   mysql_query("LOCK TABLES expenses WRITE", $conn_id);
-   mysql_query("INSERT INTO expenses 
-   (expensecost, expensevat, whoto, description, cyclistref, expensedate, expensecode, paid, expc2, expc3, expc1, expc4, expc5, expc6,
- chequeref) 
+        $expenseref=trim($_POST['expenseref']);
+        $expensecost=trim($_POST['expensecost']);
+        $expensevat=trim($_POST['expensevat']);
+        $expensecode=trim($_POST['expensecode']);
+        $whoto=trim(htmlspecialchars($_POST['whoto']));
+        $description=trim(htmlspecialchars($_POST['description']));
+        $cyclistref=trim($_POST['cyclistref']);
+        $paid=trim($_POST['paid']);
+        $chequeref=trim(htmlspecialchars($_POST['chequeref']));
+        $paymentmethod=trim($_POST['paymentmethod']);
+        
+        $whoto = str_replace("'", "&#39;", "$whoto");
+        $description = str_replace("'", "&#39;", "$description");
+        $chequeref = str_replace("'", "&#39;", "$chequeref");
+        
+        if (isset($_POST['newfromoldexpense'])) { $newfromoldexpense=trim($_POST['newfromoldexpense']); } else { $newfromoldexpense=''; }
+        
+        
+        if (isset($_POST['expensedate'])) { $expensedate=trim($_POST['expensedate']); } else { $expensedate=''; }
+        
+        if ($expensedate) {
+            $expensedate = str_replace("/", ":", "$expensedate", $count);
+            $expensedate = str_replace(",", ":", "$expensedate", $count);
+            $expensedate = str_replace("-", ":", "$expensedate", $count);
+            $temp_ar=explode(":",$expensedate); 
+            $startday=$temp_ar[0]; 
+            $startmonth=$temp_ar[1]; 
+            $startyear=$temp_ar[2];
+            $expensedate=date("Y-m-d H:i:s", mktime(01, 01, 01, $startmonth, $startday, $startyear));
+        }
+        
+        if ($paid=='Yes') { $paid=1;}
+        if ($paid=='No') { $paid=0;}
+        if ($paymentmethod=='expc1') { $expc1=$expensecost; } else { $expc1=''; }
+        if ($paymentmethod=='expc2') { $expc2=$expensecost; } else { $expc2=''; }
+        if ($paymentmethod=='expc3') { $expc3=$expensecost; } else { $expc3=''; }
+        if ($paymentmethod=='expc4') { $expc4=$expensecost; } else { $expc4=''; }
+        if ($paymentmethod=='expc5') { $expc5=$expensecost; } else { $expc5=''; }
+        if ($paymentmethod=='expc6') { $expc6=$expensecost; } else { $expc6=''; }
+        
+        if ($expenseref) {
+            if ($newfromoldexpense) {
+            
+                $description='Created from ref '.$expenseref.' '.$description;
+            
+                $infotext.='<br />New Expense '; 
+                mysql_query("LOCK TABLES expenses WRITE", $conn_id);
+                mysql_query("INSERT INTO expenses 
+                (expensecost, expensevat, whoto, description, cyclistref, expensedate, expensecode, paid, expc2, expc3, expc1, expc4, expc5, expc6, chequeref) 
+            
+                VALUES
+                ('$expensecost',
+                '$expensevat',
+                '$whoto',
+                '$description',
+                '$cyclistref', 
+                '$expensedate', 
+                '$expensecode',
+                '$paid',
+                '$expc2',
+                '$expc3',
+                '$expc1',
+                '$expc4',
+                '$expc5',
+                '$expc6',
+                '$chequeref' )
+                ", $conn_id) or die(mysql_error());
+                $expenseref=mysql_insert_id();  
+                mysql_query("UNLOCK TABLES", $conn_id);  
+                
+            
+            
+            } else {
+                $sql = "UPDATE expenses SET expensecost='$expensecost' , expensevat='$expensevat' , whoto='$whoto' , description='$description' , cyclistref='$cyclistref' , 
+                expensedate='$expensedate' , expensecode='$expensecode' , paid='$paid' , expc2='$expc2' , expc3='$expc3' , 
+                expc1='$expc1' , expc4='$expc4' , expc5='$expc5' , expc6='$expc6' , chequeref='$chequeref'  
+                WHERE expenseref='$expenseref' LIMIT 1"; 
+            
+                $result = mysql_query($sql, $conn_id);
+                if ($result){
+                    $pagetext.="<p>Expense Updated</p>"; 
+                } else { 
+                    $infotext.=mysql_error()."<br />error occured during updating expense"; 
+                    $alerttext.='<p>Error occured during updating expense</p>'; 
+                }
+            }
+        }
+        
+        if ($expenseref=='') { 
+            // $pagetext.='<p><b>New Expense</b></p>'; 
+            mysql_query("LOCK TABLES expenses WRITE");
+            mysql_query("INSERT INTO expenses 
+            (expensecost, expensevat , whoto, description, cyclistref, expensedate, expensecode, paid, expc2, expc3, expc1, expc4, expc5, expc6, chequeref) 
    
-   VALUES
-   ('$expensecost',
-   '$expensevat',
-   '$whoto',
-   '$description',
-   '$cyclistref', 
-   '$expensedate', 
-   '$expensecode',
-   '$paid',
-   '$expc2',
-   '$expc3',
-   '$expc1',
-   '$expc4',
-   '$expc5',
-   '$expc6',
-   '$chequeref' )
-   ", $conn_id
-   )  or die(mysql_error()); $expenseref=mysql_insert_id();  
-mysql_query("UNLOCK TABLES", $conn_id);  
-
-
-
-} else {
-$sql = "UPDATE expenses SET expensecost='$expensecost' , expensevat='$expensevat' , whoto='$whoto' , description='$description' , cyclistref='$cyclistref' , 
-expensedate='$expensedate' , expensecode='$expensecode' , paid='$paid' , expc2='$expc2' , expc3='$expc3' , 
-expc1='$expc1' , expc4='$expc4' , expc5='$expc5' , expc6='$expc6' , chequeref='$chequeref'  
- WHERE expenseref='$expenseref' LIMIT 1"; 
-  
- $result = mysql_query($sql, $conn_id);
-if ($result){ $pagetext.="<p>Expense Updated</p>"; } else 
-
-{ 
-$infotext.=mysql_error()."<br />error occured during updating expense"; 
-$alerttext.='<p>Error occured during updating expense</p>'; 
-
-} 
- }}
- 
-if ($expenseref=='') { 
-// $pagetext.='<p><b>New Expense</b></p>'; 
-   mysql_query("LOCK TABLES expenses WRITE");
-   mysql_query("INSERT INTO expenses 
-   (expensecost, expensevat , whoto, description, cyclistref, expensedate, expensecode, paid, expc2, expc3, expc1, expc4, expc5, expc6,
- chequeref) 
-   
-   VALUES
-   ('$expensecost',
-   '$expensevat',
-   '$whoto',
-   '$description',
-   '$cyclistref', 
-   '$expensedate', 
-   '$expensecode',
-   '$paid',
-   '$expc2',
-   '$expc3',
-   '$expc1',
-   '$expc4',
-   '$expc5',
-   '$expc6',
-   '$chequeref' )
-   "
-   )  or die(mysql_error()); $expenseref=mysql_insert_id();  
-mysql_query("UNLOCK TABLES", $conn_id);   
-
- $pagetext.='<p>New Expense ref '.$expenseref.'</p>'; 
- $infotext.='<br />New Expense'; 
-
- 
-} // end new expense
-} // ends page=editexpense
+            VALUES
+            ('$expensecost',
+            '$expensevat',
+            '$whoto',
+            '$description',
+            '$cyclistref', 
+            '$expensedate', 
+            '$expensecode',
+            '$paid',
+            '$expc2',
+            '$expc3',
+            '$expc1',
+            '$expc4',
+            '$expc5',
+            '$expc6',
+            '$chequeref' )
+            "
+            )  or die(mysql_error());
+            $expenseref=mysql_insert_id();  
+            mysql_query("UNLOCK TABLES", $conn_id);   
+            
+            $pagetext.='<p>New Expense ref '.$expenseref.'</p>'; 
+            $infotext.='<br />New Expense';
+        } // end new expense
+    } // ends page=editexpense
 
 
 
@@ -1898,91 +1892,82 @@ $infotext.='<br />Unable to edit invoice comment<br />'.$sql;
     if ($page=='markinvpaid') {
 
 
-// sets vars
+        // sets vars
 
-if (isset( $_POST['ref'])) { $invoiceref=$_POST['ref']; } else { $invoiceref=''; }
-if (isset($_POST['invmethod'])) { $invmethod=$_POST['invmethod']; } else { $invmethod=''; }
+        if (isset( $_POST['ref'])) { $invoiceref=$_POST['ref']; } else { $invoiceref=''; }
+        if (isset($_POST['invoicedate'])) { 
+            
+            $invoicedate=trim($_POST['invoicedate']); 
+            $invoicedate = str_replace("/", ":", "$invoicedate", $count);
+            $invoicedate = str_replace(",", ":", "$invoicedate", $count);
+            $invoicedate = str_replace("-", ":", "$invoicedate", $count);
+            $temp_ar=explode(":",$invoicedate); 
+            $startday=$temp_ar[0]; 
+            $startmonth=$temp_ar[1]; 
+            $startyear=$temp_ar[2];
+            
+            $invoicedate=date("Y-m-d 23:59:59", mktime(01, 01, 01, $startmonth, $startday, $startyear));
+            
+            
+        } else { $invoicedate=''; }
+            
+            
+            
+            
+            // changes invoice after a couple of checks
+            
+        // echo "<h4>Invoice method field found</h4>" . $invmethod . " " . $datepassed . " " . $invoiceref ;
+            if ($invoiceref) {
+                $sql = "SELECT cost from invoicing WHERE ref=$invoiceref ";
+                $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+            
+                $temp=mysql_affected_rows();
+            
+                // $infotext.='<br />'.$temp.' cost selected with sql : '.$sql.' with result '.$sql_result;
+            
+                while ($row = mysql_fetch_array($sql_result)) {
+                    extract($row);
+                }
+            
+                // echo $datepassed.' '. $invmethod . ' ' . $cost . ' ' . $invoiceref; 
+            
+                $sql="UPDATE `invoicing` SET `paydate` = '$invoicedate' WHERE CONCAT( `invoicing`.`ref` ) =$invoiceref ";
+                $result = mysql_query($sql, $conn_id);
+            
+                $temp=mysql_affected_rows();
+            
+            
+            if ($temp>0){ 
+            
+                $pagetext.='<p><strong> Reconciled invoice ref '.$invoiceref.'</strong></p>';
+            } else { 
+                $alerttext.='<br />Unable to change invoice<br />'; 
+                $infotext.='<br />Unable to change invoice<br />'.$sql;
+            
+            }
+            
+            
+                $sql = "UPDATE Orders SET status='120' WHERE invoiceref='$invoiceref'"; 
+                $result = mysql_query($sql, $conn_id);
+                $temp=mysql_affected_rows();
+                if ($result){
+                    $pagetext.= '<p><strong> Updated '.$temp.'</strong> jobs<p>';
+                    $auditsql='';		
+                } else { 
+            
+                    $alerttext.= '
+                    <br /><strong>An error occured during updating individual jobs,</strong>
+                    <br />Please contact COJM ASAP with the details of what you were attempting to do.'; 
+            
+                    $infotext.='<br /><strong>An error occured during updating individual jobs,</strong>';
+            
+                } // ends updating individ jobs
+            
+            } // checks for invoice ref
+            
+            
 
-
-if (isset($_POST['invoicedate'])) { 
-
-$invoicedate=trim($_POST['invoicedate']); 
-$invoicedate = str_replace("/", ":", "$invoicedate", $count);
-$invoicedate = str_replace(",", ":", "$invoicedate", $count);
-$invoicedate = str_replace("-", ":", "$invoicedate", $count);
-$temp_ar=explode(":",$invoicedate); 
-$startday=$temp_ar[0]; 
-$startmonth=$temp_ar[1]; 
-$startyear=$temp_ar[2];
-
-$invoicedate=date("Y-m-d 23:59:59", mktime(01, 01, 01, $startmonth, $startday, $startyear));
-
-
-} else { $invoicedate=''; }
- 
- 
- 
- 
- // changes invoice after a couple of checks
- 
-if ($invmethod) { // echo "<h4>Invoice method field found</h4>" . $invmethod . " " . $datepassed . " " . $invoiceref ;
-if ($invoiceref) {
-
-
-
-$sql = "SELECT cost from invoicing WHERE ref=$invoiceref ";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-
-$temp=mysql_affected_rows();
-
-// $infotext.='<br />'.$temp.' cost selected with sql : '.$sql.' with result '.$sql_result;
-
-while ($row = mysql_fetch_array($sql_result)) {
-     extract($row); }
-
-// echo $datepassed.' '. $invmethod . ' ' . $cost . ' ' . $invoiceref; 
-
-$sql="UPDATE `invoicing` SET `paydate` = '$invoicedate', `$invmethod` = '$cost' WHERE CONCAT( `invoicing`.`ref` ) =$invoiceref ";
-$result = mysql_query($sql, $conn_id);
-
-$temp=mysql_affected_rows();
-
-
-if ($temp>0){ 
-
-$pagetext.='<p><strong> Updated invoice ref '.$invoiceref."</strong>, paid via ".$invmethod.'</p>'; } else { 
-$alerttext.='<br />Unable to change invoice<br />'; 
-$infotext.='<br />Unable to change invoice<br />'.$sql;
-
-}
-
-
-$sql = "UPDATE Orders SET status='120' WHERE invoiceref='$invoiceref'"; 
-$result = mysql_query($sql, $conn_id);
-$temp=mysql_affected_rows();
-if ($result){ $pagetext.= '<p>
-				<strong> Updated '.$temp.'</strong> jobs<p>';
-$auditsql='';				
-				} else { 
-
-$alerttext.= '
-<br /><strong>An error occured during updating individual jobs,</strong>
-<br />Please contact COJM ASAP with the details of what you were attempting to do.'; 
-
-
-$infotext.='<br /><strong>An error occured during updating individual jobs,</strong>';
-
-} // ends updating individ jobs
-
-} // checks for invoice ref
-
-
-} else { $alerttext.='<p> No payment method selected </p>'; }
- 
- 
- 
- 
-} // finishes page= invoice paid
+    } // finishes page= invoice paid
 
 
 
@@ -2054,89 +2039,58 @@ $pagetext.='<p>Third Chased Changed</p>';
 
     if ($page=='deleteinv') {
 
+        if (isset( $_POST['ref'])) { $invoiceref=$_POST['ref']; } else { $invoiceref=''; }
 
-if (isset( $_POST['ref'])) { $invoiceref=$_POST['ref']; } else { $invoiceref=''; }
-
- 
-if ($invoiceref) {
+        if ($invoiceref) {
 
 
-// echo $datepassed.' '. $invmethod . ' ' . $cost . ' ' . $invoiceref; 
+            // echo $datepassed.' '. $invmethod . ' ' . $cost . ' ' . $invoiceref; 
 
-$sql = "DELETE from invoicing WHERE ref='$invoiceref'";	
+            $sql = "DELETE from invoicing WHERE ref='$invoiceref'";	
 
-// $sql="UPDATE `invoicing` SET `paydate` = '$invoicedate', `$invmethod` = '$cost' WHERE CONCAT( `invoicing`.`ref` ) =$invoiceref ";
-$result = mysql_query($sql, $conn_id);
+            // $sql="UPDATE `invoicing` SET `paydate` = '$invoicedate', `$invmethod` = '$cost' WHERE CONCAT( `invoicing`.`ref` ) =$invoiceref ";
+            $result = mysql_query($sql, $conn_id);
 
-$temp=mysql_affected_rows();
-
-
-if ($temp>'0'){
-$alerttext.='<p><strong> Deleted invoice ref '.$invoiceref.'</strong></p>'; 
-$infotext.='<br /> Invoice Deleted ';
-} else { 
-$alerttext.='<br />Unable to delete invoice<br />'; 
-$infotext.='<br />Unable to delete invoice<br />'.$sql;
-} // ends invoice dtabase changed
+            $temp=mysql_affected_rows();
 
 
+            if ($temp>'0'){
+                $alerttext.='<p><strong> Deleted invoice ref '.$invoiceref.'</strong></p>'; 
+                $infotext.='<br /> Invoice Deleted ';
+            } else { 
+                $alerttext.='<br />Unable to delete invoice<br />'; 
+                $infotext.='<br />Unable to delete invoice<br />'.$sql;
+            } // ends invoice dtabase changed
 
 
-
-
-   $dtsql = "SELECT ID FROM Orders 
-   WHERE (`Orders`.`invoiceref` ='$invoiceref' )  ";
-$dtsql_result = mysql_query($dtsql,$conn_id)  or mysql_error(); 
-while ($dtrow = mysql_fetch_array($dtsql_result)) { extract($dtrow); 
-
-
-
-$dtid=$dtrow['ID'];
-
-$browser=$_SERVER["HTTP_USER_AGENT"];
-
-$sql = "UPDATE Orders SET status='100', invoiceref='' WHERE ID='$dtid'"; 
-
-$result = mysql_query($sql, $conn_id);
-
-$temp=mysql_affected_rows();
-
-if ($result){
-
-
-
-
-
- $newpoint="INSERT INTO cojm_audit (auditid,audituser,auditorderid,auditpage,auditfilename,auditmobdevice,
- auditbrowser,audittext,auditcjtime,auditpagetime,auditmidtime,auditinfotext)   
- VALUES ('','$cyclistid','$dtid','$page','view_all_invoices.php','$mobdevice',
- '$browser','Invoice ref $invoiceref removed','','','','Invoice removed from job')";
- mysql_query($newpoint, $conn_id) or mysql_error(); $newauditid=mysql_insert_id();
- if (mysql_error()) { $alerttext.= '<div class="moreinfotext"><h1> Problem saving audit log </h1></div>';
-
-
-$infotext.= '<br />Problem saving audit log on remove invoice details'.$newpoint;
-
-
- } // ends error
-
-
-
-
-} else { // job update fail
-$alerttext.= '<br /><strong>An error occured during updating individual job, check audit log. </strong>'; 
-$infotext.='<br /><strong>An error occured during updating individual job '.$dtid.' '.$sql.' </strong>';
-} // ends updating individ jobs
-
-
-
-
-} // ends row extract for individual job
-
-
-} // checks for invoice ref
-
-} // ends page=deleteinv
+            $dtsql = "SELECT ID FROM Orders WHERE (`Orders`.`invoiceref` ='$invoiceref' )  ";
+            $dtsql_result = mysql_query($dtsql,$conn_id)  or mysql_error(); 
+            while ($dtrow = mysql_fetch_array($dtsql_result)) {
+                extract($dtrow);
+                $dtid=$dtrow['ID'];
+                $browser=$_SERVER["HTTP_USER_AGENT"];
+                $sql = "UPDATE Orders SET status='100', invoiceref='' WHERE ID='$dtid'";
+                $result = mysql_query($sql, $conn_id);
+                $temp=mysql_affected_rows();
+                
+                if ($result){
+                    $newpoint="INSERT INTO cojm_audit (auditid,audituser,auditorderid,auditpage,auditfilename,auditmobdevice,
+                    auditbrowser,audittext,auditcjtime,auditpagetime,auditmidtime,auditinfotext)   
+                    VALUES ('','$cyclistid','$dtid','$page','view_all_invoices.php','$mobdevice',
+                    '$browser','Invoice ref $invoiceref removed','','','','Invoice removed from job')";
+                    mysql_query($newpoint, $conn_id) or mysql_error();
+                    $newauditid=mysql_insert_id();
+                    if (mysql_error()) {
+                        $alerttext.= '<div class="moreinfotext"><h1> Problem saving audit log </h1></div>';
+                        $infotext.= '<br />Problem saving audit log on remove invoice details'.$newpoint;
+                    } // ends error
+                } else { // job update fail
+                    $alerttext.= '<br /><strong>An error occured during updating individual job, check audit log. </strong>'; 
+                    $infotext.='<br /><strong>An error occured during updating individual job '.$dtid.' '.$sql.' </strong>';
+                } // ends updating individ jobs
+            } // ends row extract for individual job
+        } // checks for invoice ref
+    } // ends page=deleteinv
 
 
 
@@ -2238,75 +2192,89 @@ $alerttext.='<p>Payment details NOT removed on Invoice ref '.$invoiceref.'</p>';
 
 if ($page=='addtodb') { // new invoice
 
-$clientname = mysql_result(mysql_query("SELECT CompanyName from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
+    $clientname = mysql_result(mysql_query("SELECT CompanyName from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
 
-$clientemailinv = mysql_result(mysql_query("SELECT invoiceEmailAddress from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
-if ($clientemailinv) { $pagetext.= '<a href="../live/new_cojm_client.php?clientid='.$clientid.'">'.$clientname.'</a> Invoice Email : '.$clientemailinv;}
-
-
-
-$clientemail = mysql_result(mysql_query("SELECT EmailAddress from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
-if ($clientemail) { $pagetext.= '<br /><a href="../live/new_cojm_client.php?clientid='.$clientid.'">'.$clientname.'</a> General Email : '.$clientemail;}
-
-
-if ($invoiceselectdep) {
-$depname = mysql_result(mysql_query("SELECT depname from clientdep WHERE depnumber='$invoiceselectdep' LIMIT 1", $conn_id), 0);
-$depemail = mysql_result(mysql_query("SELECT depemail from clientdep WHERE depnumber='$invoiceselectdep' LIMIT 1", $conn_id), 0);
-if ($clientemail) { $pagetext.= '<br /><a href="../live/new_cojm_department.php?depid='.$invoiceselectdep.'">'.$depname.'</a> Department Email : '.$depemail;}
-}
-
-$existinginvref='';
-
-   $dtsql = "SELECT * FROM invoicing 
-   WHERE (`invoicing`.`ref` ='$newinvoiceref' )  ";
-$dtsql_result = mysql_query($dtsql,$conn_id)  or mysql_error(); 
-while ($dtrow = mysql_fetch_array($dtsql_result)) { extract($dtrow); 
-
-
-if ($dtrow['ref']>0) { $existinginvref='1'; }  }
+    $clientemailinv = mysql_result(mysql_query("SELECT invoiceEmailAddress from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
+    if ($clientemailinv) {
+        $pagetext.= '<a href="../live/new_cojm_client.php?clientid='.$clientid.'">'.$clientname.'</a> Invoice Email : '.$clientemailinv;
+    }
 
 
 
+    $clientemail = mysql_result(mysql_query("SELECT EmailAddress from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
+    if ($clientemail) {
+        $pagetext.= '<br /><a href="../live/new_cojm_client.php?clientid='.$clientid.'">'.$clientname.'</a> General Email : '.$clientemail;
+    }
 
-if ($existinginvref) {
-    $pagetext.= '<h3>Not changing Invoice as existing invoice with same ref.';
+
+    if ($invoiceselectdep) {
+        $depname = mysql_result(mysql_query("SELECT depname from clientdep WHERE depnumber='$invoiceselectdep' LIMIT 1", $conn_id), 0);
+        $depemail = mysql_result(mysql_query("SELECT depemail from clientdep WHERE depnumber='$invoiceselectdep' LIMIT 1", $conn_id), 0);
+        if ($clientemail) {
+            $pagetext.= '<br /><a href="../live/new_cojm_department.php?depid='.$invoiceselectdep.'">'.$depname.'</a> Department Email : '.$depemail;
+        }
+    }
+
+    $existinginvref='';
+
+   $dtsql = "SELECT * FROM invoicing WHERE (`invoicing`.`ref` ='$newinvoiceref' )  ";
+    $dtsql_result = mysql_query($dtsql,$conn_id)  or mysql_error(); 
+    while ($dtrow = mysql_fetch_array($dtsql_result)) {
+        extract($dtrow);
+        if ($dtrow['ref']>0) {
+            $existinginvref='1';
+        }
+    }
+
+
+
+    if ($existinginvref) {
+        $pagetext.= '<h3>Not changing Invoice as existing invoice with same ref.';
     }
     else {
-        if ($invoiceselectdep) {
-            $sql = "SELECT * FROM Orders WHERE
-            `Orders`.`orderdep` = '$invoiceselectdep'
-            AND `Orders`.`collectiondate` >= '1'
-            AND `Orders`.`collectiondate` <= '$collectionsuntildate'
-            AND `Orders`.`status` < 110
-            AND `Orders`.`status` > 90
-            ORDER BY `Orders`.`collectiondate` ASC";
-        } else {
-            $sql = "SELECT * FROM Orders WHERE
-            Orders.CustomerID = '$clientid' 
-            AND `Orders`.`collectiondate` >= '1' 
-            AND `Orders`.`collectiondate` <= '$collectionsuntildate'
-            AND `Orders`.`status` < 110
-            AND `Orders`.`status` > 90
-            ORDER BY `Orders`.`collectiondate` ASC";
-        }
         
-        $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-        $orderupdate='';
         
-        // table loop
-        while ($row = mysql_fetch_array($sql_result)) {
-            extract($row);
-            $updatequery = "UPDATE Orders SET status ='110', iscustomprice='1', invoiceref =$newinvoiceref WHERE ID=$row[ID]";
+        foreach ($invoicejobarray as $value) {
+        
+        
+            $updatequery = "UPDATE Orders SET status ='110', invoiceref =$newinvoiceref WHERE ID=$value";
             mysql_query($updatequery,$conn_id) or die(mysql_error());
             $orderupdate++;
+            
+            $audituser=' COJM ';
+            $audittext='<strong>Added to Invoice Ref '.$newinvoiceref.'</strong>';
+            
+            try {
+                $statement = $dbh->prepare("INSERT INTO cojm_audit 
+                (auditorderid, audituser, auditpage, audittext, auditinfotext, auditdatetime, auditfilename)
+                values 
+                (:orderid, :audituser, :page, :audittext, :auditinfotext, now(), :auditfilename) ");
+
+                $statement->bindParam(':orderid', $value, PDO::PARAM_STR);
+                $statement->bindParam(':audituser', $audituser, PDO::PARAM_STR);
+                $statement->bindParam(':page', $page, PDO::PARAM_STR);
+                $statement->bindParam(':audittext', $audittext, PDO::PARAM_STR);
+                $statement->bindParam(':auditinfotext', $infotext, PDO::PARAM_STR);
+                $statement->bindParam(':auditfilename', $filename, PDO::PARAM_STR);
+                $statement->execute();
+            }
+            
+            
+            catch(PDOException $e) {
+
+                $allok=0;
+                $message.=" Issue saving Audit Log <br /> ";
+                $message.=$e->getMessage();
+            }
+            
         } // ends individ job row extraction
         
         if ($orderupdate<'1') {
             $pagetext.= '<h1>No invoice details added to database as no jobs changed.</h1>';
         }
         
-        $sql = "INSERT INTO invoicing ( ref, invdate1, created, client, cost, invvatcost,invdue, invoicedept, invcomments ) 
-         VALUES ( '$newinvoiceref', '$invoicemysqldate' , now() , '$clientid' , '$tablecost', '$tablevatcost' , '$invoiceduemysqldate' , '$invoiceselectdep', '$invcomments' ) ";
+        $sql = "INSERT INTO invoicing ( ref, invdate1, created, client, cost, invvatcost,invdue, invoicedept, invcomments, invoicetopmiddlehtml, showdelivery ) 
+         VALUES ( '$newinvoiceref', '$invoicemysqldate' , now() , '$clientid' , '$tablecost', '$tablevatcost' , '$invoiceduemysqldate' , '$invoiceselectdep', '$invcomments', '$topmiddlehtml', '$showdelivery' ) ";
         $result = mysql_query($sql, $conn_id);
         // $infotext= '<br />'.$sql;
         

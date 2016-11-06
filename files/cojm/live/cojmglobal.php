@@ -695,7 +695,20 @@ The VAT charge within a job is set by which service is used.
 </fieldset>
 
 <fieldset><label class="fieldLabel"> VAT Band B (%) </label> 
-<input class="ui-state-default ui-corner-all pad" type="text" size="10" id="vatbandb" value="<? echo $globalprefrow['vatbandb']; ?>"></fieldset>
+<input class="ui-state-default ui-corner-all pad" type="text" size="10" id="vatbandb" value="<? echo $globalprefrow['vatbandb']; ?>">
+
+</fieldset>
+<hr />
+<fieldset><label class="fieldLabel"> Auto VAT for Expenses (%) </label> 
+<input class="ui-state-default ui-corner-all pad" type="text" size="10" id="vatbandexpense" value="<? echo $globalprefrow['vatbandexpense']; ?>">
+eg, to auto add 20% VAT to an expense, use 20.00 .  Set to 0 to disable auto calculation.
+
+</fieldset>
+
+
+
+
+
 
 <h3>Expense Type Names, leave blank if not required</h3>
 
@@ -2024,6 +2037,15 @@ $("#vatbandb").change(function () {
 //  alert(globalname +' ' + newvalue);
 changedvar();
 });
+
+
+$("#vatbandexpense").change(function () {
+ globalname='vatbandexpense';	
+ newvalue=$("#vatbandexpense").val();	
+//  alert(globalname +' ' + newvalue);
+changedvar();
+});
+
 
 
 $("#gexpc1").change(function () {

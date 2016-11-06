@@ -65,7 +65,7 @@ include "cojmmenu.php";
 
 ?>
 <div class="Post" id="Post">
-<div class="ui-state-highlight ui-corner-all p15" > 
+<div class="ui-state-highlight ui-corner-all p15 aligned" > 
 
 <form id="singleexpense">
 <input type="hidden" name="page" id="page" value="lookup" >
@@ -77,45 +77,59 @@ include "cojmmenu.php";
 <button id="expensesearchbyid">Search Expense Ref</button>
 
 </fieldset>
-
+</form>
 <hr />
-
-<div id="expensedetails" class="hideuntilneeded">
+<div id="expensedetails" class="hideuntilneeded ">
 
 <fieldset>
 <label class="fieldLabel"> Amount &<?php echo $globalprefrow['currencysymbol']; ?></label>
-<input class="caps ui-state-default ui-corner-all" type="text" name="amount" id="amount" value="">
+<input class="caps ui-state-default ui-corner-all" type="text" name="amount" id="amount" size="6">
 </fieldset>
 
 <fieldset><label class="fieldLabel">
  of which VAT <span style="position:relative; float:right;">
  &<?php echo $globalprefrow['currencysymbol'];?> &nbsp;</span></label>
-<input class="caps ui-state-default ui-corner-all" type="text" name="expensevat" id="expensevat" size="6" value=""></fieldset>
+<input class="caps ui-state-default ui-corner-all" type="text" name="expensevat" id="expensevat" size="6">
+</fieldset>
+
+
+<fieldset>
+<label class="fieldLabel"> Paid </label> 
+<select class="ui-state-default ui-corner-left" name="paid" id="paid"> 
+<option value="0" > No
+<option value="1" > Yes
+</select>
+</fieldset>
+
+
+<fieldset>
+<label class="fieldLabel"> Expense Date </label> 
+<input class="ui-state-default ui-corner-all caps" type="text" value="" id="expensedate" size="12" name="expensedate">
+</fieldset>
 
 <fieldset><label class="fieldLabel"> Department </label>
 <select class="ui-state-default ui-corner-left" name="expensecode" id="expensecode">
-<option value="0"> &nbsp; </option>
 <?php 
 
 $expensetext='';
 
-$query = "SELECT expensecode, smallexpensename, expensedescription FROM expensecodes ORDER BY expensecode"; 
+$query = "SELECT expensecode, smallexpensename FROM expensecodes ORDER BY expensecode"; 
 
 $result_id = mysql_query ($query, $conn_id); 
-while (list ($expensecode, $smallexpensename, $expensedescription) = mysql_fetch_row ($result_id)) { 
-    $expensedescription = htmlspecialchars ($expensedescription);   
+while (list ($expensecode, $smallexpensename) = mysql_fetch_row ($result_id)) {  
     $expensecode = htmlspecialchars ($expensecode);
     $smallexpensename = htmlspecialchars ($smallexpensename); 
+    if ($smallexpensename=='') { $smallexpensename=' &nbsp; '; }
     print"<option ";
     print ("value=\"$expensecode\">$smallexpensename </option>\n");
-} ?></select>
+} ?>
+</select>
+<span id="expensedescription"> </span>
 </fieldset> 
  
-<fieldset><label class="fieldLabel">Who To </label>
-<input class="caps ui-state-default ui-corner-all" type="text" name="whoto" id="whoto" value="">
-</fieldset>
 
-<fieldset><label class="fieldLabel">
+ 
+<fieldset id="riderselect" class="hideuntilneeded"><label class="fieldLabel">
 <?php echo $globalprefrow['glob5'].'</label>';
  
 $query = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID"; 
@@ -125,28 +139,27 @@ while (list ($CyclistID, $cojmname) = mysql_fetch_row ($result_id)) {
     print ("<option value=\"$CyclistID\">$cojmname</option>\n");
 }
 
-print ("</select></fieldset>");
+
 ?>
-
-<fieldset>
-<label class="fieldLabel"> Expense Date </label> 
-<input class="ui-state-default ui-corner-all caps" type="text" value="<?php echo date('d-m-Y'); ?>" id="expensedate" size="12" name="expensedate">
-</fieldset>
-
-
-<fieldset><label class="fieldLabel">Comments </label>
-<textarea class="ui-state-default ui-corner-all" name="expensecomment" id="expensecomment" rows="2" cols="50" placeholder="eg, Cheque Ref" ></textarea>
-</fieldset>
-
-<input type="hidden" id="newcomment" name="newcomment" value="">
-
-<fieldset>
-<label class="fieldLabel"> Paid </label> 
-<select class="ui-state-default ui-corner-left" name="paid" id="paid"> 
-<option value="0" <?php if ($row['paid']<1) { echo 'selected'; } ?>> No
-<option value="1" <?php if ($row['paid']>0) { echo 'selected'; } ?> > Yes
 </select>
+</fieldset> 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+<fieldset><label class="fieldLabel">Who To </label>
+<input class="caps ui-state-default ui-corner-all" type="text" name="whoto" id="whoto" value="">
 </fieldset>
+
+
+
+
+
+
+
 
 
 <fieldset>
@@ -154,21 +167,23 @@ print ("</select></fieldset>");
 <select class="ui-state-default ui-corner-left" name="paymentmethod" id="paymentmethod"> 
 <option value="" > &nbsp; </option>
 <?php 
- if ($globalprefrow['gexpc1']){ echo '<option value="expc1"'; if ($row['expc1']>0) { echo ' selected '; }  echo '> '.$globalprefrow['gexpc1'].'</option>'; }
- if ($globalprefrow['gexpc2']){ echo '<option value="expc2"'; if ($row['expc2']>0) { echo ' selected '; }  echo '> '.$globalprefrow['gexpc2'].'</option>'; }
- if ($globalprefrow['gexpc3']){ echo '<option value="expc3"'; if ($row['expc3']>0) { echo ' selected '; }  echo '> '.$globalprefrow['gexpc3'].'</option>'; }
- if ($globalprefrow['gexpc4']){ echo '<option value="expc4"'; if ($row['expc4']>0) { echo ' selected '; }  echo '> '.$globalprefrow['gexpc4'].'</option>'; }
- if ($globalprefrow['gexpc5']){ echo '<option value="expc5"'; if ($row['expc5']>0) { echo ' selected '; }  echo '> '.$globalprefrow['gexpc5'].'</option>'; }
- if ($globalprefrow['gexpc6']){ echo '<option value="expc6"'; if ($row['expc6']>0) { echo ' selected '; }  echo '> '.$globalprefrow['gexpc6'].'</option>'; }
+ if ($globalprefrow['gexpc1']){ echo '<option value="expc1"> '.$globalprefrow['gexpc1'].'</option>'; }
+ if ($globalprefrow['gexpc2']){ echo '<option value="expc2"> '.$globalprefrow['gexpc2'].'</option>'; }
+ if ($globalprefrow['gexpc3']){ echo '<option value="expc3"> '.$globalprefrow['gexpc3'].'</option>'; }
+ if ($globalprefrow['gexpc4']){ echo '<option value="expc4"> '.$globalprefrow['gexpc4'].'</option>'; }
+ if ($globalprefrow['gexpc5']){ echo '<option value="expc5"> '.$globalprefrow['gexpc5'].'</option>'; }
+ if ($globalprefrow['gexpc6']){ echo '<option value="expc6"> '.$globalprefrow['gexpc6'].'</option>'; }
 ?>
 </select>
 <span id="chequeref"></span>
 </fieldset>
 
-
-<fieldset><label class="fieldLabel"> &nbsp; </label>
-<button id="editexpense" class="hideuntilneeded"> Edit Expense </button>
+<fieldset><label class="fieldLabel">Comments </label>
+<textarea class="ui-state-default ui-corner-all" name="expensecomment" id="expensecomment" rows="2" cols="40" placeholder="eg, Cheque Ref" ></textarea>
 </fieldset>
+
+<input type="hidden" id="newcomment" name="newcomment" value="">
+
 <hr />
 </div>
 
@@ -176,23 +191,14 @@ print ("</select></fieldset>");
 <button id="addnewexpense"> Create New Expense </button>
 </fieldset>
 
-</form>
-
 </div>
 </div>
 <script type="text/javascript">
 $(document).ready(function() {
-    
-    $(function () {
-        $("#combobox").combobox();
-        $("#toggle").click(function () {
-            $("#combobox").toggle();
-        });
-    });
-
     $(function (){ // autosize
         $("#expensecomment").autosize();
     });
+    var formbirthday=<?php echo date("U"); ?>;
     
 	$(function() {
 		var dates = $( "#expensedate" ).datepicker({
@@ -200,9 +206,15 @@ $(document).ready(function() {
 			changeYear:false,
 			firstDay: 1,
             dateFormat: 'dd-mm-yy',
-			changeMonth:false
+			changeMonth:false,
+            onSelect: function(d,i){
+                if(d !== i.lastVal){
+                    $(this).change();
+                }
+            }
 		});
 	});
+
 
     $("#amount").change(function () {
         // var amountcheck = $("#amountpaid").val();
@@ -219,16 +231,324 @@ $(document).ready(function() {
         } else {
             $("#amount").val("0.00");
         }
+         
+        var expenseref=$("#expenseid").val();
+        if (expenseref) {
+            message='';
+            $.ajax({
+                url: 'ajaxchangejob.php',
+                data: {
+                    page: 'ajeditexpense',
+                    whatchanged: 'expensecost',
+                    formbirthday: formbirthday,
+                    expenseref: expenseref,
+                    expensecost: $("#amount").val()
+                },
+                type: 'post',
+                success:function(data){
+                    $("#Post").append(data);
+                },
+                complete: function () {
+                    showmessage();
+                },
+                error:function (xhr, ajaxOptions, thrownError){
+                    alert(thrownError); //throw any errors
+                }
+            });
+        }
+        
+        
+        // update VAT if set
+        
+        var calcvatpc=<?php echo $globalprefrow['vatbandexpense']; ?>;
+        if (calcvatpc) {
+            
+            var newvat=($("#amount").val() * calcvatpc / 100).toFixed(2);
+            // alert ("New VAT " + newvat);
+            if (newvat =="NaN") {
+                alert ("Not a Number");
+                $("#expensevat").val("0.00");
+            } else {
+                $("#expensevat").focus().val(newvat);
+            }
+            
+        }
+        
     });
 
-    $('#expensesearchbyid').on('click', function (event) {
-        event.preventDefault();    
+    
+    
+    function expvatsubmit() {
+            if ($("#expensevat").val()) {
+            var rounded = parseFloat($("#expensevat").val()).toFixed(2); // rounded = 258.20
+            // alert(rounded);
+            
+            if (rounded =="NaN") {
+                alert ("Not a Number");
+                $("#expensevat").val("0.00");
+            } else {
+                $("#expensevat").val(rounded);
+            }
+        } else {
+            $("#expensevat").val("0.00");
+        }
+         
+        var expenseref=$("#expenseid").val();
+        if (expenseref) {
+        message='';
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditexpense',
+                whatchanged: 'expensevat',
+                formbirthday: formbirthday,
+                expenseref: expenseref,
+                expensevat: $("#expensevat").val()
+            },
+            type: 'post',
+            success:function(data){
+                // alert(data);
+                $("#Post").append(data);
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        });            
+        
+        }
+    
+        
+    }
+    
+    
+    $("#expensevat").change(function () {
+        // expvatsubmit();
+    });
+    
+    $("#expensevat").blur(function () {
+        expvatsubmit();
+    });    
+    
+    
+    $("#expensecode").change(function () {
+        var expenseref=$("#expenseid").val();
+        if (expenseref) {
+        message='';
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditexpense',
+                whatchanged: 'expensecode',
+                formbirthday: formbirthday,
+                expenseref: expenseref,
+                expensecode: $("#expensecode").val()
+            },
+            type: 'post',
+            success:function(data){
+                // alert(data);
+                $("#Post").append(data);
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        });            
+        
+        }
+    });
+    
+    
+    
+    $("#whoto").change(function () {
+        var expenseref=$("#expenseid").val();
+        if (expenseref) {
+        message='';
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditexpense',
+                whatchanged: 'whoto',
+                formbirthday: formbirthday,
+                expenseref: expenseref,
+                whoto: $("#whoto").val()
+            },
+            type: 'post',
+            success:function(data){
+                // alert(data);
+                $("#Post").append(data);
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        });            
+        
+        }
+    });
+    
+    
+    
+    $("#cyclistref").change(function () {
+        var expenseref=$("#expenseid").val();
+        if (expenseref) {
+        message='';
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditexpense',
+                whatchanged: 'cyclistref',
+                formbirthday: formbirthday,
+                expenseref: expenseref,
+                cyclistref: $("#cyclistref").val()
+            },
+            type: 'post',
+            success:function(data){
+                // alert(data);
+                $("#Post").append(data);
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        });            
+        
+        }
+    });
+
+    $('#expensedate').change(function (){
+        var expenseref=$("#expenseid").val();
+        if (expenseref) {
+        message='';
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditexpense',
+                whatchanged: 'expensedate',
+                formbirthday: formbirthday,
+                expenseref: expenseref,
+                expensedate: $("#expensedate").val()
+            },
+            type: 'post',
+            success:function(data){
+                // alert(data);
+                $("#Post").append(data);
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        });            
+        }
+    });
+
+    
+    $('#expensecomment').change(function (){
+        var expenseref=$("#expenseid").val();
+        var newcommenttext = $('#expensecomment').val().replace(/\n/g,"<br>");
+        $("#newcomment").val(newcommenttext);
+        if (expenseref) {
+        message='';
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditexpense',
+                whatchanged: 'description',
+                formbirthday: formbirthday,
+                expenseref: expenseref,
+                description: $("#newcomment").val()
+            },
+            type: 'post',
+            success:function(data){
+                // alert(data);
+                $("#Post").append(data);
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        });            
+        }
+    });
+    
+    
+    
+    $("#paid").change(function () {
+        var expenseref=$("#expenseid").val();
+        if (expenseref) {
+        message='';
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditexpense',
+                whatchanged: 'paid',
+                formbirthday: formbirthday,
+                expenseref: expenseref,
+                paid: $("#paid").val()
+            },
+            type: 'post',
+            success:function(data){
+                // alert(data);
+                $("#Post").append(data);
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        });            
+        
+        }
+    });
+     
+    
+    $("#paymentmethod").change(function () {
+        var expenseref=$("#expenseid").val();
+        if (expenseref) {
+        message='';
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditexpense',
+                whatchanged: 'paymentmethod',
+                formbirthday: formbirthday,
+                expenseref: expenseref,
+                paymentmethod: $("#paymentmethod").val()
+            },
+            type: 'post',
+            success:function(data){
+                // alert(data);
+                $("#Post").append(data);
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        });            
+        
+        }
+    });
+      
+    
+    function getexpense() {
         var notblankcheck=$("#expenseid").val();
         if (notblankcheck) {
-            
             message='';
-            $("#page").val("lookup");
-            
             var formdata=$('#singleexpense').serializeArray();
             $.ajax({
                 type: 'POST',
@@ -250,60 +570,39 @@ $(document).ready(function() {
             allok=0;
             showmessage();
         }
-    });
-    
 
-    $('#editexpense').on('click', function (event) { 
-        event.preventDefault();
-        message='';
-        var notblankcheck=$("#expenseid").val();
-        if (notblankcheck) {
-            $("#page").val("editexpense");
-            var newcommenttext = $('#expensecomment').val().replace(/\n/g,"<br>");
-            $("#newcomment").val(newcommenttext);
-            var formdata=$('#singleexpense').serializeArray();
         
-        $.ajax({
-            type: 'post',
-            url: 'ajaxchangejob.php',
-            data: formdata,
-            success:function(data){
-                // alert(data);
-                $("#Post").append(data);
-            },
-            complete: function () {
-                showmessage();
-            },
-            error:function (xhr, ajaxOptions, thrownError){
-                alert(thrownError); //throw any errors
-            }
-        });
-            
-        }
+    }
     
+    
+    $('#expensesearchbyid').on('click', function (event) {
+        event.preventDefault();
+        getexpense();
+        
+    });    
+
+    $("#expenseid").change(function () {
+        getexpense();
     });
+    
 
     $('#addnewexpense').on('click', function (event) {
         event.preventDefault();
         message='';
-        $("#page").val("addnewexpense");
-
-        
-        var newcommenttext = $('#expensecomment').val().replace(/\n/g,"<br>");
-
-        $("#newcomment").val(newcommenttext);
-        
-        var formdata=$('#singleexpense').serializeArray();
         
         $.ajax({
-            type: 'POST',
             url: 'ajaxchangejob.php',
-            data: formdata,
+            data: {
+                page: 'addnewexpense',
+                formbirthday: formbirthday
+            },
+            type: 'post',
             success:function(data){
                 // alert(data);
                 $("#Post").append(data);
             },
             complete: function () {
+                $('#expensecomment').trigger('autosize.resize');
                 showmessage();
             },
             error:function (xhr, ajaxOptions, thrownError){
@@ -314,7 +613,7 @@ $(document).ready(function() {
     <?php echo $script; ?>
 });
 
-function comboboxchanged() { }
+
 </script>
 <?php
 

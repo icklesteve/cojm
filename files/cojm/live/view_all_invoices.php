@@ -1191,8 +1191,11 @@ if ($viewtype=='individualinvoice') {
                     $(input).datepicker('setDate',  new Date() );
                 }
             });
+            
+            
+            
         });
-
+function datepickeronchange() { }
         </script>
         <?php
         } // ends check for valid invoice ref

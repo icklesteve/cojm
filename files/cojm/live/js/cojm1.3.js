@@ -1115,9 +1115,9 @@ $.extend( $.ui.tabs.prototype, {
 		closeOnSelect: true, //if a complete selection is made, close the menu
 		arrows: false,
 		appendTo: 'body',
-		onClose: function(){},
+		onClose: function(){ },
 		onOpen: function(){},
-		onChange: function(){},
+		onChange: function(){ },
 		datepickerOptions: null //object containing native UI datepicker API options
 	}, settings);
 	

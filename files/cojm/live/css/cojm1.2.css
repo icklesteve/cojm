@@ -1318,8 +1318,7 @@ width:auto;
 line-height:23px;
 }
 
-.ui-widget-content {
-background: #ffffff url(../images/ui-bg_flat_75_ffffff_40x100.png) 50% 50% repeat-x; color: #222222; }
+.ui-widget-content { background: #ffffff; color: #222222; }
 .ui-widget-content a { color: #222222; }
 
 #clientdep input.autoinputerror	{
@@ -2251,9 +2250,15 @@ text-align: right;
 padding-right: 5px;
 }
 
-#singleexpense fieldset label { width:130px; }
+#singleexpense fieldset label, .aligned fieldset label { width:130px; }
+
 
 fieldset { line-height: 24px; }
+
+
+select#paid { width: 55px;} 
+select#expensecode, select#paymentmethod { width:120px; }
+
 
 #ajaxremovepod:hover {
     opacity: 0.6;

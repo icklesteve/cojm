@@ -86,7 +86,7 @@ echo '
 <input type="hidden" name="page" value="createnewcl" />
 <button type="submit"> Create new Client </button>
 <input type="hidden" name="formbirthday" value="'. date("U").'">
-Name : <input class="ui-state-default ui-corner-all pad" type="text" name="CompanyName" size="15" />
+Name : <input class="ui-state-default ui-corner-all pad" type="text" name="CompanyName" placeholder="New Client Name" size="15" />
 </form>';
 
 }

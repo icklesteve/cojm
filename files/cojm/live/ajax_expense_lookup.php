@@ -27,7 +27,6 @@ if (isset($_POST['expenseid'])) {
     $expenseid=(trim($_POST['expenseid']));
 
     try {
-        
         $query= ' SELECT *
         FROM expenses
         INNER JOIN Cyclist, expensecodes
@@ -46,7 +45,6 @@ if (isset($_POST['expenseid'])) {
                 
                 if ($row['paymentdate']>'10') { $paymentdate= date('d-m-Y', strtotime($row['paymentdate'])); }
                 
-                
                 if ($row['expc1']>0) { $expmethod='expc1'; }
                 if ($row['expc2']>0) { $expmethod='expc2'; }
                 if ($row['expc3']>0) { $expmethod='expc3'; }
@@ -58,9 +56,7 @@ if (isset($_POST['expenseid'])) {
                 if (date('U', strtotime($row['expensedate']))>20) {
                     $displaydate=date('d-m-Y', strtotime($row['expensedate']));
                 }
-                
-                
-                
+                 
             echo '<script>';
             
             if ($row['isactive']<>1) {
@@ -73,12 +69,13 @@ if (isset($_POST['expenseid'])) {
             
             echo '
             allok=1;
-            message=" Expense Located ";
+            message=" Expense '.$row['expenseref'].' Located ";
             
             $("#amount").val("'.$row['expensecost'].'");
             $("expenseid").val("'.$row['expenseref'].'");
             $("#expensevat").val("'.$row['expensevat'].'");
             $("select#expensecode").val("'.$row['expensecode'].'");
+            $("#expensedescription").html("'.$row['expensedescription'].'");
             $("#whoto").val("'.$row['whoto'].'");              
             $("select#cyclistref").val("'.$row['cyclistref'].'");
             $("#expensedate").val("'. $displaydate.'");  
@@ -88,9 +85,16 @@ if (isset($_POST['expenseid'])) {
             var str = "'.(trim($row['description'])).'";
             var regex = /<br\s*[\/]?>/gi;
             $("#expensecomment").val(str.replace(regex, "\n"));
-            $("#editexpense").removeClass("hideuntilneeded");
             $("#expensedetails").removeClass("hideuntilneeded");
-            </script>';
+            $("#expensecomment").trigger("autosize.resize");';
+            
+            if ($row['expensecode']=='6') {
+                echo ' $("#riderselect").removeClass("hideuntilneeded"); ';
+            } else {
+                echo ' $("#riderselect").addClass("hideuntilneeded"); ';
+            }
+            
+            echo ' </script>';
             }
         } else {
             echo '<script>
@@ -103,9 +107,11 @@ if (isset($_POST['expenseid'])) {
             $("select#paid").val("0");
             $("#chequeref").val("");
             $("select#paymentmethod").val("");
-            $("#expensecomment").val("");            
+            $("#expensecomment").val("");
+            $("#expensedescription").val("");
             $("#editexpense").addClass("hideuntilneeded");
             $("#expensedetails").addClass("hideuntilneeded");
+            $("#riderselect").addClass("hideuntilneeded");
             allok=0;
             message=" No Expense Located ";
             </script>';

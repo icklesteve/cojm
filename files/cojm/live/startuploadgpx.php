@@ -319,7 +319,7 @@ $(document).ready(function() {
 	});
 
 function comboboxchanged() { }    
-    
+function datepickeronchange() { }
 </script>
 <?php
 

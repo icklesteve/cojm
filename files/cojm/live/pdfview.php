@@ -457,7 +457,7 @@ $(document).ready(function () {
     <? echo $depselectjs; ?>
     });
 
-
+function datepickeronchange() { }
 
 
 }); // ends on pageload

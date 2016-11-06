@@ -28,8 +28,6 @@ if (isset($_POST['formbirthday'])) { $formbirthday = trim($_POST['formbirthday']
 if (isset($_POST['publicid'])) { $publicid = trim($_POST['publicid']); }
 
 $newformbirthday=$formbirthday; // re-outputs original in case of error
-
-
 $cojmaction='';
 $calcmileage=0;
 $infotext=' ajaxchangejob.php '.$page;
@@ -37,7 +35,6 @@ $allok=0;
 $nextactiondatecheck='';
 $script=" var message=''; ";
 $message='';
-$infotext;
 $timeerrortext='Please check times / Refresh Page';
 
 $query = "SELECT publictrackingref, ts, tsmicro, status FROM Orders WHERE id = :getid LIMIT 0,1";
@@ -3360,13 +3357,8 @@ $alerttext.="<p>Error occured during updating next action time </p>";
 } // ends has valid order id
 
 
-
-
 // other non-order pages
-
 // manager / system admin top level security check should go here in in release 2.1
-
-
 
 if ($page=='ajaxremovegpscache') { // formbirthday does not matter
 
@@ -3399,11 +3391,6 @@ $newformbirthday=date("U");
 
 
 }
-
-
-
-
-
 
 
 if ($page=='addnewpayment') { // new payment from client
@@ -3472,119 +3459,41 @@ if ($page=='addnewpayment') { // new payment from client
 }
 
 
-
 if ($page=='addnewexpense') { // new payment from client
-    $infotext.=' Add New Expense 3477';
-    
-    $amount=trim($_POST['amount']);
-    $cyclistref=$_POST['cyclistref'];    
-    
-    
-    $expc1=0;
-    $expc2=0;
-    $expc3=0;
-    $expc4=0;
-    $expc5=0;
-    $expc6=0;
-    $paymentmethod=trim($_POST['paymentmethod']);  
-    
-    if ($paymentmethod=='expc1') { $expc1=$amount; }
-    if ($paymentmethod=='expc2') { $expc2=$amount; }
-    if ($paymentmethod=='expc3') { $expc3=$amount; }
-    if ($paymentmethod=='expc4') { $expc4=$amount; }
-    if ($paymentmethod=='expc5') { $expc5=$amount; }
-    if ($paymentmethod=='expc6') { $expc6=$amount; }
-    
-    
-    
-    
-
-
-    
-    if ($cyclistref==1) {
-        $cyclistref='';
-    }
-    
-    $expensecode = ($_POST['expensecode']); 
-    $expensecomment =$_POST['newcomment'];
-    $expensecomment = str_replace("'", "&#39;", "$expensecomment");
-    $description = str_replace("£", "&#163;", "$expensecomment");
-
-    $paymentamount=trim($_POST['amountpaid']);
-    $paymenttype=trim($_POST['paymentmethod']);
-    $expensedate=trim($_POST['expensedate']);
-
-    $expensedate = str_replace("/", ":", "$expensedate", $count);
-    $expensedate = str_replace(",", ":", "$expensedate", $count);
-    $expensedate = str_replace("-", ":", "$expensedate", $count);
-    $temp_ar=explode(":",$expensedate); 
-    $startday=$temp_ar[0]; 
-    $startmonth=$temp_ar[1]; 
-    $startyear=$temp_ar[2];
-    $expensedate=date("Y-m-d H:i:s", mktime(01, 01, 01, $startmonth, $startday, $startyear));
-
-    $expensedate=trim($_POST['expensedate']);    
-    $expensevat=trim($_POST['expensevat']);    
-    $paid=trim($_POST['paid']);     
-    $whoto=trim($_POST['whoto']);  
+    $infotext.=' Add New Expense 3463 ';
+    $expensedate=date("Y-m-d H:i:s");    
     
     try {
         $query = "INSERT INTO expenses
-        SET expensecost=:expensecost,
-        expensevat=:expensevat,
-        whoto=:whoto,
-        description=:description,
-        cyclistref=:cyclistref,
+        SET
+        cyclistref='1',
         expensedate=:expensedate,
-        expensecode=:expensecode,
-        expensemethod=:expensemethod,
-        paid=:paid,
-        expc1=:expc1,
-        expc2=:expc2,
-        expc3=:expc3,
-        expc4=:expc4,
-        expc5=:expc5,
-        expc6=:expc6; ";
-        $stmt = $dbh->prepare($query);
-        $stmt->bindParam(':expensecost', $amount, PDO::PARAM_INT);
-        $stmt->bindParam(':expensevat', $expensevat, PDO::PARAM_INT);
-        $stmt->bindParam(':whoto', $whoto, PDO::PARAM_INT);
-        $stmt->bindParam(':description', $description, PDO::PARAM_INT);
-        $stmt->bindParam(':cyclistref', $cyclistref, PDO::PARAM_INT);        
+        expensecode='0',
+        paid='0' ";
+        $stmt = $dbh->prepare($query);      
         $stmt->bindParam(':expensedate', $expensedate, PDO::PARAM_INT);
-        $stmt->bindParam(':expensecode', $expensecode, PDO::PARAM_INT); 
-        $stmt->bindParam(':paid', $paid, PDO::PARAM_INT);
-        $stmt->bindParam(':expc1', $expc1, PDO::PARAM_INT);
-        $stmt->bindParam(':expc2', $expc2, PDO::PARAM_INT);
-        $stmt->bindParam(':expc3', $expc3, PDO::PARAM_INT);
-        $stmt->bindParam(':expc4', $expc4, PDO::PARAM_INT);
-        $stmt->bindParam(':expc5', $expc5, PDO::PARAM_INT);
-        $stmt->bindParam(':expc6', $expc6, PDO::PARAM_INT);
-        $stmt->bindParam(':expensemethod', $expensemethod, PDO::PARAM_INT);
         $stmt->execute();
         $expenseid = $dbh->lastInsertId();
         $total = $stmt->rowCount();
-        $infotext.=$total.' row updated, ';
+        $infotext.=$total.' Payment Created, ';
         if ($total=='1') {
             $allok='1';
             $newformbirthday=microtime(TRUE);
             $message.='New Expense added with Ref '.$expenseid.' <br />';
             $script.=' $("#expenseid").val("'.$expenseid.'"); ';
-            $script.=' $("#editexpense").removeClass("hideuntilneeded"); ';
-            $infotext.='Ref : '.$expenseid.' 
-            Date: '.$expensedate.' 
-            Amount: '.$expensecost.' 
-            vat :  '.$expensevat.'
-            whoto: '.$whoto.' 
-            description '.$description.'
-            expensecode: '.$expensecode.'
-            paid: '.$paid.' 
-            expc1: '.$expc1.' 
-            expc2: '.$expc2.' 
-            expc3: '.$expc3.' 
-            expc4: '.$expc4.' 
-            expc5: '.$expc5.'
-            expc6: '.$expc6;            
+            $script.=' $("#editexpense").removeClass("hideuntilneeded"); 
+            $("#expensedetails").removeClass("hideuntilneeded");
+            $("#amount").val("").focus();
+            $("#expensevat").val("");
+            $("select#expensecode").val("0");
+            $("#whoto").val(""); 
+            $("select#cyclistref").val("");
+            $("#expensedate").val("'.date('d-m-Y').'");
+            $("select#paid").val("0");
+            $("#chequeref").val("");
+            $("select#paymentmethod").val("");
+            $("#expensecomment").val("");';
+            $infotext.=' Ref : '.$expenseid;           
         }
     }
     catch(PDOException $e) { $message.= $e->getMessage(); }
@@ -3592,135 +3501,295 @@ if ($page=='addnewexpense') { // new payment from client
 
 
 
-if ($page=='editexpense') { // new payment from client
+if ($page=='ajeditexpense') { // new payment from client
+    $whatchanged=$_POST['whatchanged'];
+    $expenseref=$_POST['expenseref'];
     $infotext.='Edit Expense 3597';
-    
-    $expenseid=$_POST['expenseid'];
-    $amount=trim($_POST['amount']);
-    $cyclistref=$_POST['cyclistref'];    
-    
-    
-    $expc1=0;
-    $expc2=0;
-    $expc3=0;
-    $expc4=0;
-    $expc5=0;
-    $expc6=0;
-    $paymentmethod=trim($_POST['paymentmethod']);  
-    
-    if ($paymentmethod=='expc1') { $expc1=$amount; }
-    if ($paymentmethod=='expc2') { $expc2=$amount; }
-    if ($paymentmethod=='expc3') { $expc3=$amount; }
-    if ($paymentmethod=='expc4') { $expc4=$amount; }
-    if ($paymentmethod=='expc5') { $expc5=$amount; }
-    if ($paymentmethod=='expc6') { $expc6=$amount; }
-    
-    
-    
-    
-
-
-    
-    if ($cyclistref==1) {
-        $cyclistref='';
-    }
-    
-    $expensecode = ($_POST['expensecode']); 
-    $expensecomment =$_POST['newcomment'];
-    $expensecomment = str_replace("'", "&#39;", "$expensecomment");
-    $description = str_replace("£", "&#163;", "$expensecomment");
-
-    $amount=trim($_POST['amount']);
-    $paymenttype=trim($_POST['paymentmethod']);
-    $expensedate=trim($_POST['expensedate']);
-
-    $expensedate = str_replace("/", ":", "$expensedate", $count);
-    $expensedate = str_replace(",", ":", "$expensedate", $count);
-    $expensedate = str_replace("-", ":", "$expensedate", $count);
-    $temp_ar=explode(":",$expensedate); 
-    $startday=$temp_ar[0]; 
-    $startmonth=$temp_ar[1]; 
-    $startyear=$temp_ar[2];
-    
-    if ((is_numeric($startmonth)) and (is_numeric($startday)) and (is_numeric($startyear))) {
-        $expensedate=date("Y-m-d H:i:s", mktime(01, 01, 01, $startmonth, $startday, $startyear));
-    } else {
-        $expensedate='';
-    }
-
-    $expensedate=trim($_POST['expensedate']);    
-    $expensevat=trim($_POST['expensevat']);    
-    $paid=trim($_POST['paid']);     
-    $whoto=trim($_POST['whoto']);  
-    
-    try {
-        $query = "UPDATE expenses
-        SET expensecost=:expensecost,
-        expensevat=:expensevat,
-        whoto=:whoto,
-        description=:description,
-        cyclistref=:cyclistref,
-        expensedate=:expensedate,
-        expensecode=:expensecode,
-        expensemethod=:expensemethod,
-        paid=:paid,
-        expc1=:expc1,
-        expc2=:expc2,
-        expc3=:expc3,
-        expc4=:expc4,
-        expc5=:expc5,
-        expc6=:expc6
-        WHERE expenseref =:expenseref; ";
-        $stmt = $dbh->prepare($query);
-        $stmt->bindParam(':expenseref', $expenseid, PDO::PARAM_INT);        
-        $stmt->bindParam(':expensecost', $amount, PDO::PARAM_INT);
-        $stmt->bindParam(':expensevat', $expensevat, PDO::PARAM_INT);
-        $stmt->bindParam(':whoto', $whoto, PDO::PARAM_INT);
-        $stmt->bindParam(':description', $description, PDO::PARAM_INT);
-        $stmt->bindParam(':cyclistref', $cyclistref, PDO::PARAM_INT);        
-        $stmt->bindParam(':expensedate', $expensedate, PDO::PARAM_INT);
-        $stmt->bindParam(':expensecode', $expensecode, PDO::PARAM_INT); 
-        $stmt->bindParam(':paid', $paid, PDO::PARAM_INT);
-        $stmt->bindParam(':expc1', $expc1, PDO::PARAM_INT);
-        $stmt->bindParam(':expc2', $expc2, PDO::PARAM_INT);
-        $stmt->bindParam(':expc3', $expc3, PDO::PARAM_INT);
-        $stmt->bindParam(':expc4', $expc4, PDO::PARAM_INT);
-        $stmt->bindParam(':expc5', $expc5, PDO::PARAM_INT);
-        $stmt->bindParam(':expc6', $expc6, PDO::PARAM_INT);
-        $stmt->bindParam(':expensemethod', $expensemethod, PDO::PARAM_INT);
-        $stmt->execute();
-        // $expenseid = $dbh->lastInsertId();
-        $total = $stmt->rowCount();
-        $infotext.=$total.' row updated, ';
-        if ($total=='1') {
-            $allok='1';
-            $newformbirthday=microtime(TRUE);
-            $message.='Expense '. $expenseid.' edited.';
-            // $script.=' $("#expenseid").val("'.$expenseid.'"); ';
-            // $script.=' $("#addnewexpense").addClass("hideuntilneeded"); ';
-            // $script.=' $("#editexpense").removeClass("hideuntilneeded"); ';
-            $infotext.='Ref : '.$expenseid.' 
-            Date: '.$expensedate.' 
-            Amount: '.$expensecost.' 
-            vat :  '.$expensevat.'
-            whoto: '.$whoto.' 
-            description '.$description.'
-            expensecode: '.$expensecode.'
-            paid: '.$paid.' 
-            expc1: '.$expc1.' 
-            expc2: '.$expc2.' 
-            expc3: '.$expc3.' 
-            expc4: '.$expc4.' 
-            expc5: '.$expc5.'
-            expc6: '.$expc6;            
-        } else {
-            $message.=' No Changes Made ';
+    if ($whatchanged=='expensecost') {
+        $expensecost=trim($_POST['expensecost']);    
+        try {
+            $query = "UPDATE expenses SET expensecost=:expensecost WHERE expenseref =:expenseref; ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':expenseref', $expenseref, PDO::PARAM_INT);        
+            $stmt->bindParam(':expensecost', $expensecost, PDO::PARAM_INT);
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated, ';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Expense '. $expenseref.' amount changed to '.$expensecost;
+                $infotext.='Ref : '.$expenseid.' Amount: '.$expensecost;  
+            } else {
+                $message.=' No Change Made ';
+            }
         }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
     }
-    catch(PDOException $e) { $message.= $e->getMessage(); }
+    
+    
+    if ($whatchanged=='expensevat') {
+        $expensevat=trim($_POST['expensevat']);    
+        try {
+            $query = "UPDATE expenses SET expensevat=:expensevat WHERE expenseref =:expenseref; ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':expenseref', $expenseref, PDO::PARAM_INT);        
+            $stmt->bindParam(':expensevat', $expensevat, PDO::PARAM_INT);
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated, ';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Expense '. $expenseref.' VAT element changed to '.$expensevat;
+                $infotext.='Ref : '.$expenseid.' VAT : '.$expensevat;  
+            } else {
+                $allok=1;
+                $message.=' Expense VAT Unchanged ';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
+    }  
+    
+    if ($whatchanged=='expensecode') {
+        $expensecode=trim($_POST['expensecode']);    
+        try {
+            $query = "UPDATE expenses SET expensecode=:expensecode WHERE expenseref =:expenseref; ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':expenseref', $expenseref, PDO::PARAM_INT);        
+            $stmt->bindParam(':expensecode', $expensecode, PDO::PARAM_INT);
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated, ';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $query = "SELECT smallexpensename, expensedescription FROM expensecodes WHERE expensecode = :expensecode LIMIT 0,1";
+                $clstmt = $dbh->prepare($query);
+                $clstmt->bindParam(':expensecode', $expensecode, PDO::PARAM_INT); 
+                $clstmt->execute();
+                $client = $clstmt->fetchObject();
+                $smallexpensename=$client->smallexpensename;
+                $expensedescription=$client->expensedescription;
+                $script.=' $("#expensedescription").html("'.$expensedescription.'"); ';
+                $message.='Expense '. $expenseref.' department changed to '.$smallexpensename;
+                $infotext.='Ref : '.$expenseid.' New Expense Code : '.$expensecode.' '.$smallexpensename;
+                if ($expensecode==6) {
+                    $script.= ' $("#riderselect").removeClass("hideuntilneeded"); ';
+                } else {
+                    $script.=  ' $("#riderselect").addClass("hideuntilneeded"); ';
+                }
+            } else {
+                $message.=' No Change Made ';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
+    }
+
+
+    if ($whatchanged=='whoto') {
+        $whoto=trim($_POST['whoto']);    
+        try {
+            $query = "UPDATE expenses SET whoto=:whoto WHERE expenseref =:expenseref; ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':expenseref', $expenseref, PDO::PARAM_INT);        
+            $stmt->bindParam(':whoto', $whoto, PDO::PARAM_INT);
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated, ';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Expense '. $expenseref.' whoto changed to '.$whoto;
+                $infotext.='Ref : '.$expenseid.' whoto: '.$whoto;  
+            } else {
+                $message.=' No Change Made ';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
+    }
+
+
+
+    if ($whatchanged=='cyclistref') {
+        $cyclistref=trim($_POST['cyclistref']);     
+        try {
+            $query = "UPDATE expenses SET cyclistref=:cyclistref WHERE expenseref =:expenseref; ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':expenseref', $expenseref, PDO::PARAM_INT);        
+            $stmt->bindParam(':cyclistref', $cyclistref, PDO::PARAM_INT);
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated, ';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $query = "SELECT cojmname FROM Cyclist WHERE CyclistID = :cyclistref LIMIT 0,1";
+                $clstmt = $dbh->prepare($query);
+                $clstmt->bindParam(':cyclistref', $cyclistref, PDO::PARAM_INT); 
+                $clstmt->execute();
+                $client = $clstmt->fetchObject();
+                $cojmname=$client->cojmname;
+
+                $expensedescription=$client->expensedescription;
+                $script.=' $("#expensedescription").html("'.$expensedescription.'"); ';
+                $message.='Expense '. $expenseref.' '.$globalprefrow['glob5'].' updated to '.$cojmname;
+                $infotext.='Ref : '.$expenseid.' New Rider : '.$cyclistref.' '.$cojmname;  
+            } else {
+                $message.=' No Change Made ';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
+    }
+    
+    
+    if ($whatchanged=='expensedate') {
+        $expensedate=trim($_POST['expensedate']);
+        $expensedate = str_replace("/", ":", "$expensedate", $count);
+        $expensedate = str_replace(",", ":", "$expensedate", $count);
+        $expensedate = str_replace("-", ":", "$expensedate", $count);
+        $temp_ar=explode(":",$expensedate); 
+        $startday=$temp_ar[0]; 
+        $startmonth=$temp_ar[1]; 
+        $startyear=$temp_ar[2];
+    
+        if ((is_numeric($startmonth)) and (is_numeric($startday)) and (is_numeric($startyear))) {
+            $expensedate=date("Y-m-d H:i:s", mktime(01, 01, 01, $startmonth, $startday, $startyear));
+        } else {
+            $expensedate='';
+        }
+        
+        try {
+            $query = "UPDATE expenses SET expensedate=:expensedate WHERE expenseref =:expenseref; ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':expenseref', $expenseref, PDO::PARAM_INT);        
+            $stmt->bindParam(':expensedate', $expensedate, PDO::PARAM_INT);
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated, ';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Expense '. $expenseref.' expensedate updated to <br /> '.$expensedate;
+                $infotext.='Ref : '.$expenseid.' expensedate: '.$expensedate;  
+            } else {
+                $message.=' No Change Made ';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
+    }
+
+    
+    
+    if ($whatchanged=='description') {
+        $description =$_POST['description'];
+        $description = str_replace("'", "&#39;", "$description");
+        $description = str_replace("£", "&#163;", "$description");          
+        try {
+            $query = "UPDATE expenses SET description=:description WHERE expenseref =:expenseref; ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':expenseref', $expenseref, PDO::PARAM_INT);        
+            $stmt->bindParam(':description', $description, PDO::PARAM_INT);
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated, ';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Expense '. $expenseref.' Comments updated to '.$description;
+                $infotext.='Ref : '.$expenseid.' description: '.$description;  
+            } else {
+                $message.=' No Change Made ';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
+    }    
+    
+    
+    if ($whatchanged=='paid') {
+        $paid =$_POST['paid'];         
+        try {
+            $query = "UPDATE expenses SET paid=:paid WHERE expenseref =:expenseref; ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':expenseref', $expenseref, PDO::PARAM_INT);        
+            $stmt->bindParam(':paid', $paid, PDO::PARAM_INT);
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated, ';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Expense '. $expenseref.' paid updated to '.$paid;
+                $infotext.='Ref : '.$expenseid.' paid: '.$paid;  
+            } else {
+                $message.=' No Change Made ';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
+    }     
+
+
+    if ($whatchanged=='paymentmethod') {
+        $paymentmethod =$_POST['paymentmethod'];     
+        $expc1=0;
+        $expc2=0;
+        $expc3=0;
+        $expc4=0;
+        $expc5=0;
+        $expc6=0;
+        $query = "SELECT expensecost, expensevat FROM expenses WHERE expenseref = :expenseref LIMIT 0,1";
+        $clstmt = $dbh->prepare($query);
+        $clstmt->bindParam(':expenseref', $expenseref, PDO::PARAM_INT);   
+        $clstmt->execute();
+        $client = $clstmt->fetchObject();
+        $amount=$client->expensecost + $client->expensevat;        
+
+        if ($paymentmethod=='expc1') { $expc1=$amount; }
+        if ($paymentmethod=='expc2') { $expc2=$amount; }
+        if ($paymentmethod=='expc3') { $expc3=$amount; }
+        if ($paymentmethod=='expc4') { $expc4=$amount; }
+        if ($paymentmethod=='expc5') { $expc5=$amount; }
+        if ($paymentmethod=='expc6') { $expc6=$amount; }
+        $paymentmethod = preg_replace("/[^0-9,.]/", "", $paymentmethod );
+            
+            
+        try {
+            $query = "UPDATE expenses SET
+            expc1=:expc1,
+            expc2=:expc2,
+            expc3=:expc3,
+            expc4=:expc4,
+            expc5=:expc5,
+            expc6=:expc6,
+            expensemethod=:expensemethod
+            WHERE expenseref =:expenseref; ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':expenseref', $expenseref, PDO::PARAM_INT);        
+            $stmt->bindParam(':expc1', $expc1, PDO::PARAM_INT);
+            $stmt->bindParam(':expc2', $expc2, PDO::PARAM_INT);
+            $stmt->bindParam(':expc3', $expc3, PDO::PARAM_INT);
+            $stmt->bindParam(':expc4', $expc4, PDO::PARAM_INT);
+            $stmt->bindParam(':expc5', $expc5, PDO::PARAM_INT);
+            $stmt->bindParam(':expc6', $expc6, PDO::PARAM_INT);
+            $stmt->bindParam(':expensemethod', $paymentmethod, PDO::PARAM_INT);
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated, ';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                
+                
+                $message.='Expense '. $expenseref.' payment method updated to '.$globalprefrow["gexpc$paymentmethod"];
+                $infotext.='Ref : '.$expenseid.' paid: '.$paymentmethod;  
+            } else {
+                $message.=' No Change Made ';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
+    }   
+    
 }
-
-
 
 
 if ($page=='editpayment') { // edit payment from client
@@ -3799,17 +3868,6 @@ if ($page=='editpayment') { // edit payment from client
     }
     catch(PDOException $e) { $message.= $e->getMessage(); }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 if ($page=='ajaxeditglobals') {
@@ -5145,6 +5203,24 @@ catch(PDOException $e) { $message.= $e->getMessage(); }
 }
 
 
+if ($globalname=='vatbandexpense') {
+    try {
+        $query = "UPDATE globalprefs SET vatbandexpense=:newvalue WHERE settingsid=:settingsid";
+        $stmt = $dbh->prepare($query);
+        $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+        $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+        $stmt->execute();
+        $total = $stmt->rowCount();
+        $infotext.=$total.' row updated <br />';
+        if ($total=='1') {
+            $allok='1';
+            $newformbirthday=microtime(TRUE);
+            $message.='Expense Default VAT updated to '.$newvaluet.' % <br />';
+        }
+    }
+    catch(PDOException $e) { $message.= $e->getMessage(); }
+}
+
 if ($globalname=='gexpc1') {
  try {
 $query = "UPDATE globalprefs SET gexpc1=:newvalue WHERE settingsid=:settingsid";
@@ -5834,43 +5910,28 @@ $message.='Checkbox Order updated. <br />';
 
 
 
-
-
-
-
-
-
-
-
-
-
-// ENDS MAIN CHANGEJOB  ADDS AUDIT LOG + OUTPUTS SCRIPT
-
-// echo date(c).'<br />';
-// echo $_SERVER["REQUEST_TIME_FLOAT"].'<br />';
-// echo  microtime(TRUE);
-
-$agent = $_SERVER['HTTP_USER_AGENT']; 
-
-if(preg_match('/iPhone|Android|Blackberry/i', $agent)) {
-// $infotext.='<br />Mobile device'; 
-$mobdevice='1';
-} else { $mobdevice=''; }
-
-
-$referrer=$_SERVER["HTTP_REFERER"]; $refarray = explode("/",$referrer); foreach ($refarray as $value) { $referrer = $value; }
-	
-$cj_msec = (microtime(TRUE)- $_SERVER["REQUEST_TIME_FLOAT"]) * 1000.0;
-$cj_echo = number_format($cj_msec, 1);
-
-if (isset($_SERVER["PHP_AUTH_USER"])) { $audituser=$_SERVER["PHP_AUTH_USER"]; }
-else if (isset($_SERVER["REMOTE_USER"])) { if (!$audituser) { $audituser=$_SERVER["REMOTE_USER"]; } }
-	
-	
-
-	
-
-try {
+try { // ENDS MAIN CHANGEJOB  ADDS AUDIT LOG + OUTPUTS SCRIPT
+    
+    // echo date(c).'<br />';
+    // echo $_SERVER["REQUEST_TIME_FLOAT"].'<br />';
+    // echo  microtime(TRUE);
+    
+    $agent = $_SERVER['HTTP_USER_AGENT']; 
+    
+    if(preg_match('/iPhone|Android|Blackberry/i', $agent)) {
+    // $infotext.='<br />Mobile device'; 
+    $mobdevice='1';
+    } else { $mobdevice=''; }
+    
+    if ($id=='') { $id='0'; }
+    
+    $referrer=$_SERVER["HTTP_REFERER"]; $refarray = explode("/",$referrer); foreach ($refarray as $value) { $referrer = $value; }
+    $cj_msec = (microtime(TRUE)- $_SERVER["REQUEST_TIME_FLOAT"]) * 1000.0;
+    $cj_echo = number_format($cj_msec, 1);
+    if (isset($_SERVER["PHP_AUTH_USER"])) { $audituser=$_SERVER["PHP_AUTH_USER"]; } else if (isset($_SERVER["REMOTE_USER"])) { if (!$audituser) { $audituser=$_SERVER["REMOTE_USER"]; } }
+    
+    
+    
     $statement = $dbh->prepare("INSERT INTO cojm_audit 
     (auditorderid,audituser,auditpage,auditfilename,auditmobdevice,auditbrowser,audittext,auditcjtime,auditinfotext,auditdatetime) 
     values 
@@ -5907,16 +5968,11 @@ if ($globalprefrow['showdebug']=='1') {
 
 if (!$newformbirthday) { $newformbirthday=0; }
 
-echo ' <script>
-'.$script.'
+echo ' <script> '.$script.'
 var allok='.$allok.';
 var formbirthday='.$newformbirthday.';
-var message='.json_encode($message).';
-</script>';
+var message='.json_encode($message).'; </script>';
 
-
-
-// echo phpinfo();
 $dbh=null;
 
 ?>

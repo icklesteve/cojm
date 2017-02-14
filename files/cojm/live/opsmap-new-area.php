@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	opsmap-new-area.php - Add / Edit Opsmap
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -35,7 +35,6 @@ include "C4uconnect.php";
     $areaid=''; 
 }
 
-if (isset($_POST['vertices'])) { $vertices=trim($_POST['vertices']);} else { $vertices=''; }
 
 include "changejob.php"; // page = editarea or opsmapnewarea
 
@@ -45,6 +44,16 @@ $istoplayer='';
 $corelayer='0';
 $inarchive='';
 $coord=array();
+
+
+$query = "SELECT type, inarchive, corelayer, lat, lng, opsmapid, opsname, istoplayer, descrip, AsText(g) AS POLY FROM opsmap WHERE opsmapid=? "; 
+
+$parameters = array($areaid);
+$statement = $dbh->prepare($query);
+$statement->execute($parameters);
+$row = $statement->fetch(PDO::FETCH_ASSOC);
+
+
 
 ?><!DOCTYPE html>
 <html lang="en">
@@ -58,7 +67,7 @@ $coord=array();
 <script type="text/javascript" src="https://maps.google.com/maps/api/js?libraries=geometry&amp;key=<?php echo $globalprefrow['googlemapapiv3key']; ?>"></script>
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
 <script src="js/richmarker.js" type="text/javascript"></script>
-<title>OpsMap Area <?php echo $areaid; ?></title>
+<title>OpsMap Area <?php echo $row['opsname']; ?></title>
 <style> #toploader { display:inline; } </style>
 <script type="text/javascript"> 
 
@@ -236,36 +245,23 @@ function initialize() {
     }
 });
 
-
 <?php	
-	
-$query = "SELECT * FROM opsmap WHERE opsmapid=".$areaid ; 
-$sql_result = mysql_query ($query, $conn_id) or mysql_error();  
-$sumtot=mysql_affected_rows();
-if ($sumtot>'0') { // show passed area
+
+
+if ($row) { // show passed area
     $max_lat = '-99999';
     $min_lat =  '99999';
     $max_lon = '-99999';
     $min_lon =  '99999';
 
-    // $moreinfotext.= $sumtot .' Rows found in opsmap ';
+    $mtype=$row['type'];
+    $mopsname=$row['opsname'];
+    $mdescrip=$row['descrip'];
+    $mistoplayer=$row['istoplayer'];
+    $corelayer=$row['corelayer'];
+    $minarchive=$row['inarchive'];
 
-    while ($row = mysql_fetch_array($sql_result)) {
-        extract($row);
-        // $moreinfotext.= '<br />'.$row['name'].' '.$row['descrip'];
-        $mtype=$row['type'];
-        $mopsname=$row['opsname'];
-        $mdescrip=$row['descrip'];
-        $mistoplayer=$row['istoplayer'];
-        $mcorelayer=$row['corelayer'];
-        $minarchive=$row['inarchive'];
-    }
-
-    $result = mysql_query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=".$areaid);
-    $score = mysql_fetch_assoc($result);
-	$p=$score['POLY'];
-	
-    // $moreinfotext.= '<br />359 p is :'.$p.':';
+	$p=$row['POLY'];
 
     if ($p<>'') { // there is text in the polygon field for the main area :-)
  
@@ -337,11 +333,19 @@ if ($sumtot>'0') { // show passed area
 
 
 
-    if ($mcorelayer) {  // has a parent area which we'll show
-        $result = mysql_query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=".$corelayer);
-        if (mysql_num_rows($result)) {
-            $score = mysql_fetch_assoc($result);
-            $p=$score['POLY'];
+    if ($corelayer) {  // has a parent area which we'll show
+    
+        $query = "SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=? "; 
+        $parameters = array($corelayer);
+        $statement = $dbh->prepare($query);
+        $statement->execute($parameters);
+        $score = $statement->fetch(PDO::FETCH_ASSOC);
+    
+        $p=$score['POLY'];
+    
+        if ($p) {
+            // echo ' alert(" g found "); ';
+                
             $trans = array("POLYGON" => "", "((" => "", "))" => "");
             $p=strtr($p, $trans);
             $pexploded=explode( ',', $p );
@@ -386,8 +390,7 @@ if ($sumtot>'0') { // show passed area
         strokeColor: "#000000",
         clickable: false,
         map: map
-    });
-'; 
+    }); '; 
 
 
 
@@ -397,36 +400,54 @@ if ($sumtot>'0') { // show passed area
 
 
     if ($mistoplayer=='1') {     // get right sql to select all children or siblings
-        $lilquery = "SELECT * FROM opsmap WHERE corelayer=".$areaid ." ORDER BY opsname ASC ";
+        $sql="SELECT type, inarchive, corelayer, lat, lng, opsmapid, opsname, istoplayer, descrip, AsText(g) AS POLY  FROM opsmap WHERE  corelayer= :areaid ORDER BY opsname ASC ";        
+            
+        $prep = $dbh->prepare($sql);
+        $prep->bindParam(':areaid', $areaid, PDO::PARAM_INT);
+        $prep->execute();
+        $result = $prep->fetchAll();
         $titletext=' Children';
-    } elseif ($mcorelayer) {
-        $lilquery = "SELECT * FROM opsmap WHERE opsmapid<>".$areaid." AND corelayer=".$mcorelayer." ORDER BY opsname ASC ";
+        
+    }
+    elseif ($corelayer) {
+
+        //        echo ' alert(" core layer '. $corelayer.' ");   ';     
         $titletext=' Siblings';
+        
+        
+        
+        $sql="SELECT type, inarchive, corelayer, lat, lng, opsmapid, opsname, istoplayer, descrip, AsText(g) AS POLY  FROM opsmap WHERE opsmapid <> :areaid AND corelayer= :corelayer ORDER BY opsname ASC ";        
+            
+        $prep = $dbh->prepare($sql);
+        $prep->bindParam(':areaid', $areaid, PDO::PARAM_INT);
+        $prep->bindParam(':corelayer', $corelayer, PDO::PARAM_INT);
+        $prep->execute();
+        $result = $prep->fetchAll();
+        
     } else {
-        $lilquery = "SELECT * FROM opsmap WHERE opsmapid=-69";
+        $result=null;
     }
 
 
-    $lilsql_result = mysql_query ($lilquery, $conn_id) or mysql_error();  
-    $lilsumtot=mysql_affected_rows();
 
-    if ($lilsumtot>0) { // there are children or siblings
+
+    if ($result) { // there are children or siblings
         $moreinfotext.= '<h3>'.$lilsumtot.' '.$titletext.'</h3>';
-        while ($lilrow = mysql_fetch_array($lilsql_result)) {  // loop through children or siblings
 
-            extract($lilrow); 
+        // echo ' alert(" result ");   ';
+        
+        foreach ($result as $lilrow) {
+
             $lilareaid=$lilrow['opsmapid'];
             $lilareaname=$lilrow['opsname'];
             $lilareadescrip=$lilrow['descrip'];
             $moreinfotext.= ' <p><a title="Edit Sub Area" href="opsmap-new-area.php?areaid='.$lilareaid.'">'.$lilareaname.'</a>';
             if ($lilareadescrip) {
-            $moreinfotext.= ' '.$lilareadescrip; 
+                $moreinfotext.= ' '.$lilareadescrip; 
             }
             $moreinfotext.= '</p>';    
             
-            $lilresult = mysql_query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=".$lilareaid);
-            $score = mysql_fetch_assoc($lilresult);
-            $p=$score['POLY'];
+            $p=$lilrow['POLY'];
             $trans = array("POLYGON" => "", "((" => "", "))" => "");
             $p= strtr($p, $trans);
             $pexploded=explode( ',', $p );
@@ -439,8 +460,6 @@ if ($sumtot>'0') { // show passed area
 
             $js = rtrim($js, ','); 
             echo $js.'    ]; ';
-
-
 ?>
 
     poly<?php echo $lilareaid; ?> = new google.maps.Polygon({
@@ -747,43 +766,35 @@ if ($areaid) {
 }
 
 
-
 ?>
 <br />
-<textarea id="jobcomments" title="Area Comments Not visible to Client" class="allorder normal ui-state-highlight ui-corner-all " placeholder="Area Comments" name="areacomments" 
+<textarea id="jobcomments" title="Area Comments Not visible to Client" class="normal ui-state-highlight ui-corner-all " placeholder="Area Comments" name="areacomments" 
 style="width: 100%; outline: none; height:20px;"><?php if (isset($mdescrip)) { echo $mdescrip; } ?></textarea>
 
 
 <?php
 
 if ($mistoplayer<>'1') {
+    $sql = "SELECT opsmapid, opsname, descrip FROM opsmap WHERE istoplayer='1' ";
+    $stmt = $dbh->query($sql);
+    echo '  <select title="Parent Area" name="corelayer" class="ui-state-default ui-corner-left" style="width:215px;"><option value="" > Parent Scheme </option>';
 
-$cyclistquery = "SELECT opsmapid, opsname, descrip FROM opsmap WHERE istoplayer='1' "; 
-$cyclistresult_id = mysql_query ($cyclistquery, $conn_id); 
-echo '  <select title="Parent Area" name="corelayer" class="ui-state-default ui-corner-left" style="width:215px;"><option value="" > Parent Scheme </option>';
+    foreach ($stmt as $arow) {
+        echo '<option title="'.$arow['descrip'].'" ';
+        if ($corelayer == $arow['opsmapid']) {echo ' selected="selected" ';  } 
+        echo 'value="'.$arow['opsmapid'].'" >'.$arow['opsname'].'</option>';
+    }
 
-while (list ($listopsmapid, $listopsname, $descrip ) = mysql_fetch_row ($cyclistresult_id)) {
-echo '<option title="'.$descrip.'" ';
-if ($corelayer == $listopsmapid) {echo ' selected="selected" ';  } 
-echo 'value="'.$listopsmapid.'" >'.$listopsname.'</option>';
-}
+    echo ' </select> ';
 
-echo '</select> ';
-
-
-
-
-if ($mcorelayer) {
-    echo ' <a class="showclient" title="View Parent Area" href="opsmap-new-area.php?areaid='.$mcorelayer.'"> </a>'; 
-}
-
+    if ($corelayer) {
+        echo ' <a class="showclient" title="View Parent Area" href="opsmap-new-area.php?areaid='.$corelayer.'"> </a>'; 
+    }
 }
 
 
 
-
-
-if ($mcorelayer=='0') { // has no parent area so show a checkbox to promote to parent status
+if ($corelayer=='0') { // has no parent area so show a checkbox to promote to parent status
     echo ' <br /> <input type="checkbox" name="istoplayer" value="1" title="Promote to Parent Area" ';
     if ($mistoplayer=='1') { echo 'checked';}
     echo ' /> Is Parent Scheme ';

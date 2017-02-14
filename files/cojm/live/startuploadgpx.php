@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	startuploadgpx.php - GPS Tab, upload .gpx files, start searching gps history, delete rider gps by day 
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -107,7 +107,7 @@ echo '<!DOCTYPE html>
 <html lang="en"> 
 <head> 
 <meta http-equiv="Content-Type"  content="text/html; charset=utf-8">
-<script src="//maps.googleapis.com/maps/api/js?key='.$globalprefrow['googlemapapiv3key'].'&sensor=false" type="text/javascript"></script>
+<script src="//maps.googleapis.com/maps/api/js?key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <meta name="HandheldFriendly" content="true" >
 <meta name="viewport" content="width=device-width, height=device-height " >
@@ -181,7 +181,7 @@ echo ' <br />
 <form enctype="multipart/form-data" action="startuploadgpx.php" method="POST">
 <p>
 <label for="file">Upload GPX File : </label>
-<input type="file" name="file" id="file" /> 
+<input type="file" name="file" id="file" accept=".gpx" /> 
 ';
 
 echo '<select name="newcyclist" class="ui-state-default ui-corner-left"> ';
@@ -275,13 +275,6 @@ foreach ($riderdata as $ridernum => $ridername) {
 }
 
 
-
-
-
-
-
-
-
 print ("</select>"); 
 
 echo '
@@ -325,6 +318,3 @@ function datepickeronchange() { }
 
 include "footer.php";
 echo '  </body> </html>';
-mysql_close(); 
-
-$dbh=null;

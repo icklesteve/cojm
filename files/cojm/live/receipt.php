@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	receipt.php - Create a PDF Receipt, generally for 1 / 2 jobs
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -67,19 +67,12 @@ $page=$_POST['invpage']; // previewreceipt or createreceipt
 $invoiceref=$_POST['invref'];
 $ir='';
   
-
-
-// main job loop
-
   
 
 $query = "SELECT * 
-FROM invoicing, Clients, cojm_payments, cojm_paymenttype 
+FROM invoicing, Clients  
 WHERE Clients.CustomerID = invoicing.client
-AND cojm_payments.paymentdate =  cast(invoicing.paydate as date)
-AND cojm_payments.paymenttype = cojm_paymenttype.paymenttypeid 
 AND invoicing.ref = ? LIMIT 0,1";
-
 
 $parameters = array($invoiceref);
 $statement = $dbh->prepare($query);
@@ -189,13 +182,16 @@ $html.='
     
     </table>
     
+    ';
     
     
-    <h2>Payment made '.date('D jS M Y', strtotime($mainrow['paymentdate'])).', &'.$globalprefrow["currencysymbol"].number_format($mainrow['paymentamount'], 2, '.', ','). ' '.$mainrow['paymenttypename'].'
-
-    </h2>  
     
-    <h2>Paid in Full, Many Thanks.</h2>
+    // $html.=' <h2>Payment made via  '.$mainrow['paymenttypename'].' </h2>  ';
+    
+    
+    $html.='<h2>
+    &'.$globalprefrow["currencysymbol"].number_format(($mainrow['cost']+$mainrow['invvatcost']), 2, '.', ','). '
+    Paid in Full on '.date('D jS M Y', strtotime($mainrow['paydate'])).', Many Thanks.</h2>
     
 
     ';
@@ -229,13 +225,18 @@ $CustomerID=$mainrow['client'];
 $totco2sql="SELECT co2saving, numberitems, CO2Saved, pm10saving, PM10Saved FROM Orders, Services 
 WHERE Orders.ServiceID = Services.ServiceID 
 AND Orders.status >= 90 
-AND Orders.CustomerID='$CustomerID' ";
+AND Orders.CustomerID= :CustomerID ";
 
-
-
-$totco2sql_result = mysql_query($totco2sql,$conn_id);
-while ($totco2row = mysql_fetch_array($totco2sql_result)) {
-     extract($totco2row);
+        $prep = $dbh->prepare($totco2sql);
+        $prep->bindParam(':CustomerID', $CustomerID, PDO::PARAM_INT);
+        $prep->execute();
+        $stmt = $prep->fetchAll();
+        
+        
+     
+     foreach ($stmt as $totco2row) {
+     
+     
 	 if ($totco2row['co2saving']>'0.001') { $ttableco2=$ttableco2+$totco2row["co2saving"]; }
 	 else { $ttableco2 = $ttableco2 + (($totco2row['numberitems'])*($totco2row["CO2Saved"])); }
 	 
@@ -654,5 +655,3 @@ else {
 }
 
  
- mysql_close();
-

@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	footer.php - Should be called at bottom of every page, adds copyright, audit log, back to top + triggers cron check
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-
 
 $omega_time = microtime(TRUE); 
 $lapse_time = $omega_time - $alpha_time; 
@@ -43,10 +42,25 @@ $infotext= strtr($infotext, $transf);
 
 $pagetext=$alerttext.$pagetext;
 $browser=$_SERVER["HTTP_USER_AGENT"];
- $newpoint="INSERT INTO cojm_audit (auditid,audituser,auditorderid,auditpage,auditfilename,auditmobdevice,
- auditbrowser,audittext,auditcjtime,auditpagetime,auditmidtime,auditinfotext)   
- VALUES ('','$cyclistid','$orderauditid','$page','$filename','$mobdevice',
- '$browser','$pagetext','$cj_msec','$lapse_msec','','$infotext')";
- mysql_query($newpoint, $conn_id) or mysql_error(); $newauditid=mysql_insert_id();
- if (mysql_error()) { echo '<div class="moreinfotext"><h1> Problem saving audit log </h1></div>'.$newpoint; } // ends error
+
+
+$statement = $dbh->prepare("INSERT INTO cojm_audit 
+(auditorderid, audituser, auditpage, auditfilename, auditmobdevice, auditbrowser, audittext, auditcjtime, auditpagetime, auditinfotext,auditdatetime) 
+values 
+(:orderid, :audituser, :page, :referrer, :auditmobdevice, :auditbrowser, :audittext, :auditcjtime, :auditpagetime, :auditinfotext, now())
+");
+
+$statement->bindParam(':orderid', $orderauditid, PDO::PARAM_STR);
+$statement->bindParam(':audituser', $cyclistid, PDO::PARAM_STR);
+$statement->bindParam(':page', $page, PDO::PARAM_STR);
+$statement->bindParam(':referrer', $filename, PDO::PARAM_STR);
+$statement->bindParam(':auditmobdevice', $mobdevice, PDO::PARAM_STR);
+$statement->bindParam(':auditbrowser', $browser, PDO::PARAM_STR);
+$statement->bindParam(':audittext', $pagetext, PDO::PARAM_STR);
+$statement->bindParam(':auditcjtime', $cj_msec, PDO::PARAM_STR);
+$statement->bindParam(':auditinfotext', $infotext, PDO::PARAM_STR);
+$statement->bindParam(':auditpagetime', $lapse_msec, PDO::PARAM_STR);
+$statement->execute();
+$newauditid = $dbh->lastInsertId();
+ 
 echo ' <script> var initialauditid='.$newauditid.'; </script>';

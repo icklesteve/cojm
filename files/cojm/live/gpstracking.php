@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	gpstracking.php - Displays rider GPS history
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -63,7 +63,6 @@ if (isset($_POST['confirmgpx'])) { $confirmgpx=trim($_POST['confirmgpx']); } els
 if (isset($_GET['from'])) { $start=trim($_GET['from']); } else { $start=''; }
 if (isset($_GET['to'])) { $end=trim($_GET['to']); } else { $end=''; }
 if (isset($_GET['newcyclist'])) { $CyclistID=trim($_GET['newcyclist']); } else { $CyclistID='all'; }
-// if (isset($_POST['newcyclist'])) { $CyclistID=trim($_POST['newcyclist']); }  
 
 
 $thisCyclistID=$CyclistID;
@@ -239,511 +238,369 @@ function initialize() {
 
 <?php
 
- 
- $dinterim=$dstart;
+$dinterim=$dstart;
 
 while ($dinterim<$dend) { // each day loop
 
-$dinterif=$dinterim+'86399';
+    $dinterif=$dinterim+'86399';
 
+    // $tabledatestart= date('H:i A ', $smap['timestamp']); 
+    
+    
+    // dstart - submit start
+    // dinterim - loop start
+    // dinterif - loop finish
+    // dend - submit finish
+    
+    
+    // $error.='<br /> dstart : ' . date('H:i A D j M',$dstart) . ' <br />dinterim : '.date('H:i A D j M',$dinterim).' <br />dinterif : '.date('H:i A D j M',$dinterif).' <br /> dend '.date('H:i A D j M',$dend).' <hr />';
+    
+    
+    if ($thisCyclistID == 'all') { // choose which sql lookup for rider or all riders for timestamp given
+        $sql="SELECT * FROM instamapper
+        INNER JOIN Cyclist ON instamapper.device_key = Cyclist.trackerid
+        WHERE `timestamp` >= ? 
+        AND `timestamp` <= ? 
+        GROUP BY device_key 
+        ORDER BY `timestamp` ASC "; 
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($dinterim, $dinterif));
+    } else { 
+        $sql="SELECT * FROM instamapper
+        INNER JOIN Cyclist ON instamapper.device_key = Cyclist.trackerid 
+        WHERE `timestamp` >= ? AND `timestamp` <= ?
+        AND `CyclistID` = ? 
+        GROUP BY device_key 
+        ORDER BY `timestamp` ASC ";
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute(array($dinterim, $dinterif, $thisCyclistID));
+    }
+    
 
-// $tabledatestart= date('H:i A ', $smap['timestamp']); 
-
-
-// dstart - submit start
-// dinterim - loop start
-// dinterif - loop finish
-// dend - submit finish
-
-
-// $error.='<br /> dstart : ' . date('H:i A D j M',$dstart) . ' <br />dinterim : '.date('H:i A D j M',$dinterim).' <br />dinterif : '.date('H:i A D j M',$dinterif).' <br /> dend '.date('H:i A D j M',$dend).' <hr />';
-
-
-
-
-
-
-if ($thisCyclistID == 'all') { // choose which sql lookup for rider or all riders for timestamp given
-
-$sql="SELECT DISTINCT device_key FROM `instamapper` WHERE `timestamp` >= ? AND `timestamp` <= ? "; 
-
-} else { 
-
-$sql="SELECT DISTINCT device_key FROM `instamapper` 
-INNER JOIN Cyclist ON instamapper.device_key = Cyclist.trackerid 
-WHERE `timestamp` >= ? AND `timestamp` <= ?
-AND `CyclistID` = ".$thisCyclistID." ";
-
- }
- 
-
- 
-$stmt = $dbh->prepare($sql);
-$stmt->execute(array($dinterim, $dinterif));
-$row_count = $stmt->rowCount();
-	
-$prevts='';
-
-$tabledatestart='';
-	
-while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { // got a valid device key for a particular day
-
-
-$foundtracks++;
-
-
-
-$device_key=$row['device_key'];
-
-
-
-
-$ssql="SELECT timestamp, cojmname, CyclistID FROM `instamapper` 
-INNER JOIN Cyclist ON instamapper.device_key = Cyclist.trackerid  
-WHERE `device_key` = '$device_key' 
-AND `timestamp` >= '$dinterim' 
-AND `timestamp` <= '$dinterif' 
-ORDER BY `timestamp` ASC 
-LIMIT 0,1 ;";
-
-
-
-$ssql_resulth = mysql_query($ssql,$conn_id)  or mysql_error();
-$snum_rows = mysql_num_rows($ssql_resulth);
-if ($snum_rows>'0') { while ($smap = mysql_fetch_array($ssql_resulth)) {
-
-$tabledatestart= date('H:i A ', $smap['timestamp']); 
-$cojmname=$smap['cojmname'];
-$CyclistID=$smap['CyclistID'];
-
-} }
-
-
-
-
-
-	$tabledate= date('D j M ', $dinterim); 
-	$tableyear= date('Y', $dinterim);
-	
-	
-	$tabledatelink='clientviewtargetcollection.php?clientid=all&timetype=tarcollect&from='. date(('j'), $dinterim). 
+    $row_count = $stmt->rowCount();
+    $prevts='';
+    $tabledatestart='';
+    
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { // got a valid device key for a particular day
+        $foundtracks++;
+        $device_key=$row['device_key'];
+        
+        $tabledatestart= date('H:i A ', $row['timestamp']); 
+        $cojmname=$row['cojmname'];
+        $CyclistID=$row['CyclistID'];
+        
+        
+        $tabledate= date('D j M ', $dinterim); 
+        $tableyear= date('Y', $dinterim);
+            
+            
+        $tabledatelink='clientviewtargetcollection.php?clientid=all&timetype=tarcollect&from='. date(('j'), $dinterim). 
         '%2F' .date(('n'), $dinterim).'%2F'. date(('Y'), $dinterim).'%2F&to='. date(('j'), $dinterim).'%2F'. date(('n'), $dinterim).'%2F'.
-        date(('Y'), $dinterim).'&servicetype=all&deltype=all&orderby=targetcollection&clientview=normal&viewcomments=normal&statustype=all'.
+        date(('Y'), $dinterim). '&servicetype=all&deltype=all&orderby=targetcollection&clientview=normal&viewcomments=normal&statustype=all'.
         '&newcyclistid='.$CyclistID;
-	
-	
 
-// $error.=  '<br /> Interim is '.date('H:i D j M', $dinterif);
-
-
-$checkdate=date('Y-m-d', $dinterim);
-
-$today=date('Y-m-d');
-
-$displaydate=date('D j M', $dinterim);
-$displayyear=date('Y', $dinterim);
-
-$markervar='markers'.date('Y_m_d', $dinterim).'_'.$device_key;
-$linevar='line'.date('Y_m_d', $dinterim).'_'.$device_key;
-$oro=date('Y_m_d', $dinterim).'_'.$device_key;
-
-
-
-
-
-if ($checkdate==$today) {
-
-// $error.=' Track is for today  ';   
-
-
-
-// start of tracking script
- $sql = "
- SELECT latitude, longitude, speed, timestamp FROM `instamapper`  
- WHERE `device_key` = '$device_key' 
- AND `timestamp` > '$dinterim' 
- AND `timestamp` < '$dinterif' 
- ORDER BY `timestamp` ASC"; 
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-// $lattot='0'; 
-// $lontot='0'; 
-$sumtot=mysql_affected_rows(); 
-
-// $error.='<br />'. $sumtot.' tracks found for today view starting at '.date('H:i D j M', $dinterim).' finishing at ' .date('H:i D j M', $dinterif).'';
-
-
-	
-$orderjs=' 
-var '.$markervar.' = [';
-$linecoords='';
-
-
-$prevts='';
-$i='0';
-$j=0;
-
-while ($map = mysql_fetch_array($sql_result)) { 
-    extract($map);
-    $map['latitude']=round($map['latitude'],5);
-    $map['longitude']=round($map['longitude'],5);
-
-  if($map['longitude']>$max_lon) { $max_lon = $map['longitude']; }
-  if($map['longitude']<$min_lon) { $min_lon = $map['longitude']; }
-  if($map['latitude']>$max_lat) { $max_lat = $map['latitude']; }
-  if($map['latitude']<$min_lat)  { $min_lat = $map['latitude']; }
-
-    $i=$i+'1';
-    $linecoords=$linecoords.' ['.$map['latitude'] . "," . $map['longitude'].'],';
-	 $lattot=$lattot+$map['latitude'];
-	 $lontot=$lontot+$map['longitude'];
-	 $thists=date('H:i A D j M ', $map['timestamp']);
-    $tabledatefinish=date('H:i A', $map['timestamp']);
- if ($thists<>$prevts) {
-
- $j++;
- 
-  $comments=date('H:i D j M ', $map['timestamp']).'<br />';
- 
- if ($map['speed']) {  $comments=$comments . ''. round($map['speed']);
- if ($globalprefrow['distanceunit']=='miles') { $comments=$comments. 'mph '; } 
- if ($globalprefrow['distanceunit']=='km') { $comments=$comments. 'km ph '; } }
-
-$orderjs.= '["' . $comments .'",'. $map['latitude'] . ',' . $map['longitude'] . ',"' . date("U", $map["timestamp"]) . "_" . $device_key . "_" . $i .'"],'; 
-$prevts=date('H:i A D j M ', $map['timestamp']); 
-	
-$latestlat=$latestlat+$map['latitude'];
-$latestlon=$latestlon+$map['longitude'];
-$loop++;
-
-
-} // checks timestamp different
-} // finished waypoint loop
-$lattot=($latestlat / $loop );
-$lontot=($latestlon / $loop );
-		// restarts javascript
-
-	//	echo ' i is '.$i;
-	
-
-$orderjs = rtrim($orderjs, ',');
-$linecoords = rtrim($linecoords, ',');
-	
-$orderjs.=  '
-    ]; 
-
-  var '.$linevar.' = [
- '.$linecoords. '
-  ];
-
-    markercount.push("'.$j.'");
-    lineplotscount.push("'.$i.'");
-    
-    
-    max_lon.push("'.$max_lon.'"); 
-    min_lon.push("'.$min_lon.'"); 
-    max_lat.push("'.$max_lat.'"); 
-    min_lat.push("'.$min_lat.'");  
-    
-';
-
-echo $orderjs;
-
-
-$tabletext.='<tr id="'.$oro.'">
-<td>'.$cojmname.'</td>
-<td><a href="'.$tabledatelink.'" title="">'.$tabledate.'</a></td>
-<td>'.$tabledatestart.'</td>
-<td>'.$tabledatefinish.'</td>
-<td>Live Database</td></tr>';
-
-$foundincache=0;
-
-} // finishes track is today
-else
-{ // track is not today
-
-$testfile="cache/jstrack/".date('Y/m', $dinterim).'/'.date('Y_m_d', $dinterim).'_'.$device_key.'.js';
-
-if (file_exists($testfile)) { $foundincache=1; } else { $foundincache=0; }
-
-
-if ($foundincache<>1) {
-
-
-$alreadyindbquery="
-SELECT cojmadmin_id FROM cojm_admin 
-WHERE  cojm_admin_stillneeded='1' AND cojmadmin_rider_gps='1' AND cojmadmin_rider_id='$device_key' AND cojm_admin_rider_date='$checkdate'
-ORDER BY cojmadmin_id ASC LIMIT 0,1 ; ";
-
-  $gpsadmin = mysql_query($alreadyindbquery) or die(mysql_error());
-$gpsadminrow = mysql_fetch_array($gpsadmin); 
-
-
-// $error.= $alreadyindbquery;
-
-if($gpsadminrow) {
-
-$tableerror.=' <tr class="error"> <td>'.$cojmname.'</td> <td colspan="2" title="'.$displayyear.'">'.$displaydate.' </td> <td colspan="2"> Awaiting Caching  </td> </tr> ';
-
-}
- else {
-// $error.='<br />'.$testfile. ' not found and  no job outstanding on system. ';
-
- $sql="INSERT INTO cojm_admin 
-   (cojm_admin_stillneeded, cojmadmin_rider_gps, cojmadmin_rider_id, cojm_admin_rider_date) 
-    VALUES ('1', '1', '$device_key', '$checkdate' )   ";
-    $result = mysql_query($sql, $conn_id);
- if ($result){
-// echo "<br />247 Success adding admin job";
- $thiscyclist=mysql_insert_id(); 
-// $error.= ' Admin Task '.$thiscyclist.' created.';
-
-
-$tableerror.=' <tr class="error"> <td>'.$cojmname.'</td> <td>'.$displaydate.' </td> <td colspan="3"> Cache task created </td> </tr> ';
-
- 
- } else {
-$error.= mysql_error()." An error occured during setting admin q <br>".$sql;  
- } // ends sql
-
-
- } // check job already in admin q
- 
- 
-}
-
-
-
-
-if ($foundincache==1) {
-
-$includejs[] = ' <script src="'.$testfile.'" > </script>'; 
-
-$foundcache++;
-
-
-
-
-	
-	
-	
-	
-$fsql="SELECT timestamp FROM `instamapper` 
-WHERE `device_key` = '$device_key' 
-AND `timestamp` >= '$dinterim' 
-AND `timestamp` <= '$dinterif' 
-ORDER BY `timestamp` DESC 
-LIMIT 0,1 ;"; 
-$fsql_resulth = mysql_query($fsql,$conn_id)  or mysql_error();
-$fnum_rows = mysql_num_rows($fsql_resulth);
-if ($fnum_rows>'0') { 
-while ($fmap = mysql_fetch_array($fsql_resulth)) { 
-$tabledatefinish= date('H:i A ', $fmap['timestamp']); } 
-
-}
-
-$tabletext.='<tr id="'.$oro.'">
-<td>'.$cojmname.'</td>
-<td><a href="'.$tabledatelink.'" title="'.$tableyear.'">'.$tabledate.'</a></td>
-<td>'.$tabledatestart.'</td>
-<td>'.$tabledatefinish.'</td>
-<td>';
-
-
-$tabletext.='<button class="clrcachebtn" id="clrcache-'.$oro.'">Refresh Cache</button>';
-
-$tabletext.='</td>
-</tr>';
-
-
-
-
-?>
-
-
-
-    $("#clrcache-<?php echo $oro; ?>").click(function(){
-	    $.ajax({
-            url: "ajaxchangejob.php",
-            data: {
-                page: "ajaxremovegpscache",
-                folder: "<?php echo date(('Y/m'), $dinterim); ?>",
-                trackingid: "<?php echo $oro; ?>" },
-                type: "post",
-                success: function (data) {
-                    $("#infotext").append(data);
-                },
-            complete: function () {
-                showmessage();
-            }
-        });
-    });
-
-
-
-<?php
-
-}
-	
-
-    
-    
-} // ends track is not today
-
-
-if ((file_exists($testfile)) or ($checkdate==$today)) { // create actions js for each rider day
-    
-
-
-
-
-
-
-if ($clientview=='cluster') {
-// $cjs[] = file_get_contents($testfile);
-	
-?>
-    // in daily loop
-    cluster=cluster +  (<?php echo $linevar; ?>);
-    for (var i = 0; i < <?php echo $linevar; ?>.length; i++) {
-        var lat = <?php echo $linevar; ?>[i][0];
-        var lng = <?php echo $linevar; ?>[i][1];
-        var latLng = new google.maps.LatLng(lat, lng);
-        var marker = new google.maps.Marker({map: map, position: latLng,});
-        gmarkers.push(marker);
-    }
-    
-<?php	
-	
-} else 
-{ // clientview Normal
-
-?>
-
-
-    var gmarkers<?php echo $oro; ?>=[];
-  
-    for (i = 0; i < markers<?php echo $oro; ?>.length; i++) {
-        marker = new google.maps.Marker({
-            position: new google.maps.LatLng(<?php echo $markervar; ?>[i][1], <?php echo $markervar; ?>[i][2]),
-            map: map,
-            icon: image,
-        });
+        // $error.=  '<br /> Interim is '.date('H:i D j M', $dinterif);
         
-        gmarkers<?php echo $oro; ?>.push(marker);
         
-        google.maps.event.addListener(marker, "mouseover", (function(marker, i) {
-            return function() {
-                $("#toploader").show();
-                infowindow.setContent(" <div class='info'> " + <?php echo $markervar; ?>[i][0] + "<div class='ajaxinfowin'></div> </div>");
-                var markervar = <?php echo $markervar; ?>[i][3];
-                var dataString = "markervar=" + markervar;
-                $.ajax({
-                    type: "POST",
-                    url:"ajaxgpsorderlookup.php",
-                    data: dataString,
-                    success: function(data){
-                        $(".ajaxinfowin").html(data);
-                    },
-                    complete: function (){
-                        $("#toploader").fadeOut();
-                    },
-                });
-                infowindow.setOptions({ disableAutoPan: true });
-                infowindow.open(map, marker);
-                $("tr#<?php echo $oro; ?>").addClass("highlight");
-                polyline<?php echo $oro; ?>.setOptions({strokeColor: "#339900", strokeWeight: 4 });
+        $checkdate=date('Y-m-d', $dinterim);
+        
+        $today=date('Y-m-d');
+        
+        $displaydate=date('D j M', $dinterim);
+        $displayyear=date('Y', $dinterim);
+        
+        $markervar='markers'.date('Y_m_d', $dinterim).'_'.$device_key;
+        $linevar='line'.date('Y_m_d', $dinterim).'_'.$device_key;
+        $oro=date('Y_m_d', $dinterim).'_'.$device_key;
+        
+        
+        
+        if ($checkdate==$today) { // not yet cached, use db
+
+            $orderjs=' var '.$markervar.' = [';
+            $linecoords='';
+            $prevts='';
+            $i='0';
+            $j=0;
+            
+            $sql = "SELECT latitude, longitude, speed, timestamp FROM `instamapper`  
+            WHERE `device_key` = ? 
+            AND `timestamp` >= ?  
+            AND `timestamp` <= ?
+            ORDER BY `timestamp` ASC"; 
+
+            $statement = $dbh->prepare($sql);
+            $statement->execute([$device_key,$dinterim,$dinterif]);
+            if (!$statement) throw new Exception("Query execution error.");
+            $liveresult = $statement->fetchAll();
+            foreach ($liveresult as $map) {
+                $map['latitude']=round($map['latitude'],5);
+                $map['longitude']=round($map['longitude'],5);
+            
+                if($map['longitude']>$max_lon) { $max_lon = $map['longitude']; }
+                if($map['longitude']<$min_lon) { $min_lon = $map['longitude']; }
+                if($map['latitude']>$max_lat) { $max_lat = $map['latitude']; }
+                if($map['latitude']<$min_lat)  { $min_lat = $map['latitude']; }
+            
+                $i=$i+'1';
+                $linecoords=$linecoords.' ['.$map['latitude'] . "," . $map['longitude'].'],';
+                $thists=date('H:i A D j M ', $map['timestamp']);
+                $tabledatefinish=date('H:i A', $map['timestamp']);
                 
-                for (j=0; j<gmarkers<?php echo $oro; ?>.length; j++) {
-                    gmarkers<?php echo $oro; ?>[j].setIcon(imagehighlight);
-                    gmarkers<?php echo $oro; ?>[j].setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
+                if ($thists<>$prevts) {
+                    $j++;    
+                    $comments=date('H:i D j M ', $map['timestamp']).'<br />';
+                    if ($map['speed']) {
+                        $comments.= round($map['speed']);
+                        if ($globalprefrow['distanceunit']=='miles') { $comments.= 'mph '; } 
+                        if ($globalprefrow['distanceunit']=='km') { $comments.= 'km ph '; }
+                    }
+                    $orderjs.= '["' . $comments .'",'. $map['latitude'] . ',' . $map['longitude'] . ',"' . date("U", $map["timestamp"]) . "_" . $device_key . "_" . $i .'"],'; 
+                    $prevts=date('H:i A D j M ', $map['timestamp']);
+                    $latestlat=$latestlat+$map['latitude'];
+                    $latestlon=$latestlon+$map['longitude'];
+                    $loop++;
                 }
-            };
-        })(marker, i));
-        
-        google.maps.event.addListener(marker, "mouseout", function() {
-            $("tr#<?php echo $oro; ?>").removeClass( "highlight" );
-            polyline<?php echo $oro; ?>.setOptions({strokeColor: "#000000", strokeWeight: 4 });
-            for (var j=0; j<gmarkers<?php echo $oro; ?>.length; j++) {
-                gmarkers<?php echo $oro; ?>[j].setIcon(image);
-                gmarkers<?php echo $oro; ?>[j].setZIndex(1);
             }
-        });
-    }
-	
-	var route<?php echo $oro; ?> = [];
-    for (j = 0; j < line<?php echo $oro; ?>.length; j++) {
-        lat = line<?php echo $oro; ?>[j][0];
-        lng = line<?php echo $oro; ?>[j][1];
-        marker = new google.maps.LatLng(lat, lng);
-        route<?php echo $oro; ?>.push(marker);
-    }
-	
-	var polyline<?php echo $oro; ?> = new google.maps.Polyline({
-        path: route<?php echo $oro; ?>,
-        geodesic: true,
-        strokeWeight: 4,
-        strokeOpacity: 0.6,
-        strokeColor: "#000000",
-        icons: [{
-            icon: lineSymbol,
-            repeat: "50px"
-            }],
-        map: map
-        });
-
-
-    $("tr#<?php echo $oro; ?>").mouseover(function() {
-        $("tr#<?php echo $oro; ?>").addClass( "highlight" );
-        polyline<?php echo $oro; ?>.setOptions({
-            strokeColor: "#339900",
-            strokeWeight: 4}
-        );
+  
+            
+            $orderjs = rtrim($orderjs, ',');
+            $linecoords = rtrim($linecoords, ',');
+                
+            $orderjs.=  '
+                ]; 
+            
+            var '.$linevar.' = [
+            '.$linecoords. '
+            ];
+            
+                markercount.push("'.$j.'");
+                lineplotscount.push("'.$i.'");
+                max_lon.push("'.$max_lon.'"); 
+                min_lon.push("'.$min_lon.'"); 
+                max_lat.push("'.$max_lat.'"); 
+                min_lat.push("'.$min_lat.'");  
+            ';
+            
+            echo $orderjs;
+            
+            
+            $tabletext.='<tr id="'.$oro.'">
+            <td>'.$cojmname.'</td>
+            <td><a href="'.$tabledatelink.'" title="">'.$tabledate.'</a></td>
+            <td>'.$tabledatestart.'</td>
+            <td>'.$tabledatefinish.'</td>
+            <td>Live Database</td></tr>';
+            
+            $foundincache=0;
+            
+        } // finishes track is today
+        else { // track is not today
+            $testfile="cache/jstrack/".date('Y/m', $dinterim).'/'.date('Y_m_d', $dinterim).'_'.$device_key.'.js';
+            if (file_exists($testfile)) { $foundincache=1; } else { $foundincache=0; }
+            
+            if ($foundincache<>1) {
+                $stmt = $dbh->prepare("SELECT cojmadmin_id FROM cojm_admin 
+                WHERE  cojm_admin_stillneeded='1' 
+                AND cojmadmin_rider_gps='1' 
+                AND cojmadmin_rider_id= ?
+                AND cojm_admin_rider_date= ?
+                LIMIT 0,1");
+                $stmt->execute([$device_key,$checkdate]);
+                $gpsadminrow = $stmt->fetchColumn();
+            
+                // $error.= $alreadyindbquery;
+            
+                if($gpsadminrow) {
+                    $tableerror.=' <tr class="error"> <td>'.$cojmname.'</td> <td colspan="2" title="'.$displayyear.'">'.$displaydate.' </td> <td colspan="2"> Awaiting Caching  </td> </tr> ';
+                }
+                else {
+                    $stmt = $dbh->prepare("INSERT INTO cojm_admin 
+                    (cojm_admin_stillneeded, cojmadmin_rider_gps, cojmadmin_rider_id, cojm_admin_rider_date) 
+                        VALUES ('1', '1', ?, ? ) ");
+                    $result = $stmt->execute([$device_key,$checkdate]);
+                    if ($result){
+                        $tableerror.=' <tr class="error"> <td>'.$cojmname.'</td> <td>'.$displaydate.' </td> <td colspan="3"> Cache task created </td> </tr> ';
+                    }
+                } // check job already in admin q
+            }
+            
+            
+            
+            
+            if ($foundincache==1) {
+                $includejs[] = ' <script src="'.$testfile.'" > </script>';
+                $foundcache++;
+                
+                $tstmt = $dbh->prepare("SELECT timestamp FROM `instamapper` 
+                WHERE `device_key` = ?
+                AND `timestamp` >= ? 
+                AND `timestamp` <= ?
+                ORDER BY `timestamp` DESC 
+                LIMIT 0,1 ;");
+                $tstmt->execute([$device_key,$dinterim,$dinterif]);
+                $fmap = $tstmt->fetchColumn();
+                $tabledatefinish= date('H:i A ', $fmap);
+                
+                $tabletext.='<tr id="'.$oro.'">
+                <td>'.$cojmname.'</td>
+                <td><a href="'.$tabledatelink.'" title="'.$tableyear.'">'.$tabledate.'</a></td>
+                <td>'.$tabledatestart.'</td>
+                <td>'.$tabledatefinish.'</td>
+                <td>';
+                
+                $tabletext.='<button class="clrcachebtn" id="clrcache-'.$oro.'">Refresh Cache</button>';
+                $tabletext.='</td> </tr>';
+                
+                ?>
+                    $("#clrcache-<?php echo $oro; ?>").click(function(){
+                        $.ajax({
+                            url: "ajaxchangejob.php",
+                            data: {
+                                page: "ajaxremovegpscache",
+                                folder: "<?php echo date(('Y/m'), $dinterim); ?>",
+                                trackingid: "<?php echo $oro; ?>" },
+                                type: "post",
+                                success: function (data) {
+                                    $("#infotext").append(data);
+                                },
+                            complete: function () {
+                                showmessage();
+                            }
+                        });
+                    });
+                <?php
+                
+            }
+        }
         
-        for (var j=0; j<gmarkers<?php echo $oro; ?>.length; j++) {
-            gmarkers<?php echo $oro; ?>[j].setIcon(imagehighlight);
-            gmarkers<?php echo $oro; ?>[j].setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
-        }
-    });
-    
-    $("tr#<?php echo $oro; ?>").mouseout(function() {
-        $("tr#<?php echo $oro; ?>").removeClass( "highlight" );
-		polyline<?php echo $oro; ?>.setOptions({
-            strokeColor: "#000000", 
-            strokeWeight: 4}
-        );
-        for (var j=0; j<gmarkers<?php echo $oro; ?>.length; j++) {
-            gmarkers<?php echo $oro; ?>[j].setIcon(image);
-            gmarkers<?php echo $oro; ?>[j].setZIndex(1);
-        }
-	});
-    
-<?php
+        
+        if ((file_exists($testfile)) or ($checkdate==$today)) { // create actions js for each rider day
+            
+            if ($clientview=='cluster') {
+                ?>
+                    // in daily loop
+                    cluster=cluster +  (<?php echo $linevar; ?>);
+                    for (var i = 0; i < <?php echo $linevar; ?>.length; i++) {
+                        var lat = <?php echo $linevar; ?>[i][0];
+                        var lng = <?php echo $linevar; ?>[i][1];
+                        var latLng = new google.maps.LatLng(lat, lng);
+                        var marker = new google.maps.Marker({map: map, position: latLng,});
+                        gmarkers.push(marker);
+                    }
+                    
+                <?php	
+                    
+            }
+            else { // clientview Normal
+            
+            ?>
 
-} // ends view = normal, not clustered
+                var gmarkers<?php echo $oro; ?>=[];
+            
+                for (i = 0; i < markers<?php echo $oro; ?>.length; i++) {
+                    marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(<?php echo $markervar; ?>[i][1], <?php echo $markervar; ?>[i][2]),
+                        map: map,
+                        icon: image,
+                    });
+                    
+                    gmarkers<?php echo $oro; ?>.push(marker);
+                     
+                    google.maps.event.addListener(marker, "mouseover", (function(marker, i) {
+                        return function() {
+                            $("#toploader").show();
+                            infowindow.setContent(" <div class='info'> " + <?php echo $markervar; ?>[i][0] + "<div class='ajaxinfowin'></div> </div>");
+                            var markervar = <?php echo $markervar; ?>[i][3];
+                            $.ajax({
+                                type: "POST",
+                                url:"ajax_lookup.php",
+                                data: {
+                                    markervar: markervar,
+                                    lookuppage: "ajaxgpsorderlookup"
+                                },
+                                success: function(data){
+                                    $(".ajaxinfowin").html(data);
+                                },
+                                complete: function (){
+                                    $("#toploader").fadeOut();
+                                },
+                            });
+                            infowindow.setOptions({ disableAutoPan: true });
+                            infowindow.open(map, marker);
+                            $("tr#<?php echo $oro; ?>").addClass("highlight");
+                            polyline<?php echo $oro; ?>.setOptions({strokeColor: "#339900", strokeWeight: 4 });
+                            
+                            for (j=0; j<gmarkers<?php echo $oro; ?>.length; j++) {
+                                gmarkers<?php echo $oro; ?>[j].setIcon(imagehighlight);
+                                gmarkers<?php echo $oro; ?>[j].setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
+                            }
+                        };
+                    })(marker, i));
+                    
+                    google.maps.event.addListener(marker, "mouseout", function() {
+                        $("tr#<?php echo $oro; ?>").removeClass( "highlight" );
+                        polyline<?php echo $oro; ?>.setOptions({strokeColor: "#000000", strokeWeight: 4 });
+                        for (var j=0; j<gmarkers<?php echo $oro; ?>.length; j++) {
+                            gmarkers<?php echo $oro; ?>[j].setIcon(image);
+                            gmarkers<?php echo $oro; ?>[j].setZIndex(1);
+                        }
+                    });
+                }
+                
+                var route<?php echo $oro; ?> = [];
+                for (j = 0; j < line<?php echo $oro; ?>.length; j++) {
+                    lat = line<?php echo $oro; ?>[j][0];
+                    lng = line<?php echo $oro; ?>[j][1];
+                    marker = new google.maps.LatLng(lat, lng);
+                    route<?php echo $oro; ?>.push(marker);
+                }
+                
+                var polyline<?php echo $oro; ?> = new google.maps.Polyline({
+                    path: route<?php echo $oro; ?>,
+                    geodesic: true,
+                    strokeWeight: 4,
+                    strokeOpacity: 0.6,
+                    strokeColor: "#000000",
+                    icons: [{
+                        icon: lineSymbol,
+                        repeat: "50px"
+                        }],
+                    map: map
+                    });
+            
+            
+                $("tr#<?php echo $oro; ?>").mouseover(function() {
+                    $("tr#<?php echo $oro; ?>").addClass( "highlight" );
+                    polyline<?php echo $oro; ?>.setOptions({
+                        strokeColor: "#339900",
+                        strokeWeight: 4}
+                    );
+                    
+                    for (var j=0; j<gmarkers<?php echo $oro; ?>.length; j++) {
+                        gmarkers<?php echo $oro; ?>[j].setIcon(imagehighlight);
+                        gmarkers<?php echo $oro; ?>[j].setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
+                    }
+                });
+                
+                $("tr#<?php echo $oro; ?>").mouseout(function() {
+                    $("tr#<?php echo $oro; ?>").removeClass( "highlight" );
+                    polyline<?php echo $oro; ?>.setOptions({
+                        strokeColor: "#000000", 
+                        strokeWeight: 4}
+                    );
+                    for (var j=0; j<gmarkers<?php echo $oro; ?>.length; j++) {
+                        gmarkers<?php echo $oro; ?>[j].setIcon(image);
+                        gmarkers<?php echo $oro; ?>[j].setZIndex(1);
+                    }
+                });
+                
+            <?php
+            } // ends view = normal, not clustered
+        } // ends cached ok or today check
+    } // ends rows in individual day lookup
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-} // ends cached ok or today check
-
-} // ends rows in individual day lookup
-
-
-// $error.=  ' 400 day loop '. $loop;
-$dinterim=$dinterim+'86400';
+    $dinterim=$dinterim+'86400';
 
 } // each day loop
 
@@ -821,21 +678,10 @@ if ($clientview=='cluster') { echo ' var markerCluster = new MarkerClusterer(map
     
 
     $("#javastotals").html("Total " + sum(markercount) + " infopoints, " + sum(lineplotscount) + " plots.");
-
-
- 
-
-
     
-    
-    google.maps.event.addListenerOnce(map, 'idle', function(){
-    //loaded fully
-    
-//    alert(" finished loading ");
-    $("#toploader").fadeOut(750);
-    
+    google.maps.event.addListenerOnce(map, 'idle', function(){ //loaded fully
+        $("#toploader").fadeOut();
     });
-    
 }
  
 
@@ -846,12 +692,8 @@ if ($clientview=='cluster') { echo ' var markerCluster = new MarkerClusterer(map
     function comboboxchanged() { };
 
 
-
-
 </script>
- 
- 
- <?php
+<?php
 
 echo '</head><body ';
 
@@ -874,24 +716,27 @@ include "cojmmenu.php";
 <form action="gpstracking.php" method="get" id="cvtc"> 
 <div class="ui-state-highlight ui-corner-all p15">
 
-
 <?php
+
 $query = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' AND Cyclist.CyclistID > '1' ORDER BY CyclistID "; 
-$result_id = mysql_query ($query, $conn_id); 
+$data = $dbh->query($query)->fetchAll();
+
 echo ' <select id="combobox" name="newcyclist" style="width:200px;" class=" ui-state-highlight ui-corner-left">';
 echo ' <option value="all"';
 
 if ($thisCyclistID == 'all') {echo ' selected="selected" '; }
 echo '>All '.$globalprefrow['glob5'].'s</option>';
-while (list ($CyclistID, $cojmname) = mysql_fetch_row ($result_id)) { print ("<option "); 
-if ($CyclistID == $thisCyclistID) {echo ' selected="selected" ';  } 
-print ("value=\"$CyclistID\">$cojmname</option>"); }
+
+foreach ($data as $riderrow ) {
+    print ("<option "); 
+    if ($riderrow['CyclistID'] == $thisCyclistID) { echo ' selected="selected" ';  } 
+    echo ' value="'. $riderrow['CyclistID'].'">'.$riderrow['cojmname'].'</option>';
+}
 print ("</select>"); 	
 	
-
 echo '
-<input class="ui-state-default ui-corner-all pad" size="10" type="text" name="from" value="'. $inputstart .'" id="rangeBa" />			
-To		<input class="ui-state-default ui-corner-all pad"  size="10" type="text" name="to" value="'.  $inputend.'" id="rangeBb" /> 
+    <input class="ui-state-default ui-corner-all pad" size="10" type="text" name="from" value="'. $inputstart .'" id="rangeBa" />			
+    To <input class="ui-state-default ui-corner-all pad"  size="10" type="text" name="to" value="'.  $inputend.'" id="rangeBb" /> 
 
  <select name="clientview" class="ui-state-highlight ui-corner-left">
  <option '; if ($clientview=='normal') { echo 'selected'; } echo ' value="normal">Normal View</option>
@@ -905,52 +750,36 @@ if ($foundtracks=='0') { echo ' <h1> No Results Found </h1> '; }
 
 if ($tableerror) { echo '<table><tbody>'.$tableerror.'</tbody></table>'; }
 
- 
-   echo $error;
+echo $error;
 
 if ($foundtracks<>'0') {
-
-
-echo '
-<form action="#" onsubmit="showAddress(this.address.value); return false" style=" background:none;">
-<input title="Address Search" type="text" style="width: 274px; padding-left:6px;" name="address" placeholder="Map Address Search . . ." 
-class="ui-state-default ui-corner-all address" />
-</form>	
-';
-
-
-
-
-echo ' <br /> <p>'.$foundtracks.' tracks found, '.$foundcache.' cached.</p> ';
-
-
-
-echo '
-<br />
-<table class="ord"><tbody><tr>
-<th>Rider</th>
-<th>Date</th>
-<th>Start</th>
-<th>Finish</th>
-<th></th>
-</tr>
-'.$tableerror.$tabletext.'
-<tr><td colspan="5"><span id="javastotals"> </span></td></tr>
-</tbody></table>
-';
-
+    echo '
+    <form action="#" onsubmit="showAddress(this.address.value); return false" style=" background:none;">
+    <input title="Address Search" type="text" style="width: 274px; padding-left:6px;" name="address" placeholder="Map Address Search . . ." 
+    class="ui-state-default ui-corner-all address" />
+    </form>	
+    ';
+    
+    echo ' <br /> <p>'.$foundtracks.' tracks found, '.$foundcache.' cached.</p> ';
+    
+    echo '
+    <br />
+    <table class="ord"><tbody><tr>
+    <th>Rider</th>
+    <th>Date</th>
+    <th>Start</th>
+    <th>Finish</th>
+    <th></th>
+    </tr>
+    '.$tableerror.$tabletext.'
+    <tr><td colspan="5"><span id="javastotals"> </span></td></tr>
+    </tbody></table>
+    ';
 }
-else { 
-
-
-echo '
-<script>
-$("#toploader").hide();
-</script>
-
-';
-
-
+else {
+    echo ' <script>
+    $("#toploader").hide();
+    </script> ';
 }
 
 ?>
@@ -972,9 +801,4 @@ include "footer.php";
 
 echo join(" ", $includejs); 
 
-
 echo '  </body> </html>';
-
-$dbh=null;
-
- mysql_close(); 

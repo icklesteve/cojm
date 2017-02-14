@@ -79,6 +79,7 @@ include "cojmmenu.php";
 <th scope="col"> Added or Multipler % </th>
 <th scope="col">ASAP<br /><img style="height:16px;" alt="asap" title="ASAP Logo" src="<?php echo $globalprefrow['image5']; ?>"></th>
 <th scope="col">Cargo<br /><img style="height:16px;" alt="cargo" title="Cargobike Logo" src="<?php echo $globalprefrow['image6']; ?>"></th>
+<th scope="col">x via addresses</th>
 <th scope="col"> Comments </th>
 </tr>
 </thead>
@@ -133,6 +134,13 @@ value="x">Multiplied as percentage</option>
 <td> <input data-id="<?php echo $chargedbybuildid; ?>" data-type="cbbcargo" type="checkbox" value="0" 
 <?php if ($row['cbbcargo']>0) { echo 'checked';} ?> > 
 </td>
+
+<td> <input data-id="<?php echo $chargedbybuildid; ?>" data-type="cbbmultivia" type="checkbox" value="0" 
+<?php if ($row['cbbmultivia']>0) { echo 'checked';} ?> > 
+</td>
+
+
+
 
 <td>
 <input data-id="<?php echo $row['chargedbybuildid']; ?>" data-type="cbbcomment" type="text" class="ui-state-default ui-corner-all pad" 
@@ -245,6 +253,7 @@ var newtr=	'<tr id="' + idmax + '"><td class="hidden" ><input data-id="' + idmax
  ' <option value="x">Multiplied as percentage</option>'+
  ' </select></td><td> <input class="newrow " data-id="' + idmax + '" data-type="cbbasap" type="checkbox" value="0" ></td>' +
  ' <td> <input class="newrow " data-id="' + idmax + '" data-type="cbbcargo" type="checkbox" value="0" > </td>' +
+ ' <td> <input class="newrow " data-id="' + idmax + '" data-type="cbbmultivia" type="checkbox" value="0" > </td>' + 
  ' <td><input data-id="' + idmax + '" data-type="cbbcomment" type="text" class="newrow ui-state-default ui-corner-all pad" ' +
  ' size="65" maxlength="100" ></td></tr>';
 
@@ -364,5 +373,8 @@ $('.Post').append(data);
 
 include 'footer.php';
 
-mysql_close(); ?>
+mysql_close();
+$dbh=null;
+
+?>
 </body></html>

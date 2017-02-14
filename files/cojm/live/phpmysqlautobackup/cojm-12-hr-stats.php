@@ -67,6 +67,10 @@ $msg.=''.$auditresult." Audit Logs in DB \r\n";
 
 
 
+
+$cojmtableco2=0;
+$cojmtablepm10=0;
+
 $sql = "
 SELECT 
 CO2Saved, 

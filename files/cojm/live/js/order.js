@@ -52,9 +52,65 @@ var initialhassubarea;
 
 
 
-
 $(function () { // Document is ready
     "use strict";
+
+
+    function ordermapupdater() {
+        $("#toploader").show();
+        showhidebystatus();
+        $.ajax({
+            url: 'ajaxordermap.php',
+            data: {
+                page: 'ajaxclientjobreference',
+                formbirthday: formbirthday,
+                id: id
+            },
+            type: 'post',
+            success: function (data) {
+                $('#orderajaxmap').html(data);
+            },
+            complete: function () {
+            $("#toploader").fadeOut();
+            }
+        });
+    }
+
+
+
+    function loadScript(url, callback) {
+        // Adding the script tag to the head as suggested before
+        var head = document.getElementsByTagName('head')[0];
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = url;
+    
+        // Then bind the event to the callback function.
+        // There are several events for cross browser compatibility.
+        script.onreadystatechange = callback;
+        script.onload = callback;
+    
+        // Fire the loading
+        head.appendChild(script);
+    }
+    
+    
+    var whengmapapiloaded = function() {
+        // callback function
+        // Here, do what ever you want
+        loadScript("js/richmarker.js", richmarkerloaded);
+    };
+
+
+   
+    var richmarkerloaded = function() {
+        ordermapupdater();
+    };
+   
+   
+    loadScript("//maps.googleapis.com/maps/api/js?v=3.22&key=" + googlemapapiv3key, whengmapapiloaded);
+
+
 
     (function( $ ) {
         $.widget( "ui.orderselectdep", {
@@ -261,9 +317,20 @@ $(function () { // Document is ready
         }
 
 
+
+        
+        
+        
         if (initialstatus > 99) {
-            $("#toggleresumechoose").hide();
+            $(".chngfav").hide();
+            $(".activewheneditable").hide();
+        } else {
+            $(".chngfav").show();
+            $(".activewheneditable").show();
         }
+        
+        
+        
 
 
         if (initialstatus > 99) {
@@ -293,15 +360,24 @@ $(function () { // Document is ready
 
         if (initialstatus < 31) {
             $("#currorsched").hide();
+        } else {
+            $("#currorsched").show();
         }
 
 
 
-        if ((initialstarttrackpause !== "") || (initialfinishtrackpause !== "")) {
+
+
+        if (initialstatus > 99) {
             $("#toggleresumechoose").hide();
+        } else {
+            
+            if ((initialstarttrackpause !== "") || (initialfinishtrackpause !== "")) {
+                $("#toggleresumechoose").hide();
+            } else {
+                $("#toggleresumechoose").show();
+            }
         }
-
-
 
 
         if ((initialstatus > 99 && initialstarttravelcollectiontime === "") || (initialstatus < 40)) {
@@ -331,7 +407,31 @@ $(function () { // Document is ready
             $("#clientjobreferencediv").show();
         }
 
-
+        
+        if (initialstatus > 99 && haspod === 0) {
+            $("#podcontainer").hide();
+        } else {
+            $("#podcontainer").show();
+        }
+        
+        if (initialstatus < 99 && haspod === 0) {
+            $("#podcontainer").show();
+            $("#uploadpodfile").show();
+        } else {
+            $("#uploadpodfile").hide();
+        }
+        
+        if (initialstatus > 99) {
+            $("#ajaxremovepod").hide();
+            $("#uploadpodfile").hide();
+        } else {
+            if  (haspod === 1) {
+                $("#uploadpodfile").hide();
+            } else {
+                // alert("haspod" + haspod);
+                $("#uploadpodfile").show();
+            }
+        }
 
 
         if (initialstatus > 99) {
@@ -342,16 +442,34 @@ $(function () { // Document is ready
 
 
 
+        
+        var maparea= $("select#opsmaparea").val();
+        
+        if (initialstatus > 99 ) {
+            if (maparea) {
+                $("#areaselectors").show();
+            }
+            else {
+                $("#areaselectors").hide();
+            }
+        } else {
+            if (canshowareafromservice === 1) {
+                $("#areaselectors").show();
+            } else {
+                $("#areaselectors").hide();
+            }
+        }
+        
 
 
-        if (initialstatus > 99) {
-            $("#ajaxremovepod").hide();
-            $("#uploadpodfile").hide();
+        
+        if (initialstatus < 86 && mobdevice === 1) {
+            $("#completeoption").hide();            
+        } else {
+            $("#completeoption").show();
         }
 
-
     } // ends showhidebystatus
-
 
 
     function testtimes() {
@@ -540,30 +658,12 @@ $(function () { // Document is ready
 
 
 
-    function ordermapupdater() {
-        $("#toploader").show();
-        showhidebystatus();
-        $.ajax({
-            url: 'ajaxordermap.php',
-            data: {
-                page: 'ajaxclientjobreference',
-                formbirthday: formbirthday,
-                id: id
-            },
-            type: 'post',
-            success: function (data) {
-                $('#orderajaxmap').html(data);
-            },
-            complete: function () {
-            $("#toploader").fadeOut();
-            }
-        });
-    }
-
+ 
 
 
     function editnewcost() {
         var newcost = $("#newcost").val();
+        $("#toploader").show();
         $.ajax({
             url: 'ajaxchangejob.php', //Server script to process data
             data: {
@@ -579,11 +679,283 @@ $(function () { // Document is ready
             complete: function () {
                 showmessage();
                 resizenewcost();
+                $("#toploader").fadeOut();
             }
         });
     }
 
 
+    
+    
+    
+    
+    $( "#orderviadiv" ).load( "ajaxordervias.php", { id: id }, function() {
+        // alert( "Load was performed." );
+
+        $(document).ready(function(){
+            
+            $(".chngfav").bind("click", function (e) {
+                
+                var thisviaid = e.target.id;
+                            
+                e.preventDefault();
+                $.Zebra_Dialog(' <select id="selectfavbox" > ' +
+                    ' <option value=""> Select One ...</option> ' +
+                    ' </select> ' +
+                    ' <button name="showallfavo" onclick="return false" title="All Favourites" ' +
+                    ' id="showallfavo" class="showallfav" > </button> ',
+                    {
+                    "type": "question",
+                    "title": "Please select new address",
+                    "buttons": [{
+                        caption: "Select",
+                        callback: function () {
+                            $("#toploader").show();
+                            var whichselected=$("#selectfavbox").val();
+
+                            $.ajax({
+                                type: "post",
+                                data: { page: "addfavtoorder", 
+                                    id: id, 
+                                    selectfavbox:whichselected, 
+                                    addr:thisviaid, 
+                                    formbirthday: formbirthday
+                                    },
+                                url: "ajaxchangejob.php",
+                                success: function (data) {
+                                    $('#emissionsaving').append(data);
+                                    },
+                                complete: function() {
+                                    ordermapupdater();
+                                    showmessage();
+                                    $("#toploader").fadeOut();
+                                }
+                            });
+                        }
+                    },{
+                        caption: "Cancel"
+                    } ]
+                });
+            
+                if (mobdevice==0) { $( "#selectfavbox" ).selectfavbox(); }
+            
+                var toAppendto="";
+                $("#selectfavbox").val("");
+                $("#selectfavbox option").remove();
+                $.ajax({
+                    type: "post",
+                    url: "ajax_lookup.php",
+                    data: { 
+                    lookuppage: "allfavjson",
+                    clientid: oldclientorder 
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        $.each(data, function () {
+                            toAppendto += "<option value=" + this.oV + ">" + this.oD + "</option>";
+                    });
+                            return false;
+                    },
+                    complete: function() {
+                        $("#selectfavbox").append(toAppendto);
+                        $(document).ready(function(){
+                            $("#favbutton").click();
+                            $(document).on("click", "#showallfavo",	function (event) {
+                                toAppendto = "";
+                                event.preventDefault();
+                                $("#selectfavbox option").remove();
+                                $("#showallfavo").addClass("loader");
+                                $.ajax({
+                                    type: "post",
+                                    data: { clientid: "all", lookuppage: "allfavjson" },
+                                    url: "ajax_lookup.php",
+                                    dataType: "json",
+                                    success: function (data) {
+                                        $.each(data, function () {
+                                            toAppendto += "<option value=" + this.oV + ">" + this.oD + "</option>";
+                                        });
+                                    },
+                                    complete: function() {
+                                        $("#selectfavbox").prepend(toAppendto);
+                                        $("#favbutton").click();
+                                        $("#showallfavo").fadeOut();
+                                    }
+                                });
+                                
+                                return false;
+                            });
+                        });
+                    }
+                });
+            });
+            
+
+
+
+            $(".addfield").bind("change", function (e) {
+                $("#toploader").show();
+                var thisviaid = e.target.id;
+                var newvalue = e.target.value;
+
+                $.ajax({
+                    type: "post",
+                    data: { page: "editorderaddress", 
+                        id: id, 
+                        newvalue:newvalue, 
+                        addr:thisviaid, 
+                        formbirthday: formbirthday
+                        },
+                    url: "ajaxchangejob.php",
+                    success: function (data) {
+                        $('#emissionsaving').append(data);
+                        },
+                    complete: function() {
+                        ordermapupdater();
+                        showmessage();
+                        $("#toploader").fadeOut();
+                    }
+                });                
+            });
+
+            
+
+            
+            $(".editfav").bind("click", function (e) {
+            
+                var thisviaid = e.target.id;
+                // var whichselected=$("#selectfavbox").val();
+                var enrid = parseInt(thisviaid.match(/(\d+)$/)[0], 10);
+                
+                var pcid = 'enrpc' + enrid;
+                var ftidt = 'enrft' + enrid;
+                var commentid = 'favcomment' + enrid;
+                
+                
+                var oldfreetext=$('#'+ ftidt).val();
+                var oldpostcode=$('#'+ pcid).val();
+                var oldcomment=$('#'+ commentid).text();
+                // oldcomment=trim(oldcomment);
+               
+                e.preventDefault();
+                var zd = new $.Zebra_Dialog(' <p>Address :</p> ' +
+                    ' <input id="newfreetext" type="text" placeholder="Address" class="addfield caps ui-state-default ui-corner-all freetext" value="'+ oldfreetext.trim() + '"> ' +
+                    '' +
+                    '<input id="newpostcode" type="text" placeholder="Postcode" class="addfield caps ui-state-default ui-corner-all" size="9" value="'+ 
+                    oldpostcode.trim() + '"> ' +
+                    ' <hr /> <p title="Hidden from Client"> Comments: </p>' +
+                    '  <textarea id="editcomment" title="Hidden from Client" class="normal caps ui-state-highlight ui-corner-all orderjobcomments" >' +
+                    oldcomment.trim() + '</textarea>' +
+                    '<div id="editfavfeedback"></div> ', {
+                    "type": "question",
+                    "title": "Add / Edit Favourite",
+                    "buttons": [{
+                        caption: "Add / Edit Favourite",
+                        callback: function () {
+                            // $('#editcomment').trigger('autosize.resize');
+                            // var whichselected=$("#selectfavbox").val();
+                            $("#toploader").show();
+                            
+                            var newfreetext=$('#newfreetext').val();
+                            var newpostcode=$('#newpostcode').val();
+                            var editcomment=$('#editcomment').val();
+                            
+                            $.ajax({
+                                
+                                type: "post",
+                                data: { page: "editfav", 
+                                    formbirthday: formbirthday,
+                                    oldfreetext: oldfreetext,
+                                    oldpostcode: oldpostcode,
+                                    newfreetext: newfreetext,
+                                    newpostcode: newpostcode,
+                                    newcomment: editcomment,
+                                    client: oldclientorder,
+                                    enrid: enrid,
+                                    id: id
+                                    },
+                                url: "ajaxchangejob.php",
+                                success: function (data) {
+                                    $('.ZebraDialog_Body').html(data);
+                                    },
+                                complete: function() {
+                                    // ordermapupdater();
+                                    $("#toploader").fadeOut();
+                                }
+                            });
+                            e.preventDefault();
+                            return false;
+                        }
+                    },{
+                        caption: "Cancel"
+                    }]
+                });
+                
+                
+                $(function () {
+                    // alert(" zebra loaded ");
+                    $("#editcomment").autosize();
+                    
+                });
+            });
+            
+            
+            $(".addpostcodebutton").bind("click", function (e) {
+                e.preventDefault();
+                var thisviaid = e.target.id;
+                var enrid = parseInt(thisviaid.match(/(\d+)$/)[0], 10);
+                var pcid = 'enrpc' + enrid;
+                var selectpc = $('#'+ pcid).val();
+                var url = 'newpc.php';
+                var form = $('<form action="' + url + '" method="post">' +
+                '<input type="text" name="selectpc" value="' + selectpc + '" />' +
+                '<input type="text" name="id" value="' + id + '" />' +                
+                '</form>');
+                $('body').append(form);
+                form.submit();
+            });
+        
+            $("#togglenr1choose").click(function(){$("#togglenr1").show();$("#togglenr1choose").hide().removeClass("activewheneditable");$("#togglenr2choose").addClass("activewheneditable");});
+            $("#togglenr2choose").click(function(){$("#togglenr2").show();$("#togglenr2choose").hide().removeClass("activewheneditable");$("#togglenr3choose").addClass("activewheneditable");});
+            $("#togglenr3choose").click(function(){$("#togglenr3").show();$("#togglenr3choose").hide().removeClass("activewheneditable");$("#togglenr4choose").addClass("activewheneditable");});
+            $("#togglenr4choose").click(function(){$("#togglenr4").show();$("#togglenr4choose").hide().removeClass("activewheneditable");$("#togglenr5choose").addClass("activewheneditable");});
+            $("#togglenr5choose").click(function(){$("#togglenr5").show();$("#togglenr5choose").hide().removeClass("activewheneditable");$("#togglenr6choose").addClass("activewheneditable");});
+            $("#togglenr6choose").click(function(){$("#togglenr6").show();$("#togglenr6choose").hide().removeClass("activewheneditable");$("#togglenr7choose").addClass("activewheneditable");});
+            $("#togglenr7choose").click(function(){$("#togglenr7").show();$("#togglenr7choose").hide().removeClass("activewheneditable");$("#togglenr8choose").addClass("activewheneditable");});
+            $("#togglenr8choose").click(function(){$("#togglenr8").show();$("#togglenr8choose").hide().removeClass("activewheneditable");$("#togglenr9choose").addClass("activewheneditable");});
+            $("#togglenr9choose").click(function(){$("#togglenr9").show();$("#togglenr9choose").hide().removeClass("activewheneditable");$("#togglenr10choose").addClass("activewheneditable");});
+            $("#togglenr10choose").click(function(){$("#togglenr10").show();$("#togglenr10choose").hide().removeClass("activewheneditable");$("#togglenr11choose").addClass("activewheneditable");});
+            $("#togglenr11choose").click(function(){$("#togglenr11").show();$("#togglenr11choose").hide().removeClass("activewheneditable");$("#togglenr12choose").addClass("activewheneditable");});
+            $("#togglenr12choose").click(function(){$("#togglenr12").show();$("#togglenr12choose").hide().removeClass("activewheneditable");$("#togglenr13choose").addClass("activewheneditable");});
+            $("#togglenr13choose").click(function(){$("#togglenr13").show();$("#togglenr13choose").hide().removeClass("activewheneditable");$("#togglenr14choose").addClass("activewheneditable");});
+            $("#togglenr14choose").click(function(){$("#togglenr14").show();$("#togglenr14choose").hide().removeClass("activewheneditable");$("#togglenr15choose").addClass("activewheneditable");});
+            $("#togglenr15choose").click(function(){$("#togglenr15").show();$("#togglenr15choose").hide().removeClass("activewheneditable");$("#togglenr16choose").addClass("activewheneditable");});
+            $("#togglenr16choose").click(function(){$("#togglenr16").show();$("#togglenr16choose").hide().removeClass("activewheneditable");$("#togglenr17choose").addClass("activewheneditable");});
+            $("#togglenr17choose").click(function(){$("#togglenr17").show();$("#togglenr17choose").hide().removeClass("activewheneditable");$("#togglenr18choose").addClass("activewheneditable");});
+            $("#togglenr18choose").click(function(){$("#togglenr18").show();$("#togglenr18choose").hide().removeClass("activewheneditable");$("#togglenr19choose").addClass("activewheneditable");});
+            $("#togglenr19choose").click(function(){$("#togglenr19").show();$("#togglenr19choose").hide().removeClass("activewheneditable");$("#togglenr20choose").addClass("activewheneditable");});
+            $("#togglenr20choose").click(function(){$("#togglenr20").show();$("#togglenr20choose").hide().removeClass("activewheneditable");});
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+    
+        });
+        
+    });
+    
+    
+    
+    
+    
+    
+    
 
     $("#newcost").change(function () {
         editnewcost();
@@ -591,436 +963,6 @@ $(function () { // Document is ready
 
     
     
-    $("#togglenr1choose").click(function(){$("#togglenr1").slideToggle("fast");});
-    $("#togglenr2choose").click(function(){$("#togglenr2").slideToggle("fast");});
-    $("#togglenr3choose").click(function(){$("#togglenr3").slideToggle("fast");});
-    $("#togglenr4choose").click(function(){$("#togglenr4").slideToggle("fast");});
-    $("#togglenr5choose").click(function(){$("#togglenr5").slideToggle("fast");});
-    
-    
-    
-    $("#jschangfavto").bind("click", function (e) {
-        e.preventDefault();
-        $.zebra_dialog("", {
-            "source": {
-                "ajax": ("ajaxselectfav.php?addr=to&clientid=" + oldclientorder + "&jobid=" + id)
-            },
-            "type": "question",
-            width: 500,
-            position: ["left + 20", "top + 30"],
-            "title": "Please select new address",
-            "buttons": [{
-                caption: "Cancel"
-            }, {
-                caption: "Select",
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-
-    $("#jschangfavvia1").bind("click", function (e) {
-        e.preventDefault();
-        $.zebra_dialog("", {
-            "source": {
-                "ajax": ("ajaxselectfav.php?addr=via1&clientid=" + oldclientorder + "&jobid=" + id)
-            },
-            "type": "question",
-            "width": "500",
-            position: ["left + 20", "top + 30"],
-            "title": "Please select new address",
-            "buttons": [{
-                caption: "Cancel"
-            }, {
-                caption: "Select",
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-
-    $("#jschangfavvia2").bind("click", function (e) {
-        e.preventDefault();
-        $.zebra_dialog("", {
-            "source": {
-                "ajax": ("ajaxselectfav.php?addr=via2&clientid=" + oldclientorder + "&jobid=" + id)
-            },
-            "type": "question",
-            "width": "500",
-            position: ["left + 20", "top + 30"],
-            "title": "Please select new address",
-            "buttons": [{
-                caption: "Cancel"
-            }, {
-                caption: "Select",
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $("#jschangfavvia3").bind("click", function (e) {
-        e.preventDefault();
-        $.zebra_dialog("", {
-            "source": {
-                'ajax': ('ajaxselectfav.php?addr=via3&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia4').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via4&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia5').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via5&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia6').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via6&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia7').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via7&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia8').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via8&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia9').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via9&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia10').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via10&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia11').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via11&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia12').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via12&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia13').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via13&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia14').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via14&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia15').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via15&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia16').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via16&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia17').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via17&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia18').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via18&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia19').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via19&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
-    $('#jschangfavvia20').bind('click', function (e) {
-        e.preventDefault();
-        $.zebra_dialog('', {
-            'source': {
-                'ajax': ('ajaxselectfav.php?addr=via20&clientid=' + oldclientorder + '&jobid=' + id)
-            },
-            'type': 'question',
-            'width': '500',
-            position: ['left + 20', 'top + 30'],
-            'title': 'Please select new address',
-            'buttons': [{
-                caption: 'Cancel'
-            }, {
-                caption: 'Select',
-                callback: function () {
-                    $("#selectfav").submit();
-                }
-            }]
-        });
-    });
 
 
     function checktargetcollectiondate() {
@@ -1063,6 +1005,7 @@ $(function () { // Document is ready
             var waitingstarttime = $("#waitingstarttime").val().trim();
             if (waitingstarttime !== initialwaitingstarttime) {
                 initialwaitingstarttime = waitingstarttime;
+                $("#toploader").show();
                 $.ajax({
                     url: 'ajaxchangejob.php',
                     data: {
@@ -1078,7 +1021,7 @@ $(function () { // Document is ready
                     complete: function () {
                         testtimes();
                         showmessage();
-                    }
+                        $("#toploader").fadeOut();                    }
                 });
             } // times different
         } else {
@@ -1240,6 +1183,7 @@ $(function () { // Document is ready
         if (initialstatus < 100) {
             var deliveryworkingwindow = $("#deliveryworkingwindow").val().trim();
             if (deliveryworkingwindow !== initialdeliveryworkingwindow) {
+                $("#toploader").show();
                 initialdeliveryworkingwindow = deliveryworkingwindow;
                 $.ajax({
                     url: 'ajaxchangejob.php',
@@ -1256,7 +1200,7 @@ $(function () { // Document is ready
                     complete: function () {
                         testtimes();
                         showmessage();
-                    }
+                        $("#toploader").fadeOut();                    }
                 });
             } // times different
         } else {
@@ -1307,6 +1251,7 @@ $(function () { // Document is ready
         if (initialstatus < 100) {
             var jobrequestedtime = $("#jobrequestedtime").val().trim();
             if (jobrequestedtime !== initialjobrequestedtime) {
+                $("#toploader").show();
                 initialjobrequestedtime = jobrequestedtime;
                 $.ajax({
                     url: 'ajaxchangejob.php',
@@ -1323,7 +1268,8 @@ $(function () { // Document is ready
                     complete: function () {
                         testtimes();
                         showmessage();
-                    }
+                        $("#toploader").fadeOut();
+                        }
                 });
             } // times different
         } else {
@@ -1367,6 +1313,7 @@ $(function () { // Document is ready
         if (initialstatus < 100) {
             var collectionworkingwindow = $("#collectionworkingwindow").val().trim();
             if (collectionworkingwindow !== initialcollectionworkingwindow) {
+                $("#toploader").show();
                 initialcollectionworkingwindow = collectionworkingwindow;
                 $.ajax({
                     url: 'ajaxchangejob.php',
@@ -1383,7 +1330,8 @@ $(function () { // Document is ready
                     complete: function () {
                         testtimes();
                         showmessage();
-                    }
+                        $("#toploader").fadeOut();
+                        }
                 });
             } // times different
         } else {
@@ -1427,6 +1375,7 @@ $(function () { // Document is ready
         if (initialstatus < 100) {
             var starttravelcollectiontime = $("#starttravelcollectiontime").val().trim();
             if (starttravelcollectiontime !== initialstarttravelcollectiontime) {
+                $("#toploader").show();
                 initialstarttravelcollectiontime = starttravelcollectiontime;
                 $.ajax({
                     url: 'ajaxchangejob.php',
@@ -1443,6 +1392,7 @@ $(function () { // Document is ready
                     complete: function () {
                         testtimes();
                         showmessage();
+                        $("#toploader").fadeOut();
                     }
                 });
             } // times different
@@ -1657,6 +1607,7 @@ $(function () { // Document is ready
 
     function sendstatus() {
         var newstatus = $("select#newstatus").val();
+        $("#toploader").show();
         $.ajax({
             url: 'ajaxchangejob.php',
             data: {
@@ -1734,6 +1685,7 @@ $(function () { // Document is ready
 
 
     $("#podsurname").change(function () {
+        $("#toploader").show();
         podsurname = $("#podsurname").val();
         $.ajax({
             url: 'ajaxchangejob.php',
@@ -1749,6 +1701,7 @@ $(function () { // Document is ready
             },
             complete: function () {
                 showmessage();
+                $("#toploader").fadeOut();
             }
         });
     });
@@ -1757,6 +1710,7 @@ $(function () { // Document is ready
 
 
     $(".cbbcheckbox").change(function () {
+        $("#toploader").show();
         waitingmins = $("select#waitingmins").val();
         var cbbchecked;
         var cbbname = (this.name);
@@ -1781,6 +1735,7 @@ $(function () { // Document is ready
             },
             complete: function () {
                 showmessage();
+                $("#toploader").fadeOut();
             }
         });
     });
@@ -1840,6 +1795,7 @@ $(function () { // Document is ready
 
 
     $("#serviceid").change(function () {
+        $("#toploader").show();
         var serviceid = $("select#serviceid").val();
         $.ajax({
             url: 'ajaxchangejob.php',
@@ -1851,7 +1807,7 @@ $(function () { // Document is ready
             },
             type: 'post',
             success: function (data) {
-                $('#client').append(data);
+                $('#ordernumberitemscontainer').append(data);
             },
             complete: function () {
                 ordermapupdater();
@@ -1860,8 +1816,6 @@ $(function () { // Document is ready
             }
         });
     });
-
-
 
 
     $('#uploadpodfile').change(function () {
@@ -1910,7 +1864,7 @@ $(function () { // Document is ready
             },
             complete: function () {
                 showmessage();
-                $("#toploader").fadeOut(750);
+                $("#toploader").fadeOut();
             },
 
             //        error: errorHandler,
@@ -1926,6 +1880,7 @@ $(function () { // Document is ready
 
 
     $("#ajaxremovepod").click(function () {
+        $("#toploader").show();
         $.ajax({
             url: 'ajaxchangejob.php',
             data: {
@@ -1940,6 +1895,7 @@ $(function () { // Document is ready
             },
             complete: function () {
                 showmessage();
+                $("#toploader").fadeOut();
             }
         });
     });
@@ -1948,6 +1904,7 @@ $(function () { // Document is ready
     
     
     function depcomboboxchanged() {
+        $("#toploader").show();
         var newdeporder = $("select#orderselectdep").val();
         $.ajax({
             url: 'ajaxchangejob.php',
@@ -1965,6 +1922,7 @@ $(function () { // Document is ready
             complete: function () {
                 showhidebystatus();
                 showmessage();
+                $("#toploader").fadeOut();
             }
         });
     }
@@ -1974,6 +1932,7 @@ $(function () { // Document is ready
     
 
     $("#jobcomments").change(function () {
+        $("#toploader").show();
         var jobcomments = $(this).val();
         $.ajax({
             url: 'ajaxchangejob.php',
@@ -1989,6 +1948,7 @@ $(function () { // Document is ready
             },
             complete: function () {
                 showmessage();
+                $("#toploader").fadeOut();
             }
         });
     });
@@ -1996,6 +1956,7 @@ $(function () { // Document is ready
 
 
     $("#privatejobcomments").change(function () {
+        $("#toploader").show();
         var privatejobcomments = $(this).val();
         $.ajax({
             url: 'ajaxchangejob.php',
@@ -2011,6 +1972,7 @@ $(function () { // Document is ready
             },
             complete: function () {
                 showmessage();
+                $("#toploader").fadeOut();
             }
         });
     });
@@ -2019,6 +1981,7 @@ $(function () { // Document is ready
 
 
     $("#requestor").change(function () {
+        $("#toploader").show();
         var requestor = $(this).val();
         $.ajax({
             url: 'ajaxchangejob.php',
@@ -2034,6 +1997,7 @@ $(function () { // Document is ready
             },
             complete: function () {
                 showmessage();
+                $("#toploader").fadeOut();
             }
         });
     });
@@ -2042,6 +2006,7 @@ $(function () { // Document is ready
 
 
     $("#clientjobreference").change(function () {
+        $("#toploader").show();
         var clientjobreference = $(this).val();
         $.ajax({
             url: 'ajaxchangejob.php',
@@ -2057,11 +2022,35 @@ $(function () { // Document is ready
             },
             complete: function () {
                 showmessage();
+                $("#toploader").fadeOut();
             }
         });
     });
 
+    $("#distance").change(function () {
+        $("#toploader").show();
+        var distance = $(this).val();
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajaxmanualeditdistance',
+                formbirthday: formbirthday,
+                id: id,
+                distance: distance
+            },
+            type: 'post',
+            success: function (data) {
+                $('#emissionsaving').append(data);
+            },
+            complete: function () {
+                showmessage();
+                $("#toploader").fadeOut();
+            }
+        });
+    });
 
+    
+    
 
 
     $("#numberitems").change(function () {
@@ -2082,7 +2071,7 @@ $(function () { // Document is ready
             complete: function () {
                 showmessage();
                 resizenewcost();
-                $("#toploader").fadeOut(750);
+                $("#toploader").fadeOut();
             }
         });
     });
@@ -2160,6 +2149,7 @@ $(function () { // Document is ready
 
     $(function () {
         $(".normal").autosize();
+
     });
 
     $(function () {
@@ -2179,13 +2169,26 @@ $(function () { // Document is ready
 
     $('#orderaudit').bind('click', function (e) {
         e.preventDefault();
-        $.zebra_dialog('', {
+        $.Zebra_Dialog('', {
             'source': {
-                'ajax': ('ajaxaudit.php?orderid=' + id + '&auditpage=order&page')
+                'ajax': ('ajax_lookup.php?orderid=' + id + '&auditpage=order&lookuppage=cojmaudit')
             },
             'type': 'false',
+            'width': '90%',
+            'custom_class': 'orderaudit',
+            'position': ['left+30','top'],
             'scrolling': 'yes',
-            'title': ('Audit log for ' + id)
+            'title': ('Audit log for ' + id),
+            'buttons': [
+                {caption: 'Full Audit Log', callback: function () {
+                    // empty callback does nothing
+                    window.open('cojmaudit.php?orderid='+ id,"_self");
+                }},
+                {caption: 'Close', callback: function () {
+                    // $("#frmdel").submit();
+                }}
+
+            ]
         });
     });
 
@@ -2205,6 +2208,7 @@ $(function () { // Document is ready
 
 
     function cancelpricelock() {
+        $("#toploader").show();
         $.ajax({
             url: 'ajaxchangejob.php',
             data: {
@@ -2218,7 +2222,8 @@ $(function () { // Document is ready
             },
             complete: function () {
             resizenewcost();
-                showmessage();
+            showmessage();
+            $("#toploader").fadeOut();
             }
         });
     }
@@ -2231,10 +2236,10 @@ $(function () { // Document is ready
 
 
     $('#deleteord').bind('click', function (e) {
+        
         e.preventDefault();
-        $.zebra_dialog('<strong>Are you sure ?</strong><br />This Job will be deleted.<br />This action CANNOT be undone.', {
+        $.Zebra_Dialog('<strong>Are you sure ?</strong><br />This Job will be deleted.<br />This action CANNOT be undone.', {
             'type': 'warning',
-            'width': '350',
             'title': 'Delete Job ?',
             'buttons': [
                 {caption: 'Delete', callback: function () {
@@ -2251,7 +2256,7 @@ $(function () { // Document is ready
 
     $("#deleteordmob").bind("click", function (e) {
         e.preventDefault();
-        $.zebra_dialog("<strong>Are you sure ?</strong><br />This Job will be deleted. <br />This action CANNOT be undone.", {
+        $.Zebra_Dialog("<strong>Are you sure ?</strong><br />This Job will be deleted. <br />This action CANNOT be undone.", {
             "type": "warning",
             "title": "Delete Job ?",
             "buttons": [
@@ -2266,7 +2271,7 @@ $(function () { // Document is ready
     });
 
 
-    ordermapupdater();
+    
 
 }); // ends document ready
 
@@ -2274,6 +2279,7 @@ $(function () { // Document is ready
 
 function comboboxchanged() {
     "use strict";
+    $("#toploader").show();
     var newclientorder = $("select#combobox").val();
     $.ajax({
         url: 'ajaxchangejob.php',
@@ -2290,7 +2296,7 @@ function comboboxchanged() {
         },
         complete: function () {
             showmessage();
+            $("#toploader").fadeOut();
         }
     });
 }
-

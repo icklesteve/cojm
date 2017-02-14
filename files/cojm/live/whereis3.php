@@ -205,7 +205,7 @@ ORDER BY `Orders`.`nextactiondate`
  while ($unsrow = mysql_fetch_array($unssql_result)) {
      extract($unsrow);
 
-if ($unsrow['CollectPC']) {	 } // ends check to make sure collection postcode
+if ($unsrow['enrpc0']) {	 } // ends check to make sure collection postcode
 else { $infotext=$infotext. 'No Collection Postcode for <a href="order.php?id='.$ID.'">'.$ID.'</a><br />'; }
 
 } // ends loop for check for unscheduled jobs
@@ -240,9 +240,9 @@ ORDER BY `Orders`.`nextactiondate`
 //	 echo $uncrow['cojmname'];
 	 
 	 
-if ($uncrow['CollectPC']) {	 
+if ($uncrow['enrpc0']) {	 
 	 
-$pc1 = str_replace (" ", "", $uncrow['CollectPC']);
+$pc1 = str_replace (" ", "", $uncrow['enrpc0']);
 $query="SELECT * 
 FROM  `postcodeuk` 
 WHERE  `PZ_Postcode` =  '$pc1'
@@ -277,7 +277,7 @@ $outsc="<br/><a href='order.php?id=".$uncid."'>".$uncid.'</a> ';
 
    $temptitle= 'Collection Due '.$collecttime.' by '.$cojmname;
    $tempcontent='<div><strong>Uncollected</strong>'.$outsc.' Collection due '.$collecttime.'<br>From '.
-   $uncrow['CollectPC'].' to '.$uncrow['ShipPC']. " <br />$numberitems x $Service<br /> $CompanyName</div>";
+   $uncrow['enrpc0'].' to '.$uncrow['enrpc21']. " <br />$numberitems x $Service<br /> $CompanyName</div>";
 
 // echo ' uncollected '.$uncid;
 if ($pclat) {
@@ -324,8 +324,8 @@ ORDER BY `Orders`.`nextactiondate` ";
  while ($undrow = mysql_fetch_array($undsql_result)) {
      extract($undrow);
 
-if ($undrow['ShipPC']) {	 
-$pc1 = str_replace (" ", "", $undrow['ShipPC']);
+if ($undrow['enrpc21']) {	 
+$pc1 = str_replace (" ", "", $undrow['enrpc21']);
 $query="SELECT * 
 FROM  `postcodeuk` 
 WHERE  `PZ_Postcode` =  '$pc1'

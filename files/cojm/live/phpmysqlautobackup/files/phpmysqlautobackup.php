@@ -75,12 +75,6 @@ if (isset($table_exclude))
 }
 $errors="";
 
-// echo ' phpmysqlautobackup ln 77 ';
-
-
- 
-// echo (BALOCATION."phpmysqlautobackup_extras.php");
-
 
  
 include ("phpmysqlautobackup_extras.php");
@@ -98,25 +92,6 @@ $backup_info.=$backup_type;
 // zip the backup and email it
  $backup_file_name = 'mysql_'.$backupruntype.'_'.$_SERVER['HTTP_HOST'].strftime("_%d_%b_%Y_time_%H_%M_%S.sql",time()).'.gz';
  $dump_buffer = gzencode($buffer);
-
-
-// new
-// $backup_file_name = 'mysql_'.$backupruntype.'_'.$_SERVER['HTTP_HOST'].strftime("_%d_%b_%Y_time_%H_%M_%S.sql",time()).'.gz';
-// $dump_buffer = gzencode($buffer);
-
-
-
-
-// echo 'php decrypt';
-
-// $textToEncrypt = "My super secret information.";
-// $encryptionMethod = "AES-256-CBC";  // AES is used by the U.S. gov't to encrypt top secret documents.
-// $secretHash = "25c6c7ff35b9979b151f2136cd13b0ff";
-
-//To encrypt
-// $encryptedMessage = openssl_encrypt($textToEncrypt, $encryptionMethod, $secretHash);
-
-// echo $encryptedMessage;
 
 
 if ($save_backup_zip_file_to_server) write_backup($dump_buffer, $backup_file_name);
@@ -176,9 +151,6 @@ if (isset($ftp_username))
 
 
 
-// if(!session_id()) session_start();
-// if(isset($_SESSION['pmab_mysql_errors'])) $errors.=$_SESSION['pmab_mysql_errors'];
-
 if ($send_email_backup) xmail($to_emailaddress,$from_emailaddress, "phpMySQLAutoBackup: $backup_file_name", $dump_buffer, $backup_file_name, $backup_type, $phpMySQLAutoBackup_version);
 // if ($send_email_report) {
  $msg_email_backup="";
@@ -199,7 +171,7 @@ if ($send_email_backup) xmail($to_emailaddress,$from_emailaddress, "phpMySQLAuto
 
  $infotext.= '<p>'."\n\nERRORS: ".$errors.'<br />'.$backup_info.'<br />'.$msg_ftp_backup.'<br />'.$msg_local_backup.'</p>';
 
-// $infotext.= ' phpmysqlautobackup ln 94 ';
+
 
 // $infotext.= $transfer_backup_infotext;
 

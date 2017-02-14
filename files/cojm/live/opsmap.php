@@ -20,11 +20,6 @@
 
 */
 
-
-
-
-
-
 $alpha_time = microtime(TRUE);
 include "C4uconnect.php";
 if ($globalprefrow['forcehttps']>0) {
@@ -53,162 +48,128 @@ $hasforms='0';
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>';
  ?>
 
-<style> 
-
-div.marker-info-win { max-width:250px; }
-h1.marker-heading { padding:0; }
-
-
-
-</style>
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <?php
 echo '<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;libraries=geometry&amp;key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>'; 
 
+if ($searchtype=='') { $query = "SELECT type, lat, lng, opsmapid, opsname, istoplayer, descrip, AsText(g) AS POLY FROM opsmap WHERE inarchive<>1 AND corelayer='0' "; }
 
-if ($searchtype=='') { $query = "SELECT * FROM opsmap WHERE inarchive<>1 AND corelayer='0' "; }
-if ($searchtype=='archive') { $query = "SELECT * FROM opsmap WHERE corelayer='0' "; }
+// 
 
-  $showallrow='';
-  $tablerow='';
-  $clickrow='';
+if ($searchtype=='archive') { $query = "SELECT type, lat, lng, opsmapid, opsname, istoplayer, descrip, AsText(g) AS POLY FROM opsmap WHERE corelayer='0' "; }
+
+$showallrow='';
+$tablerow='';
+$clickrow='';
+
+$stmt = $dbh->query($query);
   
+foreach ($stmt as $row) {
+    if ($row['type']=='1') {
+        $markersfound++;
+        $lat=$row['lat'];
+        $lng=$row['lng'];
+        if ($lat>$max_lat) { $max_lat=$lat; }
+        if ($lat<$min_lat) { $min_lat=$lat; }
+        if ($lng>$max_lon) { $max_lon=$lng; }
+        if ($lng<$min_lon) { $min_lon=$lng; }
+    } 
 
-$sql_result = mysql_query ($query, $conn_id) or mysql_error();  
+    elseif ($row['type']=='2') {
+        $tablerow.= '
+        <tr id="'.$row['opsmapid'].'" >
+        <td><a href="opsmap-new-area.php?areaid='.$row['opsmapid'].'">'.$row['opsname'].'</a></td>';
+        
+        $tablerow.= '<td>';
+        if ($row['istoplayer']=='1') {
+            $tablerow.= ' <span class="album" title="Has Layers"> </span> ';
+        }
 
-$sumtot=mysql_affected_rows();
+        
+        $tablerow.= $row['descrip'].'</td>';
+        $tablerow.= '</tr>';
+        
+        $p=$row['POLY'];
+        $areaid=$row['opsmapid'];
+        if ($p) {
 
-// echo $sumtot .' Rows found in opsmap ';
+            $trans = array("POLYGON" => "", "((" => "", "))" => "");
+            $p= strtr($p, $trans);
+            $pexploded=explode( ',', $p );
+            $js=$js.' 
+            
+            var polymarkers'.$areaid.' = '; 
+            
+            $jsloop = ' [ ';
+            
+            foreach ($pexploded as $v) {
+            $transf = array(" " => ",");
+            $v= strtr($v, $transf);
+                $jsloop.='   
+                new google.maps.LatLng('.$v.'),';
+                $vexploded=explode( ',', $v );
+                $tmpi='1';
+                foreach ($vexploded as $testcoord) {	
+            
+                    if ($testcoord) {
+                    
+                        if ($tmpi % 2 == 0) {
+                            if($testcoord>$max_lon) { $max_lon = $testcoord; }
+                            if($testcoord<$min_lon)  { $min_lon = $testcoord; }
+                        } else { 
+                            if ($testcoord>$max_lat) { $max_lat = $testcoord; }
+                            if ($testcoord<$min_lat)  {
+                                $testc.='<br/>151 '.$testcoord;
+                                $min_lat = $testcoord;
+                            }
+                        } $tmpi++;
+                    } // ends test coord valid check
+                }
+            } // ends each in array
 
-while ($row = mysql_fetch_array($sql_result)) { extract($row);
-
-
-if ($row['type']=='1') {
-
-
-$markersfound++;
-
-
-$lat=$row['lat'];
-$lng=$row['lng'];
-
-
-if ($lat>$max_lat) { $max_lat=$lat; }
-if ($lat<$min_lat) { $min_lat=$lat; }
-if ($lng>$max_lon) { $max_lon=$lng; }
-if ($lng<$min_lon) { $min_lon=$lng; }
-
-
-
-} 
-
-elseif ($row['type']=='2') {
-
-
-$tablerow.= '
-<tr id="'.$row['opsmapid'].'" >
-<td><a href="opsmap-new-area.php?areaid='.$row['opsmapid'].'">'.$row['opsname'].'</a></td>';
-
-$tablerow.= '<td>';
-if ($row['istoplayer']=='1') { $tablerow.= ' <span class="album" title="Has Layers"> </span> '; }
-// $tablerow.= '</td><td> ';
-
-$tablerow.= $row['descrip'].'</td>';
-
-
-
-$tablerow.= '</tr>';
-
-
-// echo '<br />'.$row['code'].' '.$row['descrip'].' '.$row['g'];
-
-$areaid=$row['opsmapid'];
-$result = mysql_query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=".$areaid);
-if (mysql_num_rows($result)) {
-    $score = mysql_fetch_assoc($result);
-	$p=$score['POLY'];
-$trans = array("POLYGON" => "", "((" => "", "))" => "");
-$p= strtr($p, $trans);
-$pexploded=explode( ',', $p );
-$js=$js.' 
-
- var polymarkers'.$areaid.' = '; 
- 
- $jsloop = ' [ ';
-
-foreach ($pexploded as $v) {
-$transf = array(" " => ",");
-$v= strtr($v, $transf);
-	$jsloop.='   
-	new google.maps.LatLng('.$v.'),';
-	$vexploded=explode( ',', $v );
-	$tmpi='1';
-	foreach ($vexploded as $testcoord) {	
-	
-	if ($testcoord) {
-	
-if ($tmpi % 2 == 0) {
-  if($testcoord>$max_lon) { $max_lon = $testcoord; }
-  if($testcoord<$min_lon)  { $min_lon = $testcoord; }
-} else { 
-  if($testcoord>$max_lat) { $max_lat = $testcoord; }
-  if($testcoord<$min_lat)  { $testc.='<br/>151 '.$testcoord; $min_lat = $testcoord;  }
-} $tmpi++;
-	} // ends test coord valid check
-}
-} // ends each in array
-$jsloop= rtrim($jsloop, ','). ' ] ';
-
-  
-$js.=$jsloop.' ; ';  
-  
-//  strokeColor: "#FF0000",
-
-$js.=' 
-var poly'.$areaid.' = new google.maps.Polygon({
-    paths: polymarkers'.$areaid.',
-    strokeWeight: 2,
-	strokeOpacity: 0.8,
-     fillColor: "#5555FF",
-	 fillOpacity: 0.25,
-	 strokeColor: "#000000",
-	 map:map,
-	 clickable: false
-  });
-  
-  totalareas = totalareas + 1;
-  
-';
-
-$clickrow.=' 
-console.log(google.maps.geometry.poly.containsLocation(event.latLng, poly'.$areaid.'));
- if(google.maps.geometry.poly.containsLocation(event.latLng, poly'.$areaid.') === true) {
-  areasfound=areasfound+1;
-  
-  
-// $( "#jssearch" ).append( "<p> Found individ '.$areaid.'</p>" );
-
-$( "#'.$areaid.'" ).addClass( " myClass " );
-$( "#'.$areaid.'" ).removeClass( " hidden " );
-	}
-
-else { 
-$( "#'.$areaid.'" ).removeClass( " myClass " );
-$( "#'.$areaid.'" ).addClass( " hidden " );
-}
-	';
-	
-	
-$showallrow.=' 
-$( "#'.$areaid.'" ).removeClass( " hidden " ); ';
-
-}
-
-
-
-} // ends type=2
-
-
+            $jsloop= rtrim($jsloop, ','). ' ] ';
+    
+            $js.=$jsloop.' ; ';  
+        
+            //  strokeColor: "#FF0000",
+        
+            $js.=' 
+            var poly'.$areaid.' = new google.maps.Polygon({
+                paths: polymarkers'.$areaid.',
+                strokeWeight: 2,
+                strokeOpacity: 0.8,
+                fillColor: "#5555FF",
+                fillOpacity: 0.25,
+                strokeColor: "#000000",
+                map:map,
+                clickable: false
+            });
+            
+            totalareas = totalareas + 1;
+            ';
+    
+            $clickrow.=' 
+            console.log(google.maps.geometry.poly.containsLocation(event.latLng, poly'.$areaid.'));
+            if(google.maps.geometry.poly.containsLocation(event.latLng, poly'.$areaid.') === true) {
+            areasfound=areasfound+1;
+            
+            
+            // $( "#jssearch" ).append( "<p> Found individ '.$areaid.'</p>" );
+            
+            $( "#'.$areaid.'" ).addClass( " myClass " );
+            $( "#'.$areaid.'" ).removeClass( " hidden " );
+                }
+            
+            else { 
+            $( "#'.$areaid.'" ).removeClass( " myClass " );
+            $( "#'.$areaid.'" ).addClass( " hidden " );
+            }
+                ';
+                
+            $showallrow.=' 
+            $( "#'.$areaid.'" ).removeClass( " hidden " ); ';
+        }
+    } // ends type=2
 } // ends db row loop
 
 
@@ -219,27 +180,11 @@ $( "#'.$areaid.'" ).removeClass( " hidden " ); ';
 
         //Load Markers from the XML File, Check (ajaxopsmap_process.php)			
 if ($searchtype=='archive') {
-    
-    
-$ajaxlocation='ajaxopsmap_process.php?archive=1';    
-}
-    else { 
+    $ajaxlocation='ajaxopsmap_process.php?archive=1';    
+} else { 
     $ajaxlocation='ajaxopsmap_process.php?archive=0';
-    }
+}
     
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ?>
 <script>
@@ -323,10 +268,10 @@ function initialize() {
             var point = new google.maps.LatLng(parseFloat($(this).attr('lat')),parseFloat($(this).attr('lng')));
             var opsmapid = $(this).attr('opsmapid');
 			  
-//call create_marker() function for xml loaded maker
-//create_marker(opsmapid, point, name, address, false, false, false, "<?php echo $globalprefrow['clweb3']; ?>");
-// var iconPath= 	"<?php echo $globalprefrow['clweb3']; ?>";			  
-//		alert(typeof markertype);			  
+            //call create_marker() function for xml loaded maker
+            //create_marker(opsmapid, point, name, address, false, false, false, "<?php echo $globalprefrow['clweb3']; ?>");
+            // var iconPath= 	"<?php echo $globalprefrow['clweb3']; ?>";			  
+            //		alert(typeof markertype);			  
 
 
             if (markertype==1) {
@@ -663,23 +608,15 @@ if ($searchtype=='') {  echo ' selected="selected" '; }
 echo 'value="">Active</option>';
 echo '<option ';
 if ($searchtype=='archive') {  echo ' selected="selected" '; }
-echo ' value="archive">Active + Archived</option>';
-
-echo '
+echo ' value="archive">Active + Archived</option>
 </select>
 </form>
-';
 
-echo '
 <form action="#" onsubmit="showAddress(this.address.value); return false" style=" background:none;">
 <input title="Address Search" type="text" style="width: 274px; padding-left:6px;" name="address" placeholder="Map Address Search . . ." 
 class="ui-state-default ui-corner-all address" />
 </form>	
-';
 
-
-
-echo '
 
 <br />
 <hr />
@@ -694,8 +631,7 @@ echo '
 </tr>
 '.$tablerow;
 
-
-echo '
+?>
 </tbody></table>
 <br />
 <table class="nolines">
@@ -707,30 +643,75 @@ echo '
 </tbody>
 </table>
 
-<p>'.$markersfound.' Locations, SQL Lookup in archive.</p>
+<p> <?php echo $markersfound; ?> Locations, SQL Lookup in archive.</p>
 
 <p> Left click on map to search areas. </p>
 <p> Left click on marker to view / edit. </p>
 <p> Right click on map to add a marker. </p>
-';
 
-// echo $testc;
-
-echo '
 <br />
+<hr />
 
  <form action="opsmap-new-area.php">
 <button type="submit" title="New Area">Create Blank New Area</button>
 </form>
+
+<button id="uploadkmltonewopsmap"> Upoad KML area </button>
+
+
 </div>		
-		</div>
+</div>
 		
 </div>		
-';
+
+<form action="opsmap-new-area.php" method="post" id="uploadkml" enctype="multipart/form-data">
+<input type="hidden" name="page" value="uploadkml">
+ <input type="hidden" name="formbirthday" value="<?php echo date("U"); ?>">
+</form>
 
 
+
+<script>
+$(document).ready(function() {
+    
+        $('#uploadkmltonewopsmap').bind('click', function (e) {
+        e.preventDefault();
+    
+               $.Zebra_Dialog(' ' +
+                    ' <input id="opsmapname" name="areaname" form="uploadkml" size="15" type="text" placeholder="Name" class="ui-state-default ui-corner-all "> ' +
+                    ' <br /> ' +
+                    ' <input name="file" id="file" form="uploadkml" type="file" accept=".kml"> ', {
+                    "type": "question",
+                    "title": "Upload KML File to New Opsmap Area",
+                    "buttons": [{
+                        caption: "Upload",
+                        callback: function () {
+                            // $('#editcomment').trigger('autosize.resize');
+                            // var whichselected=$("#selectfavbox").val();
+                            
+                            var opsmapname=$('#opsmapname').val();
+                            
+                            if (opsmapname) {
+                                $("#uploadkml").submit();
+                            
+                            } else {
+                                alert("Please Add Area Name");
+                                
+                            }
+   
+                        }
+                    },{
+                        caption: "Cancel"
+                    }]
+                });
+
+        });
+                
+});
+                
+</script>
+<?php
 
 include "footer.php";
 
 echo '</body></html>';
-mysql_close();

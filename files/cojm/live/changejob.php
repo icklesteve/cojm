@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	changejob.php - Handles non-ajax job changes ( the controller in MVC language :-), also see ajaxchangejob.php
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -20,17 +20,10 @@
 */
 
 
-
-
-
-
-
 $cj_time = microtime(TRUE);
 
 $origid='';
 
-
-// echo memory_get_usage();
 
 if (!isset($cyclistid)) { $cyclistid=''; }
 
@@ -129,10 +122,6 @@ $today = date(" H:i A D j M Y");
 
 
 
-
-
-
-
 /////////////////////     FINISHED VARIABLES          /////////////
 /////////////////////     OK HERE WE GO :-)           ////////////////////////
 /////////////////////     SEE DIA GRAM FOR MORE INFO  ////////////
@@ -145,7 +134,85 @@ if (date_default_timezone_get()=='UTC') { $nowepoch=-900000000000000; }
 
 if ($nowepoch < $globalprefrow['formtimeout']) {
 
-    if (($page=='editarea') or ($page=='opsmapnewarea')) { // checks for anti-clockwise in ops maps + edit & new areas
+
+       if (isset($_POST['vertices'])) { $vertices=trim($_POST['vertices']); } else { $vertices=''; }
+    // vertices used in a few pages
+
+    if ($page=='uploadkml') {
+
+        $allowedExts = array("kml","KML");
+        $temp = explode(".", $_FILES["file"]["name"]);
+        $extension = end($temp);
+        $infotext.='<p>Type: '.$_FILES["file"]["type"].' </p>';
+        
+        if (in_array($extension, $allowedExts)) {
+            
+        // $pagetext.='<p> Allowed </p>';
+            
+            if ($_FILES["file"]["error"] > 0) {
+                echo "Return Code: " . $_FILES["file"]["error"] . "<br>";
+            } else {
+                $fileName = $label.$_FILES["file"]["name"];
+                //        echo "Upload: " . $_FILES["file"]["name"] . "<br>";
+                //        echo "Type: " . $_FILES["file"]["type"] . "<br>";
+                //        echo "Size: " . ($_FILES["file"]["size"] / 1024) . " kB<br>";
+                //        echo "Temp file: " . $_FILES["file"]["tmp_name"] . "<br>";
+                
+
+                $tmpName=$_FILES["file"]["tmp_name"];		
+                
+                $fp      = fopen($tmpName, 'r');
+                $content = fread($fp, filesize($tmpName));
+                // $content = addslashes($content);
+                fclose($fp);  
+                
+                if(!get_magic_quotes_gpc()) {
+                    $fileName = addslashes($fileName);
+                }
+                
+                $file_contents = file_get_contents($tmpName);
+
+                $saveto='cache/'.$fileName;
+
+                
+                // file_put_contents($saveto,$content);
+                
+                $myfile = fopen($saveto, "w");
+                fwrite($myfile, $content);
+                fclose($myfile);
+                
+                
+                $xml = simplexml_load_file($saveto);
+                
+                if ($xml) {
+                    $placemarks = $xml->Folder->Placemark->Polygon->outerBoundaryIs->LinearRing->coordinates;   
+                    // $infotext.='<p>Coords '.$placemarks.' </p>';
+                    $cor_d  =  explode(' ', $placemarks);
+                    $qtmp=array();
+                    foreach($cor_d as $value){
+                        if (trim($value)) {
+                        $tmp = explode(',',$value);
+                        $ttmp=$tmp[1];
+                        $tmp[1]=$tmp[0];
+                        $tmp[0]=$ttmp; 
+                        $qtmp[]= '' . $tmp[0] . ' ' .$tmp[1].'';
+                        }
+                    }
+                                        
+                    $vertices= join(", ",$qtmp);
+
+                    // $pagetext.=' vertices '. $vertices;
+                    $pagetext.='<p>Uploaded '.$fileName.' </p>';
+                }
+            }
+        } else {
+            $pagetext.='Issue uploading kml, please recheck and retry. ';
+        }
+    }
+
+    $infotext.=' vertices: '.$vertices;
+
+
 
         if ($vertices) {
             $pexploded=explode( ',', $vertices );
@@ -182,9 +249,37 @@ if ($nowepoch < $globalprefrow['formtimeout']) {
         }
 
         
+        if ($page=='uploadkml') {
+            if (isset($_POST['areaname'])) {
+                $areaname=trim($_POST['areaname']);
+                
+                         $area = sprintf("POLYGON((%s))", $vertices); 
+            $sql="INSERT INTO opsmap (type,opsname, g) VALUES ( 
+            '2', 
+            :areaname,
+            PolygonFromText(:vertices) );";
+   
+                
+            $stmt = $dbh->prepare($sql);
+            $stmt->bindParam(':areaname', $areaname, PDO::PARAM_INT); 
+            $stmt->bindParam(':vertices', $area, PDO::PARAM_INT); 
+    
+            $stmt->execute();
+            $result = $dbh->lastInsertId();
+                
+            if ($result){
+                $infotext.="<br />Success";
+                $pagetext.='<p>Success</p>';
+                $pagetext.='<p>New area '.$areaname.' created from KML File.</p>';
+                $infotext.='<p>New OpsMapArea '.$result.' created.</p>';
+                $areaid=$result;
+                global $areaid;
+            }
+                
+            }
+        }
         
         if ($page=='editarea') {
-    
             $infotext =$infotext. ' in edit ops map area ';
             if (isset($_POST['areaid'])) { $areaid=trim($_POST['areaid']);} else { $areaid=''; }
             if (isset($_POST['areaname'])) { $areaname=trim($_POST['areaname']);} else { $areaname=''; }
@@ -192,143 +287,77 @@ if ($nowepoch < $globalprefrow['formtimeout']) {
             if (isset($_POST['inarchive'])) { $inarchive=trim($_POST['inarchive']); } else { $inarchive='0'; }
             if (isset($_POST['istoplayer'])) { $istoplayer=trim($_POST['istoplayer']); } else { $istoplayer='0'; }
             if (isset($_POST['corelayer'])) { $corelayer=trim($_POST['corelayer']);} else { $corelayer='0'; }
-            
-            
-            if ($areaid) {
-                if ($vertices=='') {
-                    $sql="UPDATE opsmap 
-                    SET inarchive='".$inarchive."', 
-                    opsname='".$areaname."' , 
-                    descrip='".$areacomments."' , 
-                    istoplayer='".$istoplayer."',
-                    corelayer='".$corelayer."'
-                    WHERE opsmapid=".$areaid; 
-                }
-                else { 
-            
-                $sql="UPDATE opsmap 
-                SET inarchive='".$inarchive."', 
-                opsname='".$areaname."' , 
-                descrip='".$areacomments."' , 
-                g= PolygonFromText('POLYGON((".$vertices."))'),
-                istoplayer='".$istoplayer."',
-                corelayer='".$corelayer."'
-                WHERE opsmapid=".$areaid; 
-                }
-            
-            }
-            else { // no area id
-            
-            
-            $sql="INSERT INTO opsmap (type,opsname,istoplayer,corelayer,descrip";
-            
-            if ($vertices) { 
-            $sql.=",g";
-            
-            }
-            $sql.=") VALUES ( '2', '".
-            $areaname."','".
-            $istoplayer."','".
-            $corelayer."','".
-            $areacomments."'";
-            if ($vertices) { 
-            $sql.=", PolygonFromText('POLYGON(( ".$vertices."))')";
-            }
-            $sql.=");";
-            
-            
-            }
-            
-            
-            
-            
-            
-            $result = mysql_query($sql, $conn_id);
-            
-            
-            // $infotext.= $sql;
-            
-            if ($result){
+            if (($areaid) and ($vertices) and ($areaname)) {
+                $query = " UPDATE opsmap 
+                SET inarchive=:inarchive, 
+                opsname=:opsname, 
+                descrip=:descrip, 
+                g= PolygonFromText(:vertices),
+                istoplayer=:istoplayer,
+                corelayer=:corelayer 
+                WHERE opsmapid=:opsmapid ";
                 
-            $infotext.="<br />Success";
-            $pagetext.='<p>Success</p>';
-            $pagetext.='<p>Edited area '.$areaname.'.</p>';
-            $infotext.='<p>Edited OpsMapArea '.$areaid.' </p>'; 
+                $area = sprintf("POLYGON((%s))", $vertices); 
+                
+                $stmt = $dbh->prepare($query);
+                $stmt->bindParam(':inarchive', $inarchive, PDO::PARAM_INT); 
+                $stmt->bindParam(':opsname', $areaname, PDO::PARAM_INT);
+                $stmt->bindParam(':descrip', $areacomments, PDO::PARAM_INT); 
+                $stmt->bindParam(':vertices', $area, PDO::PARAM_STR);
+                $stmt->bindParam(':istoplayer', $istoplayer, PDO::PARAM_INT); 
+                $stmt->bindParam(':corelayer', $corelayer, PDO::PARAM_INT);                    
+                $stmt->bindParam(':opsmapid', $areaid, PDO::PARAM_INT);                    
+                
+                $stmt->execute();
+
+                $pagetext.='<p>Edited area '.$areaname.'.</p>';
+                $infotext.='<p>Edited OpsMapArea '.$areaid.' </p>';
             } else {
-            $infotext.=mysql_error()." An error occured during editing area!<br>".$sql;  
-            $alerttext.=mysql_error()." <p>An error occured during editing area!</p>".$sql;
-            } // ends 
-            
-            // } // ends vertices check
-            
+                $infotext.=' No vertices or areaid or name passed ';
+                $alerttext.=' No vertices or areaid or name passed ';
+            }
         } // ends page editarea
-    
+
     
         if ($page=='opsmapnewarea') {
-        
-            $infotext =$infotext. ' in new ops map area ';
-    
-            // if ($vertices=='') { $infotext.='<br /> NO VERTICES PASSED'; } else {
-    
-    
-    
-    
+            $infotext =$infotext. ' new ops map area ';
             if (isset($_POST['areaname'])) { $areaname=trim($_POST['areaname']);} else {$areaname=''; }
-    if (isset($_POST['areacomments'])) { $areacomments=trim($_POST['areacomments']);} else { $areacomments=''; }
-        
-    if (isset($_POST['inarchive'])) { $inarchive=trim($_POST['inarchive']); } else { $inarchive='0'; } // Show Working Windows
-    
-    if (isset($_POST['istoplayer'])) { $istoplayer=trim($_POST['istoplayer']); } else { $istoplayer='0'; } // Show Working Windows
-    if (isset($_POST['corelayer'])) { $corelayer=trim($_POST['corelayer']);} else { $corelayer='0'; }
-        
-        
-    //	$vertices = rtrim($vertices, ',');	
-    //	$infotext.='<br />'. $areaname; 	
-    //  $infotext.='<br />'. $areacomments; 
-    //  $infotext.='<br />'. $vertices; 
-    //	$infotext.='<br />'. $output; 	
-        
-    $sql="INSERT INTO opsmap (type,opsname,istoplayer,corelayer,descrip";
-    
-    if ($vertices) { 
-    $sql.=",g";
-    
-    }
-    $sql.=") VALUES ( '2', '".
-    $areaname."','".
-    $istoplayer."','".
-    $corelayer."','".
-    $areacomments."'";
-    if ($vertices) { 
-    $sql.=", PolygonFromText('POLYGON(( ".$vertices."))')";
-    }
-    $sql.=");";
-    $infotext.= $sql;
-        
-    // echo $sql;
-        
-        $result = mysql_query($sql, $conn_id);
-    if ($result){
-    $infotext.="<br />Success";
-    $pagetext.='<p>Success</p>';
-    $areaid=mysql_insert_id(); 
-    $pagetext.='<p>New area '.$areaname.' created.</p>';
-    $infotext.='<p>New OpsMapArea '.$areaid.' created.</p>'; 
-    } else {
-    $infotext.=mysql_error()." An error occured during creating new area!<br>".$sql;  
-    $alerttext.=mysql_error()." <p>An error occured during adding new area!</p>".$sql;
-    } // ends 
-    
-    $page='editarea';	
-    
-    // } // ends vertices check
-        
-    
-        
-    } // ends page= opsmapnewarea
-    
-    }
+            if (isset($_POST['areacomments'])) { $areacomments=trim($_POST['areacomments']);} else { $areacomments=''; }
+            if (isset($_POST['inarchive'])) { $inarchive=trim($_POST['inarchive']); } else { $inarchive='0'; } // Show Working Windows
+            if (isset($_POST['istoplayer'])) { $istoplayer=trim($_POST['istoplayer']); } else { $istoplayer='0'; } // Show Working Windows
+            if (isset($_POST['corelayer'])) { $corelayer=trim($_POST['corelayer']);} else { $corelayer='0'; }
+            $area = sprintf("POLYGON((%s))", $vertices); 
+            $sql="INSERT INTO opsmap (type,opsname,istoplayer,corelayer,descrip, g) VALUES ( 
+            '2', 
+            :areaname,
+            :istoplayer,
+            :corelayer,
+            :areacomments,
+            PolygonFromText(:vertices) );";
 
+            $stmt = $dbh->prepare($sql);
+            $stmt->bindParam(':areaname', $areaname, PDO::PARAM_INT); 
+            $stmt->bindParam(':istoplayer', $istoplayer, PDO::PARAM_INT); 
+            $stmt->bindParam(':corelayer', $corelayer, PDO::PARAM_INT); 
+            $stmt->bindParam(':areacomments', $areacomments, PDO::PARAM_INT); 
+            $stmt->bindParam(':vertices', $area, PDO::PARAM_INT); 
+    
+            $stmt->execute();
+            $result = $dbh->lastInsertId();
+                
+            if ($result){
+                $infotext.="<br />Success";
+                $pagetext.='<p>Success</p>';
+                $pagetext.='<p>New area '.$areaname.' created.</p>';
+                $infotext.='<p>New OpsMapArea '.$result.' created.</p>';
+                $areaid=$result;
+                global $areaid;
+            }
+
+            $page='editarea';	
+
+        } // ends page= opsmapnewarea
+    
 
 
     if ($page=='editglobalemail') {
@@ -419,75 +448,74 @@ $alerttext.="<p><strong>An error occured during updating email settings</strong>
 
     if ($page=='newpostcode') {
  
- $lat=trim($_POST['lat']);
-$lng=trim($_POST['lng']);
-$town=trim($_POST['town']);
-$area=trim($_POST['area']);
-$newpc=trim($_POST['newpc']);
-$newpc = str_replace(" ", "", "$newpc", $count); 
-$newpc = str_replace (" ", "", strtoupper($newpc));
-$infotext.='<br />Adding new postcode '.$newpc;
+        $lat=trim($_POST['lat']);
+        $lng=trim($_POST['lng']);
+        $town=trim($_POST['town']);
+        $area=trim($_POST['area']);
+        $newpc=trim($_POST['newpc']);
+        $newpc = str_replace(" ", "", "$newpc", $count); 
+        $newpc = str_replace (" ", "", strtoupper($newpc));
+        $infotext.='<br />Adding new postcode '.$newpc;
+        
+        
+        $existingquery=" SELECT `PZ_Postcode`
+        FROM  `postcodeuk` 
+        WHERE  `PZ_Postcode` 
+        LIKE  '$newpc' LIMIT 0,1
+        ";
+
+        // echo $existingquery;
+
+        $ifexistingpc = mysql_num_rows(mysql_query($existingquery, $conn_id));
 
 
-$existingquery=" SELECT `PZ_Postcode`
-FROM  `postcodeuk` 
-WHERE  `PZ_Postcode` 
-LIKE  '$newpc' LIMIT 0,1
-";
 
-// echo $existingquery;
+    
+    
+    if ($ifexistingpc>0) {  
+    
+    
+    // $infotext.='<br />ifexistingpc : '.$ifexistingpc; 
+    // $infotext.='<br />lat : '.$lat; 
+    // $infotext.='<br />lon : '.$lng; 
+    
+    $sql = "UPDATE `postcodeuk` 
+    SET  `PZ_zero` =  '1' ,
+    `PZ_northing` =  '$lat' ,
+    `PZ_easting` =  '$lng'
+    WHERE 
+    `PZ_Postcode` =  '$newpc' LIMIT 1;";
+    
+    $result = mysql_query($sql, $conn_id);
+    if ($result){ 
+    $infotext.='<br /> Postcode updated ';
+    $pagetext.='<p> Postcode updated </p>';
+    
+    } else { $infotext.="<br /><strong>Error occured in updating postcode</strong>".$sql; }
+    
+    } else {  // ends no existing pc
+    
+    
+    $sql="INSERT INTO `postcodeuk` (`PZ_Postcode`, `PZ_northing`, `PZ_easting`, `PZ_zero`) VALUES 
+    ('$newpc', '$lat', '$lng', '1');";
+    $result = mysql_query($sql, $conn_id);
+    if ($result){ 
+        $pagetext.='<p> Postcode added </p>';
+        $infotext.='<br /> Postcode added ';
+    } else { 
+        $alerttext.="<p><strong>Error occured in adding postcode</strong></p>"; 
+        $infotext.="<br /><strong>Error occured in adding postcode</strong>".$sql; 
+        } // sql result
+    } // ends existing postcode
 
-$ifexistingpc = mysql_num_rows(mysql_query($existingquery, $conn_id));
-
-
-// $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-// $num_rows = mysql_num_rows($sql_result);
-
-
-if ($ifexistingpc>0) {  
-
-
-// $infotext.='<br />ifexistingpc : '.$ifexistingpc; 
-// $infotext.='<br />lat : '.$lat; 
-// $infotext.='<br />lon : '.$lng; 
-
-$sql = "UPDATE `postcodeuk` 
-SET  `PZ_zero` =  '1' ,
- `PZ_northing` =  '$lat' ,
- `PZ_easting` =  '$lng'
-WHERE 
-`PZ_Postcode` =  '$newpc' LIMIT 1;";
- 
- $result = mysql_query($sql, $conn_id);
-if ($result){ 
-$infotext.='<br /> Postcode updated ';
-$pagetext.='<p> Postcode updated </p>';
-
-} else { $infotext.="<br /><strong>Error occured in updating postcode</strong>".$sql; }
-
-} else {  // ends no existing pc
-
-
-$sql="INSERT INTO `postcodeuk` (`PZ_Postcode`, `PZ_northing`, `PZ_easting`, `PZ_zero`) VALUES 
-('$newpc', '$lat', '$lng', '1');";
- $result = mysql_query($sql, $conn_id);
-if ($result){ 
-$pagetext.='<p> Postcode added </p>';
-$infotext.='<br /> Postcode added ';
-} else { 
-$alerttext.="<p><strong>Error occured in adding postcode</strong></p>"; 
-$infotext.="<br /><strong>Error occured in adding postcode</strong>".$sql; 
-} // sql result
-} // ends existing postcode
-
-if ($id) {
-
-// calls recalc mileage in case page has come from an id, not menu
-calcmileage($id, $globalprefrow['distanceunit'], $globalprefrow['co2perdist'], $globalprefrow['pm10perdist']);
-$cojmaction='recalcprice';
-}
-
-
+    if ($id) {
+    
+        // calls recalc mileage in case page has come from an id, not menu
+        calcmileage($id, $globalprefrow['distanceunit'], $globalprefrow['co2perdist'], $globalprefrow['pm10perdist']);
+        $cojmaction='recalcprice';
+    }
+    
+    
 } // ends page =editpostcode
 
 
@@ -717,7 +745,6 @@ $sql = "SELECT CyclistID FROM Cyclist WEHRE trackerid ='$trackerid' LIMIT 0,1"; 
 
 // $infotext.='Res:'.$result;
 
-// $checkiftrackerid = mysql_result(mysql_query("SELECT CyclistID FROM Cyclist WEHRE trackerid ='$trackerid' LIMIT 0,1", $conn_id), 0);
 
 if ($result>'0') { $trackerid=mt_rand(99, 99999999); }
 
@@ -1273,253 +1300,264 @@ $pagetext.='<p>Created new Department </p>';
 
     if (($page=="editthisfavadr") or ( $page=="aftercheckaseditfav" ) or ( $page=='addaftercheckasnewfav')) {
 
-if (isset($_POST['thisfavadrid'])) { $thisfavadrid=trim($_POST['thisfavadrid']); } else { $thisfavadrid=''; }
-if (isset($_POST['favadrft'])) { $favadrft=trim($_POST['favadrft']); } else { $favadrft=''; }
-if (isset($_POST['favadrpc'])) { $favadrpc=trim($_POST['favadrpc']); } else { $favadrpc=''; }
-if (isset($_POST['favadrisactive'])) { $favadrisactive=trim($_POST['favadrisactive']); } else { $favadrisactive=''; } 
-if (isset($_POST['favadrclient'])) { $favadrclient=trim($_POST['favadrclient']); } else { $favadrclient=''; }
-if (isset($_POST['favadrcomments'])) { $favadrcomments=trim($_POST['favadrcomments']); } else { $favadrcomments=''; }
+        if (isset($_POST['thisfavadrid'])) { $thisfavadrid=trim($_POST['thisfavadrid']); } else { $thisfavadrid=''; }
+        if (isset($_POST['favadrft'])) { $favadrft=trim($_POST['favadrft']); } else { $favadrft=''; }
+        if (isset($_POST['favadrpc'])) { $favadrpc=trim($_POST['favadrpc']); } else { $favadrpc=''; }
+        if (isset($_POST['favadrisactive'])) { $favadrisactive=trim($_POST['favadrisactive']); } else { $favadrisactive=''; } 
+        if (isset($_POST['favadrclient'])) { $favadrclient=trim($_POST['favadrclient']); } else { $favadrclient=''; }
+        if (isset($_POST['favadrcomments'])) { $favadrcomments=trim($_POST['favadrcomments']); } else { $favadrcomments=''; }
+        
+        if ($favadrisactive=='on') { $favadrisactive='1'; }
 
-if ($favadrisactive=='on') { $favadrisactive='1'; }
+        $sPattern = ' /\s*/m'; 
+        $sReplace = '';
+        $favadrpc=preg_replace( $sPattern, $sReplace, $favadrpc );
+        $favadrpct=substr($favadrpc, 0, -3);  
+        $favadrpc=$favadrpct.' '.substr($favadrpc, -3); // 'ies' 
+        
+        if (isset($_POST["favusr1"])) { $favusr1=trim($_POST['favusr1']); } else { $favusr1='0'; } if ($favusr1=='on') { $favusr1='1'; }
+        if (isset($_POST["favusr2"])) { $favusr2=trim($_POST['favusr2']); } else { $favusr2='0'; } if ($favusr2=='on') { $favusr2='1'; }
+        if (isset($_POST["favusr3"])) { $favusr3=trim($_POST['favusr3']); } else { $favusr3='0'; } if ($favusr3=='on') { $favusr3='1'; }
+        if (isset($_POST["favusr4"])) { $favusr4=trim($_POST['favusr4']); } else { $favusr4='0'; } if ($favusr4=='on') { $favusr4='1'; }
+        if (isset($_POST["favusr5"])) { $favusr5=trim($_POST['favusr5']); } else { $favusr5='0'; } if ($favusr5=='on') { $favusr5='1'; }
+        if (isset($_POST["favusr6"])) { $favusr6=trim($_POST['favusr6']); } else { $favusr6='0'; } if ($favusr6=='on') { $favusr6='1'; }
+        if (isset($_POST["favusr7"])) { $favusr7=trim($_POST['favusr7']); } else { $favusr7='0'; } if ($favusr7=='on') { $favusr7='1'; }
+        if (isset($_POST["favusr8"])) { $favusr8=trim($_POST['favusr8']); } else { $favusr8='0'; } if ($favusr8=='on') { $favusr8='1'; }
+        if (isset($_POST["favusr9"])) { $favusr9=trim($_POST['favusr9']); } else { $favusr9='0'; } if ($favusr9=='on') { $favusr9='1'; }
+        if (isset($_POST["favusr10"])) { $favusr10=trim($_POST['favusr10']); } else { $favusr10='0'; } if ($favusr10=='on') { $favusr10='1'; }
+        if (isset($_POST["favusr11"])) { $favusr11=trim($_POST['favusr11']); } else { $favusr11='0'; } if ($favusr11=='on') { $favusr11='1'; }
+        if (isset($_POST["favusr12"])) { $favusr12=trim($_POST['favusr12']); } else { $favusr12='0'; } if ($favusr12=='on') { $favusr12='1'; }
+        if (isset($_POST["favusr13"])) { $favusr13=trim($_POST['favusr13']); } else { $favusr13='0'; } if ($favusr13=='on') { $favusr13='1'; }
+        if (isset($_POST["favusr14"])) { $favusr14=trim($_POST['favusr14']); } else { $favusr14='0'; } if ($favusr14=='on') { $favusr14='1'; }
+        if (isset($_POST["favusr15"])) { $favusr15=trim($_POST['favusr15']); } else { $favusr15='0'; } if ($favusr15=='on') { $favusr15='1'; }
+        if (isset($_POST["favusr16"])) { $favusr16=trim($_POST['favusr16']); } else { $favusr16='0'; } if ($favusr16=='on') { $favusr16='1'; }
+        if (isset($_POST["favusr17"])) { $favusr17=trim($_POST['favusr17']); } else { $favusr17='0'; } if ($favusr17=='on') { $favusr17='1'; }
+        if (isset($_POST["favusr18"])) { $favusr18=trim($_POST['favusr18']); } else { $favusr18='0'; } if ($favusr18=='on') { $favusr18='1'; }
+        if (isset($_POST["favusr19"])) { $favusr19=trim($_POST['favusr19']); } else { $favusr19='0'; } if ($favusr19=='on') { $favusr19='1'; }
+        if (isset($_POST["favusr20"])) { $favusr20=trim($_POST['favusr20']); } else { $favusr20='0'; } if ($favusr20=='on') { $favusr20='1'; }
+        
+        
+        if (isset($_POST['oldfavadrft'])) { $oldfavadrft=trim($_POST['oldfavadrft']); } else { $oldfavadrft=''; }
+        if (isset($_POST['oldfavadrpc'])) { $oldfavadrpc=trim($_POST['oldfavadrpc']); } else { $oldfavadrpc=''; }
+        if (isset($_POST['cojmid'])) { $cojmid=trim($_POST['cojmid']); } else { $cojmid=''; }
+        
+        
+        
+        
+        if ($page=='aftercheckaseditfav') {
+        
+            // $infotext.='<br />1495';
+            if (($favadrclient) and ($thisfavadrid<>'')) {
+                $sql = "UPDATE cojm_favadr SET 
+                favadrft=(UPPER('$favadrft')) , 
+                favadrpc=(UPPER('$favadrpc')) ,
+                favadrcomments=(UPPER('$favadrcomments'))
+                WHERE favadrid='$thisfavadrid' LIMIT 1"; 
+                $result = mysql_query($sql, $conn_id);
+                if ($result) { 
+                    $infotext.="<br />Success!"; 
+                    $pagetext.="<p>Details updated for ".$favadrft." - Job Details Unchanged.</p>"; 
+                } else {
+                    $infotext.=mysql_error()." An error occured during update!<br>"; 
+                    $alerttext.="<p>An error occured during update!</p>"; 
+                } // ends check for result / alert txt
+        
+            } // ends quick edit from order via redir.php
 
-$sPattern = ' /\s*/m'; 
-$sReplace = '';
-$favadrpc=preg_replace( $sPattern, $sReplace, $favadrpc );
-$favadrpct=substr($favadrpc, 0, -3);  
-$favadrpc=$favadrpct.' '.substr($favadrpc, -3); // 'ies' 
-
-if (isset($_POST["favusr1"])) { $favusr1=trim($_POST['favusr1']); } else { $favusr1='0'; } if ($favusr1=='on') { $favusr1='1'; }
-if (isset($_POST["favusr2"])) { $favusr2=trim($_POST['favusr2']); } else { $favusr2='0'; } if ($favusr2=='on') { $favusr2='1'; }
-if (isset($_POST["favusr3"])) { $favusr3=trim($_POST['favusr3']); } else { $favusr3='0'; } if ($favusr3=='on') { $favusr3='1'; }
-if (isset($_POST["favusr4"])) { $favusr4=trim($_POST['favusr4']); } else { $favusr4='0'; } if ($favusr4=='on') { $favusr4='1'; }
-if (isset($_POST["favusr5"])) { $favusr5=trim($_POST['favusr5']); } else { $favusr5='0'; } if ($favusr5=='on') { $favusr5='1'; }
-if (isset($_POST["favusr6"])) { $favusr6=trim($_POST['favusr6']); } else { $favusr6='0'; } if ($favusr6=='on') { $favusr6='1'; }
-if (isset($_POST["favusr7"])) { $favusr7=trim($_POST['favusr7']); } else { $favusr7='0'; } if ($favusr7=='on') { $favusr7='1'; }
-if (isset($_POST["favusr8"])) { $favusr8=trim($_POST['favusr8']); } else { $favusr8='0'; } if ($favusr8=='on') { $favusr8='1'; }
-if (isset($_POST["favusr9"])) { $favusr9=trim($_POST['favusr9']); } else { $favusr9='0'; } if ($favusr9=='on') { $favusr9='1'; }
-if (isset($_POST["favusr10"])) { $favusr10=trim($_POST['favusr10']); } else { $favusr10='0'; } if ($favusr10=='on') { $favusr10='1'; }
-if (isset($_POST["favusr11"])) { $favusr11=trim($_POST['favusr11']); } else { $favusr11='0'; } if ($favusr11=='on') { $favusr11='1'; }
-if (isset($_POST["favusr12"])) { $favusr12=trim($_POST['favusr12']); } else { $favusr12='0'; } if ($favusr12=='on') { $favusr12='1'; }
-if (isset($_POST["favusr13"])) { $favusr13=trim($_POST['favusr13']); } else { $favusr13='0'; } if ($favusr13=='on') { $favusr13='1'; }
-if (isset($_POST["favusr14"])) { $favusr14=trim($_POST['favusr14']); } else { $favusr14='0'; } if ($favusr14=='on') { $favusr14='1'; }
-if (isset($_POST["favusr15"])) { $favusr15=trim($_POST['favusr15']); } else { $favusr15='0'; } if ($favusr15=='on') { $favusr15='1'; }
-if (isset($_POST["favusr16"])) { $favusr16=trim($_POST['favusr16']); } else { $favusr16='0'; } if ($favusr16=='on') { $favusr16='1'; }
-if (isset($_POST["favusr17"])) { $favusr17=trim($_POST['favusr17']); } else { $favusr17='0'; } if ($favusr17=='on') { $favusr17='1'; }
-if (isset($_POST["favusr18"])) { $favusr18=trim($_POST['favusr18']); } else { $favusr18='0'; } if ($favusr18=='on') { $favusr18='1'; }
-if (isset($_POST["favusr19"])) { $favusr19=trim($_POST['favusr19']); } else { $favusr19='0'; } if ($favusr19=='on') { $favusr19='1'; }
-if (isset($_POST["favusr20"])) { $favusr20=trim($_POST['favusr20']); } else { $favusr20='0'; } if ($favusr20=='on') { $favusr20='1'; }
-
-
-if (isset($_POST['oldfavadrft'])) { $oldfavadrft=trim($_POST['oldfavadrft']); } else { $oldfavadrft=''; }
-if (isset($_POST['oldfavadrpc'])) { $oldfavadrpc=trim($_POST['oldfavadrpc']); } else { $oldfavadrpc=''; }
-if (isset($_POST['cojmid'])) { $cojmid=trim($_POST['cojmid']); } else { $cojmid=''; }
-
-
-
-
-if ($page=='aftercheckaseditfav') {
-
-// $infotext.='<br />1495';
-if (($favadrclient) and ($thisfavadrid<>'')) {
-$sql = "UPDATE cojm_favadr SET 
-favadrft=(UPPER('$favadrft')) , 
-favadrpc=(UPPER('$favadrpc'))  
-WHERE favadrid='$thisfavadrid' LIMIT 1"; 
-$result = mysql_query($sql, $conn_id);
-if ($result) { 
-$infotext.="<br />Success!"; 
-$pagetext.="<p>Details updated for ".$favadrft.".</p>"; 
-} else {
-$infotext.=mysql_error()." An error occured during update!<br>"; 
-$alerttext.="<p>An error occured during update!</p>"; 
-} // ends check for result / alert txt
-
-} // ends quick edit from order via redir.php
-
-}  // ends if ($page=='aftercheckaseditfav') 
-
+        }  // ends if ($page=='aftercheckaseditfav') 
 
 
-if ($page=='editthisfavadr') {
 
-$infotext.='<br />Editing Favourite details';
-if (($favadrclient) and ($thisfavadrid<>'')) {
-$sql = "UPDATE cojm_favadr SET 
-favadrft=(UPPER('$favadrft')) , 
-favadrpc=(UPPER('$favadrpc')) ,
-favadrclient='$favadrclient' ,
-favadrisactive='$favadrisactive' ,
-favadrcomments=(UPPER('$favadrcomments')),
-favusr1='$favusr1' , 
-favusr2='$favusr2' , 
-favusr3='$favusr3' , 
-favusr4='$favusr4' , 
-favusr5='$favusr5' , 
-favusr6='$favusr6' , 
-favusr7='$favusr7' , 
-favusr8='$favusr8' , 
-favusr9='$favusr9' , 
-favusr10='$favusr10' , 
-favusr11='$favusr11' , 
-favusr12='$favusr12' , 
-favusr13='$favusr13' , 
-favusr14='$favusr14' , 
-favusr15='$favusr15' , 
-favusr16='$favusr16' , 
-favusr17='$favusr17' , 
-favusr18='$favusr18' , 
-favusr19='$favusr19' , 
-favusr20='$favusr20'  
-WHERE favadrid='$thisfavadrid' LIMIT 1"; 
-$result = mysql_query($sql, $conn_id);
-if ($result){ 
-$infotext.="<br />Success!"; 
-$pagetext.="<p>Details updated for ".$favadrft.".</p>"; 
-} else { 
-$infotext.=mysql_error()." An error occured during update!<br>"; 
-$alerttext.="<p>An error occured during update!</p>"; 
-} // ends check for result or error
+        if ($page=='editthisfavadr') {
+
+            $infotext.='<br />Editing Favourite details';
+            if (($favadrclient) and ($thisfavadrid<>'')) {
+                $sql = "UPDATE cojm_favadr SET 
+                favadrft=(UPPER('$favadrft')) , 
+                favadrpc=(UPPER('$favadrpc')) ,
+                favadrclient='$favadrclient' ,
+                favadrisactive='$favadrisactive' ,
+                favadrcomments=(UPPER('$favadrcomments')),
+                favusr1='$favusr1' , 
+                favusr2='$favusr2' , 
+                favusr3='$favusr3' , 
+                favusr4='$favusr4' , 
+                favusr5='$favusr5' , 
+                favusr6='$favusr6' , 
+                favusr7='$favusr7' , 
+                favusr8='$favusr8' , 
+                favusr9='$favusr9' , 
+                favusr10='$favusr10' , 
+                favusr11='$favusr11' , 
+                favusr12='$favusr12' , 
+                favusr13='$favusr13' , 
+                favusr14='$favusr14' , 
+                favusr15='$favusr15' , 
+                favusr16='$favusr16' , 
+                favusr17='$favusr17' , 
+                favusr18='$favusr18' , 
+                favusr19='$favusr19' , 
+                favusr20='$favusr20'  
+                WHERE favadrid='$thisfavadrid' LIMIT 1"; 
+                $result = mysql_query($sql, $conn_id);
+                if ($result){ 
+                    $infotext.="<br />Success!"; 
+                    $pagetext.="<p>Details updated for ".$favadrft.".</p>"; 
+                } else { 
+                    $infotext.=mysql_error()." An error occured during update!<br>"; 
+                    $alerttext.="<p>An error occured during update!</p>"; 
+                } // ends check for result or error
+                
+            } // ends check for client AND favadrid
  
-} // ends check for client AND favadrid
+        } // ends ($page=='editthisfavadr')
+
+
+
+
+
+        // CHECK FOR COLLECT ADDRESS
+
+        if (($oldfavadrft) and ($oldfavadrpc)) {
+            $sql = "SELECT ID FROM Orders WHERE status < '86' 
+            AND enrpc0 = '".$oldfavadrpc."' 
+            AND enrft0 = '".$oldfavadrft."' ";
+            $sql_result = mysql_query($sql,$conn_id); $sumtot=mysql_affected_rows(); 
+            // $infotext.='<br /> 1574 '.$sumtot.' row found '.$sql;
+            if ($sumtot>'0')  {
+                while ($chngrow = mysql_fetch_array($sql_result)) {
+                    extract($chngrow); 
+                    $chngid=$chngrow['ID'];
+                    $sql = "UPDATE Orders SET 
+                    enrft0=(UPPER('$favadrft')), 
+                    enrpc0=(UPPER('$favadrpc')) 
+                    WHERE ID='$chngid' LIMIT 1";
+                    $result = mysql_query($sql, $conn_id);
+                    if ($result){ // $infotext.="<br />1616 updated"; 
+                    } else { // starts error check
+                        $infotext.="<br /><strong>1619 An error occured during updating postcodes!</strong>"; 
+                        $alerttext.="<p>Error 1620 occured during updating ".$sql."</p>"; 
+                    } // ends error check
+                } // ends loop for jobs matching ft, pc and status
+                $pagetext.='<p>'.$sumtot.' Future Collection Adresses Changed </p>';
+            } // total is more than 0 for matching addresses
+        } // ends check to see if (($oldfavadrft) and ($oldfavadrpc)) {
+
+
+
+        // CHECK FOR DELIVERY ADDRESS
+
+        if (($oldfavadrft) and ($oldfavadrpc)) {
+            $sql = "SELECT ID FROM Orders WHERE status < '86' 
+            AND enrpc21 = '".$oldfavadrpc."' 
+            AND enrft21 = '".$oldfavadrft."' ";
+            $sql_result = mysql_query($sql,$conn_id);
+            $sumtot=mysql_affected_rows(); 
+            // $infotext.='<br /> 1600 '.$sumtot.' row found '.$sql;
+            if ($sumtot>'0')  {
+                while ($chngrow = mysql_fetch_array($sql_result)) {
+                    extract($chngrow); 
+                    $chngid=$chngrow['ID'];
+                    $sql = "UPDATE Orders SET 
+                    enrft21=(UPPER('$favadrft')), 
+                    enrpc21=(UPPER('$favadrpc')) 
+                    WHERE ID='$chngid' LIMIT 1"; $result = mysql_query($sql, $conn_id);
+                    if ($result){ // $infotext.="<br />1616 updated"; 
+                    } else { // starts error check
+                        $infotext.="<br /><strong>1609 An error occured during updating postcodes!</strong>"; 
+                        $alerttext.="<p>Error 1610 occured during updating ".$sql."</p>"; 
+                    } // ends error check
+                
+                } // ends loop for jobs matching ft, pc and status
+                $pagetext.='<p>'.$sumtot.' Future Delivery Adresses Changed </p>';
+            } // total is more than 0 for matching addresses
+        } // ends check to see if (($oldfavadrft) and ($oldfavadrpc)) {
+
+
+
+
+
+        // CHECK FOR enrpc's
+
+        if (($oldfavadrft) and ($oldfavadrpc)) {
+            $i='1';
+            while ($i<'21') {
+                $sql = "SELECT ID FROM Orders WHERE status < '86' 
+                AND enrpc".$i." = '".$oldfavadrpc."' 
+                AND enrft".$i." = '".$oldfavadrft."' ";
+                $sql_result = mysql_query($sql,$conn_id); $sumtot=mysql_affected_rows(); 
+                // $infotext.='<br /> 1628 '.$sumtot.' row found '.$sql;
+                if ($sumtot>'0')  {
+                    while ($chngrow = mysql_fetch_array($sql_result)) {
+                        extract($chngrow); 
+                        $chngid=$chngrow['ID'];
+                        $sql = "UPDATE Orders SET 
+                        enrft".$i."=(UPPER('$favadrft')), 
+                        enrpc".$i."=(UPPER('$favadrpc')) 
+                        WHERE ID='$chngid' LIMIT 1"; $result = mysql_query($sql, $conn_id);
+                        if ($result){ // $infotext.="<br />1616 updated"; 
+                        } else { // starts error check
+                            $infotext.="<br /><strong>1641 An error occured during updating postcodes!</strong>"; 
+                            $alerttext.="<p>Error 1642 occured during updating ".$sql."</p>"; 
+                        } // ends error check
+                    } // ends loop for jobs matching ft, pc and status
+                $pagetext.='<p>'.$sumtot.' Future enroute address changed </p>';
+                } // total is more than 0 for matching addresses
+            $i++;
+            } // ends $i loop
+        } // ends check to see if (($oldfavadrft) and ($oldfavadrpc)) {
+
+
+
+
+
+
+
+
+
+
  
-} // ends ($page=='editthisfavadr')
+
+
+        if (($thisfavadrid=='') and ($favadrft)) {
+            $infotext.='New Favourite'; 
+            mysql_query("LOCK TABLES cojm_favadr WRITE", $conn_id);
+            mysql_query("INSERT INTO cojm_favadr 
+            (favadrclient, 
+            favadrft, 
+            favadrpc, 
+            favadrisactive,
+            favadrcomments
+            ) VALUES (
+            '$favadrclient',
+            (UPPER('$favadrft')),
+            (UPPER('$favadrpc')),
+            '1',
+            (UPPER('$favadrcomments'))   )
+            ", $conn_id
+            )  or die(mysql_error()); 
+            $insertid=mysql_insert_id();  
+            mysql_query("UNLOCK TABLES", $conn_id);   
+
+
+            $infotext.="<br />New fav id ".$insertid.' '.$favadrft; 
+            $pagetext.="<p>New favourite added ".$favadrft.".</p>"; 
+
+        } // end new client and check companyname>0 
+
+
+
+        if ( $page=='addaftercheckasnewfav') {
+
+            $infotext.='New Favourite 1665'; 
+
+        }
 
 
 
 
 
-// CHECK FOR COLLECT ADDRESS
-
-if (($oldfavadrft) and ($oldfavadrpc)) {
- $sql = "SELECT ID FROM Orders WHERE status < '86' 
- AND CollectPC = '".$oldfavadrpc."' 
- AND fromfreeaddress = '".$oldfavadrft."' ";
-$sql_result = mysql_query($sql,$conn_id); $sumtot=mysql_affected_rows(); 
-// $infotext.='<br /> 1574 '.$sumtot.' row found '.$sql;
- if ($sumtot>'0')  { while ($chngrow = mysql_fetch_array($sql_result)) { extract($chngrow); 
- $chngid=$chngrow['ID'];
- $sql = "UPDATE Orders SET 
-fromfreeaddress=(UPPER('$favadrft')), 
-CollectPC=(UPPER('$favadrpc')) 
-WHERE ID='$chngid' LIMIT 1"; $result = mysql_query($sql, $conn_id);
-if ($result){ // $infotext.="<br />1616 updated"; 
-} else { // starts error check
-$infotext.="<br /><strong>1619 An error occured during updating postcodes!</strong>"; 
-$alerttext.="<p>Error 1620 occured during updating ".$sql."</p>"; 
-} // ends error check
-} // ends loop for jobs matching ft, pc and status
-$pagetext.='<p>'.$sumtot.' Future Collection Adresses Changed </p>';
-} // total is more than 0 for matching addresses
-} // ends check to see if (($oldfavadrft) and ($oldfavadrpc)) {
-
-
-
-// CHECK FOR DELIVERY ADDRESS
-
-if (($oldfavadrft) and ($oldfavadrpc)) {
- $sql = "SELECT ID FROM Orders WHERE status < '86' 
- AND ShipPC = '".$oldfavadrpc."' 
- AND tofreeaddress = '".$oldfavadrft."' ";
-$sql_result = mysql_query($sql,$conn_id); $sumtot=mysql_affected_rows(); 
-// $infotext.='<br /> 1600 '.$sumtot.' row found '.$sql;
- if ($sumtot>'0')  { while ($chngrow = mysql_fetch_array($sql_result)) { extract($chngrow); 
- $chngid=$chngrow['ID'];
- $sql = "UPDATE Orders SET 
-tofreeaddress=(UPPER('$favadrft')), 
-ShipPC=(UPPER('$favadrpc')) 
-WHERE ID='$chngid' LIMIT 1"; $result = mysql_query($sql, $conn_id);
-if ($result){ // $infotext.="<br />1616 updated"; 
-} else { // starts error check
-$infotext.="<br /><strong>1609 An error occured during updating postcodes!</strong>"; 
-$alerttext.="<p>Error 1610 occured during updating ".$sql."</p>"; 
-} // ends error check
-} // ends loop for jobs matching ft, pc and status
-$pagetext.='<p>'.$sumtot.' Future Delivery Adresses Changed </p>';
-} // total is more than 0 for matching addresses
-} // ends check to see if (($oldfavadrft) and ($oldfavadrpc)) {
-
-
-
-
-
-// CHECK FOR enrpc's
-
-if (($oldfavadrft) and ($oldfavadrpc)) {
-$i='1'; while ($i<'21') {
- $sql = "SELECT ID FROM Orders WHERE status < '86' 
- AND enrpc".$i." = '".$oldfavadrpc."' 
- AND enrft".$i." = '".$oldfavadrft."' ";
-$sql_result = mysql_query($sql,$conn_id); $sumtot=mysql_affected_rows(); 
-// $infotext.='<br /> 1628 '.$sumtot.' row found '.$sql;
- if ($sumtot>'0')  { while ($chngrow = mysql_fetch_array($sql_result)) { extract($chngrow); 
- $chngid=$chngrow['ID'];
- $sql = "UPDATE Orders SET 
-enrft".$i."=(UPPER('$favadrft')), 
-enrpc".$i."=(UPPER('$favadrpc')) 
-WHERE ID='$chngid' LIMIT 1"; $result = mysql_query($sql, $conn_id);
-if ($result){ // $infotext.="<br />1616 updated"; 
-} else { // starts error check
-$infotext.="<br /><strong>1641 An error occured during updating postcodes!</strong>"; 
-$alerttext.="<p>Error 1642 occured during updating ".$sql."</p>"; 
-} // ends error check
-} // ends loop for jobs matching ft, pc and status
-$pagetext.='<p>'.$sumtot.' Future enroute address changed </p>';
-} // total is more than 0 for matching addresses
-$i++;
-} // ends $i loop
-} // ends check to see if (($oldfavadrft) and ($oldfavadrpc)) {
-
-
-
-
-
-
-
-
-
-
- 
-
-
- if (($thisfavadrid=='') and ($favadrft)) {
- $infotext.='New Favourite'; 
-   mysql_query("LOCK TABLES cojm_favadr WRITE", $conn_id);
-   mysql_query("INSERT INTO cojm_favadr 
-   (favadrclient, 
-   favadrft, 
-   favadrpc, 
-   favadrisactive,
-   favadrcomments
-   ) VALUES (
-   '$favadrclient',
-   (UPPER('$favadrft')),
-   (UPPER('$favadrpc')),
-   '1',
-   (UPPER('$favadrcomments'))   )
-   ", $conn_id
-   )  or die(mysql_error()); 
-   $insertid=mysql_insert_id();  
-mysql_query("UNLOCK TABLES", $conn_id);   
-
-
-$infotext.="<br />New fav id ".$insertid.' '.$favadrft; 
-$pagetext.="<p>New favourite added ".$favadrft.".</p>"; 
-
-} // end new client and check companyname>0 
-
-
-
-if ( $page=='addaftercheckasnewfav') {
-
- $infotext.='New Favourite 1665'; 
-
-}
-
-
-
-
-
-} // ends page=newfav(?) or page=quickeditfrom  or page=addaftercheckasnewfav
+    } // ends page=newfav(?) or page=quickeditfrom  or page=addaftercheckasnewfav
 
 
 
@@ -1528,254 +1566,135 @@ if ( $page=='addaftercheckasnewfav') {
 
     if ($page=='editnewfav') {
 
-// $infotext.='<br />1698 ';
+        // $infotext.='<br />1698 ';
 
-if (isset($_POST['fromfreeaddress'])) { $fromfreeaddress=(trim($_POST['fromfreeaddress'])); } else {  $fromfreeaddress=''; }
-if (isset($_POST['CollectPC'])) { $collectpc=(trim($_POST['CollectPC'])); } else {  $collectpc=''; }
-if (isset($_POST['clientorder'])) { $clientorder=(trim($_POST['clientorder'])); } else {  $clientorder=''; }
-if (isset($_POST['id'])) { $id=(trim($_POST['id'])); } else {  $id=''; }
-
-$fromfreeaddress=strtoupper ($fromfreeaddress);
-$collectpc=strtoupper ($collectpc);
-
-// $filename="order.php";
-// $adminmenu='1';
-// echo $clientorder;
-// echo $fromfreeaddress;
-// echo $collectpc;
-// echo $id;
-$favadrcomments='';
-
-$sql = "SELECT * FROM cojm_favadr, Clients 
-WHERE cojm_favadr.favadrclient= '$clientorder'
-AND (( cojm_favadr.favadrpc LIKE '%$collectpc%' ) OR ( cojm_favadr.favadrft LIKE '%$fromfreeaddress%'))
-AND cojm_favadr.favadrisactive='1' 
-AND cojm_favadr.favadrclient = Clients.CustomerID 
-"; 
-
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-$num_rows = mysql_num_rows($sql_result);
-
-if ($num_rows>'0') { 
-
-$sql = "SELECT * FROM cojm_favadr, Clients 
-WHERE cojm_favadr.favadrclient= '$clientorder'
-AND (( cojm_favadr.favadrpc LIKE '$collectpc' ) OR ( cojm_favadr.favadrft LIKE '$fromfreeaddress'))
-AND cojm_favadr.favadrisactive='1' 
-AND cojm_favadr.favadrclient = Clients.CustomerID 
-"; $sql_result2 = mysql_query($sql,$conn_id)  or mysql_error(); 
-$num_rows = mysql_num_rows($sql_result2);
-
-$companyname='';
-while ($avadrrow = mysql_fetch_array($sql_result2)) { extract($avadrrow); $companyname=$avadrrow['CompanyName']; } 
-
-
-
-$alerttext.= ' <h3>There ';
-if ($num_rows>'1') { $alerttext.= 'are'; } else { $alerttext.= 'is'; }
-$alerttext.= ' already '.$num_rows.' favourite'; if ($num_rows>'1') { $alerttext.= 's'; }
-
-$alerttext.= ' for '.$companyname.' with similar details</h3><br />';
-
-
-
-$alerttext.= '
-<table class="acc"><tr>
-<th>Address</th>
-<th>Postcode</th>
-<th></th>
-</tr><tr><td>'.$fromfreeaddress.'</td>
-<td>'.$collectpc.'</td><td>
-<form action="order.php?id='.$id.'" method="post"> 
-<input type="hidden" name="formbirthday" value="'. date("U") .'">
-<input type="hidden" name="page" value="addaftercheckasnewfav" >
-<input type="hidden" name="favadrclient" value="'.$clientorder.'" />
-<input type="hidden" name="favadrft" value="'.$fromfreeaddress.'" />
-<input type="hidden" name="favadrpc" value="'.$collectpc.'" />
-<input type="hidden" name="cojmid" value="'.$id.'" />
-<input type="hidden" name="id" value="'.$id.'" />
-<button type="submit" >Add as new favourite</button></form>
-</td></tr>';
-
-
-while ($favadrrow = mysql_fetch_array($sql_result)) { extract($favadrrow);
-$alerttext.= '<tr><td>'.$favadrrow['favadrft'].'</td><td>'.$favadrrow['favadrpc'].'</td><td>
-<form action="order.php?id='.$id.'" method="post" >
-<input type="hidden" name="formbirthday" value="'. date("U") .'">
-<input type="hidden" name="page" value="aftercheckaseditfav" >
-<input type="hidden" name="favadrft" value="'.$fromfreeaddress.'" />
-<input type="hidden" name="oldfavadrft" value="'.$favadrrow['favadrft'].'" />
-<input type="hidden" name="oldfavadrpc" value="'.$favadrrow['favadrpc'].'" />
-<input type="hidden" name="favadrpc" value="'.$collectpc.'" />
-<input type="hidden" name="favadrclient" value="'.$clientorder.'" />
-<input type="hidden" name="cojmid" value="'.$id.'" />
-<input type="hidden" name="thisfavadrid" value="'.$favadrrow['favadrid'].'" />
-<button type="submit" >Add new details to this existing location</button></form>
-</td></tr>';
-}
-
-$alerttext.= '</table><br />';
-// echo '</div></body></html>';
-
-} else {
-
-// echo '<br />New Favourite'; 
-   mysql_query("LOCK TABLES cojm_favadr WRITE", $conn_id);
-   mysql_query("INSERT INTO cojm_favadr 
-   (favadrclient, 
-   favadrft, 
-   favadrpc, 
-   favadrisactive,
-   favadrcomments
-   ) VALUES (
-   '$clientorder',
-   (UPPER('$fromfreeaddress')),
-   (UPPER('$collectpc')),
-   '1',
-   (UPPER('$favadrcomments'))   )
-   ", $conn_id
-   )  or die(mysql_error()); $newfavid=mysql_insert_id();  
-mysql_query("UNLOCK TABLES", $conn_id);   
-
-
-$pagetext.="<p>Favourite added.</p>"; 
-
-
-// echo '<br /> New fav added with id '.$newfavid;
-
-// header('Location: '.$globalprefrow['httproots'].'/cojm/live/order.php?id='.$id); exit();
-
-} // ends add new
-
-} // ends $page==editnewfav
-
-
-
-
-    if ($page=="editexpense") {
-
-        $infotext.='<p><strong>Editing expense details</strong></p>';
-
-        $expenseref=trim($_POST['expenseref']);
-        $expensecost=trim($_POST['expensecost']);
-        $expensevat=trim($_POST['expensevat']);
-        $expensecode=trim($_POST['expensecode']);
-        $whoto=trim(htmlspecialchars($_POST['whoto']));
-        $description=trim(htmlspecialchars($_POST['description']));
-        $cyclistref=trim($_POST['cyclistref']);
-        $paid=trim($_POST['paid']);
-        $chequeref=trim(htmlspecialchars($_POST['chequeref']));
-        $paymentmethod=trim($_POST['paymentmethod']);
+        if (isset($_POST['enrft0'])) { $enrft0=(trim($_POST['enrft0'])); } else {  $enrft0=''; }
+        if (isset($_POST['enrpc0'])) { $enrpc0=(trim($_POST['enrpc0'])); } else {  $enrpc0=''; }
+        if (isset($_POST['clientorder'])) { $clientorder=(trim($_POST['clientorder'])); } else {  $clientorder=''; }
+        if (isset($_POST['id'])) { $id=(trim($_POST['id'])); } else {  $id=''; }
         
-        $whoto = str_replace("'", "&#39;", "$whoto");
-        $description = str_replace("'", "&#39;", "$description");
-        $chequeref = str_replace("'", "&#39;", "$chequeref");
+        $enrft0=strtoupper ($enrft0);
+        $enrpc0=strtoupper ($enrpc0);
         
-        if (isset($_POST['newfromoldexpense'])) { $newfromoldexpense=trim($_POST['newfromoldexpense']); } else { $newfromoldexpense=''; }
+        // $filename="order.php";
+        // $adminmenu='1';
+        // echo $clientorder;
+        // echo $enrft0;
+        // echo $enrpc0;
+        // echo $id;
+        $favadrcomments='';
         
+        $sql = "SELECT * FROM cojm_favadr, Clients 
+        WHERE cojm_favadr.favadrclient= '$clientorder'
+        AND (( cojm_favadr.favadrpc LIKE '%$enrpc0%' ) OR ( cojm_favadr.favadrft LIKE '%$enrft0%'))
+        AND cojm_favadr.favadrisactive='1' 
+        AND cojm_favadr.favadrclient = Clients.CustomerID 
+        "; 
         
-        if (isset($_POST['expensedate'])) { $expensedate=trim($_POST['expensedate']); } else { $expensedate=''; }
+        $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+        $num_rows = mysql_num_rows($sql_result);
         
-        if ($expensedate) {
-            $expensedate = str_replace("/", ":", "$expensedate", $count);
-            $expensedate = str_replace(",", ":", "$expensedate", $count);
-            $expensedate = str_replace("-", ":", "$expensedate", $count);
-            $temp_ar=explode(":",$expensedate); 
-            $startday=$temp_ar[0]; 
-            $startmonth=$temp_ar[1]; 
-            $startyear=$temp_ar[2];
-            $expensedate=date("Y-m-d H:i:s", mktime(01, 01, 01, $startmonth, $startday, $startyear));
-        }
+        if ($num_rows>'0') { 
         
-        if ($paid=='Yes') { $paid=1;}
-        if ($paid=='No') { $paid=0;}
-        if ($paymentmethod=='expc1') { $expc1=$expensecost; } else { $expc1=''; }
-        if ($paymentmethod=='expc2') { $expc2=$expensecost; } else { $expc2=''; }
-        if ($paymentmethod=='expc3') { $expc3=$expensecost; } else { $expc3=''; }
-        if ($paymentmethod=='expc4') { $expc4=$expensecost; } else { $expc4=''; }
-        if ($paymentmethod=='expc5') { $expc5=$expensecost; } else { $expc5=''; }
-        if ($paymentmethod=='expc6') { $expc6=$expensecost; } else { $expc6=''; }
-        
-        if ($expenseref) {
-            if ($newfromoldexpense) {
+            $sql = "SELECT * FROM cojm_favadr, Clients 
+            WHERE cojm_favadr.favadrclient= '$clientorder'
+            AND (( cojm_favadr.favadrpc LIKE '$enrpc0' ) OR ( cojm_favadr.favadrft LIKE '$enrft0'))
+            AND cojm_favadr.favadrisactive='1' 
+            AND cojm_favadr.favadrclient = Clients.CustomerID 
+            ";
+            $sql_result2 = mysql_query($sql,$conn_id)  or mysql_error(); 
+            $num_rows = mysql_num_rows($sql_result2);
             
-                $description='Created from ref '.$expenseref.' '.$description;
-            
-                $infotext.='<br />New Expense '; 
-                mysql_query("LOCK TABLES expenses WRITE", $conn_id);
-                mysql_query("INSERT INTO expenses 
-                (expensecost, expensevat, whoto, description, cyclistref, expensedate, expensecode, paid, expc2, expc3, expc1, expc4, expc5, expc6, chequeref) 
-            
-                VALUES
-                ('$expensecost',
-                '$expensevat',
-                '$whoto',
-                '$description',
-                '$cyclistref', 
-                '$expensedate', 
-                '$expensecode',
-                '$paid',
-                '$expc2',
-                '$expc3',
-                '$expc1',
-                '$expc4',
-                '$expc5',
-                '$expc6',
-                '$chequeref' )
-                ", $conn_id) or die(mysql_error());
-                $expenseref=mysql_insert_id();  
-                mysql_query("UNLOCK TABLES", $conn_id);  
-                
-            
-            
-            } else {
-                $sql = "UPDATE expenses SET expensecost='$expensecost' , expensevat='$expensevat' , whoto='$whoto' , description='$description' , cyclistref='$cyclistref' , 
-                expensedate='$expensedate' , expensecode='$expensecode' , paid='$paid' , expc2='$expc2' , expc3='$expc3' , 
-                expc1='$expc1' , expc4='$expc4' , expc5='$expc5' , expc6='$expc6' , chequeref='$chequeref'  
-                WHERE expenseref='$expenseref' LIMIT 1"; 
-            
-                $result = mysql_query($sql, $conn_id);
-                if ($result){
-                    $pagetext.="<p>Expense Updated</p>"; 
-                } else { 
-                    $infotext.=mysql_error()."<br />error occured during updating expense"; 
-                    $alerttext.='<p>Error occured during updating expense</p>'; 
-                }
+            $companyname='';
+            while ($avadrrow = mysql_fetch_array($sql_result2)) {
+                extract($avadrrow);
+                $companyname=$avadrrow['CompanyName'];
             }
-        }
+            
+            
+            $alerttext.= ' <h3>There ';
+            if ($num_rows>'1') {
+                $alerttext.= 'are';
+            } else {
+                $alerttext.= 'is';
+            }
+            $alerttext.= ' already '.$num_rows.' favourite';
+            if ($num_rows>'1') { $alerttext.= 's'; }
+            
+            $alerttext.= ' for '.$companyname.' with similar details</h3><br />';
+            
+            
+            
+            $alerttext.= '
+            <table class="acc"><tr>
+            <th>Address</th>
+            <th>Postcode</th>
+            <th></th>
+            </tr><tr><td>'.$enrft0.'</td>
+            <td>'.$enrpc0.'</td><td>
+            <form action="order.php?id='.$id.'" method="post"> 
+            <input type="hidden" name="formbirthday" value="'. date("U") .'">
+            <input type="hidden" name="page" value="addaftercheckasnewfav" >
+            <input type="hidden" name="favadrclient" value="'.$clientorder.'" />
+            <input type="hidden" name="favadrft" value="'.$enrft0.'" />
+            <input type="hidden" name="favadrpc" value="'.$enrpc0.'" />
+            <input type="hidden" name="cojmid" value="'.$id.'" />
+            <input type="hidden" name="id" value="'.$id.'" />
+            <button type="submit" >Add as new favourite</button></form>
+            </td></tr>';
+            
+            
+            while ($favadrrow = mysql_fetch_array($sql_result)) {
+                extract($favadrrow);
+                $alerttext.= '<tr><td>'.$favadrrow['favadrft'].'</td><td>'.$favadrrow['favadrpc'].'</td><td>
+                <form action="order.php?id='.$id.'" method="post" >
+                <input type="hidden" name="formbirthday" value="'. date("U") .'">
+                <input type="hidden" name="page" value="aftercheckaseditfav" >
+                <input type="hidden" name="favadrft" value="'.$enrft0.'" />
+                <input type="hidden" name="oldfavadrft" value="'.$favadrrow['favadrft'].'" />
+                <input type="hidden" name="oldfavadrpc" value="'.$favadrrow['favadrpc'].'" />
+                <input type="hidden" name="favadrpc" value="'.$enrpc0.'" />
+                <input type="hidden" name="favadrclient" value="'.$clientorder.'" />
+                <input type="hidden" name="cojmid" value="'.$id.'" />
+                <input type="hidden" name="thisfavadrid" value="'.$favadrrow['favadrid'].'" />
+                <button type="submit" >Add new details to this existing location</button></form>
+                </td></tr>';
+            }
+            
+            $alerttext.= '</table><br />';
+            // echo '</div></body></html>';
         
-        if ($expenseref=='') { 
-            // $pagetext.='<p><b>New Expense</b></p>'; 
-            mysql_query("LOCK TABLES expenses WRITE");
-            mysql_query("INSERT INTO expenses 
-            (expensecost, expensevat , whoto, description, cyclistref, expensedate, expensecode, paid, expc2, expc3, expc1, expc4, expc5, expc6, chequeref) 
-   
-            VALUES
-            ('$expensecost',
-            '$expensevat',
-            '$whoto',
-            '$description',
-            '$cyclistref', 
-            '$expensedate', 
-            '$expensecode',
-            '$paid',
-            '$expc2',
-            '$expc3',
-            '$expc1',
-            '$expc4',
-            '$expc5',
-            '$expc6',
-            '$chequeref' )
-            "
-            )  or die(mysql_error());
-            $expenseref=mysql_insert_id();  
+        } else {
+
+            // echo '<br />New Favourite'; 
+            mysql_query("LOCK TABLES cojm_favadr WRITE", $conn_id);
+            mysql_query("INSERT INTO cojm_favadr 
+            (favadrclient, 
+            favadrft, 
+            favadrpc, 
+            favadrisactive,
+            favadrcomments
+            ) VALUES (
+            '$clientorder',
+            (UPPER('$enrft0')),
+            (UPPER('$enrpc0')),
+            '1',
+            (UPPER('$favadrcomments'))   )
+            ", $conn_id
+            )  or die(mysql_error()); $newfavid=mysql_insert_id();  
             mysql_query("UNLOCK TABLES", $conn_id);   
             
-            $pagetext.='<p>New Expense ref '.$expenseref.'</p>'; 
-            $infotext.='<br />New Expense';
-        } // end new expense
-    } // ends page=editexpense
+            
+            $pagetext.="<p>Favourite added.</p>"; 
 
+
+            // echo '<br /> New fav added with id '.$newfavid;
+
+            // header('Location: '.$globalprefrow['httproots'].'/cojm/live/order.php?id='.$id); exit();
+
+        } // ends add new
+
+    } // ends $page==editnewfav
 
 
 
@@ -1971,8 +1890,6 @@ $infotext.='<br />Unable to edit invoice comment<br />'.$sql;
 
 
 
-
-
     if ($page=="editinvchase") {
 
 $infotext.=' <br />Editing invoice chase ';
@@ -2032,8 +1949,6 @@ $pagetext.='<p>Third Chased Changed</p>';
 
 
 } // ends page = edit chase invoice
-
-
 
 
 
@@ -2097,33 +2012,48 @@ $pagetext.='<p>Third Chased Changed</p>';
 
     if ($page=='invnotpaid') {
 
-if (isset( $_POST['ref'])) { $invoiceref=$_POST['ref']; } else { $invoiceref=''; }
-
- 
-if ($invoiceref) {
-
-
-$sql="UPDATE `invoicing` SET `paydate` = '', `cash` = '', `cheque` = '', `bacs` = '', `paypal` = '' WHERE CONCAT( `invoicing`.`ref` ) =$invoiceref";
-$result = mysql_query($sql, $conn_id);
-
-
-if ($result) {
-
-$infotext.= "<br />Removed invoice payment details<br>";
-$infotext.="<br />". mysql_affected_rows().' invoice affected.<br>';
-$pagetext.='<p>Payment details removed on Invoice '.$invoiceref.'</p>';
-
-} else {
-
-$infotext.= "<br />Unable to Remove invoice payment details<br>";
-$infotext.="<br />". mysql_affected_rows().' invoice affected, ref '.$invoiceref.'<br>';
-$alerttext.='<p>Payment details NOT removed on Invoice ref '.$invoiceref.'</p>';
-
-
-
-} // ends check for type of result
-
-} // ends check for invoice ref
+        if (isset( $_POST['ref'])) {
+            $invoiceref=$_POST['ref'];
+        } else {
+            $invoiceref='';
+        }
+        
+        
+        if ($invoiceref) {
+        
+        
+            $sql="UPDATE `invoicing` SET `paydate` = '', `cash` = '', `cheque` = '', `bacs` = '', `paypal` = '' WHERE CONCAT( `invoicing`.`ref` ) =$invoiceref";
+            $result = mysql_query($sql, $conn_id);
+            
+            
+            if ($result) {
+            
+                $infotext.= "<br />Removed Reconciliation  details<br>";
+                $infotext.="<br />". mysql_affected_rows().' invoice affected.<br>';
+                $pagetext.='<p>Reconciliation removed on Invoice '.$invoiceref.'</p>';
+            
+            
+                $updatequery = "UPDATE Orders SET status ='110' WHERE invoiceref = :ref";
+                
+                $stmt = $dbh->prepare($updatequery);
+                $stmt->bindParam(':ref', $invoiceref, PDO::PARAM_INT);
+                $stmt->execute();
+                $total = $stmt->rowCount();
+                $infotext.=$total.' jobs updated to status 110 ';
+                $pagetext.=$total.' jobs updated to awaiting reconciliation ';
+            
+            
+            } else {
+            
+                $infotext.= "<br />Unable to Remove invoice Reconciliation details<br>";
+                $infotext.="<br />". mysql_affected_rows().' invoice affected, ref '.$invoiceref.'<br>';
+                $alerttext.='<p>Reconciliation NOT removed on Invoice ref '.$invoiceref.'</p>';
+            
+            
+            
+            } // ends check for type of result
+        
+        } // ends check for invoice ref
 
 } // ends page = invnotpaid
 
@@ -2184,10 +2114,10 @@ $alerttext.='<p>Payment details NOT removed on Invoice ref '.$invoiceref.'</p>';
     }
 
 
-} // finishes epoch time
+} else {// finishes epoch time
 
 
-
+}
 
 
 if ($page=='addtodb') { // new invoice
@@ -2195,13 +2125,15 @@ if ($page=='addtodb') { // new invoice
     $clientname = mysql_result(mysql_query("SELECT CompanyName from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
 
     $clientemailinv = mysql_result(mysql_query("SELECT invoiceEmailAddress from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
+    $clientemail = mysql_result(mysql_query("SELECT EmailAddress from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
+    
+    
     if ($clientemailinv) {
         $pagetext.= '<a href="../live/new_cojm_client.php?clientid='.$clientid.'">'.$clientname.'</a> Invoice Email : '.$clientemailinv;
     }
 
 
 
-    $clientemail = mysql_result(mysql_query("SELECT EmailAddress from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
     if ($clientemail) {
         $pagetext.= '<br /><a href="../live/new_cojm_client.php?clientid='.$clientid.'">'.$clientname.'</a> General Email : '.$clientemail;
     }
@@ -2217,7 +2149,7 @@ if ($page=='addtodb') { // new invoice
 
     $existinginvref='';
 
-   $dtsql = "SELECT * FROM invoicing WHERE (`invoicing`.`ref` ='$newinvoiceref' )  ";
+    $dtsql = "SELECT * FROM invoicing WHERE (`invoicing`.`ref` ='$newinvoiceref' )  ";
     $dtsql_result = mysql_query($dtsql,$conn_id)  or mysql_error(); 
     while ($dtrow = mysql_fetch_array($dtsql_result)) {
         extract($dtrow);
@@ -2296,35 +2228,38 @@ if ($page=='addtodb') { // new invoice
                 }
             }
 
-$pagetext.='</p></div></div><br />'; 
-} else { 
-$pagetext.= '<h1>An error occured during invoice database update <br />'.mysql_error().'</h1>'.$sql; }
+            $pagetext.='</p></div></div><br />'; 
+            } else { 
+            $pagetext.= '<h1>An error occured during invoice database update <br />'.mysql_error().'</h1>'.$sql; }
+            
+            // get last invoiced date
+            $sql = "SELECT lastinvoicedate from Clients WHERE CustomerID=$clientid";
+            $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+            if ($sql_result){
+                // $pdfheaderstring=$pdfheaderstring . "<h3>Found last invoice date</h3>"; 
+            } else {
+                $pagetext.= "<h1>An error occured during selecting last client invoice date</h1>".$pdfheaderstring;
+            }
 
-// get last invoiced date
-$sql = "SELECT lastinvoicedate from Clients WHERE CustomerID=$clientid";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-if ($sql_result){ 
-// $pdfheaderstring=$pdfheaderstring . "<h3>Found last invoice date</h3>"; 
-} else { $pagetext.= "<h1>An error occured during selecting last client invoice date</h1>".$pdfheaderstring; }
+        while ($row = mysql_fetch_array($sql_result)) { extract($row); }
+        $date4 = strtotime($lastinvoicedate);
+        $date2 = strtotime($collectionsuntildate);
+        $diffdate= ($date4 - $date2 );
 
-while ($row = mysql_fetch_array($sql_result)) { extract($row); }
- $date4 = strtotime($lastinvoicedate);
- $date2 = strtotime($collectionsuntildate);
- $diffdate= ($date4 - $date2 );
+        if ( $diffdate < '0' ) {
 
-if ( $diffdate < '0' ) { 
-
-$sql="UPDATE `Clients` SET `lastinvoicedate` = '$collectionsuntildate' WHERE CONCAT( `Clients`.`CustomerID` ) =$clientid";
-$result = mysql_query($sql, $conn_id);
-if ($result){ 
-// $pdfheaderstring=$pdfheaderstring . "<h1>Updated last invoice date</h1>"; 
-} else { 
-$pagetext.= "<h1>An error occured during client database update</h1>"; }
-
-} // end of making sure client database latest invoice time is latest
-
-
-} // ends check for existing invoice ref
+            $sql="UPDATE `Clients` SET `lastinvoicedate` = '$collectionsuntildate' WHERE CONCAT( `Clients`.`CustomerID` ) =$clientid";
+            $result = mysql_query($sql, $conn_id);
+            if ($result){ 
+                // $pdfheaderstring=$pdfheaderstring . "<h1>Updated last invoice date</h1>"; 
+            } else { 
+                $pagetext.= "<h1>An error occured during client database update</h1>";
+            }
+    
+        } // end of making sure client database latest invoice time is latest
+    
+    
+    } // ends check for existing invoice ref
 
 } // ends page='addtodb' ( new invoice )
 
@@ -2418,25 +2353,16 @@ if ($page == "createnewfromexisting" ) {
         $second = 00; $finishtrackpause= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
         else { $finishtrackpause=''; }
         
-        if ($status <49  ){
-        
-            $nextactiondate = $targetcollectiondate; 
-            $starttrackpause='';
-            $finishtrackpause='';
-        
-        } 
-        else {
-            $nextactiondate = $duedate;
-        }
+
         
         $numberitems=$row['numberitems'];
         $customerid=$row['CustomerID'];
-        $shippc=$row['ShipPC'];
+        $enrpc21=$row['enrpc21'];
         $requestor=$row['requestor'];
         $orderdep=$row['orderdep'];
-        $fromfreeaddress=$row['fromfreeaddress'];
-        $tofreeaddress=$row['tofreeaddress'];
-        $collectpc=$row['CollectPC'];
+        $enrft0=$row['enrft0'];
+        $enrft21=$row['enrft21'];
+        $enrpc0=$row['enrpc0'];
         $jobcomments = $row['jobcomments'];
         $privjobcomments = $row['privatejobcomments'];
         $clientjobreference = $row['clientjobreference'];
@@ -2537,9 +2463,37 @@ if ($page == "createnewfromexisting" ) {
         $handoverpostcode=$row['handoverpostcode'];
         $handoverCyclistID=$row['handoverCyclistID'];
         
-        if ($status>'86') { $status='86'; }
-        if ($status < "59" ){ $collectiondate=""; $waitingtime=""; };
-        if ($status < "70" ){ $deliverydate=""; };
+
+
+        if ($status <49  ){
+        
+            $nextactiondate = $targetcollectiondate; 
+            $starttrackpause='';
+            $finishtrackpause='';
+        
+        } 
+        else {
+            $nextactiondate = $duedate;
+        }
+
+        
+        
+        if ($status < "59" ) {
+            $collectiondate="";
+            $waitingtime="";
+        }
+        
+        if ($status < "70" ){
+            $deliverydate="";
+        }
+
+
+        if ($status>'86') {
+            $status='86';
+        }
+ 
+
+
         
         
         $infotext.='<br />2469 Client Discount : '.$clientdiscount;
@@ -2547,19 +2501,13 @@ if ($page == "createnewfromexisting" ) {
         // $infotext.=' <br>Currorsched='.$currorsched;
         
         if ($currorsched=='unsched') {
-        
-        $status='30';
-        $collectiondate='';
-        $deliverydate='';
-        $nextactiondate=$targetcollectiondate;
+            $status='30';
+            $collectiondate='';
+            $deliverydate='';
+            $starttrackpause='';
+            $finishtrackpause='';
+            $nextactiondate=$targetcollectiondate;
         }
-        
-        
-        
-        
-        
-        
-        
         
         
         // actually create new from existing
@@ -2569,274 +2517,274 @@ if ($page == "createnewfromexisting" ) {
         
         if ($id) {
 
-   mysql_query("LOCK TABLES Orders WRITE", $conn_id);
-   mysql_query("INSERT INTO Orders 
-   (ID,
-   ts,
-   CustomerID,
-   OrderDate, 
-   CollectPC, 
-   ServiceID,
-   ShipPC,
-   numberitems, 
-   duedate, 
-   ShipDate,
-   status,
-   targetcollectiondate,
-   jobrequestedtime,
-   jobcomments,
-   privatejobcomments,
-   nextactiondate,
-   collectiondate,
-   FreightCharge,
-   vatcharge,
-   CyclistID,
-   deliveryworkingwindow,
-   collectionworkingwindow,
-   starttrackpause,
-   finishtrackpause,
-   waitingstarttime,
-   requestor,  
-   orderdep,
-   fromfreeaddress,
-   tofreeaddress,
-   clientjobreference,
-   distance,
-   clientdiscount,
-   waitingmins,
-   cbb1,
-   cbb2,
-   cbb3,
-   cbb4,
-   cbb5,
-   cbb6,
-   cbb7,
-   cbb8,
-   cbb9,
-   cbb10,
-   cbb11,
-   cbb12,
-   cbb13,
-   cbb14,
-   cbb15,
-   cbb16,
-   cbb17,
-   cbb18,
-   cbb19,
-   cbb20,
-   cbbc1,
-   cbbc2,
-   cbbc3,
-   cbbc4,
-   cbbc5,
-   cbbc6,
-   cbbc7,
-   cbbc8,
-   cbbc9,
-   cbbc10,
-   cbbc11,
-   cbbc12,
-   cbbc13,
-   cbbc14,
-   cbbc15,
-   cbbc16,
-   cbbc17,
-   cbbc18,
-   cbbc19,
-   cbbc20,
-   enrpc1,
-   enrpc2,
-   enrpc3,
-   enrpc4,
-   enrpc5,
-   enrpc6,
-   enrpc7,
-   enrpc8,
-   enrpc9,
-   enrpc10,
-   enrpc11,
-   enrpc12,
-   enrpc13,
-   enrpc14,
-   enrpc15,
-   enrpc16,
-   enrpc17,
-   enrpc18,
-   enrpc19,
-   enrpc20,
-   enrft1,
-   enrft2,
-   enrft3,
-   enrft4,
-   enrft5,
-   enrft6,
-   enrft7,
-   enrft8,
-   enrft9,
-   enrft10,
-   enrft11,
-   enrft12,
-   enrft13,
-   enrft14,
-   enrft15,
-   enrft16,
-   enrft17,
-   enrft18,
-   enrft19,
-   enrft20,
-   opsmaparea,
-opsmapsubarea,
-   iscustomprice,
-   handoverpostcode,
-   handoverCyclistID,
-   autostartchain,
-   co2saving,
-   pm10saving
-    ) 
-   VALUES
-   ('',
-   now(),
-   '$customerid',
-   now(), 
-   '$collectpc', 
-   '$serviceid',
-   '$shippc',
-   '$numberitems',
-   '$duedate',
-   '$deliverydate',
-   '$status',
-   '$targetcollectiondate',
-     now(),
-   (UPPER('$jobcomments')),
-   (UPPER('$privjobcomments')),
-   '$nextactiondate',
-   '$collectiondate',
-   '$cost',
-   '$vatcharge',
-   '$cyclist',
-   '$deliveryworkingwindow',
-   '$collectionworkingwindow',
-   '$starttrackpause',
-   '$finishtrackpause',
-   '$waitingtime',
-   (UPPER('$requestor')),
-   '$orderdep',
-   (UPPER('$fromfreeaddress')),
-   (UPPER('$tofreeaddress')),
-   (UPPER('$clientjobreference')),
-   '$distance',
-   '$clientdiscount',
-   '$waitingmins',
-   '$cbb1',
-   '$cbb2',
-   '$cbb3',
-   '$cbb4',
-   '$cbb5',
-   '$cbb6',
-   '$cbb7',
-   '$cbb8',
-   '$cbb9',
-   '$cbb10',
-   '$cbb11',
-   '$cbb12',
-   '$cbb13',
-   '$cbb14',
-   '$cbb15',
-   '$cbb16',
-   '$cbb17',
-   '$cbb18',
-   '$cbb19',
-   '$cbb20',
-   '$cbbc1',
-   '$cbbc2',
-   '$cbbc3',
-   '$cbbc4',
-   '$cbbc5',
-   '$cbbc6',
-   '$cbbc7',
-   '$cbbc8',
-   '$cbbc9',
-   '$cbbc10',
-   '$cbbc11',
-   '$cbbc12',
-   '$cbbc13',
-   '$cbbc14',
-   '$cbbc15',
-   '$cbbc16',
-   '$cbbc17',
-   '$cbbc18',
-   '$cbbc19',
-   '$cbbc20',
-   (UPPER('$enrpc1')),
-   (UPPER('$enrpc2')),
-   (UPPER('$enrpc3')),
-   (UPPER('$enrpc4')),
-   (UPPER('$enrpc5')),
-   (UPPER('$enrpc6')),
-   (UPPER('$enrpc7')),
-   (UPPER('$enrpc8')),
-   (UPPER('$enrpc9')),
-   (UPPER('$enrpc10')),
-   (UPPER('$enrpc11')),
-   (UPPER('$enrpc12')),
-   (UPPER('$enrpc13')),
-   (UPPER('$enrpc14')),
-   (UPPER('$enrpc15')),
-   (UPPER('$enrpc16')),
-   (UPPER('$enrpc17')),
-   (UPPER('$enrpc18')),
-   (UPPER('$enrpc19')),
-   (UPPER('$enrpc20')),
-   (UPPER('$enrft1')),
-   (UPPER('$enrft2')),
-   (UPPER('$enrft3')),
-   (UPPER('$enrft4')),
-   (UPPER('$enrft5')),
-   (UPPER('$enrft6')),
-   (UPPER('$enrft7')),
-   (UPPER('$enrft8')),
-   (UPPER('$enrft9')),
-   (UPPER('$enrft10')),
-   (UPPER('$enrft11')),
-   (UPPER('$enrft12')),
-   (UPPER('$enrft13')),
-   (UPPER('$enrft14')),
-   (UPPER('$enrft15')),
-   (UPPER('$enrft16')),
-   (UPPER('$enrft17')),
-   (UPPER('$enrft18')),
-   (UPPER('$enrft19')),
-   (UPPER('$enrft20')),
-   '$opsmaparea',
-   '$opsmapsubarea',
-   '$iscustomprice',
-   (UPPER('$handoverpostcode')),
-   '$handoverCyclistID',
-   '$autostartchain',
-   '$co2saving',
-   '$pm10saving'
-   ) ", $conn_id
-   )  or die(mysql_error()); 
-   
-   $newjobid=mysql_insert_id();  
-mysql_query("UNLOCK TABLES", $conn_id);   
-// $ID=$id;
-
-   
-$pagetext.="<p>Created ". $newjobid.' from '. $id .'</p>';
-$infotext.="<br />Created ". $newjobid.' from '. $id;
-
-
-$id=$newjobid;
-$ID=$newjobid;
-
-
-// $infotext.='new id is'.$ID;
-
-
+            mysql_query("LOCK TABLES Orders WRITE", $conn_id);
+            mysql_query("INSERT INTO Orders 
+            (ID,
+            ts,
+            CustomerID,
+            OrderDate, 
+            enrpc0, 
+            ServiceID,
+            enrpc21,
+            numberitems, 
+            duedate, 
+            ShipDate,
+            status,
+            targetcollectiondate,
+            jobrequestedtime,
+            jobcomments,
+            privatejobcomments,
+            nextactiondate,
+            collectiondate,
+            FreightCharge,
+            vatcharge,
+            CyclistID,
+            deliveryworkingwindow,
+            collectionworkingwindow,
+            starttrackpause,
+            finishtrackpause,
+            waitingstarttime,
+            requestor,  
+            orderdep,
+            enrft0,
+            enrft21,
+            clientjobreference,
+            distance,
+            clientdiscount,
+            waitingmins,
+            cbb1,
+            cbb2,
+            cbb3,
+            cbb4,
+            cbb5,
+            cbb6,
+            cbb7,
+            cbb8,
+            cbb9,
+            cbb10,
+            cbb11,
+            cbb12,
+            cbb13,
+            cbb14,
+            cbb15,
+            cbb16,
+            cbb17,
+            cbb18,
+            cbb19,
+            cbb20,
+            cbbc1,
+            cbbc2,
+            cbbc3,
+            cbbc4,
+            cbbc5,
+            cbbc6,
+            cbbc7,
+            cbbc8,
+            cbbc9,
+            cbbc10,
+            cbbc11,
+            cbbc12,
+            cbbc13,
+            cbbc14,
+            cbbc15,
+            cbbc16,
+            cbbc17,
+            cbbc18,
+            cbbc19,
+            cbbc20,
+            enrpc1,
+            enrpc2,
+            enrpc3,
+            enrpc4,
+            enrpc5,
+            enrpc6,
+            enrpc7,
+            enrpc8,
+            enrpc9,
+            enrpc10,
+            enrpc11,
+            enrpc12,
+            enrpc13,
+            enrpc14,
+            enrpc15,
+            enrpc16,
+            enrpc17,
+            enrpc18,
+            enrpc19,
+            enrpc20,
+            enrft1,
+            enrft2,
+            enrft3,
+            enrft4,
+            enrft5,
+            enrft6,
+            enrft7,
+            enrft8,
+            enrft9,
+            enrft10,
+            enrft11,
+            enrft12,
+            enrft13,
+            enrft14,
+            enrft15,
+            enrft16,
+            enrft17,
+            enrft18,
+            enrft19,
+            enrft20,
+            opsmaparea,
+            opsmapsubarea,
+            iscustomprice,
+            handoverpostcode,
+            handoverCyclistID,
+            autostartchain,
+            co2saving,
+            pm10saving
+                ) 
+            VALUES
+            ('',
+            now(),
+            '$customerid',
+            now(), 
+            '$enrpc0', 
+            '$serviceid',
+            '$enrpc21',
+            '$numberitems',
+            '$duedate',
+            '$deliverydate',
+            '$status',
+            '$targetcollectiondate',
+                now(),
+            (UPPER('$jobcomments')),
+            (UPPER('$privjobcomments')),
+            '$nextactiondate',
+            '$collectiondate',
+            '$cost',
+            '$vatcharge',
+            '$cyclist',
+            '$deliveryworkingwindow',
+            '$collectionworkingwindow',
+            '$starttrackpause',
+            '$finishtrackpause',
+            '$waitingtime',
+            (UPPER('$requestor')),
+            '$orderdep',
+            (UPPER('$enrft0')),
+            (UPPER('$enrft21')),
+            (UPPER('$clientjobreference')),
+            '$distance',
+            '$clientdiscount',
+            '$waitingmins',
+            '$cbb1',
+            '$cbb2',
+            '$cbb3',
+            '$cbb4',
+            '$cbb5',
+            '$cbb6',
+            '$cbb7',
+            '$cbb8',
+            '$cbb9',
+            '$cbb10',
+            '$cbb11',
+            '$cbb12',
+            '$cbb13',
+            '$cbb14',
+            '$cbb15',
+            '$cbb16',
+            '$cbb17',
+            '$cbb18',
+            '$cbb19',
+            '$cbb20',
+            '$cbbc1',
+            '$cbbc2',
+            '$cbbc3',
+            '$cbbc4',
+            '$cbbc5',
+            '$cbbc6',
+            '$cbbc7',
+            '$cbbc8',
+            '$cbbc9',
+            '$cbbc10',
+            '$cbbc11',
+            '$cbbc12',
+            '$cbbc13',
+            '$cbbc14',
+            '$cbbc15',
+            '$cbbc16',
+            '$cbbc17',
+            '$cbbc18',
+            '$cbbc19',
+            '$cbbc20',
+            (UPPER('$enrpc1')),
+            (UPPER('$enrpc2')),
+            (UPPER('$enrpc3')),
+            (UPPER('$enrpc4')),
+            (UPPER('$enrpc5')),
+            (UPPER('$enrpc6')),
+            (UPPER('$enrpc7')),
+            (UPPER('$enrpc8')),
+            (UPPER('$enrpc9')),
+            (UPPER('$enrpc10')),
+            (UPPER('$enrpc11')),
+            (UPPER('$enrpc12')),
+            (UPPER('$enrpc13')),
+            (UPPER('$enrpc14')),
+            (UPPER('$enrpc15')),
+            (UPPER('$enrpc16')),
+            (UPPER('$enrpc17')),
+            (UPPER('$enrpc18')),
+            (UPPER('$enrpc19')),
+            (UPPER('$enrpc20')),
+            (UPPER('$enrft1')),
+            (UPPER('$enrft2')),
+            (UPPER('$enrft3')),
+            (UPPER('$enrft4')),
+            (UPPER('$enrft5')),
+            (UPPER('$enrft6')),
+            (UPPER('$enrft7')),
+            (UPPER('$enrft8')),
+            (UPPER('$enrft9')),
+            (UPPER('$enrft10')),
+            (UPPER('$enrft11')),
+            (UPPER('$enrft12')),
+            (UPPER('$enrft13')),
+            (UPPER('$enrft14')),
+            (UPPER('$enrft15')),
+            (UPPER('$enrft16')),
+            (UPPER('$enrft17')),
+            (UPPER('$enrft18')),
+            (UPPER('$enrft19')),
+            (UPPER('$enrft20')),
+            '$opsmaparea',
+            '$opsmapsubarea',
+            '$iscustomprice',
+            (UPPER('$handoverpostcode')),
+            '$handoverCyclistID',
+            '$autostartchain',
+            '$co2saving',
+            '$pm10saving'
+            ) ", $conn_id
+            )  or die(mysql_error()); 
+            
+            $newjobid=mysql_insert_id();  
+            mysql_query("UNLOCK TABLES", $conn_id);   
+            // $ID=$id;
+            
+                        
+            $pagetext.="<p>Created ". $newjobid.' from '. $id .'</p>';
+            $infotext.="<br />Created ". $newjobid.' from '. $id;
+            
+            
+            $id=$newjobid;
+            $ID=$newjobid;
+            
+            
+            // $infotext.='new id is'.$ID;
 
 
-}
+
+
+            }
 
         } // ends check for duplicate job 
     } // ends page=createnewfrom existing
@@ -3203,15 +3151,15 @@ if (($page=="newjobfromajax" ) and (trim($_POST['serviceID'])) and (trim($_POST[
     }
     
     
-    if (isset($_POST['collecttext'])) { $fromfreeaddress=trim($_POST['collecttext']); } else { $fromfreeaddress=''; }
-    if (isset($_POST['delivertext'])) { $tofreeaddress=trim($_POST['delivertext']); } else { $tofreeaddress=''; }
+    if (isset($_POST['collecttext'])) { $enrft0=trim($_POST['collecttext']); } else { $enrft0=''; }
+    if (isset($_POST['delivertext'])) { $enrft21=trim($_POST['delivertext']); } else { $enrft21=''; }
     
     
     $requestedby=htmlspecialchars(trim($_POST['requestedby']));
     
     if (isset($_POST['newjobdepid'])) { $newjobdepid=trim($_POST['newjobdepid']); } else { $newjobdepid=''; }
     if (isset($_POST['deliverpc'])) { $deliverpc=trim($_POST['deliverpc']); } else { $deliverpc=''; }
-    if (isset($_POST['collectpc'])) { $collectpc=trim($_POST['collectpc']); } else { $collectpc=''; }
+    if (isset($_POST['enrpc0'])) { $enrpc0=trim($_POST['enrpc0']); } else { $enrpc0=''; }
     
     if (isset($_POST['frombox'])) { $frombox=trim($_POST['frombox']); } else { $frombox=''; }
     if (isset($_POST['tobox'])) { $tobox=trim($_POST['tobox']); } else { $tobox=''; }
@@ -3219,10 +3167,10 @@ if (($page=="newjobfromajax" ) and (trim($_POST['serviceID'])) and (trim($_POST[
     $infotext.='<p>from '.$frombox.' to '.$tobox.'</p>';
     
     if ($frombox) {
-        $collectpc = mysql_result(mysql_query("SELECT favadrpc from cojm_favadr WHERE 
+        $enrpc0 = mysql_result(mysql_query("SELECT favadrpc from cojm_favadr WHERE 
         favadrid='$frombox' AND favadrisactive='1' LIMIT 0,1"), '0');
     
-        $fromfreeaddress = mysql_result(mysql_query("SELECT favadrft from cojm_favadr WHERE 
+        $enrft0 = mysql_result(mysql_query("SELECT favadrft from cojm_favadr WHERE 
         favadrid='$frombox' AND favadrisactive='1' LIMIT 0,1"), '0');
     }
     
@@ -3231,7 +3179,7 @@ if (($page=="newjobfromajax" ) and (trim($_POST['serviceID'])) and (trim($_POST[
         $deliverpc = mysql_result(mysql_query("SELECT favadrpc from cojm_favadr WHERE 
         favadrid='$tobox' AND favadrisactive='1' LIMIT 0,1"), '0');
     
-        $tofreeaddress = mysql_result(mysql_query("SELECT favadrft from cojm_favadr WHERE 
+        $enrft21 = mysql_result(mysql_query("SELECT favadrft from cojm_favadr WHERE 
         favadrid='$tobox' AND favadrisactive='1' LIMIT 0,1"), '0');
     }
     
@@ -3240,12 +3188,12 @@ if (($page=="newjobfromajax" ) and (trim($_POST['serviceID'])) and (trim($_POST[
     if ( $globalprefrow["inaccuratepostcode"]<>'1') { // accurate postcodes
     
         $deliverpc = strtoupper(str_replace(' ','',$deliverpc));
-        $collectpc = strtoupper(str_replace(' ','',$collectpc));
+        $enrpc0 = strtoupper(str_replace(' ','',$enrpc0));
     
         $start=substr($deliverpc, 0, -3);  
         $deliverpc=$start.' '.substr($deliverpc, -3); // 'ies'  
-        $start=substr($collectpc, 0, -3);  
-        $collectpc=$start.' '.substr($collectpc, -3); // 'ies' 
+        $start=substr($enrpc0, 0, -3);  
+        $enrpc0=$start.' '.substr($enrpc0, -3); // 'ies' 
     }
     
     $jobcomments=trim($_POST['jobcomments']);
@@ -3310,10 +3258,10 @@ if (($page=="newjobfromajax" ) and (trim($_POST['serviceID'])) and (trim($_POST[
     requestor ,
     ServiceID ,
     CyclistID,
-    CollectPC, 
-    ShipPC,
-    fromfreeaddress,
-    tofreeaddress,
+    enrpc0, 
+    enrpc21,
+    enrft0,
+    enrft21,
     numberitems, 
     status,
     jobrequestedtime,
@@ -3350,10 +3298,10 @@ if (($page=="newjobfromajax" ) and (trim($_POST['serviceID'])) and (trim($_POST[
     (UPPER('$requestedby')) ,
     '$serviceid' ,
     '1',
-    (UPPER('$collectpc')), 
+    (UPPER('$enrpc0')), 
     (UPPER('$deliverpc')),
-    (UPPER('$fromfreeaddress')),
-    (UPPER('$tofreeaddress')),
+    (UPPER('$enrft0')),
+    (UPPER('$enrft21')),
     '$numberitems',
     '$status',
     now() ,
@@ -3405,362 +3353,72 @@ if (($page=="newjobfromajax" ) and (trim($_POST['serviceID'])) and (trim($_POST[
 
 
 
- $sql = "SELECT * FROM Orders 
- WHERE (`Orders`.`ID` = '$id' )
- LIMIT 0,1 ";
+$sql = "SELECT * FROM Orders WHERE (`Orders`.`ID` = '$id' ) LIMIT 0,1 ";
 $sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); $sumtot=mysql_affected_rows(); 
 
     
-    if ($sumtot>0)  { // individ job id found
-    
-    
-    
+if ($sumtot>0)  { // individ job id found
     
     // $infotext.='<br />2639  checking form birthday for last edited time.';
     
     if ($nowepoch < $globalprefrow['formtimeout']) {
     
-    $editedtime = mysql_result(mysql_query("
-    SELECT ts 
-    from Orders 
-    WHERE `Orders`.`ID`=$id 
-    LIMIT 1
-    ", $conn_id), 0);
-    
-    if (($page<>'newjobfromajax') and ($page) and ($page<>'createnewfromexisting') ) {
-        if ((($formbirthday+1) < (strtotime($editedtime)) ) and (date_default_timezone_get()<>'UTC' )) {
-            $infotext.=' <br />cj2982 - Another user has modified since last refresh page is '.$page;
-            $infotext.='<br /> nowepoch ' .$nowepoch;
-            $alerttext.='<p><strong>Another user has modified since page was last refreshed, unable to change job details.</strong></p>';
-        }
-        else {
-            $infotext.='<br /> formbirthday is  '.$formbirthday.'  ie '.date('Y m j H:i ', ($formbirthday)). '<br />edited is '.$editedtime.' '.(strtotime($editedtime)); 
-    
-    
-    
-    
-    if ($page=="addfavtoorder") {
-    
-    if (isset($_POST['selectfavbox'])) { $selectfavbox=(trim($_POST['selectfavbox'])); } else { $selectfavbox=''; }
-    if (isset($_POST['addr'])) { $addr=(trim($_POST['addr'])); } else { $addr=''; }
-    
-    if (($id) and ($selectfavbox) and ($addr)) {
-    $infotext.='<br />FAV ADDRESS <br />'. $id.' ' . $selectfavbox.' ' . $addr;
-    
-    if ($addr=='fr')   { $addrft='fromfreeaddress'; $addrpc='CollectPC'; }
-    if ($addr=='to')   { $addrft='tofreeaddress';   $addrpc='ShipPC'; }
-    if ($addr=='via1') { $addrft='enrft1'; $addrpc='enrpc1'; }
-    if ($addr=='via2') { $addrft='enrft2'; $addrpc='enrpc2'; }
-    if ($addr=='via3') { $addrft='enrft3'; $addrpc='enrpc3'; }
-    if ($addr=='via4') { $addrft='enrft4'; $addrpc='enrpc4'; }
-    if ($addr=='via5') { $addrft='enrft5'; $addrpc='enrpc5'; }
-    if ($addr=='via6') { $addrft='enrft6'; $addrpc='enrpc6'; }
-    if ($addr=='via7') { $addrft='enrft7'; $addrpc='enrpc7'; }
-    if ($addr=='via8') { $addrft='enrft8'; $addrpc='enrpc8'; }
-    if ($addr=='via9') { $addrft='enrft9'; $addrpc='enrpc9'; }
-    if ($addr=='via10') { $addrft='enrft10'; $addrpc='enrpc10'; }
-    if ($addr=='via11') { $addrft='enrft11'; $addrpc='enrpc11'; }
-    if ($addr=='via12') { $addrft='enrft12'; $addrpc='enrpc12'; }
-    if ($addr=='via13') { $addrft='enrft13'; $addrpc='enrpc13'; }
-    if ($addr=='via14') { $addrft='enrft14'; $addrpc='enrpc14'; }
-    if ($addr=='via15') { $addrft='enrft15'; $addrpc='enrpc15'; }
-    if ($addr=='via16') { $addrft='enrft16'; $addrpc='enrpc16'; }
-    if ($addr=='via17') { $addrft='enrft17'; $addrpc='enrpc17'; }
-    if ($addr=='via18') { $addrft='enrft18'; $addrpc='enrpc18'; }
-    if ($addr=='via19') { $addrft='enrft19'; $addrpc='enrpc19'; }
-    if ($addr=='via20') { $addrft='enrft20'; $addrpc='enrpc20'; }
-    
-    
-    
-    $sql="SELECT * FROM cojm_favadr WHERE favadrid = '$selectfavbox' AND favadrisactive ='1' LIMIT 0,1";
-    $sql_result = mysql_query($sql,$conn_id);
-    $sumtot=mysql_affected_rows(); if ($sumtot>'0')  {
-    
-    while ($favrow = mysql_fetch_array($sql_result)) { extract($favrow);
-    
-    $infotext.='<br />3487 '.$favrow['favadrft'].' '.$favrow['favadrpc'];
-    
-    $favadrft=$favrow['favadrft'];
-    $favadrpc=$favrow['favadrpc'];
-    
-    } // ends loop for fav address
-    } // ends check for fav address on db
-    
-    
-    $sql = "UPDATE Orders SET ".$addrft." = '".$favadrft."', ".$addrpc." = '".$favadrpc."'  
-    WHERE ID='$id' "; 
-    $result = mysql_query($sql, $conn_id);
-    if ($result){ 
-    $infotext.="<br />3500 Address Updated ";
-    $pagetext.="<p>Address updated </p>";
-    
-    
-    
-    calcmileage($ID, $globalprefrow['distanceunit'], $globalprefrow['co2perdist'], $globalprefrow['pm10perdist']);
-    $cojmaction='recalcprice';
-    
-    
-    
-    } else { 
-    $infotext.="<br /><strong> 3492 An error occured during updating address! </strong>".$sql; 
-    $alerttext.="<p><strong> 3493 An error occured during updating address! </p>"; 
-    }
-    
-    
-    } // ends check for all variables
-    } // ends check for page = addfavtoorder
-    
-    
-    
-    if ($page == "confirmdeletemobile") { 
-    
-    $infotext.='<br />Delete job from mobile aka requeuing to admin ';
-    $query =  " 
-    UPDATE Orders 
-    SET status='86', 
-    privatejobcomments = concat('** DELETED FROM MOBILE BY ".$cyclistid." ** ',privatejobcomments),
-    ShipDate = now() ,
-    collectiondate = now() 
-    WHERE ID='$id'";	
-    
-    // $infotext.=$query;
-    
-    mysql_query($query, $conn_id);
-    $alerttext.="<p><strong>Job ref ".$id." moved to admin as from mobile device.</strong></p>";	
-    
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    // CONFIRMING DELETE OPTION
-    if ($page == "confirmdelete" ) {
-    
-    
-    $infotext.="<br /><strong>Delete option, job ref ".$id." deleted.</strong>";
-    $query = "DELETE from Orders WHERE ID='$id'";	mysql_query($query, $conn_id);
-    $alerttext.="<p><strong>Delete option confirmed, job ref ".$id." deleted.</strong></p>";	
-    // $infotext.="<br /><strong>Delete option confirmed,<br> ID Deleted.</strong>";	
-    
-    } 
-    
-    
-    
-    // END OF DELETION CONFIRM
-    
-    
-    
-    
-    if ($page=='edituidate') {
-    
-    $cojmaction='recalcprice';
-    
-    
-    $ShipPC=trim($_POST['ShipPC']);
-    $CollectPC=trim($_POST['CollectPC']);
-    
-    $sPattern = '/\s*/m'; 
-    $sReplace = '';
-    $ShipPC=preg_replace( $sPattern, $sReplace, $ShipPC );
-    $CollectPC=preg_replace( $sPattern, $sReplace, $CollectPC );
-    
-    if ( $globalprefrow["inaccuratepostcode"]<>'1') {
-    $start=substr($ShipPC, 0, -3);  
-    $ShipPC=$start.' '.substr($ShipPC, -3); // 'ies'  
-    $start=substr($CollectPC, 0, -3);  
-    $CollectPC=$start.' '.substr($CollectPC, -3); // 'ies' 
-    }
-    
-    
-    
-    $fromfreeaddress=trim($_POST['fromfreeaddress']);
-    $tofreeaddress=trim($_POST['tofreeaddress']);
-    $fromfreeaddress = str_replace("/", ",", "$fromfreeaddress", $count);
-    $tofreeaddress = str_replace("/", ",", "$tofreeaddress", $count);
-    $fromfreeaddress = str_replace("£", "GBP", "$fromfreeaddress", $count);
-    $tofreeaddress = str_replace("£", "GBP", "$tofreeaddress", $count);
-    $fromfreeaddress = str_replace("'", " ", "$fromfreeaddress", $count);
-    $tofreeaddress = str_replace("'", " ", "$tofreeaddress", $count);
-    $fromfreeaddress=preg_replace( '/\r\n/', ' ', trim($fromfreeaddress) );
-    $tofreeaddress=preg_replace( '/\r\n/', ' ', trim($tofreeaddress) );
-    $enrft1=trim($_POST['enrft1']);
-    $enrpc1=trim($_POST['enrpc1']);
-    $enrft2=trim($_POST['enrft2']);
-    $enrpc2=trim($_POST['enrpc2']);
-    $enrft3=trim($_POST['enrft3']);
-    $enrpc3=trim($_POST['enrpc3']);
-    $enrft4=trim($_POST['enrft4']);
-    $enrpc4=trim($_POST['enrpc4']);
-    $enrft5=trim($_POST['enrft5']);
-    $enrpc5=trim($_POST['enrpc5']);
-    $enrft6=trim($_POST['enrft6']);
-    $enrpc6=trim($_POST['enrpc6']);
-    $enrft7=trim($_POST['enrft7']);
-    $enrpc7=trim($_POST['enrpc7']);
-    $enrft8=trim($_POST['enrft8']);
-    $enrpc8=trim($_POST['enrpc8']);
-    $enrft9=trim($_POST['enrft9']);
-    $enrpc9=trim($_POST['enrpc9']);
-    $enrft10=trim($_POST['enrft10']);
-    $enrpc10=trim($_POST['enrpc10']);
-    $enrft11=trim($_POST['enrft11']);
-    $enrpc11=trim($_POST['enrpc11']);
-    $enrft12=trim($_POST['enrft12']);
-    $enrpc12=trim($_POST['enrpc12']);
-    $enrft13=trim($_POST['enrft13']);
-    $enrpc13=trim($_POST['enrpc13']);
-    $enrft14=trim($_POST['enrft14']);
-    $enrpc14=trim($_POST['enrpc14']);
-    $enrft15=trim($_POST['enrft15']);
-    $enrpc15=trim($_POST['enrpc15']);
-    $enrft16=trim($_POST['enrft16']);
-    $enrpc16=trim($_POST['enrpc16']);
-    $enrft17=trim($_POST['enrft17']);
-    $enrpc17=trim($_POST['enrpc17']);
-    $enrft18=trim($_POST['enrft18']);
-    $enrpc18=trim($_POST['enrpc18']);
-    $enrft19=trim($_POST['enrft19']);
-    $enrpc19=trim($_POST['enrpc19']);
-    $enrft20=trim($_POST['enrft20']);
-    $enrpc20=trim($_POST['enrpc20']);
-    
-    
-    $sPattern = ' /\s*/m'; 
-    $sReplace = '';
-    $enrpc1=preg_replace( $sPattern, $sReplace, $enrpc1 );
-    $enrpc2=preg_replace( $sPattern, $sReplace, $enrpc2 );
-    $enrpc3=preg_replace( $sPattern, $sReplace, $enrpc3 );
-    $enrpc4=preg_replace( $sPattern, $sReplace, $enrpc4 );
-    $enrpc5=preg_replace( $sPattern, $sReplace, $enrpc5 );
-    $enrpc6=preg_replace( $sPattern, $sReplace, $enrpc6 );
-    $enrpc7=preg_replace( $sPattern, $sReplace, $enrpc7 );
-    $enrpc8=preg_replace( $sPattern, $sReplace, $enrpc8 );
-    $enrpc9=preg_replace( $sPattern, $sReplace, $enrpc9 );
-    $enrpc10=preg_replace( $sPattern, $sReplace, $enrpc10 );
-    $enrpc11=preg_replace( $sPattern, $sReplace, $enrpc11 );
-    $enrpc12=preg_replace( $sPattern, $sReplace, $enrpc12 );
-    $enrpc13=preg_replace( $sPattern, $sReplace, $enrpc13 );
-    $enrpc14=preg_replace( $sPattern, $sReplace, $enrpc14 );
-    $enrpc15=preg_replace( $sPattern, $sReplace, $enrpc15 );
-    $enrpc16=preg_replace( $sPattern, $sReplace, $enrpc16 );
-    $enrpc17=preg_replace( $sPattern, $sReplace, $enrpc17 );
-    $enrpc18=preg_replace( $sPattern, $sReplace, $enrpc18 );
-    $enrpc19=preg_replace( $sPattern, $sReplace, $enrpc19 );
-    $enrpc20=preg_replace( $sPattern, $sReplace, $enrpc20 );
-    
-    if (($globalprefrow['inaccuratepostcode'])==0) {
-    $start=substr($enrpc1, 0, -3);  $enrpc1=trim($start.' '.substr($enrpc1, -3)); // 'ies'  
-    $start=substr($enrpc2, 0, -3);  $enrpc2=trim($start.' '.substr($enrpc2, -3)); // 'ies' 
-    $start=substr($enrpc3, 0, -3);  $enrpc3=trim($start.' '.substr($enrpc3, -3)); // 'ies'  
-    $start=substr($enrpc4, 0, -3);  $enrpc4=trim($start.' '.substr($enrpc4, -3)); // 'ies'  
-    $start=substr($enrpc5, 0, -3);  $enrpc5=trim($start.' '.substr($enrpc5, -3)); // 'ies'  
-    $start=substr($enrpc6, 0, -3);  $enrpc6=trim($start.' '.substr($enrpc6, -3)); // 'ies'  
-    $start=substr($enrpc7, 0, -3);  $enrpc7=trim($start.' '.substr($enrpc7, -3)); // 'ies'  
-    $start=substr($enrpc8, 0, -3);  $enrpc8=trim($start.' '.substr($enrpc8, -3)); // 'ies'  
-    $start=substr($enrpc9, 0, -3);  $enrpc9=trim($start.' '.substr($enrpc9, -3)); // 'ies'  
-    $start=substr($enrpc10, 0, -3);  $enrpc10=trim($start.' '.substr($enrpc10, -3)); // 'ies'  
-    $start=substr($enrpc11, 0, -3);  $enrpc11=trim($start.' '.substr($enrpc11, -3)); // 'ies'  
-    $start=substr($enrpc12, 0, -3);  $enrpc12=trim($start.' '.substr($enrpc12, -3)); // 'ies'  
-    $start=substr($enrpc13, 0, -3);  $enrpc13=trim($start.' '.substr($enrpc13, -3)); // 'ies'  
-    $start=substr($enrpc14, 0, -3);  $enrpc14=trim($start.' '.substr($enrpc14, -3)); // 'ies'  
-    $start=substr($enrpc15, 0, -3);  $enrpc15=trim($start.' '.substr($enrpc15, -3)); // 'ies'  
-    $start=substr($enrpc16, 0, -3);  $enrpc16=trim($start.' '.substr($enrpc16, -3)); // 'ies'  
-    $start=substr($enrpc17, 0, -3);  $enrpc17=trim($start.' '.substr($enrpc17, -3)); // 'ies'  
-    $start=substr($enrpc18, 0, -3);  $enrpc18=trim($start.' '.substr($enrpc18, -3)); // 'ies'  
-    $start=substr($enrpc19, 0, -3);  $enrpc19=trim($start.' '.substr($enrpc19, -3)); // 'ies'  
-    $start=substr($enrpc20, 0, -3);  $enrpc20=trim($start.' '.substr($enrpc20, -3)); // 'ies'  
-    }
-    
-    // $infotext.="<br><b>Updating Collection Postcode</b><br>New Postcode : ". $CollectPC. "<br>";
-    $sql = "UPDATE Orders SET 
-    fromfreeaddress=(UPPER('$fromfreeaddress')), 
-    tofreeaddress=(UPPER('$tofreeaddress')), 
-    enrpc1=(UPPER('$enrpc1')),
-    enrft1=(UPPER('$enrft1')),
-    enrpc2=(UPPER('$enrpc2')),
-    enrft2=(UPPER('$enrft2')),
-    enrpc3=(UPPER('$enrpc3')),
-    enrft3=(UPPER('$enrft3')),
-    enrpc4=(UPPER('$enrpc4')),
-    enrft4=(UPPER('$enrft4')),
-    enrpc5=(UPPER('$enrpc5')),
-    enrft5=(UPPER('$enrft5')),
-    enrpc6=(UPPER('$enrpc6')),
-    enrft6=(UPPER('$enrft6')),
-    enrpc7=(UPPER('$enrpc7')),
-    enrft7=(UPPER('$enrft7')),
-    enrpc8=(UPPER('$enrpc8')),
-    enrft8=(UPPER('$enrft8')),
-    enrpc9=(UPPER('$enrpc9')),
-    enrft9=(UPPER('$enrft9')),
-    enrpc10=(UPPER('$enrpc10')),
-    enrft10=(UPPER('$enrft10')),
-    enrpc11=(UPPER('$enrpc11')),
-    enrft11=(UPPER('$enrft11')),
-    enrpc12=(UPPER('$enrpc12')),
-    enrft12=(UPPER('$enrft12')),
-    enrpc13=(UPPER('$enrpc13')),
-    enrft13=(UPPER('$enrft13')),
-    enrpc14=(UPPER('$enrpc14')),
-    enrft14=(UPPER('$enrft14')),
-    enrpc15=(UPPER('$enrpc15')),
-    enrft15=(UPPER('$enrft15')),
-    enrpc16=(UPPER('$enrpc16')),
-    enrft16=(UPPER('$enrft16')),
-    enrpc17=(UPPER('$enrpc17')),
-    enrft17=(UPPER('$enrft17')),
-    enrpc18=(UPPER('$enrpc18')),
-    enrft18=(UPPER('$enrft18')),
-    enrpc19=(UPPER('$enrpc19')),
-    enrft19=(UPPER('$enrft19')),
-    enrpc20=(UPPER('$enrpc20')),
-    enrft20=(UPPER('$enrft20')),
-    CollectPC=(UPPER('$CollectPC')),  
-    ShipPC=(UPPER('$ShipPC')) 
-    WHERE ID='$id' LIMIT 1"; $result = mysql_query($sql, $conn_id);
-    if ($result){ 
-    $infotext.="<br />Postcodes updated<br />"; 
-    //  $pagetext.='<p> cj 4406 Pt1 success</p>'; 
-    } 
-    else { 
-    $infotext.="<br /><strong>An error occured during updating postcodes!</strong>"; 
-    $alerttext.="<p>Error occured during updating postcodes</p>"; 
-    
-    }
-    
-    
-    
-    
-    
-    
-    // $infotext.='<br />Editing new style dates / times';
-    
-    
-    
-    // refreshes job to make sure not changed by job status
-    
-    $query="SELECT * FROM Orders where ID = '$id' LIMIT 1";
-    $result=mysql_query($query, $conn_id); $row=mysql_fetch_array($result);
-    
-    
-    
-    
-    calcmileage($ID, $globalprefrow['distanceunit'], $globalprefrow['co2perdist'], $globalprefrow['pm10perdist']);
-    $cojmaction='recalcprice';
-    
-    
-    } ////////////////////      ENDS EDIT MAIN PAGE=edituidate          ///////////////////////////////////////////////////
-    
-    
-    
-    
-    if (($page=="editstatus") or ($page=='edituidate')) {
+        $editedtime = mysql_result(mysql_query("
+        SELECT ts 
+        from Orders 
+        WHERE `Orders`.`ID`=$id 
+        LIMIT 1
+        ", $conn_id), 0);
+        
+        if ((($page<>'newjobfromajax') and ($page<>'newpostcode') and ($page<>'createnewfromexisting') ) and ($page)) {
+            if ((($formbirthday+1) < (strtotime($editedtime)) ) and (date_default_timezone_get()<>'UTC' )) {
+                $infotext.=' <br />cj2982 - Another user has modified since last refresh page is '.$page;
+                $infotext.='<br /> nowepoch ' .$nowepoch;
+                $alerttext.='<p><strong>Another user has modified since page was last refreshed, unable to change job details.</strong></p>';
+            }
+            else {
+                $infotext.='<br /> formbirthday is  '.$formbirthday.'  ie '.date('Y m j H:i ', ($formbirthday)). '<br />edited is '.$editedtime.' '.(strtotime($editedtime)); 
+        
+        
+                if ($page == "confirmdeletemobile") { 
+            
+                    $infotext.='<br />Delete job from mobile aka requeuing to admin ';
+                    $query =  " 
+                    UPDATE Orders 
+                    SET status='86', 
+                    privatejobcomments = concat('** DELETED FROM MOBILE BY ".$cyclistid." ** ',privatejobcomments),
+                    ShipDate = now() ,
+                    collectiondate = now() 
+                    WHERE ID='$id'";	
+                    
+                    // $infotext.=$query;
+                    
+                    mysql_query($query, $conn_id);
+                    $alerttext.="<p><strong>Job ref ".$id." moved to admin as from mobile device.</strong></p>";	
+                
+                }
+    
+    
+    
+                // CONFIRMING DELETE OPTION
+                if ($page == "confirmdelete" ) {
+                    $infotext.="<br /><strong>Delete option, job ref ".$id." deleted.</strong>";
+                    $query = "DELETE from Orders WHERE ID='$id'";	mysql_query($query, $conn_id);
+                    $alerttext.="<p><strong>Delete option confirmed, job ref ".$id." deleted.</strong></p>";	
+                    // $infotext.="<br /><strong>Delete option confirmed,<br> ID Deleted.</strong>";	
+                }
+        
+
+                // END OF DELETION CONFIRM
+        
+        
+        
+        
+
+        
+    
+    
+    if (($page=="editstatus")) {
     
     // $infotext.=' form birthday is '.$formbirthday. ' timestamp is '.strtotime($editedtime);
     
@@ -4263,10 +3921,10 @@ while ($row = mysql_fetch_array($sql_result)) {
 
 if ($ID) {
 
-$row['enrpc0']=$row['CollectPC'];
+$row['enrpc0']=$row['enrpc0'];
 // $infotext.=' <br />ID found : '.$ID;
 
-// $infotext.=' <br />3618 CollectPC : '.$row['CollectPC'];
+// $infotext.=' <br />3618 enrpc0 : '.$row['enrpc0'];
 
 // $infotext.=' <br />enrPC0 : '.$row['enrpc0'];
 // $infotext.=' <br />enrPC : '.$row['enrpc1'];
@@ -4289,8 +3947,8 @@ $row['enrpc0']=$row['CollectPC'];
 // $infotext.=' <br />enrPC : '.$row['enrpc18'];
 // $infotext.=' <br />enrPC : '.$row['enrpc19'];
 // $infotext.=' <br />enrPC : '.$row['enrpc20'];
-// $infotext.=' <br />ShipPC : '.$row['ShipPC'];
-$row['enrpc21']=$row['ShipPC'];
+// $infotext.=' <br />enrpc21 : '.$row['enrpc21'];
+$row['enrpc21']=$row['enrpc21'];
 
 // $infotext.=' <br />enrpc21 : '.$row['enrpc21'];
 
@@ -4868,15 +4526,13 @@ $caudtext='<hr><b>'. $cyclistid.' : '.$today.'</b>'. $infotext;
 
 
 
-// $sql = "UPDATE Orders SET caud=concat (caud,'$caudtext') WHERE ID='$id' LIMIT 1"; $result = mysql_query($sql, $conn_id);
-
 // $infotext.='<br />ID found : '.$id;
  
  $orderauditid=$id;
  
 // if ($page) { $infotext.='<br /> page is '.$page; }
 
-// $infotext.='<br /> 4351 Collect : '.$collectpc.' Deliver : '.$deliverpc;
+// $infotext.='<br /> 4351 Collect : '.$enrpc0.' Deliver : '.$deliverpc;
 
 
 
@@ -4890,10 +4546,54 @@ $caudtext='<hr><b>'. $cyclistid.' : '.$today.'</b>'. $infotext;
 	
 	$infotext.="";
 	
+function time2str($ts) { //Relative Date Function  // used in order.php and ajaxordermap
+	if(!ctype_digit($ts)) {
+           $ts = strtotime($ts); 
+       }		
+	$tempdaydiff=date('z', $ts)-date('z');
 	
-	
-//	include "phpmysqlautobackup/run3.php";
-	
-	
+	$diff = time() - $ts;
+	if($diff == 0){	
+           return 'now'; 
+       }
+	elseif($diff > 0)
+	{
+		$day_diff = floor($diff / 86400);
+		if($day_diff == 0)
+		{
+			if($diff < 60) return ' Just now. ';
+			if($diff < 120) return ' 1 min ago. ';
+			if($diff < 3600) return ' '.floor($diff / 60) . ' min ago. ';
+			if($diff < 7200) return ' 1 hr, ' . floor(($diff-3600) / 60) . ' min ago. ';
+			if($diff < 86400) return floor($diff / 3600) . ' hours ago';
+		}
+		if($tempdaydiff=='-1') { return 'Yesterday '. date('A', $ts).'. '; }
+		if($day_diff < 7) return ' Last '. date('D A', $ts).'. ';
+           if($day_diff < 31) return date('D', $ts).' '. ceil($day_diff / 7) . ' weeks ago. ';
+		if($day_diff < 60) return 'Last month';
+		return date('D M Y', $ts);
+	}
+	else
+	{
+		$diff = abs($diff);
+		$day_diff = floor($diff / 86400);
+		if($day_diff == 0)
+		{
+			if($diff < 120) return 'In a minute';
+			if($diff < 3600) return 'In ' . floor($diff / 60) . ' mins. ';
+			if($diff < 7200) { return ' 1hr, ' . floor(($diff-3600) / 60) . ' mins. '; }
+		//	if(($diff < 86400) and ($tempday<>date('z', $ts))) {  return ' Tomorrow ';    }
+			
+			if($diff < 86400) return ' ' . floor($diff / 3600) . ' hrs. ';
+		}
+		if($tempdaydiff == 1) return ' Tomorrow '. date('A', $ts).'. ';
+		if($day_diff < 4) return date(' D A', $ts);
+		if($day_diff < 7 + (7 - date('w'))) return date('D ', $ts).'next week. ';
+		if(ceil($day_diff / 7) < 4) return date('D ', $ts).' in ' . ceil($day_diff / 7) . ' weeks. ';
+		if(date('n', $ts) == date('n') + 1) return date('D', $ts).' next month. ';
+		return date('D M Y', $ts);
+	}
+}
+
 
 ?>

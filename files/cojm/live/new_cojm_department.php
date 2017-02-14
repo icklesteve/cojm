@@ -512,7 +512,7 @@ $(document).ready(function() {
 
 include "footer.php";
 
-mysql_close(); ?>
+ ?>
 <script type="text/javascript">
 		$(function() {
 		$(function() {	$("#tabs").tabs();	});

@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	paymentsin.php - New Payment by Client
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -31,14 +31,21 @@ $title = "COJM";
 <html lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="HandheldFriendly" content="true" >
-<meta name="viewport" content="width=device-width, height=device-height, user-scalable=no" >
+<meta name="viewport" content="width=device-width, height=device-height" >
 <meta name="generator" content="COJM Expenses">
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <?php echo '<link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>'; 
 ?> 
-<title><?php print ($title); ?> New Payment</title>
+<title><?php print ($title); ?> Single Payment</title>
+<style>
+ fieldset label, .aligned fieldset label {
+    width:130px;
+}
+</style>
+
+
 </head><body>
 <?php 
 include "changejob.php";
@@ -47,6 +54,11 @@ $invoicemenu = "1";
 $filename='paymentsin.php';
 include "cojmmenu.php"; 
 
+if (isset($_GET['paymentid'])) {
+    $paymentid=trim($_GET['paymentid']);
+} else {
+    $paymentid='';
+}
 
 
 ?>
@@ -59,184 +71,126 @@ include "cojmmenu.php";
 <label class="fieldLabel"> Ref </label>
 <input class="caps ui-state-default ui-corner-all" type="number" step="1" name="paymentid" id="paymentid"
 
-<?php if ($paymentid=='') { echo ' placeholder="Search ID" '; } ?>
+placeholder="Search ID"
 
-value="<?php echo $row['paymentid']; ?>">
-
-
+value="<?php echo $paymentid; ?>">
 
 <button id="paymentsearchbyid">Search Payment Ref</button>
+<button id="addnewpayment"> New Payment </button>
 
 </fieldset>
-
-
-
 
 <hr />
+<div id="paymentdetails" class="hideuntilneeded">
 
 <fieldset>
-<label class="fieldLabel"> Amount &<?php echo $globalprefrow['currencysymbol']; ?></label>
-<input class="ui-state-default ui-corner-all" type="text" name="amountpaid" id="amountpaid" value="<?php echo $row['whoto']; ?>">
+    <label class="fieldLabel"> Amount &<?php echo $globalprefrow['currencysymbol']; ?></label>
+    <input class="ui-state-default ui-corner-all caps" type="text" name="amountpaid" id="amountpaid" value="" placeholder="0.00" size="8">
 </fieldset>
 
-
 <fieldset>
-<label class="fieldLabel">Who From </label>
-<select class="ui-state-default ui-corner-all" id="combobox" name="client" >
+    <label class="fieldLabel">Who From </label>
+    <select class="ui-state-default ui-corner-all" id="combobox" name="client" >
     <option value="">Select..</option>
 <?php
 
     $query = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName ASC";
     $stmt = $dbh->query($query);
-    foreach ($stmt as $row) {
-        
-        $CustomerID = htmlspecialchars ($row['CustomerID']);
-        $CompanyName = htmlspecialchars ($row['CompanyName']);
+    foreach ($stmt as $clrow) {
+        $CustomerID = htmlspecialchars ($clrow['CustomerID']);
+        $CompanyName = htmlspecialchars ($clrow['CompanyName']);
         print "<option ";
-        if ($CustomerID == $row['CustomerID']) {
+        if ($CustomerID == $clrow['CustomerID']) {
         //    echo "selected='SELECTED' ";
         }        
         echo ' value="'.$CustomerID.'">'.$CompanyName;
         echo '</option>';
     }
-
-
 ?>
+    </select>
+</fieldset>
 
-</select>
+<fieldset>
+    <label class="fieldLabel"> Payment Date </label> 
+    <input class="ui-state-default ui-corner-all caps" type="text" value="<?php echo date('d-m-Y'); ?>" id="paymentdate" size="12" name="paymentdate">
+</fieldset>
 
+<fieldset>
+    <label class="fieldLabel"> Method of Payment </label>
+    <select class="ui-state-default ui-corner-left" name="paymentmethod" id="paymentmethod" >
+        <option selected value="" >Payment Method</option>
+<?php
+
+    $query = "SELECT paymenttypeid, paymenttypename FROM cojm_paymenttype ORDER BY paymenttypeid ASC";
+    $stmt = $dbh->query($query);
+    foreach ($stmt as $row) {        
+        $paymenttypeid = htmlspecialchars ($row['paymenttypeid']);
+        $paymenttypename = htmlspecialchars ($row['paymenttypename']);
+        print "<option ";      
+        echo ' value="'.$paymenttypeid.'">'.$paymenttypename;
+        echo '</option>';
+    }
+?>
+    </select>
 </fieldset>
 
 
 <fieldset>
-<label class="fieldLabel"> Payment Date </label> 
-<input class="ui-state-default ui-corner-all caps" type="text" value="<?php echo date('d-m-Y'); ?>" id="paymentdate" size="12" name="paymentdate">
+    <label class="fieldLabel">Comments </label>
+    <textarea class="ui-state-default ui-corner-all" 
+    name="paymentcomment" 
+    id="paymentcomment" 
+    rows="2" 
+    cols="50" 
+    title="eg, Cheque Ref" 
+    placeholder="eg, Cheque Ref" 
+    style="padding-left: 3px;" ></textarea>
 </fieldset>
-
-<fieldset><label class="fieldLabel">
-Method of Payment </label>
-<select class="ui-state-default ui-corner-left" name="paymentmethod" id="paymentmethod" >
-<option selected value="" >Payment Method</option>
-
-<?php
-
-
-    $query = "SELECT paymenttypeid, paymenttypename FROM cojm_paymenttype ORDER BY paymenttypeid ASC";
-    $stmt = $dbh->query($query);
-    foreach ($stmt as $row) {
-        
-        $paymenttypeid = htmlspecialchars ($row['paymenttypeid']);
-        $paymenttypename = htmlspecialchars ($row['paymenttypename']);
-        print "<option ";
-        if ($paymenttypeid == $row['paymenttypeid']) {
-        //    echo "selected='SELECTED' ";
-        }        
-        echo ' value="'.$paymenttypeid.'">'.$paymenttypename;
-        echo '</option>';
-    }
-
-
-?>
-</select>
-</fieldset>
-
-
-<fieldset><label class="fieldLabel">Comments </label>
-<textarea class="ui-state-default ui-corner-all" name="paymentcomment" id="paymentcomment" rows="2" cols="50" placeholder="eg, Cheque Ref" ><?php ?></textarea>
-</fieldset>
-
-
 
 <input type="hidden" id="newcomment" name="newcomment" value="">
 
+</div>
 
 
-<fieldset><label class="fieldLabel"> &nbsp; </label>
-<button id="addnewpayment"> Add Payment </button>
-<button id="editpayment" class="hideuntilneeded"> Edit Payment </button>
 
-</fieldset>
 
 </form>
 
 </div>
 
+
+<div id="paymentstats" >
+</div>
+<br />
+
 </div>
 
 <script type="text/javascript">
-$(document).ready(function() {
-    var max = 0;
-    $("label").each(function(){
-        if ($(this).width() > max)
-            max = $(this).width();    
-    });
-    $("label").width((max+20));
-    
-    $(function () {
-        $("#combobox").combobox();
-        $("#toggle").click(function () {
-            $("#combobox").toggle();
-        });
-    });
 
-    
-    $(function (){ // autosize
-        $("#paymentcomment").autosize();
-    });
-    
-    
-    
-	$(function() {
-		var dates = $( "#paymentdate" ).datepicker({
-			numberOfMonths: 1,
-			changeYear:false,
-			firstDay: 1,
-            dateFormat: 'dd-mm-yy',
-			changeMonth:false
-		});
-	});
-    
+var formbirthday=<?php echo date("U"); ?>;
 
-
-    $("#amountpaid").change(function () {
-        // var amountcheck = $("#amountpaid").val();
-        if ($("#amountpaid").val()) {
-            var rounded = parseFloat($("#amountpaid").val()).toFixed(2); // rounded = 258.20
-            // alert(rounded);
-            
-            
-            if (rounded =="NaN") {
-            
-            alert ("Not a Number");
-            $("#amountpaid").val("0.00");
-            
-            } else {
-            
-                $("#amountpaid").val(rounded);
-            }
-        } else {
-            $("#amountpaid").val("0.00");
-        }
-    });
-    
-    
     $('#paymentsearchbyid').on('click', function (event) {
         event.preventDefault();    
         var notblankcheck=$("#paymentid").val();
         if (notblankcheck) {
-                
-
-            var formdata=$('#paymentsin').serializeArray();
-            
             $.ajax({
                 type: 'POST',
-                url: 'ajax_payment_lookup.php',
-                data: formdata,
+                url: 'ajax_lookup.php',
+                data: {
+                    lookuppage: 'paymentstuff',
+                    paymentid: $("#paymentid").val()
+                    
+                },
                 success:function(data){
                     $("#Post").append(data);
                 },
                 complete: function () {
                     $('#paymentcomment').trigger('autosize.resize');
+                    var clientid=$("#combobox").val();
+                    $( "#paymentstats" ).load( "ajax_lookup.php", { lookuppage: "paymentstuff", view: "client", clientid: clientid }, function() {
+                        // alert( "Load was performed." );
+                    });
+                    
                     showmessage();
                 },
                 error:function (xhr, ajaxOptions, thrownError){
@@ -251,52 +205,31 @@ $(document).ready(function() {
         }
     });
     
+       <?php
+  if ($paymentid) {
+      echo ' $("#paymentsearchbyid").click();   ';
+  }
+else {
     
+    echo ' $( "#paymentstats" ).load( "ajax_lookup.php", { view: "initial", lookuppage: "paymentstuff" }, function() {}); ';
     
-    $('#editpayment').on('click', function (event) { 
-        event.preventDefault();
-        
-        var notblankcheck=$("#paymentid").val();
-        if (notblankcheck) {
-            
-                    $("#page").val("editpayment");
+}  
 
-        
-        var newcommenttext = $('#paymentcomment').val().replace(/\n/g,"<br>");
+?>
+$(document).ready(function() {
 
-        $("#newcomment").val(newcommenttext);
-        
-        var formdata=$('#paymentsin').serializeArray();
-        
-        $.ajax({
-            type: 'POST',
-            url: 'ajaxchangejob.php',
-            data: formdata,
-            success:function(data){
-                // alert(data);
-                $("#Post").append(data);
-            },
-            complete: function () {
-                showmessage();
-            },
-            error:function (xhr, ajaxOptions, thrownError){
-                alert(thrownError); //throw any errors
-            }
+    
+    $(function () { // combobox + #toggle click
+        $("#combobox").combobox();
+        $("#toggle").click(function () {
+            $("#combobox").toggle();
         });
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-        }
-    
     });
+
     
+    $(function (){ // autosize comment
+        $("#paymentcomment").autosize();
+    });
     
     
 
@@ -318,6 +251,71 @@ $(document).ready(function() {
             data: formdata,
             success:function(data){
                 // alert(data);
+                $("#paymentdetails").append(data);
+            },
+            complete: function () {
+                
+                $("#paymentdetails").show(); 
+                $("#amountpaid").val("0.00");
+            $("select#combobox").val("");
+            $("select#paymentmethod").val(""); 
+            $("#paymentcomment").val("");
+            $(".ui-autocomplete-input").val("");
+            $("#editpayment").removeClass("hideuntilneeded"); 
+            $( "#paymentstats" ).load( "ajax_lookup.php", { view: "initial", lookuppage: "paymentstuff" }, function() {
+                showmessage();
+            });            
+                
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        });
+    });
+
+
+	$(function() { // datepicker
+		var dates = $( "#paymentdate" ).datepicker({
+			numberOfMonths: 1,
+			changeYear:false,
+			firstDay: 1,
+            dateFormat: 'dd-mm-yy',
+			changeMonth:false
+		});
+	});
+    
+
+
+    $("#amountpaid").change(function () {
+        // var amountcheck = $("#amountpaid").val();
+        if ($("#amountpaid").val()) {
+            var rounded = parseFloat($("#amountpaid").val()).toFixed(2); // rounded = 258.20
+            // alert(rounded);
+            if (rounded =="NaN") {
+                message='Not a Number';
+                allok=0;
+                showmessage();
+                $("#amountpaid").val("0.00");
+            } else {
+                $("#amountpaid").val(rounded);
+            }
+        } else {
+            $("#amountpaid").val("0.00");
+        }
+
+        
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditpayment',
+                whatchanged: 'amountpaid',
+                formbirthday: formbirthday,
+                paymentid: $("#paymentid").val(),
+                paymentclient: $("#combobox").val(),
+                amountpaid: $("#amountpaid").val()
+            },
+            type: 'post',
+            success:function(data){
                 $("#Post").append(data);
             },
             complete: function () {
@@ -328,7 +326,101 @@ $(document).ready(function() {
             }
         });
     });
+    
 
+
+
+    $('#paymentdate').change(function (){
+        var paymentdate=$("#paymentdate").val();
+        if (paymentdate) {
+        message='';
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditpayment',
+                whatchanged: 'paymentdate',
+                formbirthday: formbirthday,
+                paymentid: $("#paymentid").val(),
+                paymentclient: $("#combobox").val(),
+                paymentdate: paymentdate
+            },
+            type: 'post',
+            success:function(data){
+                // alert(data);
+                $("#Post").append(data);
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        });            
+        } else {
+            message=' Please enter date ';
+            allok=0;
+            showmessage();
+        }
+    });
+
+
+
+
+
+
+    $('#paymentmethod').change(function (){
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditpayment',
+                whatchanged: 'paymentmethod',
+                formbirthday: formbirthday,
+                paymentid: $("#paymentid").val(),
+                paymentclient: $("#combobox").val(),
+                paymentmethod: $("#paymentmethod").val()
+            },
+            type: 'post',
+            success:function(data){
+                // alert(data);
+                $("#Post").append(data);
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        }); 
+    });
+    
+    
+    $('#paymentcomment').change(function (){
+        var newcommenttext = $('#paymentcomment').val().replace(/\n/g,"<br>");
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditpayment',
+                whatchanged: 'paymentcomment',
+                formbirthday: formbirthday,
+                paymentid: $("#paymentid").val(),
+                paymentclient: $("#combobox").val(),
+                paymentcomment: newcommenttext
+            },
+            type: 'post',
+            success:function(data){
+                // alert(data);
+                $("#Post").append(data);
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        }); 
+    });    
+    
+    
     
     
     
@@ -337,17 +429,36 @@ $(document).ready(function() {
     
 });
 
-
-function comboboxchanged() { }
-
-
-	</script>
+function comboboxchanged() {
+    
+            $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditpayment',
+                whatchanged: 'paymentclient',
+                formbirthday: formbirthday,
+                paymentid: $("#paymentid").val(),
+                paymentclient: $("#combobox").val()
+            },
+            type: 'post',
+            success:function(data){
+                $("#Post").append(data);
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        });
+    
+    
+}
+</script>
 <?php
 
 include "footer.php";
 
 echo '</body></html>';
-mysql_close(); 
-$dbh=null;
  
 ?>

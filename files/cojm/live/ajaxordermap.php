@@ -20,16 +20,11 @@
 */
 
 
-
-
-
-
 // show rider tracking if present
 // show area map if present
 // show sub areas if present
 
 // update span #totaltime
-
 
 include_once "C4uconnect.php";
 include_once ("GeoCalc.class.php");
@@ -37,507 +32,488 @@ include_once ("GeoCalc.class.php");
 if (isset($_POST['page'])) { $page=trim($_POST['page']); } else { exit();  }
 if (isset($_POST['id'])) { $postedid = trim($_POST['id']); }
 
-
-
 $query = "SELECT bankholcomment, bankholdate FROM bankhols";
 $bankholdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
 
 
 
-echo '<script>  </script> ';
+$sql='
+SELECT
+p.starttrackpause,
+p.finishtrackpause,
+p.collectiondate,
+p.targetcollectiondate,
+p.collectionworkingwindow,
+p.deliveryworkingwindow,
+p.duedate,
+p.ShipDate,
+p.cbb1,
+p.cbb2,
+p.cbb3,
+p.cbb4,
+p.cbb5,
+p.cbb6,
+p.cbb7,
+p.cbb8,
+p.cbb9,
+p.cbb10,
+p.cbb11,
+p.cbb12,
+p.cbb13,
+p.cbb14,
+p.cbb15,
+p.cbb16,
+p.cbb17,
+p.cbb18,
+p.cbb19,
+p.cbb20,
+p.enrpc0,
+p.enrft0,
+p.enrpc1,
+p.enrpc2,
+p.enrpc3,
+p.enrpc4,
+p.enrpc5,
+p.enrpc6,
+p.enrpc7,
+p.enrpc8,
+p.enrpc9,
+p.enrpc10,
+p.enrpc11,
+p.enrpc12,
+p.enrpc13,
+p.enrpc14,
+p.enrpc15,
+p.enrpc16,
+p.enrpc17,
+p.enrpc18,
+p.enrpc19,
+p.enrpc20,
+p.enrft1,
+p.enrft2, 
+p.enrft3, 
+p.enrft4, 
+p.enrft5, 
+p.enrft6, 
+p.enrft7, 
+p.enrft8, 
+p.enrft9, 
+p.enrft10, 
+p.enrft11, 
+p.enrft12, 
+p.enrft13, 
+p.enrft14, 
+p.enrft15, 
+p.enrft16, 
+p.enrft17, 
+p.enrft18, 
+p.enrft19, 
+p.enrft20, 
+p.status, 
+p.CyclistID, 
+p.collectiondate, 
+p.enrpc21,
+p.enrft21,
+p.opsmaparea, 
+p.opsmapsubarea, 
+y.opsname,
+y.descrip,
+AsText(y.g) AS `POLY`,
+AsText(z.g) AS `SUBPOLY`,
+z.opsname AS `subareaname`,
+z.descrip AS `subareadescrip`,
+c.cojmname,
+c.trackerid
 
+FROM Orders p
+INNER JOIN Clients u ON p.CustomerID = u.CustomerID
+INNER JOIN Services t ON p.ServiceID = t.ServiceID
+left JOIN Cyclist c ON p.CyclistID = c.CyclistID 
+left join clientdep l ON p.orderdep = l.depnumber
+left join opsmap y ON p.opsmaparea = y.opsmapid
+left join opsmap z on p.opsmapsubarea = z.opsmapid
+WHERE p.id = :getid LIMIT 1';
 
-
-
-$sql = "SELECT 
-publictrackingref,
-cojmname,
-trackerid, 
-starttrackpause,
-finishtrackpause,
-collectiondate,
-targetcollectiondate,
-collectionworkingwindow,
-deliveryworkingwindow,
-duedate,
-ShipDate,
-status,
-opsmaparea,
-opsmapsubarea
-FROM Orders 
-INNER JOIN Cyclist
-WHERE Orders.CyclistID = Cyclist.CyclistID 
-AND `Orders`.`id` = :getid LIMIT 0,1";
 
 $stmt = $dbh->prepare($sql);
 $stmt->bindParam(':getid', $postedid, PDO::PARAM_INT); 
 $stmt->execute();
 
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
-$total = $stmt->rowCount();
 
-
-
-
-
-
-
-// if waitingstarttime use that instead
-if (($row['status']) >'76' ) { // calcs job time, english : $lengthtext
-
-    $secmod='';
-    $lengthtext='';
-    $tottimec=strtotime($row['starttrackpause']);
-    $tottimed=strtotime($row['finishtrackpause']);
-    if (($tottimec>'1') AND ($tottimed>'1')) {
-        $secmod=($tottimed-$tottimec);
-    }
-    $tottimea=strtotime($row['collectiondate']); 
-    $tottimeb=strtotime($row['ShipDate']); 
-    $tottimedif=($tottimeb-$tottimea-$secmod);
-    $inputval = $tottimedif; // USER DEFINES NUMBER OF SECONDS FOR WORKING OUT | 3661 = 1HOUR 1MIN 1SEC 
-    $unitd ='86400';
-    $unith ='3600';        // Num of seconds in an Hour... 
-    $unitm ='60';            // Num of seconds in a min... 
-    $dd = intval($inputval / $unitd);       // days
-    $hh_remaining = ($inputval - ($dd * $unitd));
-    $hh = intval($hh_remaining / $unith);    // '/' given value by num sec in hour... output = HOURS 
-    $ss_remaining = ($hh_remaining - ($hh * $unith)); // '*' number of hours by seconds, then '-' from given value... output = REMAINING seconds 
-    $mm = intval($ss_remaining / $unitm);    // take remaining sec and devide by sec in a min... output = MINS 
-    $ss = ($ss_remaining - ($mm * $unitm));        // '*' number of mins by seconds, then '-' from remaining sec... output = REMAINING seconds. 
-    if ($dd=='1') {$lengthtext.= $dd . "day "; } if ($dd>'1' ) { $lengthtext=$lengthtext. $dd . "days "; }
-    if ($hh=='1') {$lengthtext.= $hh . "hr "; } if ($hh>'1') { $lengthtext=$lengthtext. $hh . "hrs "; }
-    if ($mm>'1' ) {$lengthtext.= $mm . "mins "; } if ($mm=='1') {$lengthtext=$lengthtext. $mm . "min "; }
-    if ($dd) {} else {
-        if ($mm) {   
-            $thrs= number_format((($mm/60)+$hh), 2, '.', '');
-            $lengthtext.= '('. (float)$thrs .'hrs)';
+if ($row) {
+    
+    // if waitingstarttime use that instead
+    if (($row['status']) >'76' ) { // calcs job time, english : $lengthtext
+    
+        $secmod='';
+        $lengthtext='';
+        $tottimec=strtotime($row['starttrackpause']);
+        $tottimed=strtotime($row['finishtrackpause']);
+        if (($tottimec>'1') AND ($tottimed>'1')) {
+            $secmod=($tottimed-$tottimec);
         }
-    }
-    if ($ss_remaining) {
-        $lengthtext= "Tot ".$lengthtext;
-    }
-} // ends check greater than status 76
-
-
-
-if (date('U', strtotime($row['collectionworkingwindow']))>10) {
-    $collectiontext= ' '.time2str(($row['collectionworkingwindow']));
-    $bhtext=(array_search((substr($row['collectionworkingwindow'],0,10)), $bankholdata));
-    if ($bhtext) { $collectiontext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
-} else {
-    $collectiontext=' '.time2str(($row['targetcollectiondate']));
-    $bhtext=(array_search((substr($row['targetcollectiondate'],0,10)), $bankholdata));
-    if ($bhtext) { $collectiontext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
-    }
-
- 
-if (date('U', strtotime($row['deliveryworkingwindow']))>10) {
-    $deliverytext= time2str($row['deliveryworkingwindow']);
-    $bhtext=(array_search((substr($row['deliveryworkingwindow'],0,10)), $bankholdata));
-    if ($bhtext) { $deliverytext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
-} else {
-    $deliverytext=time2str(($row['duedate']));
-    $bhtext=(array_search((substr($row['duedate'],0,10)), $bankholdata));
-    if ($bhtext) { $deliverytext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
-}
-
-
- 
-if (date('U', strtotime($row['collectiondate']))>10) {
-    $collectiondatetext= time2str($row['collectiondate']);
-    $bhtext=(array_search((substr($row['collectiondate'],0,10)), $bankholdata));
-    if ($bhtext) { $collectiondatetext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
-} else {
-	$collectiondatetext='';
-}
- 
- 
-if (date('U', strtotime($row['ShipDate']))>10) {
-    $ShipDatetext= time2str($row['ShipDate']);
-    $bhtext=(array_search((substr($row['ShipDate'],0,10)), $bankholdata));
-    if ($bhtext) { $ShipDatetext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
-} else {
-	$ShipDatetext='';
-}
- 
- 
- 
-echo '
-    <script>
-    $("#collectiontext").html("'.$collectiontext.'"); 
-    $("#collectiondatetext").html("'.$collectiondatetext.'");
-    $("#deliverytext").html("'.$deliverytext.'");
-    $("#ShipDatetext").html("'.$ShipDatetext.'");
-    $("#totaltime").html("'.$lengthtext.'");
-    </script>';	
-
-
-
-if ($row['opsmaparea']) {
-    $sql = "SELECT 
-    opsname,
-    descrip
-    FROM opsmap 
-    WHERE opsmap.opsmapid = :opsmapid LIMIT 0,1";
-    $astmt = $dbh->prepare($sql);
-    $astmt->bindParam(':opsmapid', $row['opsmaparea'], PDO::PARAM_INT); 
-    $astmt->execute();
-    $arow = $astmt->fetch(PDO::FETCH_ASSOC);
-    // $atotal = $astmt->rowCount();
+        $tottimea=strtotime($row['collectiondate']); 
+        $tottimeb=strtotime($row['ShipDate']); 
+        $tottimedif=($tottimeb-$tottimea-$secmod);
+        $inputval = $tottimedif; // USER DEFINES NUMBER OF SECONDS FOR WORKING OUT | 3661 = 1HOUR 1MIN 1SEC 
+        $unitd ='86400';
+        $unith ='3600';        // Num of seconds in an Hour... 
+        $unitm ='60';            // Num of seconds in a min... 
+        $dd = intval($inputval / $unitd);       // days
+        $hh_remaining = ($inputval - ($dd * $unitd));
+        $hh = intval($hh_remaining / $unith);    // '/' given value by num sec in hour... output = HOURS 
+        $ss_remaining = ($hh_remaining - ($hh * $unith)); // '*' number of hours by seconds, then '-' from given value... output = REMAINING seconds 
+        $mm = intval($ss_remaining / $unitm);    // take remaining sec and devide by sec in a min... output = MINS 
+        $ss = ($ss_remaining - ($mm * $unitm));        // '*' number of mins by seconds, then '-' from remaining sec... output = REMAINING seconds. 
+        if ($dd=='1') {$lengthtext.= $dd . "day "; } if ($dd>'1' ) { $lengthtext=$lengthtext. $dd . "days "; }
+        if ($hh=='1') {$lengthtext.= $hh . "hr "; } if ($hh>'1') { $lengthtext=$lengthtext. $hh . "hrs "; }
+        if ($mm>'1' ) {$lengthtext.= $mm . "mins "; } if ($mm=='1') {$lengthtext=$lengthtext. $mm . "min "; }
+        if ($dd) {} else {
+            if ($mm) {   
+                $thrs= number_format((($mm/60)+$hh), 2, '.', '');
+                $lengthtext.= '('. (float)$thrs .'hrs)';
+            }
+        }
+        if ($ss_remaining) {
+            $lengthtext= "Tot ".$lengthtext;
+        }
+    } // ends check greater than status 76
     
-    $mainareaname=$arow['opsname'];
-    $mainareadescrip=$arow['descrip'];
-}
-
-
-if ($row['opsmapsubarea']>'0') {
-
     
-    $sql = "SELECT 
-    opsname,
-    descrip
-    FROM opsmap 
-    WHERE opsmap.opsmapid = :opsmapid LIMIT 0,1";
-    $bstmt = $dbh->prepare($sql);
-    $bstmt->bindParam(':opsmapid', $row['opsmapsubarea'], PDO::PARAM_INT); 
-    $bstmt->execute();
-    $brow = $bstmt->fetch(PDO::FETCH_ASSOC);
-    // $atotal = $astmt->rowCount();
+    if (date('U', strtotime($row['collectionworkingwindow']))>10) {
+        $collectiontext= ' '.time2str(($row['collectionworkingwindow']));
+        $bhtext=(array_search((substr($row['collectionworkingwindow'],0,10)), $bankholdata));
+        if ($bhtext) { $collectiontext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
+    } else {
+        $collectiontext=' '.time2str(($row['targetcollectiondate']));
+        $bhtext=(array_search((substr($row['targetcollectiondate'],0,10)), $bankholdata));
+        if ($bhtext) { $collectiontext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
+        }
     
-    $subareaname=$brow['opsname'];
-    $subareadescrip=$brow['descrip'];
-
-}
-
-
-
-$thistrackerid=$row['trackerid'];
-
-
-$startpause=strtotime($row['starttrackpause']); 
-$finishpause=strtotime($row['finishtrackpause']);
-$collecttime=strtotime($row['collectiondate']); 
-$delivertime=strtotime($row['ShipDate']);
-
-
-if (($startpause > '10') and ( $finishpause < '10')) {
-    $delivertime=$startpause;
-} 
-if ($startpause <'10') {
-    $startpause='9999999999';
-}
-if (($row['status']<'86') and ($delivertime < '200')) {
-    $delivertime='9999999999';
-} 
-if ($row['status']<'50') {
-    $delivertime='0';
-}
-if ($collecttime < '10') {
-    $collecttime='9999999999';
-}
-
-$findlast="SELECT * FROM `instamapper` 
-WHERE `device_key` = '$thistrackerid' 
-AND `timestamp` > '$collecttime' 
-AND `timestamp` NOT BETWEEN '$startpause' 
-AND '$finishpause' 
-AND `timestamp` < '$delivertime' 
-ORDER BY `timestamp` ASC 
-LIMIT 1"; 
-
-
-// echo $findlast;
-
-
-$sql_result = mysql_query($findlast,$conn_id)  or mysql_error(); 
-    while ($foundlast = mysql_fetch_array($sql_result)) {
+    
+    if (date('U', strtotime($row['deliveryworkingwindow']))>10) {
+        $deliverytext= time2str($row['deliveryworkingwindow']);
+        $bhtext=(array_search((substr($row['deliveryworkingwindow'],0,10)), $bankholdata));
+        if ($bhtext) { $deliverytext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
+    } else {
+        $deliverytext=time2str(($row['duedate']));
+        $bhtext=(array_search((substr($row['duedate'],0,10)), $bankholdata));
+        if ($bhtext) { $deliverytext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
+    }
+    
+    
+    if (date('U', strtotime($row['collectiondate']))>10) {
+        $collectiondatetext= time2str($row['collectiondate']);
+        $bhtext=(array_search((substr($row['collectiondate'],0,10)), $bankholdata));
+        if ($bhtext) { $collectiondatetext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
+    } else {
+        $collectiondatetext='';
+    }
+    
+    
+    if (date('U', strtotime($row['ShipDate']))>10) {
+        $ShipDatetext= time2str($row['ShipDate']);
+        $bhtext=(array_search((substr($row['ShipDate'],0,10)), $bankholdata));
+        if ($bhtext) { $ShipDatetext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
+    } else {
+        $ShipDatetext='';
+    }
+    
+    
+    echo '
+        <script>
+        $("#collectiontext").html("'.$collectiontext.'"); 
+        $("#collectiondatetext").html("'.$collectiondatetext.'");
+        $("#deliverytext").html("'.$deliverytext.'");
+        $("#ShipDatetext").html("'.$ShipDatetext.'");
+        $("#totaltime").html("'.$lengthtext.'");
+        </script>';
+    
+    $mainareaname=$row['opsname'];
+    $subareaname=$row['subareaname'];
+    
+    $thistrackerid=$row['trackerid'];
+    
+    
+    $startpause=strtotime($row['starttrackpause']); 
+    $finishpause=strtotime($row['finishtrackpause']);
+    $collecttime=strtotime($row['collectiondate']); 
+    $delivertime=strtotime($row['ShipDate']);
+    
+    
+    if (($startpause > '10') and ( $finishpause < '10')) {
+        $delivertime=$startpause;
+    } 
+    if ($startpause <'10') {
+        $startpause='9999999999';
+    }
+    if (($row['status']<'86') and ($delivertime < '200')) {
+        $delivertime='9999999999';
+    } 
+    if ($row['status']<'50') {
+        $delivertime='0';
+    }
+    if ($collecttime < '10') {
+        $collecttime='9999999999';
+    }
+    
+    
+    // start of tracking script
+    $sql = "SELECT latitude, longitude, speed, timestamp 
+    FROM `instamapper`  
+    WHERE `device_key` = ?
+    AND `timestamp` > ?
+    AND `timestamp` NOT BETWEEN ? AND ?
+    AND `timestamp` < ?
+    ORDER BY `timestamp` ASC"; 
+    
+    
+    $statement = $dbh->prepare($sql);
+    $statement->execute([$thistrackerid,$collecttime,$startpause,$finishpause,$delivertime]);
+    if (!$statement) throw new Exception("Query execution error.");
+    $tracking = $statement->fetchAll();
+    
+    
+    
+    if (($tracking) or ($row['opsname'])) {
+        $areajs='';
+        $orderjs='';
+        $max_lat = '-99999';
+        $min_lat =  '99999';
+        $max_lon = '-99999';
+        $min_lon =  '99999';
+        $btmdescrip='';
+        $topdescrip=''; 
+        $checkifarchivearea='';
         
-        extract($foundlast);
-        $englishfirst= date('H:i jS', $foundlast['timestamp']);
-        $englishfirstda= date('H:i', $foundlast['timestamp']);
-        $englishfirstd= date('jS', $foundlast['timestamp']);
-}
-
-
-$findlast="SELECT * FROM `instamapper` 
-WHERE `device_key` = '$thistrackerid' 
-AND `timestamp` > '$collecttime' 
-AND `timestamp` NOT BETWEEN '$startpause' 
-AND '$finishpause' 
-AND `timestamp` < '$delivertime' 
-ORDER BY `timestamp` DESC 
-LIMIT 1";
-
-$sql_result = mysql_query($findlast,$conn_id)  or mysql_error(); 
-while ($foundlast = mysql_fetch_array($sql_result)) {
-    extract($foundlast);
-    $englishlast= date('H:i', $foundlast['timestamp']); 
-    $englishlastd=date('jS', $foundlast['timestamp']);
-    $englishlastda=date('H:i jS', $foundlast['timestamp']);    
-    if ($englishlastd==$englishfirstd) {
-        $trackingtext= ' ' . $englishfirstda . '-' . $englishlast . '';
-    }
-    else {
-        $trackingtext= ' ' . $englishfirst . ' - ' . $englishlastda . '';
-    }
-}
-  
- 
-
-// start of tracking script
-$sql = "SELECT latitude, longitude, speed, timestamp 
-FROM `instamapper`  
-WHERE `device_key` = '$thistrackerid' 
-AND `timestamp` > '$collecttime' 
-AND `timestamp` NOT BETWEEN '$startpause' AND '$finishpause' 
-AND `timestamp` < '$delivertime' 
-ORDER BY `timestamp` ASC"; 
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-
-$lattot='0'; 
-$lontot='0'; 
-$sumtot=mysql_affected_rows(); 
-
-if (($sumtot>'0.5') or ($row['opsmaparea'] <>'')) {
-
-
-    $areajs='';
-    $orderjs='';
-    $max_lat = '-99999';
-    $min_lat =  '99999';
-    $max_lon = '-99999';
-    $min_lon =  '99999';
-    $btmdescrip='';
-    $topdescrip=''; 
-    $checkifarchivearea='';
-    
-    
-    
-    if ($sumtot>'0.5') {
-    
-        $linecoords='';
-        $latestlat=	'';
-        $latestlon='';
-        $loop='';
+        if ($tracking) {
         
-        $orderjs=' var locations = [';
-        $prevts='';
-        $i=0;
-        while ($map = mysql_fetch_array($sql_result)) {
-            extract($map); 
-    
-            $map['latitude']=round($map['latitude'],5);
-            $map['longitude']=round($map['longitude'],5);
+            $linecoords='';
+            $latestlat=	'';
+            $latestlon='';
+            $loop='';
             
-            if($map['longitude']>$max_lon) { $max_lon = $map['longitude']; }
-            if($map['longitude']<$min_lon) { $min_lon = $map['longitude']; }
-            if($map['latitude']>$max_lat)  { $max_lat = $map['latitude']; }
-            if($map['latitude']<$min_lat)  { $min_lat = $map['latitude']; }
+            $orderjs=' var locations = [';
+            $prevts='';
+            $i=0;
             
-            $i++;
-            $thispc='';
-            $linecoords=$linecoords.' ['.$map['latitude'] . "," . $map['longitude'].'],';
-            $lattot=$lattot+$map['latitude'];
-            $lontot=$lontot+$map['longitude'];
-            $thists=date('H:i A D j M ', $map['timestamp']);
-            
-            if ($thists<>$prevts) {
-                $comments=date('H:i D j M ', $map['timestamp']).'<br />';
-                $oGC = new GeoCalc();
-                $dRadius = '0.15'; 
-                $dLongitude = $map['longitude'];
-                $dLatitude = $map['latitude'];
-                $dAddLat = $oGC->getLatPerKm() * $dRadius;
-                $dAddLon = $oGC->getLonPerKmAtLat($dLatitude) * $dRadius;
-                $dNorthBounds = $dLatitude + $dAddLat;
-                $dSouthBounds = $dLatitude - $dAddLat;
-                $dWestBounds = $dLongitude - $dAddLon;
-                $dEastBounds = $dLongitude + $dAddLon;
-                $strQuery = "SELECT PZ_northing, PZ_easting, PZ_Postcode FROM postcodeuk " .
-                            "WHERE PZ_northing > $dSouthBounds " .
-                            "AND PZ_northing < $dNorthBounds " .
-                            "AND PZ_easting > $dWestBounds " .
-                            "AND PZ_easting < $dEastBounds";
-                $trsql_result = mysql_query($strQuery,$conn_id)  or mysql_error(); 
-                $trsumtot=mysql_affected_rows(); 
-                $dDist='99999999999';
-                $startdit='9999999999999';
-                while ($trrow = mysql_fetch_array($trsql_result)) {
-                    extract($trrow);
-                    $oGC = new GeoCalc(); 
-                    $dDist = $oGC->EllipsoidDistance($map["latitude"],$map["longitude"],$trrow["PZ_northing"],$trrow["PZ_easting"]);
-                    if ($dDist<$startdit) {
-                        $dDist=$startdit; $thispc=$trrow['PZ_Postcode'];
-                        $start= substr($thispc, 0, -3); 
-                        $cyclistpos= $start.' '.substr($thispc, -3); // 'ies'
-                    }
-                }
-            
-                if (isset($cyclistpos)) {
-                    $comments.=''.$cyclistpos.'     ';
-                }
-            
-                if ($map['speed']) {
-                    $comments.=''. round($map['speed']);
-                    if ($globalprefrow['distanceunit']=='miles') {
-                        $comments.= 'mph ';
-                    }
-                    if ($globalprefrow['distanceunit']=='km') {
-                        $comments.= 'km ph ';
-                    }
-                }
-            
-                $orderjs.= "['" . $comments ."',". $map['latitude'] . "," . $map['longitude'] . "," .$postedid.'-'. $i ."],"; 
-                $prevts=date('H:i A D j M ', $map['timestamp']); 
+            foreach ($tracking as $map) {
+                $i++;
                 
-                $latestlat=$latestlat+$map['latitude'];
-                $latestlon=$latestlon+$map['longitude'];
-                $loop++;
-            
-            } // checks timestamp different
-        } // finished waypoint loop
-        $lattot=($latestlat / $loop );
-        $lontot=($latestlon / $loop );
-    
-        //	echo ' i is '.$i;
-            
-        $orderjs.=  '  ]; var lineCoordinates = ['.$linecoords. '];
-    
-    
-    
-    var gmarkers = [];
-    for (var j = 0; j < lineCoordinates.length; j++) {
-            var lat = lineCoordinates[j][0];
-            var lng = lineCoordinates[j][1];
-            var marker = new google.maps.LatLng(lat, lng);
-        gmarkers.push(marker);
-    }
-    
-    
-    var line = new google.maps.Polyline({
-        path: gmarkers,
-        geodesic: true,
-        strokeOpacity: 0.7,
-        icons: [{
-        icon: lineSymbol,
-        repeat: "50px"
-        }],
-        map: map
-    });
-    
-    
-    var image = {
-        url: "'. $globalprefrow['clweb3'].'",
-        size: new google.maps.Size(20, 20),
-        origin: new google.maps.Point(0,0),
-        anchor: new google.maps.Point(10, 10)
-    };  
-    
-        var infowindow = new google.maps.InfoWindow();
-    
-        var marker, i;
-        for (i = 0; i < locations.length; i++) {  
-        marker = new google.maps.Marker({
-            position: new google.maps.LatLng(locations[i][1], locations[i][2]),
-            map: map,
-                icon: image,
-        });
-        google.maps.event.addListener(marker, "mouseover", (function(marker, i) {
-            return function() {
-            infowindow.setContent(" <div style=\" width: 110px; \"> "+locations[i][0] + " </div> " );
-            infowindow.setOptions({ disableAutoPan: true });
-            infowindow.open(map, marker);
-            }
-        })(marker, i));
-        }';
+                $map['latitude']=round($map['latitude'],5);
+                $map['longitude']=round($map['longitude'],5);
+                
+                if($map['longitude']>$max_lon) { $max_lon = $map['longitude']; }
+                if($map['longitude']<$min_lon) { $min_lon = $map['longitude']; }
+                if($map['latitude']>$max_lat)  { $max_lat = $map['latitude']; }
+                if($map['latitude']<$min_lat)  { $min_lat = $map['latitude']; }
+                
+                $thispc='';
+                $linecoords.= ' ['.$map['latitude'] . "," . $map['longitude'].'],';
+                $lattot=$lattot+$map['latitude'];
+                $lontot=$lontot+$map['longitude'];
+                $thists=date('H:i A D j M ', $map['timestamp']);
+                
+                if ($thists<>$prevts) {
+                    if ($i==1){
+                        $englishfirst= date('H:i jS', $map['timestamp']);
+                        $englishfirstda= date('H:i', $map['timestamp']);
+                        $englishfirstd= date('jS', $map['timestamp']);
+                    }
+                    
+                    $englishlast= date('H:i', $map['timestamp']); 
+                    $englishlastd=date('jS', $map['timestamp']);
+                    $englishlastda=date('H:i jS', $map['timestamp']); 
+                    
+                    $comments=date('H:i D j M ', $map['timestamp']).'<br />';
+                    $oGC = new GeoCalc();
+                    $dRadius = '0.1'; 
+                    $dLongitude = $map['longitude'];
+                    $dLatitude = $map['latitude'];
+                    $dAddLat = $oGC->getLatPerKm() * $dRadius;
+                    $dAddLon = $oGC->getLonPerKmAtLat($dLatitude) * $dRadius;
+                    $dNorthBounds = $dLatitude + $dAddLat;
+                    $dSouthBounds = $dLatitude - $dAddLat;
+                    $dWestBounds = $dLongitude - $dAddLon;
+                    $dEastBounds = $dLongitude + $dAddLon;
+
+                    $trsumtot=0;
+                    
+                    
+                    $beer = "   SELECT PZ_Postcode, 
+                    ( 3959 * acos( cos( radians(?) ) * cos( radians( PZ_northing ) ) * cos( radians( PZ_easting ) - radians(?) ) + sin( radians(?) ) * sin( radians( PZ_northing ) ) ) ) AS distance ,
+                    PZ_easting
+                    FROM postcodeuk 
+                    WHERE PZ_northing > ?
+                    AND PZ_northing < ?
+                    AND PZ_easting < ? 
+                    AND PZ_easting > ?
+                    ORDER BY distance 
+                    LIMIT 1; ";
+
+                    $cbstmt = $dbh->prepare($beer);
+                    $cbstmt->execute([$map["latitude"],$map["longitude"],$map["latitude"],$dSouthBounds,$dNorthBounds,$dWestBounds,$dEastBounds]);
+                    $data = $cbstmt->fetchAll();
+
+
+                    if ($data) {
+                        $thispc=$data[0][PZ_Postcode];
+                        $start= substr($thispc, 0, -3); 
+                        $cyclistpos= $start.' '.substr($thispc, -3);
+                        $comments.=''.$cyclistpos.'     ';
+                    }
+
+                    // echo $trsumtot.' ';
+                
+                    if ($map['speed']) {
+                        $comments.=''. round($map['speed']);
+                        if ($globalprefrow['distanceunit']=='miles') {
+                            $comments.= 'mph ';
+                        }
+                        if ($globalprefrow['distanceunit']=='km') {
+                            $comments.= 'km ph ';
+                        }
+                    }
+                
+                    $orderjs.= "['" . $comments ."',". $map['latitude'] . "," . $map['longitude'] . "," .$postedid.'-'. $i ."],"; 
+                    $prevts=date('H:i A D j M ', $map['timestamp']); 
+                    
+                    $latestlat=$latestlat+$map['latitude'];
+                    $latestlon=$latestlon+$map['longitude'];
+                    $loop++;
+                
+                } // checks timestamp different
+            } // finished waypoint loop
+            $lattot=($latestlat / $loop );
+            $lontot=($latestlon / $loop );
         
-    } // ends sumtot > 0.5 rider tracking
+            //	echo ' i is '.$i;
+                
+            $orderjs.=  '  ]; var lineCoordinates = ['.$linecoords. '];
+        
+        
+        
+        var gmarkers = [];
+        for (var j = 0; j < lineCoordinates.length; j++) {
+                var lat = lineCoordinates[j][0];
+                var lng = lineCoordinates[j][1];
+                var marker = new google.maps.LatLng(lat, lng);
+            gmarkers.push(marker);
+        }
+        
+        var line = new google.maps.Polyline({
+            path: gmarkers,
+            geodesic: true,
+            strokeOpacity: 0.7,
+            icons: [{
+            icon: lineSymbol,
+            repeat: "50px"
+            }],
+            map: map
+        });
+        
+        
+        var image = {
+            url: "'. $globalprefrow['clweb3'].'",
+            size: new google.maps.Size(20, 20),
+            origin: new google.maps.Point(0,0),
+            anchor: new google.maps.Point(10, 10)
+        };  
+        
+            var infowindow = new google.maps.InfoWindow();
+        
+            var marker, i;
+            for (i = 0; i < locations.length; i++) {  
+            marker = new google.maps.Marker({
+                position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+                map: map,
+                    icon: image,
+            });
+            google.maps.event.addListener(marker, "mouseover", (function(marker, i) {
+                return function() {
+                infowindow.setContent(" <div style=\" width: 110px; \"> "+locations[i][0] + " </div> " );
+                infowindow.setOptions({ disableAutoPan: true });
+                infowindow.open(map, marker);
+                }
+            })(marker, i));
+            }';
+            
+        } // ends sumtot > 0.5 rider tracking
+        
     
+        if ($row['opsname'] <>'') {
+            $areajs.= ' var worldCoords = [
+            new google.maps.LatLng(85,180),
+            new google.maps.LatLng(85,90),
+            new google.maps.LatLng(85,0),
+            new google.maps.LatLng(85,-90),
+            new google.maps.LatLng(85,-180),
+            new google.maps.LatLng(0,-180),
+            new google.maps.LatLng(-85,-180),
+            new google.maps.LatLng(-85,-90),
+            new google.maps.LatLng(-85,0),
+            new google.maps.LatLng(-85,90),
+            new google.maps.LatLng(-85,180),
+            new google.maps.LatLng(0,180),
+            new google.maps.LatLng(85,180)]; ';
     
+            $areaid=$row['opsmaparea'];
+            if ($row['POLY']) {
+                $p=$row['POLY'];
+                $trans = array("POLYGON" => "", "((" => "", "))" => "");
+                $p= strtr($p, $trans);
+                $pexploded=explode( ',', $p );
     
-    
-
-
-    if ($row['opsmaparea'] <>'') {
-        $areajs.= ' var worldCoords = [
-    new google.maps.LatLng(85,180),
-	new google.maps.LatLng(85,90),
-	new google.maps.LatLng(85,0),
-	new google.maps.LatLng(85,-90),
-	new google.maps.LatLng(85,-180),
-	new google.maps.LatLng(0,-180),
-	new google.maps.LatLng(-85,-180),
-	new google.maps.LatLng(-85,-90),
-	new google.maps.LatLng(-85,0),
-	new google.maps.LatLng(-85,90),
-	new google.maps.LatLng(-85,180),
-	new google.maps.LatLng(0,180),
-	new google.maps.LatLng(85,180)]; ';
-
-
-        $areaid=$row['opsmaparea'];
-        $result = mysql_query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=".$areaid);
-        if (mysql_num_rows($result)) {
-            $score = mysql_fetch_assoc($result);
-            $p=$score['POLY'];
-            $trans = array("POLYGON" => "", "((" => "", "))" => "");
-            $p= strtr($p, $trans);
-            $pexploded=explode( ',', $p );
-
-            $areajs.= ' var polymarkers'.$areaid.' = [ ';
-            foreach ($pexploded as $v) {
-                $transf = array(" " => ",");
-                $v= strtr($v, $transf);
-                $areajs.= ' new google.maps.LatLng('.$v.'),';
-	
-	
-                if ($row['opsmapsubarea'] <1) { // show bounds of sub area instead
-                    $vexploded=explode( ',', $v );
-                    $tmpi='1';
-                    foreach ($vexploded as $testcoord) {
-                        if ($tmpi % 2 == 0) {
-                            if ($testcoord>$max_lon) { $max_lon = $testcoord; }
-                            if ($testcoord<$min_lon) { $min_lon = $testcoord; }
+                $areajs.= ' var polymarkers'.$areaid.' = [ ';
+                foreach ($pexploded as $v) {
+                    $transf = array(" " => ",");
+                    $v= strtr($v, $transf);
+                    $areajs.= ' new google.maps.LatLng('.$v.'),';
+        
+        
+                    if ($row['opsmapsubarea'] <1) { // show bounds of sub area instead
+                        $vexploded=explode( ',', $v );
+                        $tmpi='1';
+                        foreach ($vexploded as $testcoord) {
+                            if ($tmpi % 2 == 0) {
+                                if ($testcoord>$max_lon) { $max_lon = $testcoord; }
+                                if ($testcoord<$min_lon) { $min_lon = $testcoord; }
+                            }
+                            else { 
+                                if ($testcoord>$max_lat) { $max_lat = $testcoord; }
+                                if ($testcoord<$min_lat) { $min_lat = $testcoord; }
+                            }
+                            $tmpi++;
                         }
-                        else { 
-                            if ($testcoord>$max_lat) { $max_lat = $testcoord; }
-                            if ($testcoord<$min_lat) { $min_lat = $testcoord; }
-                        }
-                        $tmpi++;
                     }
                 }
-            }
+    
+                $areajs = rtrim($areajs, ','); 
+    
+                $areajs.=' ]; ';
+    
+                //  strokeColor: "#FF0000",
+    
+                $areajs.=' 
+                    poly'.$areaid.' = new google.maps.Polygon({
+                    paths: [worldCoords, polymarkers'.$areaid.'],
+                    strokeWeight: 3,
+                    strokeOpacity: 0.6,
+                    fillColor: "#667788",
+                    fillOpacity: 0.2,
+                    strokeColor: "#000000",
+                    clickable:false,
+                    map:map
+                    }); ';
+            } // ends top layer
+    
+    
+    
+            if ($row['SUBPOLY']) {
+                $areaid=$row['opsmapsubarea'];
 
-            $areajs = rtrim($areajs, ','); 
-
-            $areajs.=' ]; ';
-  
-            //  strokeColor: "#FF0000",
-
-            $areajs.=' 
-                poly'.$areaid.' = new google.maps.Polygon({
-                paths: [worldCoords, polymarkers'.$areaid.'],
-                strokeWeight: 3,
-                strokeOpacity: 0.6,
-                fillColor: "#667788",
-                fillOpacity: 0.2,
-                strokeColor: "#000000",
-                clickable:false,
-                map:map
-                }); ';
-        } // ends top layer
-
-
-
-
-
-        if ($row['opsmapsubarea']>'0') {
-            $areaid=$row['opsmapsubarea'];
-            $result = mysql_query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=".$areaid);
-            if (mysql_num_rows($result)) {
-                $score = mysql_fetch_assoc($result);
-                $p=$score['POLY'];
+                $p=$row['SUBPOLY'];
                 $trans = array("POLYGON" => "", "((" => "", "))" => "");
                 $p= strtr($p, $trans);
                 $pexploded=explode( ',', $p );
@@ -561,7 +537,7 @@ if (($sumtot>'0.5') or ($row['opsmaparea'] <>'')) {
                     }
                 } // ends each in array
                 $areajs = rtrim($areajs, ','); 
-                $areajs=$areajs.' ]; ';
+                $areajs.= ' ]; ';
     
                 //  strokeColor: "#FF0000",
     
@@ -576,601 +552,579 @@ if (($sumtot>'0.5') or ($row['opsmaparea'] <>'')) {
                 clickable: false,
                 map: map
                 }); ';
+
+                $lilquery = "SELECT opsmapid, opsname, descrip, AsText(g) AS POLY FROM opsmap WHERE opsmapid<> ? AND corelayer=?";
+                $cbstmt = $dbh->prepare($lilquery);
+                $cbstmt->execute([$row['opsmapsubarea'],$row['opsmaparea']]);        
+            }
+            else { // else no subarea
+                $lilquery = "SELECT opsmapid, opsname, descrip, AsText(g) AS POLY FROM opsmap WHERE inarchive=0 AND corelayer=?";
+                $cbstmt = $dbh->prepare($lilquery);
+                $cbstmt->execute([$row['opsmaparea']]);
+            }
+
+
+            $lildata = $cbstmt->fetchAll();
+            $lilareaarray=[];
     
-            } // ends main sub area
+            if ($lildata) {
+                foreach ($lildata as $lilrow ) {  
     
+                    $lilareaid=$lilrow['opsmapid'];
+                    $lilareaarray[]=$lilrow['opsmapid'];
+                    $lilareaname=$lilrow['opsname'];
+                    $lilareadescrip=$lilrow['descrip'];
+                    $p=$lilrow['POLY'];
+                    
+                    $trans = array("POLYGON" => "", "((" => "", "))" => "");
+                    $p= strtr($p, $trans);
+                    $pexploded=explode( ',', $p );
+                    $areajs.='  var polymarkers'.$lilareaid.' = [ ';
+                    foreach ($pexploded as $v) {
+                        $transf = array(" " => ",");
+                        $v= strtr($v, $transf);
+                        $areajs.=' new google.maps.LatLng('.$v.'),';
+                    } // ends each in array
+        
+                    $areajs = rtrim($areajs, ',') . '    ]; 
+        
+                    poly'.$lilareaid.' = new google.maps.Polygon({
+                    paths: [polymarkers'.$lilareaid.'],
+                    strokeWeight: 3,
+                    strokeOpacity: 0.3,
+                    strokeColor: "#000000",
+                    fillOpacity: 0,
+                    clickable: false,
+                    map: map
+                    });
+        
+                    var bounds'.$lilareaid.' = new google.maps.LatLngBounds();
+                    var i;  
+                    for (i = 0; i < polymarkers'.$lilareaid.'.length; i++) {
+                        bounds'.$lilareaid.'.extend(polymarkers'.$lilareaid.'[i]);
+                    }
+                    
+                    var cent=(bounds'.$lilareaid.'.getCenter());
+        
+                    marker'.$lilareaid.' = new RichMarker({
+                    position: cent,
+                    flat: true,
+                    map: map,
+                    draggable: false,
+                    content: '; 
+                    $areajs.= "'";
+                    $areajs.= '<div class="map-sub-area-label"><a href="opsmap-new-area.php?areaid='.$lilareaid.'">'.$lilareaname.'</a></div>';
+                    $areajs.= "'";
+                    $areajs.= '});';
+                } // ends lil area row extract
+            } // ends check lil sum tot
+        } // ends main area
     
-            $lilquery = "SELECT * FROM opsmap WHERE opsmapid<>".$row['opsmapsubarea']." AND corelayer=".$row['opsmaparea']; 
-    
+        
+        
+        
+        if ($englishlastd==$englishfirstd) {
+            $trackingtext= ' ' . $englishfirstda . '-' . $englishlast . '';
         }
-        else { // else no subarea
-            $lilquery = "SELECT * FROM opsmap WHERE corelayer=".$row['opsmaparea'];
+        else {
+            $trackingtext= ' ' . $englishfirst . ' - ' . $englishlastda . '';
+        }    
+        
+        if ($tracking) {
+            echo '<div class="fsl">Tracking</div><div id="map-comments" >'.$trackingtext.' '.$i.' waypoints, '.$loop.' infopoints.</div>';
+        }    
+        
+        
+    
+        echo '
+        <div id="map-container" >
+        <div class="btn-full-screen" >
+        <button id="btn-enter-full-screen" title="Full Screen Map"> &nbsp; </button>
+        <button id="mylocation" title="Current Position"> &nbsp; </button>
+        <button id="btn-exit-full-screen" title="Exit Full Screen"> </button>
+        <button id="printbutton" title="Print Map" > </button>
+        <input id="geocodeaddress" title="Address Search" type="text" placeholder="Search Map" class="ui-state-default ui-corner-all" />
+        <div class="printinfo">
+        <img alt="'.$globalprefrow['globalshortname'].' Logo" src="'.$globalprefrow['adminlogo'].'" />
+        <p>'. date('l jS M Y', strtotime($row['targetcollectiondate'])).'</p>';
+    
+        if ($row['opsname'])  {
+            echo '<p>'.$row['opsname'];
+            echo '</p>';
         }
-
-        $lilsql_result = mysql_query ($lilquery, $conn_id) or mysql_error();  
-        $lilsumtot=mysql_affected_rows();
-
-        // echo ' alert(" on '.$opsname.' '.$sumtot.' found '.$query.'"); ';
-
-        $lilareaarray=[];
-
-        if ($lilsumtot>'0') {
-            while ($lilrow = mysql_fetch_array($lilsql_result)) {
-                extract($lilrow); 
-
-                $lilareaid=$lilrow['opsmapid'];
-                $lilareaarray[]=$lilrow['opsmapid'];
-                $lilareaname=$lilrow['opsname'];
-                $lilareadescrip=$lilrow['descrip'];
     
-                $lilresult = mysql_query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=".$lilareaid);
-    
-                $score = mysql_fetch_assoc($lilresult);
-                $p=$score['POLY'];
-                $trans = array("POLYGON" => "", "((" => "", "))" => "");
-                $p= strtr($p, $trans);
-                $pexploded=explode( ',', $p );
-                $areajs.='  var polymarkers'.$lilareaid.' = [ ';
-                foreach ($pexploded as $v) {
-                    $transf = array(" " => ",");
-                    $v= strtr($v, $transf);
-                    $areajs.=' new google.maps.LatLng('.$v.'),';
-                } // ends each in array
-    
-                $areajs = rtrim($areajs, ',') . '    ]; 
-    
-                poly'.$lilareaid.' = new google.maps.Polygon({
-                paths: [polymarkers'.$lilareaid.'],
-                strokeWeight: 3,
-                strokeOpacity: 0.3,
-                strokeColor: "#000000",
-                fillOpacity: 0,
-                clickable: false,
-                map: map
-                });
-    
-                var bounds'.$lilareaid.' = new google.maps.LatLngBounds();
-                var i;  
-                for (i = 0; i < polymarkers'.$lilareaid.'.length; i++) {
-                    bounds'.$lilareaid.'.extend(polymarkers'.$lilareaid.'[i]);
-                }
-                
-                
-                var cent=(bounds'.$lilareaid.'.getCenter());
-    
-                marker'.$lilareaid.' = new RichMarker({
-                position: cent,
-                flat: true,
-                map: map,
-                draggable: false,
-                content: '; 
-                $areajs.= "'";
-                $areajs.= '<div class="map-sub-area-label"><a href="opsmap-new-area.php?areaid='.$lilareaid.'">'.$lilareaname.'</a></div>';
-                $areajs.= "'";
-                $areajs.= '});';
-            } // ends lil area row extract
-        } // ends check lil sum tot
-    } // ends main area
-
-
-    if ($sumtot>'0.5') {
-        echo '<div class="fsl">Tracking</div><div id="map-comments" >'.$trackingtext.' '.$sumtot.' waypoints, '.$loop.' infopoints.</div>';
-    }    
-    
-    
-    
-    
-
-    echo '
-    <div id="map-container" >
-    <div class="btn-full-screen" >
-    <button id="btn-enter-full-screen" title="Full Screen Map"> &nbsp; </button>
-    <button id="mylocation" title="Current Position"> &nbsp; </button>
-    <button id="btn-exit-full-screen" title="Exit Full Screen"> </button>
-    <button id="printbutton" title="Print Map" > </button>
-    <input id="geocodeaddress" title="Address Search" type="text" placeholder="Search Map" class="ui-state-default ui-corner-all" />
-    <div class="printinfo">
-    <img alt="'.$globalprefrow['globalshortname'].' Logo" src="'.$globalprefrow['adminlogo'].'" />
-    <p>'. date('l jS M Y', strtotime($row['targetcollectiondate'])).'</p>';
-
-    if ($mainareaname)  {
-        echo '<p>'.$mainareaname;
-        if ($mainareadescrip)  {
-    //        echo '('.$mainareadescrip.')';
-        } echo '</p>';
-    }
- 
-    // sub area name & comments in brackets go here
-    if ($subareaname) {
-        echo '<p> '.$subareaname;
-        if ($subareadescrip) {
-    //        echo ' ('.$subareadescrip.') ';
+        // sub area name & comments in brackets go here
+        if ($subareaname) {
+            echo '<p> '.$subareaname;
+            echo '</p>';
         }
-        echo '</p>';
-    }
- 
-    echo '<p> '.$postedid.' </p>';
-
-    if ($row['CyclistID']<>'1') { echo '<p> '.$row['cojmname'].' </p>'; }
-
-
-    echo '</div>
-    </div>
-    <div class="ordermap" id="ordermap" ></div>';
-
-
- 
-
     
-    echo ' </div> ';
- 
-
-    if (!$min_lat) { $min_lat=0; }
- 
- ?>
-<script>
- 
- $("#orderajaxmap").removeClass("hideuntilneeded");
- 
-// $("#geocodeaddress").hide();
-var element = document.getElementById("ordermap");
-var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"];
-var map = new google.maps.Map(element, {
-    center: new google.maps.LatLng('. $lattot . ',' . $lontot.'),
-    zoom: 11,
-    mapTypeId: "OSM",
-    scaleControl: true,
-    mapTypeControl: true,
-    mapTypeControlOptions: {
-        mapTypeIds: mapTypeIds,
-        style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
-    }
-});
-	
-map.mapTypes.set("OSM", new google.maps.ImageMapType({
-    getTileUrl: function(coord, zoom) {
-        return "https://a.tile.openstreetmap.org/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-    },
-    tileSize: new google.maps.Size(256, 256),
-    name: "OSM",
-    alt: "Open Street Map",
-    maxZoom: 19
-}));	
-	
-map.mapTypes.set("OCM", new google.maps.ImageMapType({
-    getTileUrl: function(coord, zoom) {
-        return "https://a.tile.thunderforest.com/cycle/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-    },
-    tileSize: new google.maps.Size(256, 256),
-    name: "OCM",
-    alt: "Open Cycle Map",
-    maxZoom: 20
-}));
-		
-var osmcopyr='<span class=\"inlinemapcopy\" > &copy; <a style=\"color:#444444\" href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">OpenStreetMap</a> contributors</span> ';
-
-var outerdiv = document.createElement("div");
-
-outerdiv.className  = "outerdiv";
-outerdiv.style.fontSize = "10px";
-outerdiv.style.opacity = "0.7";
-outerdiv.style.whiteSpace = "nowrap";
-outerdiv.style.padding = "0px 0px 0px 6px";
-		
-map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(outerdiv);	
-
-google.maps.event.addListener( map, "maptypeid_changed", function() {
-    var checkmaptype = map.getMapTypeId();
-    if ( checkmaptype=="OSM" || checkmaptype=="OCM") { 
-        $("div.outerdiv").html(osmcopyr);
-        $("span.printcopyr").html(" " + osmcopyr+ " ");
-    }
-    else { 
-        $("div.outerdiv").text("");
-        $("span.printcopyr").html(" Map Data &copy; Google Maps ");
-    }
-});
-
-
-// if OSM / OCM set as default, show copyright
-$(document).ready(function() {
-    setTimeout(function() {
-        $("div.outerdiv").html(osmcopyr);
-        $("span.printcopyr").html(" " + osmcopyr + " " );
-    },3000);
-});
-
-var lineSymbol = {
-    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-    strokeOpacity: 0.3
-};
- 
- 
-bounds = new google.maps.LatLngBounds();
-bounds.extend(new google.maps.LatLng(<?php echo $max_lat.', '.$min_lon; ?>)); // upper left
-bounds.extend(new google.maps.LatLng(<?php echo $max_lat.', '.$max_lon; ?>)); // upper right
-bounds.extend(new google.maps.LatLng(<?php echo $min_lat.', '.$max_lon; ?>)); // lower right
-bounds.extend(new google.maps.LatLng(<?php echo $min_lat.', '.$min_lon; ?>)); // lower left
-map.fitBounds(bounds);
-
-	
-if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-    currentpositionsuccess,errorCallback_highAccuracy,{
-        maximumAge:600000,
-        timeout:5000,
-        enableHighAccuracy: true
-    }); 
-
-} else {
-    error("Geo Location is not supported");
-}
-
-function currentpositionsuccess(position) {
-   mycoords = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-    var mypositionimage = {
-        url: "../images/bluedot.png",
-        scaledSize: new google.maps.Size(26, 26), // scaled size
-        origin: new google.maps.Point(0,0),
-        anchor: new google.maps.Point(13, 13)
-    }; 
-    mymarker = new google.maps.Marker({
-        position: mycoords,
-        map: map,
-        title:"Accurate to "+ position.coords.accuracy + "m",
-        icon: mypositionimage,
-        clickable:true
+        echo '<p> '.$postedid.' </p>';
+    
+        if ($row['CyclistID']<>'1') { echo '<p> '.$row['cojmname'].' </p>'; }
+    
+    
+        echo '</div>
+        </div>
+        <div class="ordermap" id="ordermap" ></div>';
+    
+        echo ' </div> ';
+    
+    
+        if (!$min_lat) { $min_lat=0; }
+    
+    ?>
+    <script>
+    
+    $("#orderajaxmap").removeClass("hideuntilneeded");
+    
+    // $("#geocodeaddress").hide();
+    var element = document.getElementById("ordermap");
+    var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"];
+    var map = new google.maps.Map(element, {
+        center: new google.maps.LatLng('. $lattot . ',' . $lontot.'),
+        zoom: 11,
+        mapTypeId: "OSM",
+        scaleControl: true,
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            mapTypeIds: mapTypeIds,
+            style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+        }
+    });
+        
+    map.mapTypes.set("OSM", new google.maps.ImageMapType({
+        getTileUrl: function(coord, zoom) {
+            return "https://a.tile.openstreetmap.org/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
+        },
+        tileSize: new google.maps.Size(256, 256),
+        name: "OSM",
+        alt: "Open Street Map",
+        maxZoom: 19
+    }));	
+        
+    map.mapTypes.set("OCM", new google.maps.ImageMapType({
+        getTileUrl: function(coord, zoom) {
+            return "https://a.tile.thunderforest.com/cycle/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
+        },
+        tileSize: new google.maps.Size(256, 256),
+        name: "OCM",
+        alt: "Open Cycle Map",
+        maxZoom: 20
+    }));
+            
+    var osmcopyr='<span class=\"inlinemapcopy\" > &copy; <a style=\"color:#444444\" href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">OpenStreetMap</a> contributors</span> ';
+    
+    var outerdiv = document.createElement("div");
+    
+    outerdiv.className  = "outerdiv";
+    outerdiv.style.fontSize = "10px";
+    outerdiv.style.opacity = "0.7";
+    outerdiv.style.whiteSpace = "nowrap";
+    outerdiv.style.padding = "0px 0px 0px 6px";
+            
+    map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(outerdiv);	
+    
+    google.maps.event.addListener( map, "maptypeid_changed", function() {
+        var checkmaptype = map.getMapTypeId();
+        if ( checkmaptype=="OSM" || checkmaptype=="OCM") { 
+            $("div.outerdiv").html(osmcopyr);
+            $("span.printcopyr").html(" " + osmcopyr+ " ");
+        }
+        else { 
+            $("div.outerdiv").text("");
+            $("span.printcopyr").html(" Map Data &copy; Google Maps ");
+        }
     });
     
-    $("#mylocation").click(function() {	map.panTo(mycoords); });
-	$('#mylocation').prop('title', "Accurate to "+ position.coords.accuracy + "m");	
-	
-	
-	setInterval(function() { // runs once a minute to get latest position
-		   $("#mylocation").show();
-    navigator.geolocation.getCurrentPosition(changesuccess, errorCallback_highAccuracy,{
-        maximumAge:600000,
-        timeout:30000,
-        enableHighAccuracy: true});
-    }, 60 * 1000); // 60 * 1000 milsec       
-}
- 
- 
-function zeroPad(num, places) {
-  var zero = places - num.toString().length + 1;
-  return Array(+(zero > 0 && zero)).join("0") + num;
-}
- 
- 
-function changesuccess(position) { // runs once a min of geolocation supported
-
-// alert(" function changesuccess has fired ");	 
-	 var currentdate = new Date(); 
-	 
- mycoords = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
- mytitle= "Accurate to " + position.coords.accuracy + "m, updated " + zeroPad(currentdate.getHours(), 2) + ":"  + zeroPad(currentdate.getMinutes(), 2);
-mymarker.setPosition(mycoords);  
-mymarker.setTitle(mytitle);
-
-    var latitude = position.coords.latitude;
-    var longitude = position.coords.longitude;
-		$('#mylocation').prop('title', mytitle);
-		    $("#mylocation").css({ opacity: "1"});
-  }
-  
-
-function errorCallback_highAccuracy(position) {
-	     $("#mylocation").css({ opacity: "0.4"});
-		 $('#mylocation').prop('title', 'Unable to locate you');
-}
-
-
-
-var googleMapWidth = $("#ordermap").css("width");
-var googleMapHeight = $("#ordermap").css("height");
-
-//Used for centering the map on print
-function center_map(size) {
-    lastPos = map.getCenter(); 
-    if (lastPos != null) {
-        swapStyleSheet("css/fullscreenmap.css");
-        $("#ordermap").css({
-            height: "700px",
-            width: "1050px"
+    
+    // if OSM / OCM set as default, show copyright
+    $(document).ready(function() {
+        setTimeout(function() {
+            $("div.outerdiv").html(osmcopyr);
+            $("span.printcopyr").html(" " + osmcopyr + " " );
+        },1000);
+    });
+    
+    var lineSymbol = {
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        strokeOpacity: 0.3
+    };
+    
+    
+    bounds = new google.maps.LatLngBounds();
+    bounds.extend(new google.maps.LatLng(<?php echo $max_lat.', '.$min_lon; ?>)); // upper left
+    bounds.extend(new google.maps.LatLng(<?php echo $max_lat.', '.$max_lon; ?>)); // upper right
+    bounds.extend(new google.maps.LatLng(<?php echo $min_lat.', '.$max_lon; ?>)); // lower right
+    bounds.extend(new google.maps.LatLng(<?php echo $min_lat.', '.$min_lon; ?>)); // lower left
+    map.fitBounds(bounds);
+    
+        
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+        currentpositionsuccess,errorCallback_highAccuracy,{
+            maximumAge:600000,
+            timeout:5000,
+            enableHighAccuracy: true
+        }); 
+    
+    } else {
+        error("Geo Location is not supported");
+    }
+    
+    function currentpositionsuccess(position) {
+    mycoords = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        var mypositionimage = {
+            url: "../images/bluedot.png",
+            scaledSize: new google.maps.Size(26, 26), // scaled size
+            origin: new google.maps.Point(0,0),
+            anchor: new google.maps.Point(13, 13)
+        }; 
+        mymarker = new google.maps.Marker({
+            position: mycoords,
+            map: map,
+            title:"Accurate to "+ position.coords.accuracy + "m",
+            icon: mypositionimage,
+            clickable:true
         });
         
+        $("#mylocation").click(function() {	map.panTo(mycoords); });
+        $('#mylocation').prop('title', "Accurate to "+ position.coords.accuracy + "m");	
+        
+        
+        setInterval(function() { // runs once a minute to get latest position
+            $("#mylocation").show();
+        navigator.geolocation.getCurrentPosition(changesuccess, errorCallback_highAccuracy,{
+            maximumAge:600000,
+            timeout:30000,
+            enableHighAccuracy: true});
+        }, 60 * 1000); // 60 * 1000 milsec       
+    }
+    
+    
+    function zeroPad(num, places) {
+    var zero = places - num.toString().length + 1;
+    return Array(+(zero > 0 && zero)).join("0") + num;
+    }
+    
+    
+    function changesuccess(position) { // runs once a min of geolocation supported
+    
+        // alert(" function changesuccess has fired ");	 
+        var currentdate = new Date(); 
+    
+        mycoords = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        mytitle= "Accurate to " + position.coords.accuracy + "m, updated " + zeroPad(currentdate.getHours(), 2) + ":"  + zeroPad(currentdate.getMinutes(), 2);
+        mymarker.setPosition(mycoords);  
+        mymarker.setTitle(mytitle);
+        var latitude = position.coords.latitude;
+        var longitude = position.coords.longitude;
+        $('#mylocation').prop('title', mytitle);
+        $("#mylocation").css({ opacity: "1"});
+    }
+    
+    
+    function errorCallback_highAccuracy(position) {
+            $("#mylocation").css({ opacity: "0.4"});
+            $('#mylocation').prop('title', 'Unable to locate you');
+    }
+    
+    
+    
+    var googleMapWidth = $("#ordermap").css("width");
+    var googleMapHeight = $("#ordermap").css("height");
+    
+    //Used for centering the map on print
+    function center_map(size) {
+        lastPos = map.getCenter(); 
+        if (lastPos != null) {
+            swapStyleSheet("css/fullscreenmap.css");
+            $("#ordermap").css({
+                height: "700px",
+                width: "1050px"
+            });
+            
+            $(".printinfo").css({
+                display: "block"
+            });
+            
+            $("#map-container").css({
+                top: "0" });
+        <?php
+        if ($areaid) { // set fill options for print view
+            echo 'poly'.$areaid.'.setOptions({
+                fillColor: "white",
+                fillOpacity: 0.5,
+            });';
+        }	
+            ?>
+            google.maps.event.trigger(map, "resize");
+            map.setCenter(lastPos);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    
+    function loadPrint() {
+        window.print();
+        setTimeout(function () {
+            
+    <?php	if ($areaid) {
+                echo '
+            poly'.$areaid.'.setOptions({
+            fillColor: "#667788",
+            fillOpacity: 0.4,
+            clickable: false
+            }); ';
+            }
+    ?>
+    
+        swapStyleSheet("<?php echo $globalprefrow['glob10']; ?>");
+    
         $(".printinfo").css({
-            display: "block"
+            display: "none"
         });
         
         $("#map-container").css({
-            top: "0" });
-	<?php
-	if ($areaid) { // set fill options for print view
-        echo 'poly'.$areaid.'.setOptions({
-            fillColor: "white",
-            fillOpacity: 0.5,
-        });';
-    }	
-		?>
+            top: "36px",
+            height: "calc (100% - 36px)"
+        });
+        
+        $("#ordermap").css({
+            height: "100%",
+            width: "100%"
+        });
+            
+            
+        $("#btn-exit-full-screen").toggle();
+        $("#printbutton").toggle();
+    
         google.maps.event.trigger(map, "resize");
         map.setCenter(lastPos);
-        return true;
+        
+        }, 100);
     }
-    else {
-        return false;
-    }
-}
-  
-function loadPrint() {
-    window.print();
-    setTimeout(function () {
-		
-<?php	if ($areaid) {
-            echo '
-        poly'.$areaid.'.setOptions({
-		fillColor: "#667788",
-		fillOpacity: 0.4,
-		clickable: false
-		}); ';
-		}
-?>
-
-    swapStyleSheet("<?php echo $globalprefrow['glob10']; ?>");
-
-	$(".printinfo").css({
-		display: "none"
-	});
     
-    $("#map-container").css({
-        top: "36px",
-        height: "calc (100% - 36px)"
-    });
+    $("#printbutton").click(function() {
+            
+        $("#btn-exit-full-screen").toggle();
+        $("#printbutton").toggle();
+        $("#geocodeaddress").hide();
+        
+        if (center_map(800)) {
+        
+        google.maps.event.addListenerOnce(map, "tilesloaded", function(){
+            google.maps.event.addListenerOnce(map, "idle", function(){		
+        
+            window.setTimeout(loadPrint, 100);  
+        
+            });
+            });	  
     
-    $("#ordermap").css({
-        height: "100%",
-        width: "100%"
-    });
-		
-		
-    $("#btn-exit-full-screen").toggle();
-    $("#printbutton").toggle();
-
-    google.maps.event.trigger(map, "resize");
-    map.setCenter(lastPos);
-	
-	}, 100);
-}
- 
-$("#printbutton").click(function() {
-		
-    $("#btn-exit-full-screen").toggle();
-    $("#printbutton").toggle();
-	$("#geocodeaddress").hide();
-	
-     if (center_map(800)) {
-   	
-    google.maps.event.addListenerOnce(map, "tilesloaded", function(){
-		google.maps.event.addListenerOnce(map, "idle", function(){		
-	
-		  window.setTimeout(loadPrint, 100);  
-	  
-		});
-		 });	  
-
-    document.getElementById("ordermap").style.height = googleMapHeight + "px";
-    document.getElementById("ordermap").style.width = googleMapWidth + "px";		
-		
-     }
-  });
-	
-$("#btn-enter-full-screen").click(function() {
-
-
-    var menuheight=0;
-    var screenheight=$(window).height();
-    $(".top_menu_line").each(function( index ) {
-        if ($(this).is(':visible')) {
-            menuheight = menuheight + $( this ).height();
-        } 
-    });
-    screenheight = screenheight - menuheight;   
-
-
-
-    $("#map-container").css({
-        position: "fixed",
-        left: "0",
-		top: menuheight,
-        width: "100%",
-        backgroundColor: "white",
-		height: screenheight
-    });
-
-    $("#ordermap").css({
-        height: "100%"
-    });
-
-    google.maps.event.trigger(map, "resize");
-	map.fitBounds(bounds);
-
-    // Gui
-    $("#btn-enter-full-screen").toggle();
-    $("#btn-exit-full-screen").toggle();
-	$("#geocodeaddress").show();
-    $("#printbutton").toggle();
-	$("#back-top").css({
-		position: "unset"
-	});
-	
-	$(document).keyup(function(e) {
-     if (e.keyCode == 27) { // escape key maps to keycode `27`
-//	 alert(" escape pressed ");
-	 	 $("#btn-exit-full-screen").trigger("click");
-    }
-});	
-    return false;
-});
-
-$("#btn-exit-full-screen").click(function() {
-
-    $("#map-container").css({
-        position: "relative",
-        top: 0,
-        width: googleMapWidth,
-        height: googleMapHeight,
-        backgroundColor: "transparent"
-    });
-
-    google.maps.event.trigger(map, "resize");
-	map.fitBounds(bounds);
-
-    // Gui
-    $("#btn-enter-full-screen").show();
-    $("#btn-exit-full-screen").hide();
-	$("#printbutton").hide();
-	$("#geocodeaddress").hide();
-	$("#back-top").css({
-		position: "fixed"
-	});
-    return false;
-});
-  
-function swapStyleSheet(sheet){
-	document.getElementById("pagestyle").setAttribute("href", sheet);
-}
- 
-<?php   echo $areajs.$orderjs; ?>
-
-
-
- geocoder = new google.maps.Geocoder(); 
- $("#geocodeaddress").change(function (e) {
-    // e == our event data
-    e.preventDefault();
-	var addtocheck=$("#geocodeaddress").val();
-    geocoder.geocode( { 
-	"address": addtocheck + " , UK ",
-	"region":   "uk",
-	"bounds": bounds 
-	}, function(results, status) {
-        if (status == google.maps.GeocoderStatus.OK) {
-          if (status != google.maps.GeocoderStatus.ZERO_RESULTS) {
-          map.setCenter(results[0].geometry.location);
-            var infowindow = new google.maps.InfoWindow(
-                { content: "<div class='info'>"+addtocheck+"</div>",
-				    position: results[0].geometry.location,
-                map: map
-                });
-			infowindow.open(map);
-          } else {
-            alert("No results found");
-          }
-        } else {
-          alert("Search was not successful : " + status);
+        document.getElementById("ordermap").style.height = googleMapHeight + "px";
+        document.getElementById("ordermap").style.width = googleMapWidth + "px";		
+            
         }
-      });
-});
-
-
-
-</script>
-<?php
-
+    });
+        
+    $("#btn-enter-full-screen").click(function() {
+    
+    
+        var menuheight=0;
+        var screenheight=$(window).height();
+        $(".top_menu_line").each(function( index ) {
+            if ($(this).is(':visible')) {
+                menuheight = menuheight + $( this ).height();
+            } 
+        });
+        screenheight = screenheight - menuheight;   
+    
+    
+    
+        $("#map-container").css({
+            position: "fixed",
+            left: "0",
+            top: menuheight,
+            width: "100%",
+            backgroundColor: "white",
+            height: screenheight
+        });
+    
+        $("#ordermap").css({
+            height: "100%"
+        });
+    
+        google.maps.event.trigger(map, "resize");
+        map.fitBounds(bounds);
+    
+        // Gui
+        $("#btn-enter-full-screen").toggle();
+        $("#btn-exit-full-screen").toggle();
+        $("#geocodeaddress").show();
+        $("#printbutton").toggle();
+        $("#back-top").css({
+            position: "unset"
+        });
+        
+        $(document).keyup(function(e) {
+        if (e.keyCode == 27) { // escape key maps to keycode `27`
+    //	 alert(" escape pressed ");
+            $("#btn-exit-full-screen").trigger("click");
+        }
+    });	
+        return false;
+    });
+    
+    $("#btn-exit-full-screen").click(function() {
+    
+        $("#map-container").css({
+            position: "relative",
+            top: 0,
+            width: googleMapWidth,
+            height: googleMapHeight,
+            backgroundColor: "transparent"
+        });
+    
+        google.maps.event.trigger(map, "resize");
+        map.fitBounds(bounds);
+    
+        // Gui
+        $("#btn-enter-full-screen").show();
+        $("#btn-exit-full-screen").hide();
+        $("#printbutton").hide();
+        $("#geocodeaddress").hide();
+        $("#back-top").css({
+            position: "fixed"
+        });
+        return false;
+    });
+    
+    function swapStyleSheet(sheet){
+        document.getElementById("pagestyle").setAttribute("href", sheet);
+    }
+    
+    <?php   echo $areajs.$orderjs; ?>
+    
+    
+    
+    geocoder = new google.maps.Geocoder(); 
+    $("#geocodeaddress").change(function (e) {
+        // e == our event data
+        e.preventDefault();
+        var addtocheck=$("#geocodeaddress").val();
+        geocoder.geocode( { 
+        "address": addtocheck + " , UK ",
+        "region":   "uk",
+        "bounds": bounds 
+        }, function(results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+            if (status != google.maps.GeocoderStatus.ZERO_RESULTS) {
+            map.setCenter(results[0].geometry.location);
+                var infowindow = new google.maps.InfoWindow(
+                    { content: "<div class='info'>"+addtocheck+"</div>",
+                        position: results[0].geometry.location,
+                    map: map
+                    });
+                infowindow.open(map);
+            } else {
+                alert("No results found");
+            }
+            } else {
+            alert("Search was not successful : " + status);
+            }
+        });
+    });
+    
+    
+    
+    </script>
+    <?php
+    
+    
+    }
+    else { // no tracking OR maps
+        
+    echo '<script>
+    $("#orderajaxmap").addClass("hideuntilneeded");
+    </script>';	
+        
+    }
+    
 
 }
-else { // no tracking OR maps
-	
-echo '<script>
-$("#orderajaxmap").addClass("hideuntilneeded");
-</script>';	
-	
-}
 
-
-
-
-
-
-
-
-
- 
-	function time2str($ts)
-	{
-		if(!ctype_digit($ts))
-			$ts = strtotime($ts);
-
-
-// echo ' cj 5643 ';		
-		
-		$tempdaydiff=date('z', $ts)-date('z');
-		
-// echo $tempday.' '.date('z');		// passed date day
-		
-// 		$tempday<>date('z', $ts)
-		
-//		$tempnay
-		
-		
-//		echo $tempdaydiff;
-		
-		
-		$diff = time() - $ts;
-		if($diff == 0)
-			return 'now';
-		elseif($diff > 0)
-		{
-			$day_diff = floor($diff / 86400);
-			if($day_diff == 0)
-			{
-				if($diff < 60) return ' Just now. ';
-				if($diff < 120) return ' 1 min ago. ';
-				if($diff < 3600) return ' '.floor($diff / 60) . ' min ago. ';
-				if($diff < 7200) return ' 1 hr, ' . floor(($diff-3600) / 60) . ' min ago. ';
-				
-				
-			if($diff < 86400) return floor($diff / 3600) . ' hours ago';
-			
-			}
-			
-			if($tempdaydiff=='-1') { return 'Yesterday '. date('A', $ts).'. '; }
-			
-//			if($day_diff == 1) return 'Yesterday';
-			if($day_diff < 7) return ' Last '. date('D A', $ts).'. ';
-			
-			//date('D', $ts).' '. $day_diff . ' days ago';
-	
-
-	if($day_diff < 31) return date('D', $ts).' '. ceil($day_diff / 7) . ' weeks ago. ';
-			if($day_diff < 60) return 'Last month';
-			return date('D M Y', $ts);
-		}
-		else
-		{
-			$diff = abs($diff);
-			$day_diff = floor($diff / 86400);
-			if($day_diff == 0)
-			{
-				if($diff < 120) return 'In a minute';
-				if($diff < 3600) return 'In ' . floor($diff / 60) . ' mins. ';
-				if($diff < 7200) { return ' 1hr, ' . floor(($diff-3600) / 60) . ' mins. '; }
-			//	if(($diff < 86400) and ($tempday<>date('z', $ts))) {  return ' Tomorrow ';    }
-				
-				if($diff < 86400) return ' ' . floor($diff / 3600) . ' hrs. ';
-			}
-			if($tempdaydiff == 1) return ' Tomorrow '. date('A', $ts).'. ';
-			if($day_diff < 4) return date(' D A', $ts);
-			if($day_diff < 7 + (7 - date('w'))) return date('D ', $ts).'next week. ';
-			if(ceil($day_diff / 7) < 4) return date('D ', $ts).' in ' . ceil($day_diff / 7) . ' weeks. ';
-			if(date('n', $ts) == date('n') + 1) return date('D', $ts).' next month. ';
-			return date('D M Y', $ts);
-		}
-	}
-
-//////////////////     ENDS RELATIVE DATE FUNCTION                ////////////////////////////////
- 
-
-$dbh=null;
+function time2str($ts) {
+            if(!ctype_digit($ts))
+                $ts = strtotime($ts);
+    
+    
+    // echo ' cj 5643 ';		
+            
+            $tempdaydiff=date('z', $ts)-date('z');
+            
+    // echo $tempday.' '.date('z');		// passed date day
+            
+    // 		$tempday<>date('z', $ts)
+            
+    //		$tempnay
+            
+            
+    //		echo $tempdaydiff;
+            
+            
+            $diff = time() - $ts;
+            if($diff == 0)
+                return 'now';
+            elseif($diff > 0)
+            {
+                $day_diff = floor($diff / 86400);
+                if($day_diff == 0)
+                {
+                    if($diff < 60) return ' Just now. ';
+                    if($diff < 120) return ' 1 min ago. ';
+                    if($diff < 3600) return ' '.floor($diff / 60) . ' min ago. ';
+                    if($diff < 7200) return ' 1 hr, ' . floor(($diff-3600) / 60) . ' min ago. ';
+                    
+                    
+                if($diff < 86400) return floor($diff / 3600) . ' hours ago';
+                
+                }
+                
+                if($tempdaydiff=='-1') { return 'Yesterday '. date('A', $ts).'. '; }
+                
+    //			if($day_diff == 1) return 'Yesterday';
+                if($day_diff < 7) return ' Last '. date('D A', $ts).'. ';
+                
+                //date('D', $ts).' '. $day_diff . ' days ago';
+        
+    
+        if($day_diff < 31) return date('D', $ts).' '. ceil($day_diff / 7) . ' weeks ago. ';
+                if($day_diff < 60) return 'Last month';
+                return date('D M Y', $ts);
+            }
+            else
+            {
+                $diff = abs($diff);
+                $day_diff = floor($diff / 86400);
+                if($day_diff == 0)
+                {
+                    if($diff < 120) return 'In a minute';
+                    if($diff < 3600) return 'In ' . floor($diff / 60) . ' mins. ';
+                    if($diff < 7200) { return ' 1hr, ' . floor(($diff-3600) / 60) . ' mins. '; }
+                //	if(($diff < 86400) and ($tempday<>date('z', $ts))) {  return ' Tomorrow ';    }
+                    
+                    if($diff < 86400) return ' ' . floor($diff / 3600) . ' hrs. ';
+                }
+                if($tempdaydiff == 1) return ' Tomorrow '. date('A', $ts).'. ';
+                if($day_diff < 4) return date(' D A', $ts);
+                if($day_diff < 7 + (7 - date('w'))) return date('D ', $ts).'next week. ';
+                if(ceil($day_diff / 7) < 4) return date('D ', $ts).' in ' . ceil($day_diff / 7) . ' weeks. ';
+                if(date('n', $ts) == date('n') + 1) return date('D', $ts).' next month. ';
+                return date('D M Y', $ts);
+            }
+        }
+  
 
 ?>

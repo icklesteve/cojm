@@ -144,11 +144,12 @@ $(document).ready(function() {
         "&orderid=" + orderid + 
         "&showtimes=" + showtimes + 
         "&showdebug=" + showdebug +
-        "&showpageviews=" + showpageviews;
+        "&showpageviews=" + showpageviews +
+        "&lookuppage=cojmaudit";
 
         $.ajax({
             type: "POST",
-            url:"ajaxaudit.php",
+            url:"ajax_lookup.php",
             data: dataString,
             success: function (data){
                 $("#content").html(data)
@@ -185,5 +186,5 @@ if (isset($_GET['orderid'])) { // check for 1st time form submittal
 <?php
 
 include 'footer.php';
-mysql_close();  
+
 echo '</body></html>';

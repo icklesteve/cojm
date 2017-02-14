@@ -27,7 +27,6 @@ include "C4uconnect.php";
 
 if ($globalprefrow['forcehttps']>'0') { if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
 $hasforms='1';
-$bottomhtml='';
 $favcomments='';
 $pcrow1["PZ_easting"]='';
 $trackingtext='';
@@ -44,82 +43,26 @@ $subareacomments='';
 include "changejob.php";
 
 
-function time2str($ts) { //Relative Date Function  // used in order.php and ajaxordermap
-	if(!ctype_digit($ts)) {
-           $ts = strtotime($ts); 
-       }		
-	$tempdaydiff=date('z', $ts)-date('z');
-	
-	$diff = time() - $ts;
-	if($diff == 0){	
-           return 'now'; 
-       }
-	elseif($diff > 0)
-	{
-		$day_diff = floor($diff / 86400);
-		if($day_diff == 0)
-		{
-			if($diff < 60) return ' Just now. ';
-			if($diff < 120) return ' 1 min ago. ';
-			if($diff < 3600) return ' '.floor($diff / 60) . ' min ago. ';
-			if($diff < 7200) return ' 1 hr, ' . floor(($diff-3600) / 60) . ' min ago. ';
-			if($diff < 86400) return floor($diff / 3600) . ' hours ago';
-		}
-		if($tempdaydiff=='-1') { return 'Yesterday '. date('A', $ts).'. '; }
-		if($day_diff < 7) return ' Last '. date('D A', $ts).'. ';
-           if($day_diff < 31) return date('D', $ts).' '. ceil($day_diff / 7) . ' weeks ago. ';
-		if($day_diff < 60) return 'Last month';
-		return date('D M Y', $ts);
-	}
-	else
-	{
-		$diff = abs($diff);
-		$day_diff = floor($diff / 86400);
-		if($day_diff == 0)
-		{
-			if($diff < 120) return 'In a minute';
-			if($diff < 3600) return 'In ' . floor($diff / 60) . ' mins. ';
-			if($diff < 7200) { return ' 1hr, ' . floor(($diff-3600) / 60) . ' mins. '; }
-		//	if(($diff < 86400) and ($tempday<>date('z', $ts))) {  return ' Tomorrow ';    }
-			
-			if($diff < 86400) return ' ' . floor($diff / 3600) . ' hrs. ';
-		}
-		if($tempdaydiff == 1) return ' Tomorrow '. date('A', $ts).'. ';
-		if($day_diff < 4) return date(' D A', $ts);
-		if($day_diff < 7 + (7 - date('w'))) return date('D ', $ts).'next week. ';
-		if(ceil($day_diff / 7) < 4) return date('D ', $ts).' in ' . ceil($day_diff / 7) . ' weeks. ';
-		if(date('n', $ts) == date('n') + 1) return date('D', $ts).' next month. ';
-		return date('D M Y', $ts);
-	}
-}
 
 
 $query = "SELECT *
 FROM Orders
 INNER JOIN Clients 
 INNER JOIN Services 
-INNER JOIN status 
 INNER JOIN Cyclist 
+INNER JOIN status 
 left join clientdep ON Orders.orderdep = clientdep.depnumber
 WHERE Orders.CustomerID = Clients.CustomerID 
-AND Orders.ServiceID = Services.ServiceID 
-AND Orders.status = status.status
+AND Orders.ServiceID = Services.ServiceID
 AND Orders.CyclistID = Cyclist.CyclistID
+AND Orders.status = status.status
 AND Orders.ID = ? LIMIT 0,1";
-
-
-
-
-// add placeholders + titles to most elements
-
 
 
 $parameters = array($id);
 $statement = $dbh->prepare($query);
 $statement->execute($parameters);
 $row = $statement->fetch(PDO::FETCH_ASSOC);
-
-
 
 $cojmid=$id;
 
@@ -134,11 +77,6 @@ $cojmid=$id;
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <link id="pagestyle" rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
-<style>
-
-  
-  
-</style>
 <?php 
 if ($row['ID']) {
     
@@ -147,30 +85,11 @@ if ($row['ID']) {
     $stmt->bindParam(':getid', $row['publictrackingref'], PDO::PARAM_INT); 
     $stmt->execute();
     $haspod = $stmt->rowCount();
-    
-    
-    
-    
-    
-    
-    
     $formbirthday=microtime(TRUE);
 
-    
-    
-    $CollectPC=trim($row['CollectPC']);
-    $ShipPC=trim($row['ShipPC']);
-    $prShipPC= str_replace(" ", "+", "$ShipPC");
-    $prCollectPC= str_replace(" ", "+", "$CollectPC");
-    $linkfafrom=trim($row['fromfreeaddress']);
-    $linkfafrom= str_replace(" ", "+", "$linkfafrom");
-
-    
 
     ?>
 <script>
-
-
 var id='<?php echo $row['ID']; ?>';
 var publictrackingref='<?php echo $row['publictrackingref']; ?>';
 var allok=1;
@@ -210,11 +129,22 @@ var podsurname="<?php echo $row['podsurname']; ?>";
 var waitingtimedelay=<?php echo $globalprefrow['waitingtimedelay']; ?>;
 var initialjobcomments<?php if ($row["jobcomments"]) { echo '=1'; } ?>;
 var initialprivatejobcomments<?php if ($row["privatejobcomments"]) { echo '=1'; } ?>;
-</script>
+var googlemapapiv3key="<?php echo $globalprefrow['googlemapapiv3key']; ?>";
+var canshowareafromservice<?php if ($row['canhavemap']) { echo '=1'; } ?>;
 
-<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;key=<?php echo $globalprefrow['googlemapapiv3key']; ?>" type="text/javascript"defer ></script>
-<script src="js/order.js" type="text/javascript" defer></script>
-<script src="js/richmarker.js" type="text/javascript" defer></script>
+function downloadJSAtOnload() {
+ var element = document.createElement("script");
+ element.src = "js/order.js";
+ document.body.appendChild(element);
+ }
+ 
+ if (window.addEventListener)
+ window.addEventListener("load", downloadJSAtOnload, false);
+ else if (window.attachEvent)
+ window.attachEvent("onload", downloadJSAtOnload);
+ else window.onload = downloadJSAtOnload;
+
+</script>
 <style>
 /* starts spinner on page load, only for ajax pages  */
 #toploader { display:block; }
@@ -234,450 +164,329 @@ if ($row['ID']) {
     echo '<div id="Post" class="Post lh24 clearfix';
     if ($row['status']>99) { echo ' complete'; }
     
-    echo '">';
-
-    if ($row['status']<'100') { // get rid of this when fully ajaxed :-)
-    echo '<form action="order.php#" method="post" accept-charset="utf-8" id="allorder" novalidate>
-        <input type="hidden" name="formbirthday" form="allorder" value="'. date("U").'">
-        <input type="hidden" name="id" id="id" form="allorder" value="'.$row['ID'].'">
-        <input type="hidden" name="page" form="allorder" value="edituidate"></form>';
-    }
-
-
-    echo '
+    echo '">
     <div class="hangleft">
     <div class="ui-corner-all ui-state-highlight addresses" >
     <div class="fs">
     <div class="fsl">';
+    
+    // echo 'innacpc is '. $globalprefrow['inaccuratepostcode'];
+      
+    $enrpc0=trim($row['enrpc0']);
+    $prenrpc0= str_replace(" ", "+", "$enrpc0");
+    $linkfafrom=trim($row['enrft0']);
+    $linkfafrom= str_replace(" ", "+", "$linkfafrom");
 
+    
+    $enrpc21=trim($row['enrpc21']);
+    $prenrpc21= str_replace(" ", "+", "$enrpc21", $count);
+    $prfreea=trim($row["enrft21"]);
+    $prfreea= str_replace(" ", "+", "$prfreea", $count);
+    $tolinktxt='';
+    
+    
+        if (($globalprefrow['inaccuratepostcode'])=='0') {
+        $pcenrpc0= str_replace(" ", "", "$enrpc0", $count);
+        if (trim($row['enrpc0'])) {
+            $sql = 'SELECT PZ_northing FROM  `postcodeuk` WHERE  `PZ_Postcode` LIKE ? LIMIT 0 , 1';  
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute([$pcenrpc0]);
+            $frompcondb = $stmt->fetchAll();
+        }
+        
+        
+        
+        
+        $pcprenPC= str_replace(" ", "", "$enrpc21", $count);
+        if (trim($pcprenPC)) {
+            $sql = 'SELECT PZ_northing FROM  `postcodeuk` WHERE  `PZ_Postcode` LIKE ? LIMIT 0 , 1';  
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute([$pcprenPC]);
+            $enrpc21ondb = $stmt->fetchAll();
+        }
+    
+        
+        
+        
+        
+    }
+    
 
-    if ((trim($CollectPC)<>'') or (trim($row['fromfreeaddress'])<>'')) {
+    if (($enrpc0) or ($linkfafrom)) {
 
 
         if ($globalprefrow["inaccuratepostcode"]=='1') {
-            $fromfreeaddresslink=trim($row["fromfreeaddress"]);
-            $fromfreeaddresslink= str_replace(" ", "+", "$fromfreeaddresslink");
-            $tofreeaddresslink=trim($row["tofreeaddress"]);
-            $tofreeaddresslink= str_replace(" ", "+", "$tofreeaddresslink");
-            echo ' <a title="View in Maps" class="newwin" target="_blank" href="https://www.google.co.uk/maps/?q='. 
-            $fromfreeaddresslink.'+'.$prCollectPC .'">From</a> ';
+            $pulinktxt =  $linkfafrom.'+'.$prenrpc0;
         } 
         else { // accurate postcode
-            if ($prCollectPC) {
-                echo ' <a title="View in Maps" target="_blank" class="newwin" href="https://www.google.co.uk/maps/?q='. 
-                $prCollectPC .'">From</a> ';
+            if ($prenrpc0) {
+                $pulinktxt= $prenrpc0;
             }
         }
-    } // ends check for pc or freetext
+    }
 
+    
+    
+    
 
+    
+    if (($enrpc21) or ($prfreea)) {
+        if ((($globalprefrow['inaccuratepostcode'])=='0') and ($enrpc21)) {
+            $tolinktxt=$prenrpc21;
+        }
+        if ((($globalprefrow['inaccuratepostcode'])=='1') and (($enrpc21) or ($prfreea))) {
+            $tolinktxt = $prfreea.'+'.$prenrpc21.' ';
+        }
+    }
+    
+    
+    
+    echo ' <a id="viewinmap0" title="View in Maps" target="_blank" class="newwin';
+    if (!$pulinktxt) {
+        echo ' hideuntilneeded';
+    }
+    echo '" href="https://'.$globalprefrow['addresssearchlink'].$pulinktxt.'">PU</a> ';
+    
+    
 
-    if ((trim($row['fromfreeaddress'])) or (trim($row['CollectPC']))) {
-        $sql = "SELECT * FROM cojm_favadr WHERE 
-                favadrft = '".$row["fromfreeaddress"]."' 
-                AND favadrclient= '".$row['CustomerID']."'
-                AND favadrpc= '".$row['CollectPC']."'
-                AND favadrisactive='1' 
-                LIMIT 1";
-        $sql_result = mysql_query($sql,$conn_id) or mysql_error(); 
-        $favadrrow=mysql_fetch_array($sql_result);
-        if ($favadrrow['favadrft']==$row["fromfreeaddress"]) { // echo ' found '; 
-            $favf=$favadrrow['favadrid'];
-            $favcomments=$favadrrow['favadrcomments'];
+    if ((trim($row['enrft0'])) or (trim($row['enrpc0']))) {
+        $sql = 'SELECT favadrcomments FROM cojm_favadr WHERE 
+            favadrft = ?
+            AND favadrclient= ?
+            AND favadrpc= ?
+            AND favadrisactive="1" 
+            LIMIT 0 , 1';  
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute([$row["enrft0"],$row['CustomerID'],$row['enrpc0']]);
+        $favadrrow = $stmt->fetchAll();
+        if ($favadrrow) {
+        $newfavf=0;
+        $favcomments=$favadrrow[0]['favadrcomments'];
         } 
         else {
-            $newfavf='1';
-            echo' <input class="favadr" type="submit" form="newfavcollect" value="Add to Favourites"  title="Add to Favourites" />';
+            $newfavf=1;
         } // ends found / not found
     } // ends check for address to check
+    
+
+    echo '<button id="editfav0" title="Add / Edit Favourite" class="editfav';
+    if ((!trim($row['enrft0'])) and (!trim($row['enrpc0']))) {
+        echo ' hideuntilneeded';
+    }
+    
+    
+    if ($newfavf<>0) {
+        echo ' newfav';
+    }
+    
+    
+    
+    echo '"> Edit Favourite </button>';
+    
 
  
+    echo '<button class="chngfav';
+    if ($row['status']>99) { echo ' hideuntilneeded'; }
+    echo '" title="Insert Favourite" id="jschangfavfr"> &nbsp;  </button>
+    </div>
+    <input class="addfield caps ui-state-default ui-corner-left freetext" ';
+    echo 'id="enrft0" type="text" title="Collection Address" placeholder="From . . ." value="'. $row["enrft0"].'" /><input ';
+    echo ' size="9" placeholder="Postcode" class="addfield caps ui-state-default ui-corner-right';
 
-    if ($row['status']<'100') {
-        $activefavs='1'; 
-    } 
-    else {
-        $activefavs='0';
-    }
 
-    if ($activefavs=='1') {
-        echo '<button class="chngfav" title="Change Address" id="jschangfavfr"> &nbsp;  </button>'; 
-    }
-    echo '</div> <input form="allorder" class="allorder caps ui-state-default ui-corner-left freetext" ';
-    echo 'id="fromfreeaddress" type="text" placeholder="From . . ." name="fromfreeaddress" value="'.
-        $row["fromfreeaddress"].'" /><input ';
-    if (($globalprefrow['inaccuratepostcode'])=='0') {
-        if (((!$pcrow1["PZ_easting"]) and (trim($row["fromfreeaddress"]))) or (($sumtot=='0') and (trim($row['CollectPC']))) or ((trim($ShipPC) and (!trim($CollectPC)))))  {
-            echo ' style="'.$globalprefrow['highlightcolourno'].'"';
-        }
-    }
-    echo ' size="9" form="allorder" placeholder="Postcode" class="allorder caps ui-state-default ui-corner-right"';
-    echo ' name="CollectPC" type="text" maxlength="9" value="'.trim($row["CollectPC"]).'">';
-
-    if ($row['status']<'100') { // check to see if postcode on database
-        if (($globalprefrow['inaccuratepostcode'])=='0') {
-            $pcCollectPC= str_replace(" ", "", "$CollectPC", $count);
-            if (trim($row['CollectPC'])) {
-                $sql = 'SELECT PZ_northing FROM  `postcodeuk` WHERE  `PZ_Postcode` LIKE  "'.$pcCollectPC.'" LIMIT 0 , 1';  
-                $result = mysql_query($sql, $conn_id);
-                $sumtot=mysql_affected_rows();
-                if ($sumtot>'0'){ 
-                } 
-                else {
-                    echo ' <a href="newpc.php?selectpc='.trim($row['CollectPC']).'&amp;id='.$row['ID'].'">Add PC</a>';
-                }
-            }
+    if (($globalprefrow['inaccuratepostcode'])==0) {
+        if ((((!trim($row['enrpc0']))) and (trim($row['enrft0']))) or (((trim($row['enrpc0']))) and (!$frompcondb))) {
+                echo ' ui-state-error';
         }
     }
 
-    $ntot=0;
-    $n=1;
-    while ($n<21) {
-        $prenPC=trim($row["enrpc$n"]);
-        $prenFT=trim($row["enrft$n"]);
-        if (($prenPC) or ($prenFT)) {
-            $ntot=$ntot+1;
-        }
-        $n++;
+    
+    echo '" id="enrpc0" type="text" title="Collection Postcode" maxlength="9" value="'.trim($row["enrpc0"]).'">';
+    
+    
+    if (($globalprefrow['inaccuratepostcode'])==0) {    
+        
+        echo ' <button id="addpostcodebutton0" title="Add Postcode" class="addpostcodebutton';
+                
+        if (($frompcondb) or (!trim($row["enrpc0"]))) { 
+            echo ' hideuntilneeded'; 
+        } 
+        
+        echo '"> Add Postcode </button>       ';
+        
     }
-
-    if (($row['status']<'100') or ($ntot>0)) {
-
-    if ($ntot==0) {
-        echo " <span id='togglenr1choose' ><a href='#'>Add via</a></span>";
-        }
+    
+    
+    echo " <button class='activewheneditable addvia";
+    if ($row['status']>99){
+        echo ' hideuntilneeded';
     }
+    echo "' id='togglenr1choose' title='Add Via' > Add via </button>";
 
-    echo '</div> ';
+    echo '</div> 
+    <div id="favcomment0" class="favcomments fsr';
+    if (!$favcomments) { echo ' hideuntilneeded'; }
+    echo '"> '.$favcomments.' </div> ';
 
+    echo '<div id="orderviadiv"></div>';
+    
+ 
+    echo '<div class="fs"><div class="fsl"> '; // starts to address
+    
+    
 
+    
+    echo '<a title="View in Maps" id="viewinmap21" class="newwin';
+    if (!$tolinktxt) {
+        echo ' hideuntilneeded';
+    }
+    echo '" target="_blank" href="https://'.$globalprefrow['addresssearchlink']. $tolinktxt.'">To</a>';
+    
+    
 
-    if ($favcomments) {
-        echo ' <div class="favcomments fsr"> '.$favcomments.' </div> ';
-        }
     $favcomments='';
-
-    if (($row['status']<'100') or ($ntot>0)) { ///  starts via loops
-        if ($ntot==0) {
-            echo '<div id="togglenr1" >'; 
-        }
-        else {
-            echo '<div>';
+    if ((trim($row['enrft21'])) or (trim($row['enrpc21']))) {
+        $sql = 'SELECT favadrcomments FROM cojm_favadr WHERE 
+            favadrft = ?
+            AND favadrclient= ?
+            AND favadrpc= ?
+            AND favadrisactive="1" 
+            LIMIT 0 , 1';  
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute([$row["enrft21"],$row['CustomerID'],$row['enrpc21']]);
+        $favadrrow = $stmt->fetchAll();
+        if ($favadrrow) {        
+            $favcomments=$favadrrow[0]['favadrcomments'];
         }
         
-        $i='1';
-        while ($i<'21') {
-            echo ' <div class="fs"><div class="fsl" > &nbsp; ';  
-            $prenPC=trim($row["enrpc$i"]); 
-            $prenPC=str_replace(" ", "+", "$prenPC", $count);
-            $prenFT=trim($row["enrft$i"]);
-            $prenFT=str_replace(" ", "+", "$prenFT", $count);
-            if (($prenPC) or ($prenFT)) {
-                if ((($globalprefrow['inaccuratepostcode'])=='0') and ($prenPC)) {
-                    echo '<a title="View in Maps" class="newwin" target="_blank" href="https://www.google.co.uk/maps/?q='.
-                    $prenPC.'">via</a> ';
-                }
-                
-                if ((($globalprefrow['inaccuratepostcode'])=='1') and (($prenFT) or ($prenPC))) {
-                    echo '<a title="View in Maps" class="newwin" target="_blank" href="https://www.google.co.uk/maps/?q='.
-                    $prenFT.'%20'.$prenPC.'">via</a> ';
-                }
-            }
-            
-            $favcomments='';
-            if ((trim($row["enrft$i"])) or (trim($row["enrpc$i"]))) {
-                $clientorder=$row['CustomerID'];
-                $fromfreeaddress=$row["enrft$i"];
-                $collectpc=$row["enrpc$i"];
-                $sql = "SELECT * FROM cojm_favadr 
-                WHERE favadrft = '$fromfreeaddress' 
-                AND favadrclient= '$clientorder' 
-                AND favadrpc= '$collectpc'
-                AND favadrisactive='1'
-                LIMIT 1"; 
-                $sql_result = mysql_query($sql,$conn_id) or mysql_error();
-                $favadrrow=mysql_fetch_array($sql_result);
-                if ($favadrrow['favadrft']==$fromfreeaddress) {
-                    $favcomments=$favadrrow['favadrcomments'];
-                }
-                else {
-                    echo'<input class="favadr" type="submit" form="newfavenr'.$i.
-                    '" value="Add to Favourites"  title="Add to Favourites" >';
-
-
-                $bottomhtml.= '<form action="#" id="newfavenr'.$i.'" method="post" >
-                <input type="hidden" name="page" value="editnewfav">
-                <input type="hidden" name="formbirthday" value="'. date("U").'">
-                <input type="hidden" name="clientorder" value="'.$row['CustomerID'].'">
-                <input type="hidden" name="id" value="'.$row['ID'].'">
-                <input type="hidden" name="fromfreeaddress" value="'.$row["enrft$i"].'" />
-                <input type="hidden" name="CollectPC" value="'.$row["enrpc$i"].'" /> </form> ';
-                } // ends found / not found
-            } // ends check for address to check
-
-            if ($activefavs=='1') {
-                echo '<button class="chngfav" title="Change Address" id="jschangfavvia'.$i.'"> &nbsp;  </button>';
-                }
-            echo ' </div>
-            <input placeholder="via . . ." type="text" form="allorder" class="allorder caps ui-state-default ui-corner-left freetext" name="enrft'.$i.'" value="'.$row["enrft$i"].'">
-            <input size="9" form="allorder" ';
-
-            if (($globalprefrow['inaccuratepostcode'])=='0') {
-                if (((!trim($prenPC)) and (trim($row["enrft$i"]))) or (($sumtot=='0') and (trim($prenPC))))  {
-                    echo ' style="'.$globalprefrow['highlightcolourno'].'"';
-                }
-            }
-            echo ' class="allorder caps ui-state-default ui-corner-right" placeholder="Postcode" name="enrpc'.
-            $i.'" type="text" id="TextBox'.$i.'" value="'.$row["enrpc$i"].'">';
-            if (($globalprefrow['inaccuratepostcode'])=='0') { ///  check to see if postcode on database //
-
-                $pcprenPC=trim($row["enrpc$i"]); 
-                $pcprenPC= str_replace(" ", "", "$pcprenPC", $count);
-                if (trim($pcprenPC)) {
-                    $sql = 'SELECT PZ_northing FROM  `postcodeuk` 
-                    WHERE  `PZ_Postcode` LIKE  "'.$pcprenPC.'"
-                    LIMIT 0 , 1';
-                    $result = mysql_query($sql, $conn_id);
-                    $sumtot=mysql_affected_rows();
-                    if ($sumtot>'0'){
-                    }
-                    else {
-                        echo ' <a href="newpc.php?selectpc='.trim($row["enrpc$i"]).'&amp;id='.$row['ID'].'">Add Postcode</a>';
-                    }
-                }
-            } // ends check to see if postcode
-
-            if ($ntot>0) {
-                $ntot--;
-                }
-    
-            // echo ' ntotis '.$ntot;
-    
-            if ($n<'1') {
-                $n='0';
-            }
-    
-            if ($i=='1') {
-                if (($ntot<1) and ($row['status']<'100')) {
-                    echo ' <span id="togglenr2choose"><a href="#">Add more vias</a></span>';
-                }
-                echo'</div>'; 
-    
-                if ($favcomments) {
-                    echo '<div class="favcomments fsr">'. $favcomments .'</div>';
-                }
-                $favcomments='';
-    
-                if ($ntot<1) {
-                    echo '<div id="togglenr2">';
-                } else {
-                        echo '<div>';
-                }
-            }
-            else if ($i=='5') {
-                if (($ntot<1) and ($row['status']<'100')) {
-                    echo ' <span id="togglenr3choose"><a href="#">Add more vias</a></span>';
-                }
-                echo'</div>'; 
-                if ($favcomments) {
-                    echo '<div class="favcomments fsr">'.$favcomments.'</div>';
-                }
-                $favcomments='';
-                
-                if ($ntot<1) {
-                    echo '<div id="togglenr3">';
-                }
-                else {
-                    echo '<div>';
-                }
-            }
-            else if ($i=='10') {
-                if (($ntot<1) and ($row['status']<'100')) {
-                    echo ' <span id="togglenr4choose"><a href="#">Add more vias</a></span>';
-                }
-                echo'</div>'; 
-                if ($favcomments) {
-                    echo '<div class="favcomments fsr">'. $favcomments .'</div>';
-                }
-                $favcomments='';
-                if ($ntot<'1') {
-                    echo '<div id="togglenr4">';
-                }
-                else {
-                    echo '<div>';
-                }
-            }
-            else if ($i=='15') {
-                if (($ntot<1) and ($row['status']<'100')) {
-                    echo ' <span id="togglenr5choose"><a href="#">Add more vias</a></span>';
-                }
-                echo'</div>'; 
-                if ($favcomments) {
-                    echo '<div class="favcomments fsr">'.$favcomments.'</div>';
-                }
-                $favcomments='';
-                
-                if ($ntot<1) {
-                    echo '<div id="togglenr5">';
-                }
-                else {
-                    echo '<div>';
-                }
-            }
-            else {
-                echo '</div>'; 
-                if ($favcomments) {
-                    echo '<div class="favcomments fsr">'. $favcomments .'</div>';
-                }
-                $favcomments='';
-            }
-            
-            $i=$i+'1';
-        } // less than 21 loop
-    
-        echo '</div></div></div></div></div>'; // ends via loops
-    
-    
-    } // ends favourites or job status < 100
-
-
-    /// starts to address
-    $ShipPC=trim($ShipPC);
-    $prShipPC= str_replace(" ", "+", "$ShipPC", $count);
-    $prfreea=trim($row["tofreeaddress"]);
-    $prfreea= str_replace(" ", "+", "$prfreea", $count);
-
-    echo '<div class="fs"><div class="fsl"> ';
-    if (($ShipPC) or ($prfreea)) { 
-        if ((($globalprefrow['inaccuratepostcode'])=='0') and ($ShipPC)) {
-            echo '<a title="View in Maps" class="newwin" target="_blank" href="https://www.google.co.uk/maps/?q='.
-            $prShipPC.'">To</a>';
-        }
-        if ((($globalprefrow['inaccuratepostcode'])=='1') and (($ShipPC) or ($prfreea))) {
-            echo '<a title="View in Maps" class="newwin" target="_blank" href="https://www.google.co.uk/maps/?q='.
-            $prfreea.'%20'.$prShipPC.'">To</a> ';
-        }
-    }
-
-    $favcomments='';
-    if ((trim($row['tofreeaddress'])) or (trim($row['ShipPC']))) {
-        $clientorder=$row['CustomerID'];
-        $fromfreeaddress=$row["tofreeaddress"];
-        $collectpc=$row['ShipPC'];
-        $sql = "SELECT * FROM cojm_favadr WHERE 
-        favadrft = '$fromfreeaddress' 
-        AND favadrclient= '$clientorder'
-        AND favadrpc= '$collectpc'
-        AND favadrisactive='1' 
-        LIMIT 1"; 
-        $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-        $favadrrow=mysql_fetch_array($sql_result);
-        if ($favadrrow['favadrft']==$fromfreeaddress) { // echo ' found '; 
-            $favcomments=$favadrrow['favadrcomments'];
-        }
-        else {
-            $newfavt='1';
-            echo' <input class="favadr" type="submit" form="newfavto" value="Add to Favourites"  title="Add / Edit Favourite" />';
-        } // ends found / not found
     } // ends check for address to check
-
-    if ($activefavs=='1') {
-        echo ' <button class="chngfav" title="Change Address" id="jschangfavto"> &nbsp;  </button> ';
+    
+    
+    echo '<button id="editfav21" title="Add / Edit Favourite" class="editfav';
+    if (!$favadrrow) {
+        echo ' newfav';
     }
+        
+        
+    if ((!(trim($row["enrft21"]))) and (!(trim($row["enrpc21"])))) {        
+        echo ' hideuntilneeded';
+    }
+    echo '"> Add / Edit Favourite </button>';
+    
+    
+    
+    
+    
+    
+
+    echo ' <button class="chngfav';
+    if ($row['status']>99) { echo ' hideuntilneeded'; }
+    echo '" title="Insert Favourite" id="jschangfavto"> &nbsp;  </button> ';
+    
+    
     
     echo ' </div>
-    <input type="text" form="allorder" class="allorder caps ui-state-default ui-corner-left freetext" name="tofreeaddress" placeholder="To . . ." value="'.$row["tofreeaddress"].'"><input placeholder="Postcode" size="9" form="allorder" ';
-    if (($globalprefrow['inaccuratepostcode'])=='0') {
-        if (((!trim($ShipPC)) and (trim($row["tofreeaddress"]))) or (($sumtot=='0') and (trim($ShipPC))) or ((!trim($ShipPC) and (trim($CollectPC))))) {
-            echo 'style="'.$globalprefrow['highlightcolourno'].'"';
-        }
-    }
-    echo ' class="allorder caps ui-state-default ui-corner-right" name="ShipPC" type="text" id="TextBox21" value="'.
-    trim($row["ShipPC"]).'"> ';
     
-    if (($globalprefrow['inaccuratepostcode'])=='0') { // check to see if postcode on database //
-        $pcprenPC= str_replace(" ", "", "$ShipPC", $count);
-        if (trim($pcprenPC)) {
-            $sql = 'SELECT PZ_northing FROM  `postcodeuk` WHERE  `PZ_Postcode` LIKE  "'.$pcprenPC.'" LIMIT 0 , 1';
-            $result = mysql_query($sql, $conn_id);
-            $sumtot=mysql_affected_rows();
-            if ($sumtot>'0'){
-            } 
-            else {
-                echo ' <a href="newpc.php?selectpc='.trim($ShipPC).'&amp;id='.$row['ID'].'">Add Postcode</a> ';
-            }
+    <input type="text" id="enrft21" class="addfield caps ui-state-default ui-corner-left freetext';
+    echo '" placeholder="To . . ." value="'.$row["enrft21"].'" title="Delivery Address" ><input placeholder="Postcode" size="9" ';
+    echo ' class="addfield caps ui-state-default ui-corner-right';
+    
+
+
+    if (($globalprefrow['inaccuratepostcode'])=='0') {
+        if (((!(trim($row['enrpc21']))) and (trim($row['enrft21']))) or ((!$enrpc21ondb) and (trim($row['enrpc21'])))) {
+            echo ' ui-state-error';
         }
     }
 
 
+    echo '" type="text" id="enrpc21" title="Delivery Postcode" value="'. trim($row["enrpc21"]).'"> ';
+    
     if ( $globalprefrow["inaccuratepostcode"]=='0') {
+        echo ' <button id="addpostcodebutton21" title="Add Postcode" class="addpostcodebutton';
+        if (($enrpc21ondb) or (!trim($row["enrpc21"]))){
+            echo ' hideuntilneeded';
+        }
+        echo '"> Add Postcode </button> ';
+    }
+
+    
+    
+    if ( $globalprefrow["inaccuratepostcode"]=='0') {
+        echo '<span id="orderdistance">';
         if ($row['distance']>'0') {
             echo $row['distance'].' '. $globalprefrow['distanceunit'];
         }
+        echo '</span>';
     }
+    
+    
     
     echo '</div>';
-    
-    if ($favcomments) {
-        echo '<div class="favcomments fsr">'.$favcomments.'</div>';
+    echo '<div id="favcomment21" class="favcomments fsr';
+    if (!$favcomments) {
+        echo ' hideuntilneeded';
     }
-    $favcomments='';
+
+    echo '">'.$favcomments.'</div>';
     
     if ( $globalprefrow["inaccuratepostcode"]=='1') {
-        echo ' <input form="allorder" type="text" class="caps ui-state-default ui-corner-all" name="distance" size="4" value="'.
+        echo ' <input type="text" class="caps ui-state-default ui-corner-all" id="distance" size="4" value="'.
         $row['distance']. '" maxlength="5" />' . $globalprefrow['distanceunit'];
     }
     
     echo ' <div class="clrfix"> </div> ';
     
-    
-    if ($row['status']<'100') {
-        echo ' <button form="allorder" type="submit" > Edit Addresses </button><hr />';
-    }
- 
-
 
     // starts area selectors
     echo '<div id="areaselectors" ';
-    if ($row['canhavemap']<>'1') {
+    if (($row['canhavemap']<>'1') or (($row['status']>99) and (!$opsmaparea))) {
         echo 'class="hideuntilneeded" ';
     }
     echo '>';
     $showsubarea='0';
     $checkifarchivearea=0;
     if ($row['opsmaparea']>0) {
-        $opsmaparea=$row['opsmaparea'];
-
-        
-        $checkifarchivearea=mysql_result(mysql_query("SELECT inarchive FROM opsmap WHERE opsmapid=$opsmaparea LIMIT 1 ", $conn_id), 0);
-        // echo ' aa:'.$checkifarchivearea;
+        $stmt = $dbh->prepare("SELECT inarchive FROM opsmap WHERE opsmapid=? LIMIT 0,1");
+        $stmt->execute([$row['opsmaparea']]);
+        $checkifarchivearea = $stmt->fetchColumn();
     }
     
-    if ($checkifarchivearea=='1') {
-        $topareaquery = "SELECT opsmapid, opsname, descrip, istoplayer FROM opsmap WHERE type=2 AND corelayer='0' "; 
+    if ($checkifarchivearea) {
+        $topareaquery = "SELECT opsmapid, inarchive, opsname, descrip, istoplayer FROM opsmap WHERE type=2 AND corelayer='0' "; 
     }
     else {
-        $topareaquery = "SELECT opsmapid, opsname, descrip, istoplayer FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer='0' "; 
+        $topareaquery = "SELECT opsmapid, inarchive, opsname, descrip, istoplayer FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer='0' "; 
     }
 
-    $topareaqueryres = mysql_query ($topareaquery, $conn_id);
+    
     echo '<div class="fs"><div class="fsl"> </div> 
     <select id="opsmaparea" name="opsmaparea" class="ui-state-default ui-corner-left">
     <option value="" > Choose Area </option>';
     
-    while (list ($listopsmapid, $listopsname, $descrip, $istoplayer ) = mysql_fetch_row ($topareaqueryres)) {
+    $stmt = $dbh->prepare($topareaquery);
+    $stmt->execute();
+
+    $areaarray = $stmt->fetchAll();
+   
+    foreach ($areaarray as $arearow ) {
         print ("<option ");
-        if ($row['opsmaparea'] == $listopsmapid) {
+        if ($row['opsmaparea'] == $arearow['opsmapid']) {
             echo ' selected="selected" ';
-            $showsubarea=$istoplayer;
-            $topname=$listopsname;
-            $topdescrip=$descrip;
+            $showsubarea=$arearow['istoplayer'];
+            $topname=$arearow['opsname'];
+            $topdescrip=$arearow['descrip'];
         } 
 
-        echo 'value="'.$listopsmapid.'" >' .$listopsname;
-        if ($istoplayer=='1') { 
+        echo 'value="'.$arearow['opsmapid'].'" >';
+        
+        if ($arearow['inarchive']) { echo ' ARCHIVED '; }
+        
+        echo $arearow['opsname'];
+        if ($arearow['istoplayer']=='1') { 
             echo ' ++ ';
         }
+        
         echo '</option>';
     }
     echo '</select>
@@ -688,10 +497,6 @@ if ($row['ID']) {
     }
     echo '" title="Area Details" target="_blank" href="opsmap-new-area.php?areaid='.$row['opsmaparea'].'"> </a>';
 
-
-    $btmareaquery = "SELECT opsmapid, opsname, descrip  FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer='".$row['opsmaparea']."' "; 
-    $btmareaqueryres = mysql_query ($btmareaquery, $conn_id);
-    
     
     echo '<script> var initialhassubarea='.$showsubarea.'; </script>';
 
@@ -699,25 +504,30 @@ if ($row['ID']) {
 
 
 if ($showsubarea<>'1') {
-    
-    
-    
-    echo '    hideuntilneeded';
+    echo ' hideuntilneeded';
 }
     echo '">
     <option value="" > Choose Sub Area </option>';
-    while (list ($listopsmapid, $listopsname, $descrip ) = mysql_fetch_row ($btmareaqueryres)) {
-        print ("<option "); 
-        if ($row['opsmapsubarea'] == $listopsmapid) {
-            echo ' selected="selected" '; 
-            // $btmdescrip=$descrip;
-            $subareaname=$listopsname;
-            $subareacomments=$descrip;
-        } 
-        echo 'value="'.$listopsmapid.'" >' .$listopsname.' '.$descrip;
-        echo '</option>';
-    }
+    
+    if ($row['opsmaparea']>0) {
 
+        $pbtmareaquery = "SELECT opsmapid, inarchive, opsname, descrip  FROM opsmap WHERE type=2 AND corelayer= :opsmaparea "; 
+        $stmt = $dbh->prepare($pbtmareaquery);
+        $stmt->bindParam(':opsmaparea', $row['opsmaparea'], PDO::PARAM_INT); 
+        $stmt->execute();
+        $favdata = $stmt->fetchAll();
+        if ($favdata) {
+            foreach ($favdata as $subarearow ) {
+                print ("<option "); 
+                if ($row['opsmapsubarea'] == $subarearow['opsmapid']) {
+                    echo ' selected="selected" '; 
+                    $subareacomments=$subarearow['descrip'];
+                } 
+                echo 'value="'.$subarearow['opsmapid'].'" >' .$subarearow['opsname'].' '.$subarearow['descrip'];
+                echo '</option>';
+            }
+        }
+    }
     echo '</select>
     <a id="subarealink" class="showclient';
     if ($row['opsmapsubarea']<1) {
@@ -745,7 +555,6 @@ if ($showsubarea<>'1') {
     </div>';
     ///////     ends area selector
 
-
     echo ' </div>'; // ends distance container
 
 
@@ -755,44 +564,43 @@ if ($showsubarea<>'1') {
 
     echo '<div class="ui-corner-all ui-state-highlight addresses">'; // select rider
     echo '<div class="fs"><div class="fsl"> '.$globalprefrow['glob5'].'</div>';
-    if ($row['isactive']=='1') {
-        $cyclistquery = "SELECT CyclistID, cojmname, trackerid, isactive FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID"; 
-    } else {	
-        $cyclistquery = "SELECT CyclistID, cojmname, trackerid, isactive FROM Cyclist ORDER BY CyclistID"; 
-    }
-
-
-    $cyclistresult_id = mysql_query ($cyclistquery, $conn_id); 
-    echo '<input form="allorder" type="hidden" name="oldcyclist" value="'.$row['CyclistID'].'" >';
-
+    
     echo '<select id="newrider" name="newcyclist" class="ui-state-default ui-corner-left ';
-
     if ($row['CyclistID']=='1') { 
         echo ' red ';
     }
-
     echo ' ">';
 
-    while (list ($CyclistID, $cojmname, $trackerid, $isactive) = mysql_fetch_row ($cyclistresult_id)) {
+    
+    if ($row['isactive']=='1') {
+        $cyclistquery = "SELECT CyclistID, cojmname, isactive FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID"; 
+    } else {	
+        $cyclistquery = "SELECT CyclistID, cojmname, isactive FROM Cyclist ORDER BY CyclistID"; 
+    }
+    
+    $data = $dbh->query($cyclistquery)->fetchAll();
+    
+    foreach ($data as $riderrow ) {
         print ("<option ");
-        if ($row['CyclistID'] == $CyclistID) {
+        if ($row['CyclistID'] == $riderrow['CyclistID']) {
             echo ' selected="selected" ';
-            $thistrackerid=$trackerid;
         }
-        echo 'value="'.$CyclistID.'" ';
+        echo 'value="'.$riderrow['CyclistID'].'" ';
         
-        if (($CyclistID=='1') or ($isactive<>'1')) {
+        if (($CyclistID=='1') or ($riderrow['isactive']<>'1')) {
             echo ' class="unalo" ';
         }
-        echo '>'.$cojmname;
+        echo '>';
 
-        if ($isactive<>'1') {
-            echo ' Inactive ';
+        if ($riderrow['isactive']<>'1') {
+            echo ' INACTIVE ';
         }
-        
+
+        echo $riderrow['cojmname'];
         echo '</option>';
     }
     print ("</select>");
+    
     echo '<a id="showriderlink" class="showclient';
     if ($row['CyclistID']=='1') {
         echo ' hidden';
@@ -800,7 +608,7 @@ if ($showsubarea<>'1') {
     
     echo '" title="'.$row['cojmname'].' Details" target="_blank" href="cyclist.php?thiscyclist='.$row['CyclistID'].'"> </a>';
     if ($row['isactive']<>'1') {
-        echo ' Inactive ';
+        echo ' INACTIVE ';
     }
 
     echo '</div>'; // finishes select rider
@@ -811,25 +619,33 @@ if ($showsubarea<>'1') {
     
 
     echo '<div class="ui-corner-all ui-state-highlight addresses">';   // STATUS /// + times container
-    if ($row['status']<'101') {
+    if ($row['status']<'101') { // show select status if uninvoiced
         echo '<div class="fs"><div class="fsl"></div> ';
-        $query = "SELECT statusname, status FROM status WHERE activestatus=1 AND status<101 ORDER BY status";
-        $result_id = mysql_query ($query, $conn_id);
         print (" <select id=\"newstatus\" name=\"newstatus\" class=\"ui-state-default ui-corner-left\" >\n");
-        while (list ($statusname, $status) = mysql_fetch_row ($result_id)) {
-            $status = htmlspecialchars ($status);
-            $statusname = htmlspecialchars ($statusname);
+
+        $query = "SELECT statusname, status FROM status WHERE activestatus=1 AND status<101 ORDER BY status";
+        
+        $data = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
+        foreach($data as $statusname => $status) {
             print ("<option ");
             if ($row['status'] == $status) {
                 echo " SELECTED ";
             }
-            echo 'value="'.$status.'">'.$statusname.'</option>';
+            
+            if ($status < 77) {
+                echo 'class="hideifcomplete" ';
+            }
+            
+            if ($status == 100 ){
+                echo 'id="completeoption" ';
+            }
+            
+            echo 'value="'.$status.'">'.
+            htmlspecialchars ($statusname).'</option>';
         }
         print (" </select>");
         echo '</div>';
     }   /////////////    ENDS STATUS          //////////// 
-
-
 
 
     echo '<div class="fs"><div class="fsl"> Target PU </div> 
@@ -842,9 +658,21 @@ if ($showsubarea<>'1') {
 
     if ($globalprefrow['glob11']=='1') {
 
-        echo '<button class="hideuntilneeded" id="allowww" >Add Slot</button> 
-        <span class="hideuntilneeded" id="allowwwuntil"> until </span>
-        <input type="text" class="caps ui-state-default ui-corner-all dpinput hideuntilneeded" name="collectionworkingwindow" id="collectionworkingwindow" value="';
+        echo '<button class="hideuntilneeded addslot" id="allowww" title="Add Slot">Add Slot</button> 
+        <span class="';
+        if (date('U', strtotime($row['collectionworkingwindow']))<10) {
+            echo 'hideuntilneeded';
+        }
+        
+        echo '" id="allowwwuntil"> until </span>
+        
+        
+        <input type="text" class="caps ui-state-default ui-corner-all dpinput';
+
+        if (date('U', strtotime($row['collectionworkingwindow']))<10) {     
+            echo ' hideuntilneeded';
+        }
+        echo '" name="collectionworkingwindow" id="collectionworkingwindow" value="';
         if ($row['collectionworkingwindow']>'10') {
             echo date('d/m/Y H:i', strtotime($row['collectionworkingwindow']));
         } 
@@ -855,14 +683,24 @@ if ($showsubarea<>'1') {
     echo '</div>';
 
     
-    echo '<div id="starttravelcollectiontimediv" class="fs"><div class="fsl">En route PU</div> '; 
+    echo '<div id="starttravelcollectiontimediv" class="fs';
+        if (($row['status']>99) or ($row['status']<41)) {
+            echo ' hideuntilneeded';
+        }
+    echo '"><div class="fsl">En route PU</div> '; 
     echo '<input type="text" class="caps ui-state-default ui-corner-all dpinput" name="starttravelcollectiontime" id="starttravelcollectiontime" value="';
     if ($row['starttravelcollectiontime']>'10') { 
         echo date('d/m/Y H:i', strtotime($row['starttravelcollectiontime']));
     }
     echo '" /> </div>';
 
-    echo '<div id="waitingstarttimediv" class="fs hideuntilneeded"><div class="fsl">On site PU </div> ';  	
+    
+    
+    echo '<div id="waitingstarttimediv" class="fs';
+        if (($row['status']>99) or ($row['status']<51)) {    
+    echo ' hideuntilneeded';
+        }
+    echo '"><div class="fsl">On site PU </div> ';  	
     echo '<input type="text" class="caps ui-state-default ui-corner-all dpinput" name="waitingstarttime" '; 
     echo 'id="waitingstarttime" value="'; 
     if ($row['waitingstarttime']>'10') { 
@@ -872,7 +710,11 @@ if ($showsubarea<>'1') {
 
 
     echo '
-    <div id="collectiondatediv" class="fs orderhighlight hideuntilneeded">
+    <div id="collectiondatediv" class="fs orderhighlight';
+    if (date('U', strtotime($row['collectiondate']))<10) {   
+        echo ' hideuntilneeded';
+    }
+    echo '">
     <div class="fsl">PU </div> 
     <input type="text" class="caps ui-state-default ui-corner-all dpinput" name="collectiondate" id="collectiondate" 
     value="'; 
@@ -934,7 +776,7 @@ if ($showsubarea<>'1') {
 
 
     if ($globalprefrow['glob11']=='1') { // ends check for ww
-        echo ' <button class="hideuntilneeded" id="allowdww" > Add Slot </button> 
+        echo ' <button class="hideuntilneeded addslot" id="allowdww" title="Add Slot"> Add Slot </button> 
         <span class="hideuntilneeded" id="untildww"> until </span> 
         <input type="text" class="caps ui-state-default ui-corner-all dpinput hideuntilneeded" 
         name="deliveryworkingwindow" id="deliveryworkingwindow" value="';
@@ -945,11 +787,17 @@ if ($showsubarea<>'1') {
     }
 
     echo ' <span id="deliverytext"></span> </div> 
-    <div id="ShipDatediv" class="orderhighlight fs hideuntilneeded">
+    <div id="ShipDatediv" class="orderhighlight fs';
+    
+    if ($row['status']<80) {
+        echo ' hideuntilneeded';
+    }
+    
+    echo '">
     <div class="fsl" >  ';
     
-    $docalc = mysql_result(mysql_query("SELECT statusname from status WHERE `status`.`status`='100' LIMIT 1", $conn_id), 0);
-    echo $docalc. ' </div> ';
+    $completetext = $dbh->query("SELECT statusname from status WHERE `status`.`status`='100' LIMIT 0,1")->fetchColumn();
+    echo $completetext. ' </div> ';
     
     echo '<input type="text" class="caps ui-state-default ui-corner-all dpinput" name="ShipDate" id="ShipDate" value="'; 
     if ($row['ShipDate']>'10') {
@@ -995,15 +843,18 @@ if ($showsubarea<>'1') {
 
     ////////////   SERVICE           ////////////////
     if ($row['activeservice']=='1') {
+
+        print ("<select id =\"serviceid\" class=\"ui-state-default ui-corner-left\" name=\"serviceid\" >"); 
+
         $query = "
         SELECT ServiceID,
         Service 
         FROM Services 
         WHERE activeservice='1' 
         ORDER BY serviceorder DESC, ServiceID ASC"; 
-        $result_id = mysql_query ($query, $conn_id); 
-        print ("<select id =\"serviceid\" class=\"ui-state-default ui-corner-left\" name=\"serviceid\" >"); 
-        while (list ($ServiceID, $Service) = mysql_fetch_row ($result_id)) {
+        $data = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
+        foreach($data as $ServiceID => $Service) {
+            
             $ServiceID = htmlspecialchars ($ServiceID);	
             $Service = htmlspecialchars ($Service);
             print ("<option "); 
@@ -1029,12 +880,26 @@ if ($showsubarea<>'1') {
     ///    ENDS SERVICE   ////////////
     
     
-    echo '<div id="jobcommentsdiv" class="fs">
+    echo '<div id="jobcommentsdiv" class="fs';
+    
+    
+    if (($row['status']>99) and (!$row['jobcomments'])) {
+        echo ' hideuntilneeded';
+    }
+    
+    
+    echo '">
     <div class="fsl">Instructions</div>
-    <textarea id="jobcomments" class="normal caps ui-state-highlight ui-corner-all orderjobcomments" name="jobcomments" >'.
-    $row['jobcomments'].'</textarea>
+    <textarea id="jobcomments" class="normal caps ui-state-highlight ui-corner-all orderjobcomments';
+    echo '" name="jobcomments" >'. $row['jobcomments'].'</textarea>
     </div>
-    <div id="privatejobcommentsdiv" class="fs">
+    <div id="privatejobcommentsdiv" class="fs';
+    
+    if (($row['status']>99) and (!$row['privatejobcomments'])) {
+        echo ' hideuntilneeded';
+    }    
+    
+    echo '">
     <div class="fsl">Priv Note</div>
     <textarea id="privatejobcomments" class="normal caps ui-state-highlight ui-corner-all orderjobcomments" name="privatejobcomments">'.
     $row['privatejobcomments'].'</textarea></div>
@@ -1055,15 +920,13 @@ if ($showsubarea<>'1') {
     }
     echo '">
     <div id="podsurnamecontainer" class="fs"><div class="fsl">POD </div>
-    <input type="text" id="podsurname" class="caps ui-state-default ui-corner-all" name="podsurname" size="25" maxlength="40" value="'.$row["podsurname"].'">';
+    <input type="text" id="podsurname" placeholder="Surname" class="caps ui-state-default ui-corner-all" name="podsurname" size="25" maxlength="40" value="'.$row["podsurname"].'">';
     
     
     
     echo '
     <input type="file" form="uploadpodform" name="file" id="uploadpodfile" ';
 
-    
-    
     if ($haspod==1) {
     echo ' class="hideuntilneeded" ';
     }
@@ -1082,6 +945,8 @@ if ($showsubarea<>'1') {
 
     if ($haspod>0) {
         echo 'src="../podimage.php?id='.$row['publictrackingref'].'" ';
+    } else {
+        echo ' src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAAAI=" '; // blank image
     }
 
 
@@ -1117,26 +982,25 @@ if ($showsubarea<>'1') {
     number_format(($numberitems * $row["Price"]), 2, '.', '') .'</span></td>
     <td></td>
     </tr> </thead><tbody>';
+    
+    echo '<tr id="mileagerow" '; 
+    if ($row['chargedbybuild']<>'1') { echo 'class="hideuntilneeded" '; }
+    echo '>';
 
     $query = "
     SELECT 
     chargedbybuildid, 
-    cbbname, 
-    cbbcost 
+    cbbname
     FROM chargedbybuild 
     WHERE cbbcost <> '0.00'
     AND chargedbybuildid < '3'
     ORDER BY chargedbybuildid ASC"; 
-    $result_id = mysql_query ($query, $conn_id); 
-
-    echo '<tr id="mileagerow"'; 
-    if ($row['chargedbybuild']<>'1') { echo 'class="hideuntilneeded" '; }
-    echo '>';
-    while (list ($chargedbybuildid, $cbbname, $cbbcost) = mysql_fetch_row ($result_id)) {
-        $cbbname = htmlspecialchars ($cbbname);
     
-    
-            if ($chargedbybuildid==1) {
+    $data = $dbh->query($query)->fetchAll();
+    foreach ($data as $cbbrow ) {
+        $cbbname = htmlspecialchars ($cbbrow['cbbname']);
+        $chargedbybuildid = htmlspecialchars ($cbbrow['chargedbybuildid']);
+        if ($chargedbybuildid==1) {
             echo '<td> '. $cbbname. ' 
             <span class="cbbprice" id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"] . $row["cbb$chargedbybuildid"]. ' </span> </td>';
 
@@ -1145,10 +1009,8 @@ if ($showsubarea<>'1') {
         if ($chargedbybuildid==2) {
             echo '<td> '.$cbbname.'
             <span class="cbbprice" id="cbb'.$chargedbybuildid.'"> &'.$globalprefrow["currencysymbol"].$row["cbb$chargedbybuildid"]. '  </span> </td>';
-
         }
-
-    }    
+    }
     
     
     echo '</tr>';
@@ -1158,34 +1020,22 @@ if ($showsubarea<>'1') {
     
     
     
-    
-    
-    
-    
-    
     $query = "
     SELECT 
     chargedbybuildid, 
-    cbbname, 
-    cbbcost 
+    cbbname
     FROM chargedbybuild 
     WHERE cbbcost <> '0.00'
     AND chargedbybuildid <> '1'
     AND chargedbybuildid <> '2'
     ORDER BY cbborder"; 
-    $result_id = mysql_query ($query, $conn_id); 
+
     $i=1;
 
-
-    
-    
-    
-    
-    
-    while (list ($chargedbybuildid, $cbbname, $cbbcost) = mysql_fetch_row ($result_id)) {
-        $cbbname = htmlspecialchars ($cbbname);
-        
-        
+    $data = $dbh->query($query)->fetchAll();
+    foreach ($data as $cbbrow ) {
+        $chargedbybuildid=$cbbrow['chargedbybuildid'];
+        $cbbname = htmlspecialchars ($cbbrow['cbbname']);
         $seeifnewtr='';
         $seeifnewtrend='';
         $tidytrloop='';
@@ -1336,30 +1186,33 @@ if ($showsubarea<>'1') {
         $query = "SELECT CustomerID, CompanyName, isactiveclient FROM Clients ORDER BY CompanyName";
     }
 
-    $result_id = mysql_query ($query, $conn_id); 
 	echo '<select class="ui-state-default ui-corner-all" id="combobox" name="clientorder" ><option value="">Select..</option>';
-    while (list ($CustomerIDlist, $CompanyName, $isactive) = mysql_fetch_row ($result_id)) {
-        $CustomerID = htmlspecialchars ($CustomerID);
-        $CompanyName = htmlspecialchars ($CompanyName);
+
+    $data = $dbh->query($query)->fetchAll();
+    foreach ($data as $clientrow ) {
+        $CustomerIDlist = htmlspecialchars ($clientrow['CustomerID']);
+        $CompanyName = htmlspecialchars ($clientrow['CompanyName']);
         print "<option ";
         if ($CustomerIDlist == $row['CustomerID']) {
             echo "selected='SELECTED' ";
         }
-        if ($isactive <>'1' ) {
+        if ($clientrow['isactiveclient'] <>1) {
             echo ' class="unalo" ';
         }
         
-        echo ' value="'.$CustomerIDlist.'">'.$CompanyName;
-        if ($isactive <>'1' ) {
+        echo ' value="'.$CustomerIDlist.'">';
+
+        if ($clientrow['isactiveclient'] <>1 ) {
             echo ' INACTIVE ';
         }
+        
+        echo $CompanyName;
         echo '</option>';
     }
     echo '</select> ';
     if ($row['isactiveclient'] <>'1' ) { echo ' INACTIVE '; }
-    
-    
     echo '</div>';
+
     echo ' <div id="clientNotes" class="fsr favcomments';
     if ($row['Notes']=='') {
         echo ' hideuntilneeded';
@@ -1380,25 +1233,35 @@ if ($showsubarea<>'1') {
     echo '" title="'.$row['depname'].' Details" 
     target="_blank" href="new_cojm_department.php?depid='.$row['orderdep'].'"> </a>
     </div>';
-    $query = "SELECT depnumber, depname , isactivedep FROM clientdep 
-    WHERE associatedclient = '".$row['CustomerID']."' ORDER BY isactivedep DESC, depname";
-    $result_id = mysql_query ($query, $conn_id) or mysql_error();
-    $sumtot=mysql_affected_rows(); // echo $sumtot.' Department(s) : ';
+
     echo '<select class="ui-state-default ui-corner-left" id="orderselectdep" >
     <option value="0" >No Department</option>';
-    while (list ($CustomerIDlist, $CompanyName, $isactivedep ) = mysql_fetch_row ($result_id)) {
-        $CustomerID = htmlspecialchars ($CustomerID);
-        $CompanyName = htmlspecialchars($CompanyName);
+    
+    $query = "SELECT depnumber, depname , isactivedep FROM clientdep 
+    WHERE associatedclient = :CustomerID ORDER BY isactivedep DESC, depname";
+
+    
+    $stmt = $dbh->prepare($query);
+    $stmt->bindParam(':CustomerID', $row['CustomerID'], PDO::PARAM_INT); 
+    $stmt->execute();
+    
+    $data = $stmt->fetchAll();
+    foreach ($data as $deprow ) {    
+    
+        $depname = htmlspecialchars($deprow['depname']);
         print'<option ';
-        if ($CustomerIDlist==$row['orderdep']) {
+        if ($deprow['depnumber']==$row['orderdep']) {
             echo ' SELECTED ';
         }
-        echo 'value="'.$CustomerIDlist.'">'.$CompanyName;
-        if ($isactivedep<>'1') {
-            echo ' Inactive ';
+        echo 'value="'.$deprow['depnumber'].'">';
+        if ($deprow['isactivedep']<>1) {
+            echo ' INACTIVE ';
         }
+        echo $depname;
         echo '</option>';
     }
+    
+    
     echo '</select> ';
     
     echo '</div>
@@ -1455,41 +1318,42 @@ if ($showsubarea<>'1') {
     </div>
     <div class="hangright">
     
-    
-     <div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses hideuntilneeded clearfix"></div>
-    
-    
+    <div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses hideuntilneeded clearfix"></div>
     
     <div class="ui-corner-all ui-state-highlight addresses">    
     
-    
-    <div class="fs"><div class="fsl"> Duplicate</div>
+    <div class="fs">
+    <div class="fsl"> Duplicate</div>
     <form action="order.php#" method="post">
     <input type="hidden" name="formbirthday" value="'.date("U").'">
     <input type="hidden" name="id" value="'.$row['ID'].'">
     <input type="hidden" name="page" value="createnewfromexisting">';
     
     
-    $sql='SELECT statusname FROM status WHERE status=100 LIMIT 1';
-    $sth=$dbh->prepare($sql);
-    // $data=array($newstatus);
-    // $sth->execute($data);
-    $sth->execute();
-    $result=$sth->fetchColumn();
     
-    echo '<select id="currorsched" class="ui-state-default ui-corner-left" name="currorsched" >
+    
+    echo '<select id="currorsched" class="ui-state-default ui-corner-left';
+
+    if ($row['status']<31) {
+        echo ' hideuntilneeded';
+    }
+    
+    echo '" name="currorsched" >
     <option value="current" SELECTED> ';
     
     if ($row['status']>'100') {
-        echo $result;
+        echo $completetext;
     }
     else {
         echo $row['statusname'];
     }
-    echo '</option> <option value="unsched" > Uncollected</option></select>';
+    echo '</option> <option value="unsched" > Uncollected</option>
+    </select>';
     
     
-    echo '<select class="ui-state-default ui-corner-left" name="dateshift" >
+    echo '<select class="ui-state-default ui-corner-left';
+
+    echo '" name="dateshift" >
     <option value="0" >Same</option>
     <option';
 
@@ -1507,6 +1371,7 @@ if ($showsubarea<>'1') {
     <button type="submit">New Job</button>
     </form>
     </div>
+    
     <div class="fsr">
     <form action="mail7.php?" method="post" ><input type="hidden" name="formbirthday" value="'.date("U").'">
     <input type="hidden" name="id1" value="'.$row['ID'].'" >
@@ -1524,6 +1389,7 @@ if ($showsubarea<>'1') {
 
 
     echo '<span id="ajaxinfo"> &nbsp; </span>
+    
     <form name="uploadpodform" id="uploadpodform" enctype="multipart/form-data">
     <input form="uploadpodform" type="hidden" name="page" value="orderaddpod">
     <input form="uploadpodform" type="hidden" name="id" value="'. $row['ID'].'" >
@@ -1556,36 +1422,6 @@ if ($showsubarea<>'1') {
 
     </div> <br /> '; // ends div hangright
     
-    $tmp= '<input type="email" id="email" name="email">';
-    if (isset($newfavf)) {
-        if ($newfavf=='1') {
-            echo '<form action="#" id="newfavcollect" method="post" >
-            <input type="hidden" name="page" value="editnewfav">
-            <input type="hidden" name="clientorder" value="'.$row['CustomerID'].'">
-            <input type="hidden" name="id" value="'.$row['ID'].'">
-            <input type="hidden" name="fromfreeaddress" value="'.$row['fromfreeaddress'].'" />
-            <input type="hidden" name="CollectPC" value="'.$row['CollectPC'].'" />
-            <input type="hidden" name="formbirthday" value="'. date("U").'">
-            </form> ';
-        }
-    }
-
-    // $favto
-    if (isset($newfavt)) {
-        if ($newfavt=='1') {
-            echo '<form action="#" id="newfavto" method="post" >
-            <input type="hidden" name="page" value="editnewfav">
-            <input type="hidden" name="clientorder" value="'.$row['CustomerID'].'">
-            <input type="hidden" name="id" value="'.$row['ID'].'">
-            <input type="hidden" name="fromfreeaddress" value="'.$row['tofreeaddress'].'" />
-            <input type="hidden" name="CollectPC" value="'.$row['ShipPC'].'" />
-            <input type="hidden" name="formbirthday" value="'. date("U").'">
-            </form> ';
-        }
-    }
-    
-    echo $bottomhtml; // bottomhtml is to do with fav addresses forms
-    
     
     echo '</div> ';
     
@@ -1600,54 +1436,8 @@ else { // no COJM ID located
     } // ends check for ID		
 }
 
-echo '
-<script>
-$(document).ready(function() {
-    $("#jschangfavfr").bind("click", function(e) {
-        e.preventDefault();
-        $.zebra_dialog("", {
-            "source":  {
-                "ajax": ("ajaxselectfav.php?addr=fr&clientid=" + oldclientorder + "&jobid=" + id )
-            },
-            "type": "question",
-            //	width : 500 ,
-            //	position : ["left + 20", "top + 30"],
-            "title": "Please select new address",
-	        "buttons":  [ {
-                caption: "Cancel", callback: function() {
-                    }
-                },
-			{
-                caption: "Select", 
-                callback: function() {
-                    $("#selectfav").submit(); 
-                }
-			}]
-        });
-    $("#selectfavbox").focus();
-	});	    
-';
-
-
-
-
-
-
-
-echo '
-
-}); // ends document ready
-
-</script>
-
-
-
-<link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
-';
+echo ' <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" > ';
 
 include "footer.php";
-mysql_close();
-
-$dbh=null;
 
 echo '</body></html>';

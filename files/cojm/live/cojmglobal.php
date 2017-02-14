@@ -55,20 +55,7 @@ $filename='cojmglobal.php';
 $adminmenu=0; $settingsmenu=1;
 include "cojmmenu.php"; 
 
-$sql = "SELECT * FROM globalprefs"; 
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-$globalprefrow=mysql_fetch_array($sql_result);
-
-
-
-
-
-// spare is image 7 - 10
-
 ?>
-
-
-
 <div class="Post Spaceout">
 
 <p>You will need to do a full page refresh after some settings to check images / styles are displaying ok ( on the to-do list for version 2.1 ) </p>
@@ -199,11 +186,11 @@ on-site time to en-route with delivery before prompting to add waiting time
 	
 <?php
 		
-$ridername = mysql_result(mysql_query(" SELECT cojmname from Cyclist WHERE `Cyclist`.`CyclistID` = '1' LIMIT 1", $conn_id), 0);
-$ridernamf = mysql_result(mysql_query(" SELECT poshname from Cyclist WHERE `Cyclist`.`CyclistID` = '1' LIMIT 1", $conn_id), 0);
-  
- 
+
+$ridername = $dbh->query("SELECT cojmname from Cyclist WHERE `Cyclist`.`CyclistID` = '1' LIMIT 1")->fetchColumn();
+$ridernamf = $dbh->query("SELECT poshname from Cyclist WHERE `Cyclist`.`CyclistID` = '1' LIMIT 1")->fetchColumn();
 	
+    
 ?>
 	
 	
@@ -475,6 +462,9 @@ Needs full root https:// address
 class="ui-state-default ui-corner-all pad" placeholder="Get from google for your domain" size="60" id="googlemapapiv3key" value="<? echo $globalprefrow['googlemapapiv3key']; ?>"></fieldset>
 
 
+<fieldset><label class="fieldLabel"> Adress Search Link https://</label> <input 
+class="ui-state-default ui-corner-all pad" placeholder="eg, maps.google.com" size="60" id="addresssearchlink" value="<? echo $globalprefrow['addresssearchlink']; ?>"></fieldset>
+
 
 
 <fieldset><label class="fieldLabel"> Default Google Map Latitude </label>
@@ -698,6 +688,20 @@ The VAT charge within a job is set by which service is used.
 <input class="ui-state-default ui-corner-all pad" type="text" size="10" id="vatbandb" value="<? echo $globalprefrow['vatbandb']; ?>">
 
 </fieldset>
+
+
+
+<fieldset><label class="fieldLabel"> Auto Invoice Calculator (%) </label> 
+<input class="ui-state-default ui-corner-all pad" placeholder="8.5" type="text" size="6" id="invoice7" value="<? echo $globalprefrow['invoice7']; ?>">
+
+</fieldset>
+
+
+
+
+
+
+
 <hr />
 <fieldset><label class="fieldLabel"> Auto VAT for Expenses (%) </label> 
 <input class="ui-state-default ui-corner-all pad" type="text" size="10" id="vatbandexpense" value="<? echo $globalprefrow['vatbandexpense']; ?>">
@@ -1509,13 +1513,6 @@ copy of the Program in return for a fee.</p>
 
 
 
-
-
-
-
-
-
-
 </div>
 
 
@@ -2128,12 +2125,23 @@ changedvar();
 
 
 
+
+
 $("#glob9").change(function () {
  globalname='glob9';
  newvalue=$("#glob9").val();	
 //  alert(globalname +' ' + newvalue);
 changedvar();
 });
+
+
+$("#invoice7").change(function () {
+ globalname='invoice7';
+ newvalue=$("#invoice7").val();	
+//  alert(globalname +' ' + newvalue);
+changedvar();
+});
+
 
 
 $("#glob10").change(function () {
@@ -2263,6 +2271,15 @@ $("#googlemapapiv3key").change(function () {
 //  alert(globalname +' ' + newvalue);
 changedvar();
 });
+
+
+$("#addresssearchlink").change(function () {
+    globalname='addresssearchlink';
+    newvalue=$("#addresssearchlink").val();	
+    //  alert(globalname +' ' + newvalue);
+    changedvar();
+});
+
 
 
 $("#clweb8").change(function () {

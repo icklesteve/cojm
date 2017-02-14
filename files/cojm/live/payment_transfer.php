@@ -35,9 +35,9 @@
         $stmt->bindParam(':paymentid', $paymentid, PDO::PARAM_INT);
         $stmt->execute();
         $total = $stmt->rowCount();
-         echo $total;
+        echo $total;
         
-            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 
                 
                     $temp_ar=explode(" ",$row['paydate']); 

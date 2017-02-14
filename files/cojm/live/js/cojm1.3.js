@@ -27,7 +27,7 @@
 // jQuery UI Tabs 1.8.18
 // jQuery-Plugin "daterangepicker.jQuery.js" 1050
 // date.js  Version: 1.0 Alpha-1 1455
-// zebra dialogue function v1.3.4  1834
+// zebra dialogue function v1.3.12
 // http://ryanday.org/konami   * Dual licensed under the MIT and GPL licenses.  1840
 // Stickyfill -- `position: sticky` polyfill * v. 1.1.4 | https://github.com/wilddeer/stickyfill  MIT License 1928
 
@@ -49,7 +49,7 @@ for(d=i.length;d;)e=i[--d],a[e]=g[e];a.target||(a.target=g.srcElement||c),a.targ
 
 return h.filter?h.filter(a,g):a},special:{ready:{setup:f.bindReady},load:{noBubble:!0},focus:{delegateType:"focusin"},blur:{delegateType:"focusout"},beforeunload:{setup:function(a,b,c){f.isWindow(this)&&(this.onbeforeunload=c)},teardown:function(a,b){this.onbeforeunload===b&&(this.onbeforeunload=null)}}},simulate:function(a,b,c,d){
 var e=f.extend(new f.Event,c,{type:a,isSimulated:!0,originalEvent:{}});
-d?f.event.trigger(e,null,b):f.event.dispatch.call(b,e),e.isDefaultPrevented()&&c.preventDefault()}},f.event.handle=f.event.dispatch,f.removeEvent=c.removeEventListener?function(a,b,c){a.removeEventListener&&a.removeEventListener(b,c,!1)}:function(a,b,c){a.detachEvent&&a.detachEvent("on"+b,c)},f.Event=function(a,b){if(!(this instanceof f.Event))return new f.Event(a,b);a&&a.type?(this.originalEvent=a,this.type=a.type,this.isDefaultPrevented=a.defaultPrevented||a.returnValue===!1||a.getPreventDefault&&a.getPreventDefault()?K:J):this.type=a,b&&f.extend(this,b),this.timeStamp=a&&a.timeStamp||f.now(),this[f.expando]=!0},f.Event.prototype={preventDefault:function(){this.isDefaultPrevented=K;var a=this.originalEvent;!a||(a.preventDefault?a.preventDefault():a.returnValue=!1)},stopPropagation:function(){this.isPropagationStopped=K;var a=this.originalEvent;!a||(a.stopPropagation&&a.stopPropagation(),a.cancelBubble=!0)},stopImmediatePropagation:function(){
+d?f.event.trigger(e,null,b):f.event.dispatch.call(b,e),e.isDefaultPrevented()&&c.preventDefault()}},f.event.handle=f.event.dispatch,f.removeEvent=c.removeEventListener?function(a,b,c){a.removeEventListener&&a.removeEventListener(b,c,!1)}:function(a,b,c){a.detachEvent&&a.detachEvent("on"+b,c)},f.Event=function(a,b){if(!(this instanceof f.Event))return new f.Event(a,b);a&&a.type?(this.originalEvent=a,this.type=a.type,this.isDefaultPrevented=a.defaultPrevented||a.returnValue===!1||a.defaultPrevented &&a.defaultPrevented ()?K:J):this.type=a,b&&f.extend(this,b),this.timeStamp=a&&a.timeStamp||f.now(),this[f.expando]=!0},f.Event.prototype={preventDefault:function(){this.isDefaultPrevented=K;var a=this.originalEvent;!a||(a.preventDefault?a.preventDefault():a.returnValue=!1)},stopPropagation:function(){this.isPropagationStopped=K;var a=this.originalEvent;!a||(a.stopPropagation&&a.stopPropagation(),a.cancelBubble=!0)},stopImmediatePropagation:function(){
 this.isImmediatePropagationStopped=K,this.stopPropagation()},isDefaultPrevented:J,isPropagationStopped:J,isImmediatePropagationStopped:J},f.each({mouseenter:"mouseover",mouseleave:"mouseout"},function(a,b){f.event.special[a]={delegateType:b,bindType:b,handle:function(a){var c=this,d=a.relatedTarget,e=a.handleObj,g=e.selector,h;if(!d||d!==c&&!f.contains(c,d))a.type=e.origType,h=e.handler.apply(this,arguments),a.type=b;return h}}}),f.support.submitBubbles||(f.event.special.submit={setup:function(){if(f.nodeName(this,"form"))return!1;f.event.add(this,"click._submit keypress._submit",function(a){var c=a.target,d=f.nodeName(c,"input")||f.nodeName(c,"button")?c.form:b;d&&!d._submit_attached&&(f.event.add(d,"submit._submit",function(a){this.parentNode&&!a.isTrigger&&f.event.simulate("submit",this.parentNode,a,!0)}),d._submit_attached=!0)})},teardown:function(){if(f.nodeName(this,"form"))return!1;f.event.remove(this,"._submit")}}),f.support.changeBubbles||(f.event.special.change={setup:function(){if(z.test(this.nodeName)){
 
 if(this.type==="checkbox"||this.type==="radio")f.event.add(this,"propertychange._change",function(a){a.originalEvent.propertyName==="checked"&&(this._just_changed=!0)}),f.event.add(this,"click._change",function(a){this._just_changed&&!a.isTrigger&&(this._just_changed=!1,f.event.simulate("change",this,a,!0))});return!1}f.event.add(this,"beforeactivate._change",function(a){var b=a.target;z.test(b.nodeName)&&!b._change_attached&&(f.event.add(b,"change._change",function(a){this.parentNode&&!a.isSimulated&&!a.isTrigger&&f.event.simulate("change",this.parentNode,a,!0)}),b._change_attached=!0)})},handle:function(a){var b=a.target;if(this!==b||a.isSimulated||a.isTrigger||b.type!=="radio"&&b.type!=="checkbox")return a.handleObj.handler.apply(this,arguments)},teardown:function(){f.event.remove(this,"._change");return z.test(this.nodeName)}}),f.support.focusinBubbles||f.each({focus:"focusin",blur:"focusout"},function(a,b){var d=0,e=function(a){f.event.simulate(b,a.target,f.event.fix(a),!0)};f.event.special[b]={setup:function(){d++===0&&c.addEventListener(a,e,!0)},teardown:function(){--d===0&&c.removeEventListener(a,e,!0)}}}),f.fn.extend({on:function(a,c,d,e,g){var h,i;if(typeof a=="object"){typeof c!="string"&&(d=c,c=b);for(i in a)this.on(i,c,d,a[i],g);return this}d==null&&e==null?(e=c,d=c=b):e==null&&(typeof c=="string"?(e=d,d=b):(e=d,d=c,c=b));if(e===!1)e=J;else if(!e)return this;g===1&&(h=e,e=function(a){f().off(a);return h.apply(this,arguments)},e.guid=h.guid||(h.guid=f.guid++));return this.each(function(){f.event.add(this,a,e,d,c)})},one:function(a,b,c,d){return this.on.call(this,a,b,c,d,1)},off:function(a,c,d){if(a&&a.preventDefault&&a.handleObj){var e=a.handleObj;f(a.delegateTarget).off(e.namespace?e.type+"."+e.namespace:e.type,e.selector,e.handler);return this}if(typeof a=="object"){for(var g in a)this.off(g,c,a[g]);return this}if(c===!1||typeof c=="function")d=c,c=b;d===!1&&(d=J);return this.each(function(){f.event.remove(this,a,d,c)})},bind:function(a,b,c){return this.on(a,null,b,c)},unbind:function(a,b){return this.off(a,null,b)},live:function(a,b,c){f(this.context).on(a,this.selector,b,c);return this},die:function(a,b){f(this.context).off(a,this.selector||"**",b);return this},delegate:function(a,b,c,d){return this.on(b,a,c,d)},undelegate:function(a,b,c){return arguments.length==1?this.off(a,"**"):this.off(b,a,c)},trigger:function(a,b){return this.each(function(){f.event.trigger(a,b,this)})},triggerHandler:function(a,b){if(this[0])return f.event.trigger(a,b,this[0],!0)},toggle:function(a){var b=arguments,c=a.guid||f.guid++,d=0,e=function(c){var e=(f._data(this,"lastToggle"+a.guid)||0)%d;f._data(this,"lastToggle"+a.guid,e+1),c.preventDefault();return b[e].apply(this,arguments)||!1};e.guid=c;while(d<b.length)b[d++].guid=c;return this.click(e)},hover:function(a,b){return this.mouseenter(a).mouseleave(b||a)}}),f.each("blur focus focusin focusout load resize scroll unload click dblclick mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave change select submit keydown keypress keyup error contextmenu".split(" "),function(a,b){f.fn[b]=function(a,c){c==null&&(c=a,a=null);return arguments.length>0?this.on(b,null,a,c):this.trigger(b)},f.attrFn&&(f.attrFn[b]=!0),C.test(b)&&(f.event.fixHooks[b]=f.event.keyHooks),D.test(b)&&(f.event.fixHooks[b]=f.event.mouseHooks)}),function(){function x(a,b,c,e,f,g){for(var h=0,i=e.length;h<i;h++){var j=e[h];if(j){var k=!1;j=j[a];while(j){if(j[d]===c){k=e[j.sizset];break}if(j.nodeType===1){g||(j[d]=c,j.sizset=h);if(typeof b!="string"){if(j===b){k=!0;break}}else if(m.filter(b,[j]).length>0){k=j;break}}j=j[a]}e[h]=k}}}function w(a,b,c,e,f,g){for(var h=0,i=e.length;h<i;h++){var j=e[h];if(j){var k=!1;j=j[a];while(j){if(j[d]===c){k=e[j.sizset];break}j.nodeType===1&&!g&&(j[d]=c,j.sizset=h);if(j.nodeName.toLowerCase()===b){k=j;break}j=j[a]}e[h]=k}}}var a=/((?:\((?:\([^()]+\)|[^()]+)+\)|\[(?:\[[^\[\]]*\]|['"][^'"]*['"]|[^\[\]'"]+)+\]|\\.|[^ >+~,(\[\\]+)+|[>+~])(\s*,\s*)?((?:.|\r|\n)*)/g,d="sizcache"+(Math.random()+"").replace(".",""),e=0,g=Object.prototype.toString,h=!1,i=!0,j=/\\/g,k=/\r\n/g,l=/\W/;[0,0].sort(function(){i=!1;return 0});var m=function(b,d,e,f){e=e||[],d=d||c;var h=d;if(d.nodeType!==1&&d.nodeType!==9)return[];if(!b||typeof b!="string")return e;var i,j,k,l,n,q,r,t,u=!0,v=m.isXML(d),w=[],x=b;do{a.exec(""),i=a.exec(x);if(i){x=i[3],w.push(i[1]);if(i[2]){l=i[3];break}}}while(i);if(w.length>1&&p.exec(b))if(w.length===2&&o.relative[w[0]])j=y(w[0]+w[1],d,f);else{j=o.relative[w[0]]?[d]:m(w.shift(),d);while(w.length)b=w.shift(),o.relative[b]&&(b+=w.shift()),j=y(b,j,f)}else{!f&&w.length>1&&d.nodeType===9&&!v&&o.match.ID.test(w[0])&&!o.match.ID.test(w[w.length-1])&&(n=m.find(w.shift(),d,v),d=n.expr?m.filter(n.expr,n.set)[0]:n.set[0]);
@@ -1597,10 +1597,1051 @@ m]=f(d)}})(c,"years months days hours minutes seconds milliseconds".split(" "));
 
 
 
+// zebra function 1.3.12
 
-// zebra function 1.3.4
+/*
+ *  For more resources visit {@link http://stefangabos.ro/}
+ *
+ *  @author     Stefan Gabos <contact@stefangabos.ro>
+ *  @version    1.3.12 (last revision: January 26, 2016)
+ *  @copyright  (c) 2011 - 2016 Stefan Gabos
+ *  @license    http://www.gnu.org/licenses/lgpl-3.0.txt GNU LESSER GENERAL PUBLIC LICENSE
+ *  @package    Zebra_Dialog
+ */
+;(function($) {
 
-(function(d){d.zebra_dialog=function(g,k){var s={animation_speed_hide:0,animation_speed_show:0,auto_close:!1,buttons:!0,custom_class:!1,keyboard:!0,max_height:0,message:"",modal:!0,overlay_close:!0,overlay_opacity:0.9,position:"center",reposition_speed:100,source:!1,title:"",type:"information",vcenter_short_message:!0,width:0,onClose:null},a=this;a.settings={};options={};"string"==typeof g&&(options.message=g);if("object"==typeof g||"object"==typeof k)options=d.extend(options,"object"==typeof g? g:k);a.init=function(){a.settings=d.extend({},s,options);a.isIE6="explorer"==j.name&&6==j.version||!1;a.settings.modal&&(a.overlay=jQuery("<div>",{"class":"ZebraDialogOverlay"}).css({position:a.isIE6?"absolute":"fixed",left:0,top:0,opacity:a.settings.overlay_opacity,"z-index":1E3}),a.settings.overlay_close&&a.overlay.bind("click",function(){a.close()}),a.overlay.appendTo("body"));a.dialog=jQuery("<div>",{"class":"ZebraDialog"+(a.settings.custom_class?" "+a.settings.custom_class:"")}).css({position:a.isIE6? "absolute":"fixed",left:0,top:0,"z-index":1001,visibility:"hidden"});!a.settings.buttons&&a.settings.auto_close&&a.dialog.attr("id","ZebraDialog_"+Math.floor(9999999*Math.random()));var e=parseInt(a.settings.width);!isNaN(e)&&(e==a.settings.width&&e.toString()==a.settings.width.toString()&&0<e)&&a.dialog.css({width:a.settings.width});a.settings.title&&jQuery("<h3>",{"class":"ZebraDialog_Title"}).html(a.settings.title).appendTo(a.dialog);e=jQuery("<div>",{"class":"ZebraDialog_BodyOuter"+(!a.settings.title? " ZebraDialog_NoTitle":"")+(!l()?" ZebraDialog_NoButtons":"")}).appendTo(a.dialog);a.message=jQuery("<div>",{"class":"ZebraDialog_Body"+(""!=m()?" ZebraDialog_Icon ZebraDialog_"+m():"")});0<a.settings.max_height&&(a.message.css("max-height",a.settings.max_height),a.isIE6&&a.message.attr("style","height: expression(this.scrollHeight > "+a.settings.max_height+' ? "'+a.settings.max_height+'px" : "85px")'));a.settings.vcenter_short_message?jQuery("<div>").html(a.settings.message).appendTo(a.message): a.message.html(a.settings.message);if(a.settings.source&&"object"==typeof a.settings.source){var b=a.settings.vcenter_short_message?d("div:first",a.message):a.message,c;for(c in a.settings.source)switch(c){case "ajax":var f="string"==typeof a.settings.source[c]?{url:a.settings.source[c]}:a.settings.source[c],g=jQuery("<div>").attr("class","ZebraDialog_Preloader").appendTo(b);f.success=function(a){g.remove();b.append(a);h(!1)};d.ajax(f);break;case "iframe":iframe_options=d.extend({width:"100%",height:"100%", marginheight:"0",marginwidth:"0",frameborder:"0"},"string"==typeof a.settings.source[c]?{src:a.settings.source[c]}:a.settings.source[c]);b.append(jQuery("<iframe>").attr(iframe_options));break;case "inline":b.append(a.settings.source[c])}}a.message.appendTo(e);if(c=l()){var n=jQuery("<div>",{"class":"ZebraDialog_Buttons"}).appendTo(a.dialog);d.each(c,function(e,b){var c=jQuery("<a>",{href:"javascript:void(0)","class":"ZebraDialog_Button"+e});d.isPlainObject(b)?c.html(b.caption):c.html(b);c.bind("click", function(){void 0!=b.callback&&b.callback(a.dialog);a.close(void 0!=b.caption?b.caption:b)});c.appendTo(n)});jQuery("<div>",{style:"clear:both"}).appendTo(n)}a.dialog.appendTo("body");d(window).bind("resize",h);a.settings.keyboard&&d(document).bind("keyup",p);a.isIE6&&d(window).bind("scroll",q);!1!==a.settings.auto_close&&(a.dialog.bind("click",function(){clearTimeout(a.timeout);a.close()}),a.timeout=setTimeout(a.close,a.settings.auto_close));h(!1);return a};a.close=function(e){a.settings.keyboard&& d(document).unbind("keyup",p);a.isIE6&&d(window).unbind("scroll",q);d(window).unbind("resize",h);a.overlay&&a.overlay.animate({opacity:0},a.settings.animation_speed_hide,function(){a.overlay.remove()});a.dialog.animate({top:0,opacity:0},a.settings.animation_speed_hide,function(){a.dialog.remove();if(a.settings.onClose&&"function"==typeof a.settings.onClose)a.settings.onClose(void 0!=e?e:"")})};var h=function(e){var b=d(window).width(),c=d(window).height(),f=a.dialog.width(),g=a.dialog.height(),f= {left:0,top:0,right:b-f,bottom:c-g,center:(b-f)/2,middle:(c-g)/2};a.dialog_left=void 0;a.dialog_top=void 0;a.settings.modal&&a.overlay.css({width:b,height:c});d.isArray(a.settings.position)&&(2==a.settings.position.length&&"string"==typeof a.settings.position[0]&&a.settings.position[0].match(/^(left|right|center)[\s0-9\+\-]*$/)&&"string"==typeof a.settings.position[1]&&a.settings.position[1].match(/^(top|bottom|middle)[\s0-9\+\-]*$/))&&(a.settings.position[0]=a.settings.position[0].toLowerCase(), a.settings.position[1]=a.settings.position[1].toLowerCase(),d.each(f,function(b,e){for(var c=0;2>c;c++){var d=a.settings.position[c].replace(b,e);d!=a.settings.position[c]&&(0==c?a.dialog_left=eval(d):a.dialog_top=eval(d))}}));if(void 0==a.dialog_left||void 0==a.dialog_top)a.dialog_left=f.center,a.dialog_top=f.middle;a.settings.vcenter_short_message&&(b=a.message.find("div:first"),c=b.height(),f=a.message.height(),c<f&&b.css({"padding-top":(f-c)/2}));"boolean"==typeof e&&!1===e||0==a.settings.reposition_speed? a.dialog.css({left:a.dialog_left,top:a.dialog_top,visibility:"visible",opacity:0}).animate({opacity:1},a.settings.animation_speed_show):(a.dialog.stop(!0),a.dialog.css("visibility","visible").animate({left:a.dialog_left,top:a.dialog_top},a.settings.reposition_speed));a.dialog.find("a[class^=ZebraDialog_Button]:first").focus();a.isIE6&&setTimeout(r,500)},r=function(){var e=d(window).scrollTop(),b=d(window).scrollLeft();a.settings.modal&&a.overlay.css({top:e,left:b});a.dialog.css({left:a.dialog_left+ b,top:a.dialog_top+e})},l=function(){if(!0!==a.settings.buttons&&!d.isArray(a.settings.buttons))return!1;if(!0===a.settings.buttons)switch(a.settings.type){case "question":a.settings.buttons=["Yes","No"];break;default:a.settings.buttons=["OK"]}return a.settings.buttons.reverse()},m=function(){switch(a.settings.type){case "confirmation":case "error":case "information":case "question":case "warning":return a.settings.type.charAt(0).toUpperCase()+a.settings.type.slice(1).toLowerCase();default:return!1}}, p=function(e){27==e.which&&a.close();return!0},q=function(){r()},j={init:function(){this.name=this.searchString(this.dataBrowser)||"";this.version=this.searchVersion(navigator.userAgent)||this.searchVersion(navigator.appVersion)||""},searchString:function(a){for(var b=0;b<a.length;b++){var c=a[b].string,d=a[b].prop;this.versionSearchString=a[b].versionSearch||a[b].identity;if(c){if(-1!=c.indexOf(a[b].subString))return a[b].identity}else if(d)return a[b].identity}},searchVersion:function(a){var b= a.indexOf(this.versionSearchString);if(-1!=b)return parseFloat(a.substring(b+this.versionSearchString.length+1))},dataBrowser:[{string:navigator.userAgent,subString:"MSIE",identity:"explorer",versionSearch:"MSIE"}]};j.init();return a.init()}})(jQuery);		
+    'use strict';
+
+    $.Zebra_Dialog = function() {
+
+        // default options
+        var defaults = {
+
+            animation_speed_hide:       0,            //  The speed, in milliseconds, by which the overlay and the
+                                                        //  dialog box will be animated when closing.
+                                                        //
+                                                        //  Default is 250
+
+            animation_speed_show:       0,              //  The speed, in milliseconds, by which the dialog box will
+                                                        //  fade in when appearing.
+                                                        //
+                                                        //  Default is 0
+
+            auto_close:                 false,          //  The number of milliseconds after which to automatically
+                                                        //  close the dialog box or FALSE to not automatically close the
+                                                        //  dialog box.
+                                                        //
+                                                        //  Default is FALSE
+
+            buttons:                    true,           //  Use this for localization and for adding custom buttons.
+                                                        //
+                                                        //  If set to TRUE, the default buttons will be used, depending
+                                                        //  on the type of the dialog box: ['Yes', 'No'] for "question"
+                                                        //  type and ['Ok'] for the other dialog box types.
+                                                        //
+                                                        //  For custom buttons, use an array containing the captions of
+                                                        //  the buttons to display: ['My button 1', 'My button 2'].
+                                                        //
+                                                        //  Set to FALSE if you want no buttons.
+                                                        //
+                                                        //  Note that when the dialog box is closed as a result of clicking
+                                                        //  a button, the "onClose" event is triggered and the callback
+                                                        //  function (if any) receives as argument the caption of the
+                                                        //  clicked button.
+                                                        //
+                                                        //  See the comments for the "onClose" event below for more
+                                                        //  information.
+                                                        //
+                                                        //  You can also attach callback functions to individual buttons
+                                                        //  by using objects in the form of:
+                                                        //
+                                                        //  [
+                                                        //   {caption: 'My button 1', callback: function() { // code }},
+                                                        //   {caption: 'My button 2', callback: function() { // code }}
+                                                        //  ]
+                                                        //
+                                                        //  The main difference is that a callback function attached this
+                                                        //  way is executed as soon as the button is clicked rather than
+                                                        //  *after* the dialog box is closed, as it is the case with the
+                                                        //  "onClose" event.
+                                                        //
+                                                        //  Callback functions attached to buttons get as argument the
+                                                        //  entire dialog box jQuery object.
+                                                        //
+                                                        //  A callback function returning FALSE will prevent the dialog
+                                                        //  box from closing.
+
+            center_buttons:              false,         //  When set to TRUE, the buttons will be centered instead of
+                                                        //  right-aligned.
+                                                        //
+                                                        //  Default is FALSE
+
+            custom_class:                false,         //  An extra class to add to the dialog box's container. Useful
+                                                        //  for customizing a dialog box elements' styles at runtime.
+                                                        //
+                                                        //  For example, setting this value to "mycustom" and in the
+                                                        //  CSS file having something like
+                                                        //  .mycustom .ZebraDialog_Title { background: red }
+                                                        //  would set the dialog box title's background to red.
+                                                        //
+                                                        //  See the CSS file for what can be changed.
+                                                        //
+                                                        //  Default is FALSE
+
+            keyboard:                   true,           //  When set to TRUE, pressing the ESC key will close the dialog
+                                                        //  box.
+                                                        //
+                                                        //  Default is TRUE.
+
+            max_height:                 0,              //  The maximum height, in pixels, before the content in the
+                                                        //  dialog box is scrolled.
+                                                        //
+                                                        //  If set to "0" the dialog box's height will automatically
+                                                        //  adjust to fit the entire content.
+                                                        //
+                                                        //  Default is "0"
+
+            message:                    '',             //  The text (or HTML) to be displayed in the dialog box.
+                                                        //
+                                                        //  See the "source" property on how to add content via AJAX,
+                                                        //  iFrames or from inline elements.
+
+            modal:                      true,           //  When set to TRUE there will be a semitransparent overlay
+                                                        //  behind the dialog box, preventing users from clicking
+                                                        //  the page's content.
+                                                        //
+                                                        //  Default is TRUE
+
+            overlay_close:              true,           //  Should the dialog box close when the overlay is clicked?
+                                                        //
+                                                        //  Default is TRUE
+
+            overlay_opacity:            '.9',           //  The opacity of the overlay (between 0 and 1)
+                                                        //
+                                                        //  Default is .9
+
+            position:                   ['center','top'],       //  Position of the dialog box.
+                                                        //
+                                                        //  Can be either "center" (which would center the dialog box) or
+                                                        //  an array with 2 elements, in the form of
+                                                        //  {'horizontal_position +/- offset', 'vertical_position +/- offset'}
+                                                        //  (notice how everything is enclosed in quotes) where
+                                                        //  "horizontal_position" can be "left", "right" or "center",
+                                                        //  "vertical_position" can be "top", "bottom" or "middle", and
+                                                        //  "offset" represents an optional number of pixels to add/substract
+                                                        //  from the respective horizontal or vertical position.
+                                                        //
+                                                        //  Positions are relative to the viewport (the area of the
+                                                        //  browser that is visible to the user)!
+                                                        //
+                                                        //  Examples:
+                                                        //
+                                                        //  ['left + 20', 'top + 20'] would position the dialog box in the
+                                                        //  top-left corner, shifted 20 pixels inside.
+                                                        //
+                                                        //  ['right - 20', 'bottom - 20'] would position the dialog box
+                                                        //  in the bottom-right corner, shifted 20 pixels inside.
+                                                        //
+                                                        //  ['center', 'top + 20'] would position the dialog box in
+                                                        //  center-top, shifted 20 pixels down.
+                                                        //
+                                                        //  Default is "center".
+
+            reposition_speed:           0,            //  The duration (in milliseconds) of the animation used to
+                                                        //  reposition the dialog box when the browser window is resized.
+                                                        //
+                                                        //  Default is 100.
+
+            show_close_button:          true,           //  When set to TRUE, a "close" button (the little "x") will be
+                                                        //  shown in the upper right corner of the dialog box.
+                                                        //
+                                                        //  If the dialog box has a title bar then the "close" button
+                                                        //  will be shown in the title bar, vertically centered and
+                                                        //  respecting the right padding.
+                                                        //
+                                                        //  If the dialog box does not have a title bar then the "close"
+                                                        //  button will be shown in the upper right corner of the body
+                                                        //  of the dialog box, respecting the position related properties
+                                                        //  set in the stylesheet.
+                                                        //
+                                                        //  Default is TRUE.
+
+            source:                     false,          //  Add content via AJAX, iFrames or from inline elements (together
+                                                        //  with the already applied events).
+                                                        //
+                                                        //  This property can be any of the following:
+                                                        // 
+                                                        //  - 'ajax': object - where "object" can be an object with any
+                                                        //  of the properties you'd normally use to make an AJAX call in
+                                                        //  jQuery (see the description for the "settings" argument at
+                                                        //  http://api.jquery.com/jQuery.ajax/), or it can be a string
+                                                        //  representing a valid URL whose content to be fetched via
+                                                        //  AJAX and placed inside the dialog box.
+                                                        //
+                                                        //  Example:
+                                                        //
+                                                        //  source: {'ajax': 'http://myurl.com/'}
+                                                        //
+                                                        //  source: {'ajax': {
+                                                        //      'url':      'http://myurl.com/',
+                                                        //      'cache':    false
+                                                        //  }}
+                                                        //
+                                                        //  Note that you cannot use the "success" property as it will
+                                                        //  always be overwritten by the library; use the "complete"
+                                                        //  property instead, if you have to!
+                                                        //
+                                                        //  - 'iframe': object - where "object" can be an object where
+                                                        //  property names can be valid attributes of the <iframe> tag
+                                                        //  (see https://developer.mozilla.org/en-US/docs/HTML/Element/iframe),
+                                                        //  or it can be a string representing a valid URL to be loaded
+                                                        //  inside an iFrame and placed inside the dialog box.
+                                                        //
+                                                        //  Example:
+                                                        //
+                                                        //  source: {'iframe': 'http://myurl.com/'}
+                                                        //
+                                                        //  source: {'iframe': {
+                                                        //      'src':          'http://myurl.com/',
+                                                        //      'width':        480,
+                                                        //      'height':       320,
+                                                        //      'scrolling':    'no'
+                                                        //  }}
+                                                        //
+                                                        //  Note that you should always set the iFrame's width and height
+                                                        //  and adjust the dialog box's "width" property accordingly!
+                                                        //
+                                                        //  - 'inline': selector - where "element" is a jQuery element
+                                                        //  from the page; the element will be copied and placed inside
+                                                        //  the dialog box together with any attached events! if you just
+                                                        //  want the element's inner HTML, use $('#element').html().
+                                                        //
+                                                        //  Example:
+                                                        //
+                                                        //  source: {'inline': $('#myelement')}
+                                                        //
+                                                        //  Default is FALSE
+
+            title:                      '',             //  Title of the dialog box
+                                                        //
+                                                        //  Default is "" (an empty string - no title)
+
+            type:                       'information',  //  Dialog box type.
+                                                        //
+                                                        //  Can be any of the following:
+                                                        //
+                                                        //  - confirmation
+                                                        //  - error
+                                                        //  - information
+                                                        //  - question
+                                                        //  - warning
+                                                        //
+                                                        //  If you don't want an icon, set the "type" property to FALSE.
+                                                        //
+                                                        //  By default, all types except "question" have a single button
+                                                        //  with the caption "Ok"; type "question" has two buttons, with
+                                                        //  the captions "Ok" and "Cancel" respectively.
+                                                        //
+                                                        //  Default is "information".
+
+            vcenter_short_message:      true,           //  Should short messages be vertically centered?
+                                                        //
+                                                        //  Default is TRUE
+
+            width:                      0,              //  By default, the width of the dialog box is set in the CSS
+                                                        //  file. Use this property to override the default width at
+                                                        //  runtime.
+                                                        //
+                                                        //  Must be an integer, greater than 0. Anything else will instruct
+                                                        //  the script to use the default value, as set in the CSS file.
+                                                        //  Value should be no less than 200 for optimal output.
+                                                        //
+                                                        //  Default is 0 - use the value from the CSS file.
+
+            onClose:                null                //  Event fired when *after* the dialog box is closed.
+                                                        //
+                                                        //  For executing functions *before* the closing of the dialog
+                                                        //  box, see the "buttons" attribute.
+                                                        //
+                                                        //  The callback function (if any) receives as argument the
+                                                        //  caption of the clicked button or boolean FALSE if the dialog
+                                                        //  box is closed by pressing the ESC key or by clicking on the
+                                                        //  overlay.
+
+        };
+
+        var
+
+            // to avoid confusions, we use "plugin" to reference the current instance of the object
+            plugin = this,
+
+            // by default, we assume there are no custom options provided
+            options = {},
+
+            // we'll use this when resizing
+            timeout;
+
+        // this will hold the merged default, and user-provided options
+        plugin.settings = {};
+
+        // if plugin is initialized so that first argument is a string
+        // that string is the message to be shown in the dialog box
+        if (typeof arguments[0] == 'string') options.message = arguments[0];
+
+        // if plugin is initialized so that first or second argument is an object
+        if (typeof arguments[0] == 'object' || typeof arguments[1] == 'object')
+
+            // extend the options object with the user-provided options
+            options = $.extend(options, (typeof arguments[0] == 'object' ? arguments[0] : arguments[1]));
+
+        /**
+         *  Constructor method
+         *
+         *  @return object  Returns a reference to the plugin
+         */
+        plugin.init = function() {
+
+            var $title;
+
+            // the plugin's final properties are the merged default and user-provided options (if any)
+            plugin.settings = $.extend({}, defaults, options);
+
+            // check if browser is Internet Explorer 6 and set a flag accordingly as we need to perform some extra tasks
+            // later on for Internet Explorer 6
+            plugin.isIE6 = (browser.name == 'explorer' && browser.version == 6) || false;
+
+            // if dialog box should be modal
+            if (plugin.settings.modal) {
+
+                // create the overlay
+                plugin.overlay = $('<div>', {
+
+                    'class':    'ZebraDialogOverlay'
+
+                // set some css properties of the overlay
+                }).css({
+
+                    'position': (plugin.isIE6 ? 'absolute' : 'fixed'),  //  for IE6 we emulate the "position:fixed" behaviour
+                    'left':     0,                                      //  the overlay starts at the top-left corner of the
+                    'top':      0,                                      //  browser window (later on we'll stretch it)
+                    'opacity':  plugin.settings.overlay_opacity         //  set the overlay's opacity
+
+                });
+
+                // if dialog box can be closed by clicking the overlay
+                if (plugin.settings.overlay_close)
+
+                    // when the overlay is clicked
+                    // remove the overlay and the dialog box from the DOM
+                    plugin.overlay.bind('click', function() {plugin.close();});
+
+                // append the overlay to the DOM
+                plugin.overlay.appendTo('body');
+
+            }
+
+            // create the dialog box
+            plugin.dialog = $('<div>', {
+
+                'class':        'ZebraDialog' + (plugin.settings.custom_class ? ' ' + plugin.settings.custom_class : '')
+
+            // set some css properties of the dialog box
+            }).css({
+
+                'position':     (plugin.isIE6 ? 'absolute' : 'fixed'),  //  for IE6 we emulate the "position:fixed" behaviour
+                'left':         0,                                      //  by default, place it in the top-left corner of the
+                'top':          0,                                      //  browser window (we'll position it later)
+                'visibility':   'hidden'                                //  the dialog box is hidden for now
+
+            });
+
+            // if a notification message
+            if (!plugin.settings.buttons && plugin.settings.auto_close)
+
+                // assign a unique id to each notification
+                plugin.dialog.attr('id', 'ZebraDialog_' + Math.floor(Math.random() * 9999999));
+
+            // check to see if the "width" property is given as an integer
+            // try to convert to a integer
+            var tmp = parseInt(plugin.settings.width, 10);
+
+            // if converted value is a valid number
+            if (!isNaN(tmp) && tmp == plugin.settings.width && tmp.toString() == plugin.settings.width.toString() && tmp > 0)
+
+                // set the dialog box's width
+                plugin.dialog.css({'width' : plugin.settings.width});
+
+            // if dialog box has a title
+            if (plugin.settings.title)
+
+                // create the title
+                $title = $('<h3>', {
+
+                    'class':    'ZebraDialog_Title'
+
+                // set the title's text
+                // and append the title to the dialog box
+                }).html(plugin.settings.title).appendTo(plugin.dialog);
+
+            // get the buttons that are to be added to the dialog box
+            var buttons = get_buttons();
+
+            // we create an outer container to apply borders to
+            var body_container = $('<div>', {
+
+                'class':    'ZebraDialog_BodyOuter' + (!plugin.settings.title ? ' ZebraDialog_NoTitle' : '') + (!buttons ? ' ZebraDialog_NoButtons' : '')
+
+            }).appendTo(plugin.dialog);
+
+            // create the container of the actual message
+            // we save it as a reference because we'll use it later in the "draw" method
+            // if the "vcenter_short_message" property is TRUE
+            plugin.message = $('<div>', {
+
+                // if a known dialog box type is specified, also show the appropriate icon
+                'class':    'ZebraDialog_Body' + (get_type() !== false ? ' ZebraDialog_Icon ZebraDialog_' + get_type() : '')
+
+            });
+
+            // if we have a max-height set
+            if (plugin.settings.max_height > 0) {
+
+                // set it like this for browsers supporting the "max-height" attribute
+                plugin.message.css('max-height', plugin.settings.max_height);
+
+                // for IE6, go this way...
+                if (plugin.isIE6) plugin.message.attr('style', 'height: expression(this.scrollHeight > ' + plugin.settings.max_height + ' ? "' + plugin.settings.max_height + 'px" : "85px")');
+
+            }
+
+            // if short messages are to be centered vertically
+            if (plugin.settings.vcenter_short_message)
+
+                // create a secondary container for the message and add everything to the message container
+                // (we'll later align the container vertically)
+                $('<div>').html(plugin.settings.message).appendTo(plugin.message);
+
+            // if short messages are not to be centered vertically
+            else
+
+                // add the message to the message container
+                plugin.message.html(plugin.settings.message);
+
+            // if dialog box content is to be fetched from an external source
+            if (plugin.settings.source && typeof plugin.settings.source == 'object') {
+
+                // the object where the content will be injected into
+                var canvas = (plugin.settings.vcenter_short_message ? $('div:first', plugin.message) : plugin.message);
+
+                // let's see what type of content we need
+                for (var type in plugin.settings.source) {
+
+                    switch (type) {
+
+                        // if we have to fetch content using an AJAX call
+                        case 'ajax':
+
+                            var
+
+                                // prepare the options for the AJAX call
+                                ajax_options = typeof plugin.settings.source[type] == 'string' ? {'url': plugin.settings.source[type]} : plugin.settings.source[type],
+
+                                // create the animated preloader and show it
+                                preloader = $('<div>').attr('class', 'ZebraDialog_Preloader').appendTo(canvas);
+
+                            // handle the "success" event
+                            ajax_options.success = function(result) {
+
+                                // remove the preloader
+                                preloader.remove();
+
+                                // append new content
+                                canvas.append(result);
+
+                                // reposition the dialog box
+                                draw(false);
+                            };
+
+                            // make the AJAX call
+                            $.ajax(ajax_options);
+
+                            break;
+
+                        // if we have to show an iFrame
+                        case 'iframe':
+
+                            // these are the default options
+                            var default_options = {
+                                    'width':        '100%',
+                                    'height':       '100%',
+                                    'marginheight': '0',
+                                    'marginwidth':  '0',
+                                    'frameborder':  '0'
+                                },
+
+                                // extend the default options with the ones provided by the user, if any
+                                iframe_options = $.extend(default_options, typeof plugin.settings.source[type] == 'string' ? {'src': plugin.settings.source[type]} : plugin.settings.source[type]);
+
+                            // create the iFrame and place it inside the dialog box
+                            canvas.append($('<iframe>').attr(iframe_options));
+
+                            break;
+
+                        // if content is to be taken from an inline element
+                        case 'inline':
+
+                            // copy content and place it inside the dialog box
+                            canvas.append(plugin.settings.source[type]);
+
+                            break;
+
+                    }
+
+                }
+
+            }
+
+            // add the message container to the dialog box
+            plugin.message.appendTo(body_container);
+
+            // if there are any buttons to be added to the dialog box
+            if (buttons) {
+
+                // reverse the order of the buttons because they are floated to the right
+                buttons.reverse();
+
+                // create the button bar
+                var button_bar = $('<div>', {
+
+                    'class':    'ZebraDialog_Buttons'
+
+                // append it to the dialog box
+                }).appendTo(plugin.dialog);
+
+                // iterate through the buttons that are to be attached to the dialog box
+                $.each(buttons, function(index, value) {
+
+                    // create button
+                    var button = $('<a>', {
+
+                        'href':     'javascript:void(0)',
+                        'class':    'ZebraDialog_Button_' + index
+
+                    });
+
+                    // if button is given as an object, with a caption and a callback function
+                    // set the button's caption
+                    if ($.isPlainObject(value)) button.html(value.caption);
+
+                    // if button is given as a plain string, set the button's caption accordingly
+                    else button.html(value);
+
+                    // handle the button's click event
+                    button.bind('click', function() {
+
+                        // by default, clicking a button closes the dialog box
+                        var close = true;
+
+                        // execute the callback function when button is clicked
+                        if (undefined !== value.callback) close = value.callback(plugin.dialog);
+
+                        // if dialog box is to be closed
+                        if (close !== false)
+
+                            // remove the overlay and the dialog box from the DOM
+                            // also pass the button's label as argument
+                            plugin.close(undefined !== value.caption ? value.caption : value);
+
+                    });
+
+                    // append the button to the button bar
+                    button.appendTo(button_bar);
+
+                });
+
+                // wrap everything in another wrapper
+                // and center buttons if needed
+                button_bar.wrap($('<div>').addClass('ZebraDialog_ButtonsOuter' + (plugin.settings.center_buttons ? ' ZebraDialog_Buttons_Centered' : '')));
+
+            }
+
+            // insert the dialog box in the DOM
+            plugin.dialog.appendTo('body');
+
+            // if we need to show the little "x" for closing the dialog box, in the top-right corner
+            if (plugin.settings.show_close_button) {
+
+                // create the button now and append it to the dialog box's title, or to the dialog box's body if there's no title
+                var $close = $('<a href="javascript:void(0)" class="ZebraDialog_Close">&times;</a>').bind('click', function(e){
+
+                    e.preventDefault();
+                    plugin.close();
+
+
+                }).appendTo($title ? $title : plugin.message);
+
+                // if the close button was added to the title bar
+                if ($title)
+
+                    // center it vertically
+                    $close.css({
+                        'right':    parseInt($title.css('paddingRight'), 10),
+                        'top':      (parseInt($title.css('height'), 10) + parseInt($title.css('paddingTop'), 10) + parseInt($title.css('paddingBottom'), 10) - $close.height()) / 2
+                    });
+
+            }
+
+            // if the browser window is resized
+            $(window).bind('resize.Zebra_Dialog', function() {
+
+                // clear a previously set timeout
+                // this will ensure that the next piece of code will not be executed on every step of the resize event
+                clearTimeout(timeout);
+
+                // set a small timeout before doing anything
+                timeout = setTimeout(function() {
+
+                    // reposition the dialog box
+                    draw();
+
+                }, 100);
+
+            });
+
+            // if dialog box can be closed by pressing the ESC key
+            if (plugin.settings.keyboard)
+
+                // if a key is pressed
+                $(document).bind('keyup.Zebra_Dialog', function(e) {
+
+                    // if pressed key is ESC
+                    // remove the overlay and the dialog box from the DOM
+                    if (e.which == 27) plugin.close();
+
+                    // let the event bubble up
+                    return true;
+
+                });
+
+            // if browser is Internet Explorer 6 we attach an event to be fired whenever the window is scrolled
+            // that is because in IE6 we have to simulate "position:fixed"
+            if (plugin.isIE6)
+
+                // if window is scrolled
+                $(window).bind('scroll.Zebra_Dialog', function() {
+
+                    // make sure the overlay and the dialog box always stay in the correct position
+                    emulate_fixed_position();
+
+                });
+
+            // if plugin is to be closed automatically after a given number of milliseconds
+            if (plugin.settings.auto_close !== false) {
+
+                // if, in the meantime, the box is clicked
+                plugin.dialog.bind('click', function() {
+
+                    // stop the timeout
+                    clearTimeout(plugin.timeout);
+
+                    // close the box now
+                    plugin.close();
+
+                });
+
+                // call the "close" method after the given number of milliseconds
+                plugin.timeout = setTimeout(plugin.close, plugin.settings.auto_close);
+
+            }
+
+            // draw the overlay and the dialog box
+            // (no animation)
+            draw(false);
+
+            // return a reference to the object itself
+            return plugin;
+
+        };
+
+        /**
+         *  Close the dialog box
+         *
+         *  @return void
+         */
+        plugin.close = function(caption) {
+
+            // remove all event handlers set by the plugin
+            $(document).unbind('.Zebra_Dialog');
+            $(window).unbind('.Zebra_Dialog');
+
+            // if an overlay exists
+            if (plugin.overlay)
+
+                // animate overlay's css properties
+                plugin.overlay.animate({
+
+                    opacity: 0  // fade out the overlay
+
+                },
+
+                // animation speed
+                plugin.settings.animation_speed_hide,
+
+                // when the animation is complete
+                function() {
+
+                    // remove the overlay from the DOM
+                    plugin.overlay.remove();
+
+                });
+
+            // animate dialog box's css properties
+            plugin.dialog.animate({
+
+                top: 0,     // move the dialog box to the top
+                opacity: 0  // fade out the dialog box
+
+            },
+
+            // animation speed
+            plugin.settings.animation_speed_hide,
+
+            // when the animation is complete
+            function() {
+
+                // remove the dialog box from the DOM
+                plugin.dialog.remove();
+
+                // if a callback function exists for when closing the dialog box
+                if (plugin.settings.onClose && typeof plugin.settings.onClose == 'function')
+
+                    // execute the callback function
+                    plugin.settings.onClose(undefined !== caption ? caption : '');
+
+            });
+
+        };
+
+        /**
+         *  Draw the overlay and the dialog box
+         *
+         *  @return void
+         *
+         *  @access private
+         */
+        var draw = function() {
+
+            var
+
+                // get the viewport width and height
+                viewport_width = $(window).width(),
+                viewport_height = $(window).height(),
+
+                // get dialog box's width and height
+                dialog_width = plugin.dialog.width(),
+                dialog_height = plugin.dialog.height(),
+
+                // the numeric representations for some constants that may exist in the "position" property
+                values = {
+
+                    'left':     0,
+                    'top':      0,
+                    'right':    viewport_width - dialog_width,
+                    'bottom':   viewport_height - dialog_height,
+                    'center':   (viewport_width - dialog_width) / 2,
+                    'middle':   (viewport_height - dialog_height) / 2
+
+                };
+
+            // reset these values
+            plugin.dialog_left = undefined;
+            plugin.dialog_top = undefined;
+
+            // if
+            if (
+
+                // the position is given as an array
+                $.isArray(plugin.settings.position) &&
+
+                // the array has exactly two elements
+                plugin.settings.position.length == 2 &&
+
+                // first element is a string
+                typeof plugin.settings.position[0] == 'string' &&
+
+                // first element contains only "left", "right", "center", numbers, spaces, plus and minus signs
+                plugin.settings.position[0].match(/^(left|right|center)[\s0-9\+\-]*$/) &&
+
+                // second element is a string
+                typeof plugin.settings.position[1] == 'string' &&
+
+                // second element contains only "top", "bottom", "middle", numbers, spaces, plus and minus signs
+                plugin.settings.position[1].match(/^(top|bottom|middle)[\s0-9\+\-]*$/)
+
+            ) {
+
+                // make sure both entries are lowercase
+                plugin.settings.position[0] = plugin.settings.position[0].toLowerCase();
+                plugin.settings.position[1] = plugin.settings.position[1].toLowerCase();
+
+                // iterate through the array of replacements
+                $.each(values, function(index, value) {
+
+                    // we need to check both the horizontal and vertical values
+                    for (var i = 0; i < 2; i++) {
+
+                        // replace if there is anything to be replaced
+                        var tmp = plugin.settings.position[i].replace(index, value);
+
+                        // if anything could be replaced
+                        if (tmp != plugin.settings.position[i])
+
+                            // evaluate string as a mathematical expression and set the appropriate value
+                            if (i === 0) plugin.dialog_left = eval(tmp); else plugin.dialog_top = eval(tmp);
+
+                    }
+
+                });
+
+            }
+
+            // if "dialog_left" and/or "dialog_top" values are still not set
+            if (undefined === plugin.dialog_left || undefined === plugin.dialog_top) {
+
+                // the dialog box will be in its default position, centered
+                plugin.dialog_left = values['center'];
+                plugin.dialog_top = values['middle'];
+
+            }
+
+            // if short messages are to be centered vertically
+            if (plugin.settings.vcenter_short_message) {
+
+                var
+
+                    // the secondary container - the one that contains the message
+                    message = plugin.message.find('div:first'),
+
+                    // the height of the secondary container
+                    message_height = message.height(),
+
+                    // the main container's height
+                    container_height = plugin.message.height();
+
+                // if we need to center the message vertically
+                if (message_height < container_height)
+
+                    // center the message vertically
+                    message.css({
+
+                        'padding-top':   (container_height - message_height) / 2
+
+                    });
+
+            }
+
+            // if dialog box is to be placed without animation
+            if ((typeof arguments[0] == 'boolean' && arguments[0] === false) || plugin.settings.reposition_speed === 0) {
+
+                // position the dialog box and make it visible
+                plugin.dialog.css({
+
+                    'left':         plugin.dialog_left,
+                    'top':          plugin.dialog_top,
+                    'visibility':   'visible',
+                    'opacity':      0
+
+                }).animate({'opacity': 1}, plugin.settings.animation_speed_show);
+
+            // if dialog box is to be animated into position
+            } else {
+
+                // stop any ongoing animation
+                // (or animations will queue up when manually resizing the window)
+                plugin.dialog.stop(true);
+
+                plugin.dialog.css('visibility', 'visible').animate({
+                    'left': plugin.dialog_left,
+                    'top':  plugin.dialog_top
+                }, plugin.settings.reposition_speed);
+
+            }
+
+            // move the focus to the first of the dialog box's buttons
+            plugin.dialog.find('a[class^=ZebraDialog_Button]:first').focus();
+
+            // if the browser is Internet Explorer 6, call the "emulate_fixed_position" method
+            // (if we do not apply a short delay, it sometimes does not work as expected)
+            if (plugin.isIE6) setTimeout(emulate_fixed_position, 500);
+
+        };
+
+        /**
+         *  Emulates "position:fixed" for Internet Explorer 6.
+         *
+         *  @return void
+         *
+         *  @access private
+         */
+        var emulate_fixed_position = function() {
+
+            var
+
+                // get how much the window is scrolled both horizontally and vertically
+                scroll_top = $(window).scrollTop(),
+                scroll_left = $(window).scrollLeft();
+
+            // if an overlay exists
+            if (plugin.settings.modal)
+
+                // make sure the overlay is stays positioned at the top of the viewport
+                plugin.overlay.css({
+
+                    'top':  scroll_top,
+                    'left': scroll_left
+
+                });
+
+            // make sure the dialog box always stays in the correct position
+            plugin.dialog.css({
+
+                'left': plugin.dialog_left + scroll_left,
+                'top':  plugin.dialog_top + scroll_top
+
+            });
+
+        };
+
+        /**
+         *  Returns an array containing the buttons that are to be added to the dialog box.
+         *
+         *  If no custom buttons are specified, the returned array depends on the type of the dialog box.
+         *
+         *  @return array       Returns an array containing the buttons that are to be added to the dialog box.
+         *
+         *  @access private
+         */
+        var get_buttons = function() {
+
+            // if plugin.settings.buttons is not TRUE and is not an array either, don't go further
+            if (plugin.settings.buttons !== true && !$.isArray(plugin.settings.buttons)) return false;
+
+            // if default buttons are to be used
+            if (plugin.settings.buttons === true)
+
+                // there are different buttons for different dialog box types
+                switch (plugin.settings.type) {
+
+                    // for "question" type
+                    case 'question':
+
+                        // there are two buttons
+                        plugin.settings.buttons = ['Yes', 'No'];
+
+                        break;
+
+                    // for the other types
+                    default:
+
+                        // there is only one button
+                        plugin.settings.buttons = ['Ok'];
+
+                }
+
+            // return the buttons
+            return plugin.settings.buttons;
+
+        };
+
+        /**
+         *  Returns the type of the dialog box, or FALSE if type is not one of the five known types.
+         *
+         *  Values that may be returned by this method are:
+         *  -   Confirmation
+         *  -   Error
+         *  -   Information
+         *  -   Question
+         *  -   Warning
+         *
+         *  @return boolean     Returns the type of the dialog box, or FALSE if type is not one of the five known types.
+         *
+         *  @access private
+         */
+        var get_type = function() {
+
+            // see what is the type of the dialog box
+            switch (plugin.settings.type) {
+
+                // if one of the five supported types
+                case 'confirmation':
+                case 'error':
+                case 'information':
+                case 'question':
+                case 'warning':
+
+                    // return the dialog box's type, first letter capital
+                    return plugin.settings.type.charAt(0).toUpperCase() + plugin.settings.type.slice(1).toLowerCase();
+
+                // if unknown type
+                default:
+
+                    // return FALSE
+                    return false;
+
+            }
+
+        };
+
+        // since with jQuery 1.9.0 the $.browser object was removed, we rely on this piece of code from
+        // http://www.quirksmode.org/js/detect.html to detect the browser
+        var browser = {
+            init: function () {
+                this.name = this.searchString(this.dataBrowser) || '';
+                this.version = this.searchVersion(navigator.userAgent) || this.searchVersion(navigator.appVersion) || '';
+            },
+            searchString: function (data) {
+                for (var i=0;i<data.length;i++)    {
+                    var dataString = data[i].string;
+                    var dataProp = data[i].prop;
+                    this.versionSearchString = data[i].versionSearch || data[i].identity;
+                    if (dataString) {
+                        if (dataString.indexOf(data[i].subString) != -1)
+                            return data[i].identity;
+                    }
+                    else if (dataProp)
+                        return data[i].identity;
+                }
+            },
+            searchVersion: function (dataString) {
+                var index = dataString.indexOf(this.versionSearchString);
+                if (index == -1) return;
+                return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
+            },
+            dataBrowser: [
+                {
+                    string: navigator.userAgent,
+                    subString: 'MSIE',
+                    identity: 'explorer',
+                    versionSearch: 'MSIE'
+                }
+            ]
+        };
+
+        browser.init();
+
+        // fire up the plugin!
+        // call the "constructor" method
+        return plugin.init();
+
+    };
+
+})(jQuery);
+
+
+
+
+
+
 
 
 (function($){   /* http://ryanday.org/konami   * Dual licensed under the MIT and GPL licenses.  */
@@ -1975,6 +3016,8 @@ $(function(){  $.konami(function(){
 	
 	
 	
+
+
 	
 	
 var toAppend = "";
@@ -1997,21 +3040,22 @@ var tempfromval = $("#frombox").val();
 var tempfrom = $("#modfrombox").val();
 
 
-if(toAppend.length <5)
-{
-
+if(toAppend.length <5) {
 	$.ajax({
-     type: "POST",
-     url: "ajaxallfav.php",
-     async: false,
-	 cache: true,
+    type: "POST",
+    url: "ajax_lookup.php",
+    data: {
+        lookuppage: "allfavjson",
+        clientid: "all"
+    },
+    cache: true,
 	dataType: "json",
-	success: function(data){ $.each(data,function() {
- toAppend+="<option value=" + this.oV + ">" + this.oD + "</option>"; }); 
-	
- }
- }); 
- 
+	success: function(data){
+        $.each(data,function() {
+            toAppend+="<option value=" + this.oV + ">" + this.oD + "</option>";
+        });
+    }
+    }); 
 }
 
 $("#frombox").children().remove().end();
@@ -2035,41 +3079,34 @@ $("#tobox").html(toAppend);
 
 
 $(document).on("click","a#showinactiveclient",function(event){
- event.preventDefault();
- 
-  
-$("a#showinactiveclient").addClass("loader");
+    event.preventDefault();
+    
+    $("a#showinactiveclient").addClass("loader");
+    
+    var toAppendcl = "";
 
-	var toAppendcl = "";
-
-	$.ajax({
-     type: "POST",
-     url: "ajaxallclient.php",
-     async: false,
-	 cache: true,
-	dataType: "json",
-	success: function(data){ $.each(data,function() {
- toAppendcl+="<option value=" + this.oV + ">" + this.oD + "</option>"; 
- 
- }); 
-	
-
-  }
- }); 
- 
-  
-
-
-// $("#newjobselectclient").children().remove().end();
-$("#newjobselectclient").html(toAppendcl);
+    $.ajax({
+        type: "POST",
+        url: "ajax_lookup.php",
+        data: {
+            lookuppage: "allclientjson"
+        },
+        dataType: "json",
+        success: function(data){
+            $.each(data,function() {
+                toAppendcl+="<option value=" + this.oV + ">" + this.oD + "</option>";
+            });
+        },
+        complete: function(data){
+            // $("#newjobselectclient").children().remove().end();
+            $("#newjobselectclient").html(toAppendcl);
+            $("a#showinactiveclient").addClass("fadeout");
+            setTimeout( function() { $("#newjobbutton").click() }, 100 );
+        }
+    }); 
 
 
-	$("a#showinactiveclient").addClass("fadeout");
-	
-	setTimeout( function() { $("#newjobbutton").click() }, 250 );
-
-
- });
+});
 
 
 
@@ -2916,10 +3953,6 @@ input.attr('id', 'modtobox');
 	
 	
 
-
-
-		
-
         var settimmer = 0;
  $(function(){ // page timeout timer
                 window.setInterval(function() {
@@ -2964,21 +3997,6 @@ if(updateTime ==  1){ $("span[id=cdtext]").html('Timed Out'); }
 
 
 
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function showmessage() {
 	if ((allok)==1) {
 	$("#pagetext").stop(true, true).removeAttr("style").attr("height","100%").html(message).delay(ptdelay).slideUp(ptslide);
@@ -3017,12 +4035,6 @@ $(document).ready(function() {
 
 
 $(document).ready(function() {
-
-
-
-
-
-
 
 
 

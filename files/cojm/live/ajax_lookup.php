@@ -1,7 +1,8 @@
 <?php
+
 /*
     COJM Courier Online Operations Management
-	ajaxaudit.php - Serves audit log requets via ajax
+	ajax_lookup.php - Anything that needs looking up via ajax
     Copyright (C) 2016 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
@@ -17,72 +18,39 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    
-    + see bottom browser detection,
-
-     * File: Browser.php
-     * Author: Chris Schuld (http://chrisschuld.com/)
-     * Last Modified: August 20th, 2010
-     * @version 1.9
-     * @package PegasusPHP
-    
 */
 
 
-include "C4uconnect.php";
+
+if (isSet($_GET['lookuppage'])) { $lookuppage=$_GET['lookuppage']; } elseif (isSet($_POST['lookuppage'])) { $lookuppage=$_POST['lookuppage']; }
+
+if ($lookuppage) {
+    include "C4uconnect.php";
+//    echo ' 10 lookuppage : '.$lookuppage;
+    
 
 
 
-if ($globalprefrow['showdebug']>0) {
 
-    // error handler function
-    function myErrorHandler($errno, $errstr, $errfile, $errline){
-        if (!(error_reporting() & $errno)) {    
-            // This error code is not included in error_reporting
-        return;
-    }
 
-    switch ($errno) {
-    case E_USER_ERROR:
-        echo "<b>My ERROR</b> [$errno] $errstr<br />\n";
-        echo "  Fatal error on line $errline in file $errfile";
-        echo ", PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
-        echo "Aborting...<br />\n";
-        exit(1);
-        break;
 
-    case E_USER_WARNING:
-        echo "<b>My WARNING</b> [$errno] $errstr<br />\n";
-        break;
 
-    case E_USER_NOTICE:
-        echo "<b>My NOTICE</b> [$errno] $errstr<br />\n";
-        break;
-	    default:
-//        $infotext=$infotext. "<br />$errstr on line $errline in $errfile\n";
-		echo " $errstr on line $errline in $errfile<br /> \n";
-        break;
-    }
 
-    /* Don't execute PHP internal error handler */
-    return true;
-}
 
- error_reporting(E_ALL);
-// set to the user defined error handler
-$old_error_handler = set_error_handler("myErrorHandler");
-}
 
-$maxresults='5000';
 
-if (isSet($_GET['auditpage'])) { $view=$_GET['auditpage']; } else { $view=$_POST['auditpage']; }
+
+
+
+
+
+
+    if ($lookuppage=='cojmaudit') {
+        if (isSet($_GET['auditpage'])) { $view=$_GET['auditpage']; } else { $view=$_POST['auditpage']; }
 if (isSet($_GET['page'])) { $page=$_GET['page']; } elseif (isSet($_POST['page'])) { $page=$_POST['page']; }
 if (isSet($_POST['showdebug'])) { $showdebug=$_POST['showdebug']; } else { $showdebug=''; }
 if (isSet($_POST['showtimes'])) { $showtimes=$_POST['showtimes']; } else { $showtimes=''; }
 if (isSet($_GET['orderid'])) { $orderid=$_GET['orderid'];   } else { $orderid=$_POST['orderid']; }
-
-// print_r($_POST);
-
 
 if  (isset($_POST['clientid'])) { $clientid=trim($_POST['clientid']); } else { $clientid=''; }
 if  (isset($_POST['clientview'])) { $clientview=trim($_POST['clientview']); } else { $clientview=''; }
@@ -93,11 +61,9 @@ if  (isset($_POST['from'])) {
     
     $start=trim($_POST['from']); 
     
-
     if ($start) {
 
         if ($clientid=='') { $clientid='all'; }
-    
         $trackingtext='';
         $tstart = str_replace("%2F", ":", "$start", $count);
         $tstart = str_replace("/", ":", "$start", $count);
@@ -141,76 +107,92 @@ if (isset($_POST['to'])) {
     else {
         $sqlend='3000-12-25 23:59:59'; $inputend='';
     }
-
 } else { 
-
     $inputend='';
     $sqlend='';
 }
 
 
 $idlocated='';
-$queryextra='';
+
+
+$conditions = array();
+$parameters = array();
+$where = "";
+
+$conditions[] = " `auditdatetime` <> '' ";
+
+if ($sqlstart) {
+    $conditions[] = " auditdatetime >= :sqlstart ";
+    $parameters[":sqlstart"] = $sqlstart;
+}
+if ($sqlend) {
+    $conditions[] = " auditdatetime <= :sqlend ";
+    $parameters[":sqlend"] = $sqlend;
+}
+
+if ($showpageviews<>1) {
+    $conditions[] = " (( `auditpage` <>'') OR  (`audittext` <>'' )) ";
+}
+
+if ($page) {
+    $conditions[] = " auditpage = :auditpage ";
+    $parameters[":auditpage"] = $page;
+}
+
 
 if ($orderid) {
-
-    $query="SELECT * FROM Orders WHERE Orders.ID = '$orderid' LIMIT 1";
-    $result=mysql_query($query, $conn_id);
-    $row=mysql_fetch_array($result);
-
-    if ($row['ID']) {  
-
-        // echo ' id located ';
+    $query="SELECT ID FROM Orders WHERE Orders.ID = :id LIMIT 1";
+    $prep = $dbh->prepare($query);
+    $prep->bindParam(':id', $orderid, PDO::PARAM_INT);
+    $prep->execute();
+    $stmt = $prep->fetchAll();    
+    if ($stmt) {
+        $conditions[] = " auditorderid = :auditorderid ";
+        $parameters[":auditorderid"] = $orderid;
         $idlocated='1';
-
-        $queryextra=" AND `auditorderid` ='".$orderid."'" ;
     } // ends located
 } // ends orderid present
 
 
-$audquery=" SELECT * FROM  `cojm_audit` WHERE `auditdatetime` <>'' ";
-
-if ($sqlstart<>'') {
-    $audquery.=" AND `auditdatetime` >= '$sqlstart' AND `auditdatetime` <= '$sqlend' ";
-}
-
-if ($showpageviews<>1) {
-    $audquery.=" AND (( `auditpage` <>'') OR  (`audittext` <>'' )) ";
-}
-
-
-if ($page) {
-    $audquery=$audquery." AND `auditpage` ='".$page."' ";
-}
-
-
-
-$audquery=$audquery.$queryextra." ORDER BY  `cojm_audit`.`auditdatetime` DESC LIMIT 0,".$maxresults;
-
-
-$audresult=mysql_query($audquery, $conn_id);
-$sumtot=mysql_affected_rows();
-if ($globalprefrow['showdebug']>0) {
-    echo ' <br /> '.$audquery.' <br /> ';
-}
-
-if ($sumtot>'0') {
-
-    echo '<div class="success"> '.$sumtot.' result';
-    if ($sumtot<>'1') { echo 's '; }
-
-    echo ' found ';
-
-    if ($sumtot==$maxresults) {
-        echo ' ( limited to '.$maxresults.' ) ';
+    
+    if (count($conditions) > 0) {
+        $where = implode(' AND ', $conditions);
     }
 
+    // check if $where is empty string or not
+    $query = "SELECT * FROM  `cojm_audit`
+    " . ($where != "" ? " WHERE $where" : "");
 
+
+$query.= " ORDER BY auditdatetime DESC ";
+
+    try {
+        if (empty($parameters)) {
+            $result = $dbh->query($query);
+        }
+        else {
+            $statement = $dbh->prepare($query);
+            $statement->execute($parameters);
+            if (!$statement) throw new Exception("Query execution error.");
+            $result = $statement->fetchAll();
+            $pdocount = $statement->rowCount();
+        }
+    }
+    catch(Exception $ex)
+    {
+        echo $ex->getMessage();
+    }
+   
+if ($result) {
+
+    echo '<div class="success"> '.$pdocount.' result';
+    if ($pdocount<>'1') { echo 's '; }
+    echo ' found ';
     echo ' </div><br />'; 
 
 
-    echo '
-    <table class="orderaudit">
+    echo ' <table class="orderaudit">
     <thead>
     <tr>
     <th>Time</th>
@@ -221,14 +203,11 @@ if ($sumtot>'0') {
     }
 
     echo ' <th>Text</th>';
-
     if ($showdebug) {
         echo ' <th>Debug Text</th>';
     }
-    
     echo ' <th>Page</th>
     <th>Action</th>';
-
     if ($showtimes) {
         echo '<th> CJ ms</th><th> MID ms</th><th> PAGE ms</th>';
     }
@@ -242,100 +221,60 @@ if ($sumtot>'0') {
     <tbody>';
 
 
-
-    while ($audrow = mysql_fetch_array($audresult)) {
-        extract($audrow);
-
+    foreach ($result as $audrow) {
         $rowbrowser = new Browser($agent_string=$audrow['auditbrowser']); 
         $rowplatform=$rowbrowser->getPlatform();
         $rowversion=$rowbrowser->getVersion();
         $rowbrowsername=$rowbrowser->getBrowser();
         
-
-        echo '
-        <tr>
+        echo ' <tr>
         <td>'.date('H:i D jS M Y', strtotime($audrow['auditdatetime'])).'</td>
         <td>'.$audrow['audituser'].'</td>';
-
         if ($idlocated=='') {
             echo '<td>';
             if ($audrow['auditorderid']<>'0') {
                 echo '<a target="_blank" class="newwin" href="order.php?id='. $audrow['auditorderid'].'">'. $audrow['auditorderid'].'</a>';
             }
-
             echo '</td>';
         }
-
         echo ' <td >'.$audrow['audittext'].'</td>';
-
         if ($showdebug) {
-
             echo '<td>'.$audrow['auditinfotext'].'</td>';
         }
-
-
-
         echo '
         <td>'.$audrow['auditfilename'].'</td>
         <td>'.$audrow['auditpage'].'</td>';
-
-
         if ($showtimes) {
             echo '<td>';
-
             if ($auditcjtime) { echo $auditcjtime; }
-
             echo ' </td> <td>';
-
             if ($auditmidtime) { echo $auditmidtime; }
-
             echo ' </td><td> ';
-
             if ($auditpagetime) { echo $auditpagetime; }
             echo '</td> ';	
         }
-    
         echo ' <td>';
-
-
         if ($audrow['auditmobdevice']=='1') {
             echo'<span class="mobileonline" title="Mobile Device" ></span>';
         }
         else {
             echo '<span class="desktoponline" title="Desktop" ></span>';
         }
-            
         echo '</td>
         <td>';
-
         if (($audrow['auditscreenwidth']) or ($audrow['auditscreenheight'])) {
             echo $audrow['auditscreenwidth'].' x '.$audrow['auditscreenheight'];
         }
-
-
-
         echo '</td> ';
         echo '<td>' . $rowplatform . ' </td> <td> '.$rowbrowsername;
-        
         if ($rowversion) { echo ' <br /> v '.$rowversion; }
-        
-        
         echo '</td>';
-
-
         echo ' </tr>';
 
     } // ends row extract
 
-    echo '</tbody>
-    </table>
-    <br />';
+    echo '</tbody> </table>';
     
-
-    
-    if ($view=='order') {
-        echo '<a href="cojmaudit.php?orderid='.$orderid.'" >Full Audit Log</a>';
-    }
     
 //    echo ' auditpage = '.$auditpage;
     
@@ -346,60 +285,782 @@ else {
 
 
 
+        
+        
+    }
 
 
 
+    if ($lookuppage=='invoiceorderlist'){
+        $invoiceref=$_POST['invoiceref'];
+        $sql = "
+        SELECT * FROM Orders 
+        left JOIN Services ON Orders.ServiceID = Services.ServiceID 
+        left JOIN Cyclist ON Orders.CyclistID = Cyclist.CyclistID
+        left JOIN Clients ON Orders.CustomerID = Clients.CustomerID
+        left JOIN status ON Orders.status = status.status 
+        WHERE Orders.invoiceref = :ref
+        ORDER BY `Orders`.`ShipDate` ASC";
+        
+        $prep = $dbh->prepare($sql);
+        $prep->bindParam(':ref', $invoiceref, PDO::PARAM_INT);
+        $prep->execute();
+        $stmt = $prep->fetchAll();
+    
+        $firstrun='1';
+        
+        if ($stmt) {
+
+            $i='1';
+            $tablecost='';
+            $tabletotal='';
+            $temptrack='';
+            $tottimedif='';
+            $secmod='';
+            echo '<div class="vpad"></div>
+            <table class="acc normalsize" style="width:100%;">
+            <tbody>
+            <tr>
+            <th scope="col">COJM ID</th>
+            <th scope="col">'.$globalprefrow['glob5'].'</th>
+            <th scope="col">Service</th>
+            <th scope="col">Cost ex VAT</th>
+            <th scope="col">From </th>
+            <th scope="col">To </th>
+            <th scope="col">Collection</th>
+            <th scope="col">Delivery</th>
+            </tr>';
+            
+            foreach ($stmt as $orow) {
+            
+                echo '
+                <tr>
+                <td><a href="order.php?id='. $orow['ID'].'">'. $orow['ID'].'</a></td>
+                <td>'. $orow['cojmname'].'</td>
+                <td>'. formatmoney($orow["numberitems"]) .' x '. $orow['Service'].'</td>
+                <td>&'. $globalprefrow['currencysymbol'].$orow["FreightCharge"].'</td>
+                <td>'. $orow['enrft0'];  
+                if (trim($orow['enrpc0'])) {
+                    echo ' <a target="_blank" href="http://maps.google.com/maps?q='. $orow['enrpc0'].'">'. $orow['enrpc0'].'</a>';
+                    }
+                echo '</td><td>'. $orow['enrft21'].' ';
+                if (trim($orow['enrpc21'])) {
+                    echo ' <a target="_blank" href="http://maps.google.com/maps?q='. $orow['enrpc21'].'">'. $orow['enrpc21'].'</a>';
+                }
+                echo '</td>
+                <td>'.date('H:i D jS M ', strtotime($orow['collectiondate'])).'</td>
+                <td>'.date('H:i D jS M ', strtotime($orow['ShipDate'])).'</td></tr>';
+                
+                $tablecost = $tablecost + $orow["FreightCharge"];
+                $tabletotal = $tabletotal + $orow['numberitems'];
+                
+                $temptrack=$temptrack.'<input type="hidden" name="tr'.$i.'" value="'.$orow['ID'].'" />';
+                
+                $i++;
+                
+                $tottimec=strtotime($orow['starttrackpause']);
+                $tottimed=strtotime($orow['finishtrackpause']);
+                if (($tottimec>'1') AND ($tottimed>'1')) { $secmod=($tottimed-$tottimec); }
+                $tottimea=strtotime($orow['collectiondate']); 
+                $tottimeb=strtotime($orow['ShipDate']); 
+                $tottimedif=($tottimedif+$tottimeb-$tottimea-$secmod);
+            
+            
+            } 
+            
+            echo '</tbody></table>';
+            
+            
+            
+            
+            
+            $lengthtext='';
+            
+            
+            $inputval = $tottimedif; // USER DEFINES NUMBER OF SECONDS FOR WORKING OUT | 3661 = 1HOUR 1MIN 1SEC 
+            $unitd ='86400';
+            $unith ='3600';        // Num of seconds in an Hour... 
+            $unitm ='60';            // Num of seconds in a min... 
+            $dd = intval($inputval / $unitd);       // days
+            $hh_remaining = ($inputval - ($dd * $unitd));
+            $hh = intval($hh_remaining / $unith);    // '/' given value by num sec in hour... output = HOURS 
+            $ss_remaining = ($hh_remaining - ($hh * $unith)); // '*' number of hours by seconds, then '-' from given value... output = REMAINING seconds 
+            $mm = intval($ss_remaining / $unitm);    // take remaining sec and devide by sec in a min... output = MINS 
+            $ss = ($ss_remaining - ($mm * $unitm));        // '*' number of mins by seconds, then '-' from remaining sec... output = REMAINING seconds. 
+            if ($dd=='1') {$lengthtext=$lengthtext. $dd . " day "; } if ($dd>'1' ) { $lengthtext=$lengthtext. $dd . " days "; }
+            if ($hh=='1') {$lengthtext=$lengthtext. $hh . " hr "; } if ($hh>'1') { $lengthtext=$lengthtext. $hh . " hrs "; }
+            if ($mm>'1' ) {$lengthtext=$lengthtext. $mm . " mins. "; } if ($mm=='1') {$lengthtext=$lengthtext. $mm . " min. "; }
+            // number_format($tablecost, 2, '.', '')
+            if ($dd) {} else { if ($mm) {   $lengthtext=$lengthtext. "(". number_format((($mm/'60')+$hh), 2, '.', ''). 'hrs)'; } }
+            // echo ($tottimedif/60).' minutes';
+            
+            
+            
+            
+            if (($lengthtext) or ($tabletotal)) {
+                echo '<div class="vpad"></div>
+                <div class="ui-widget">	<div class="ui-state-default ui-corner-all" style="padding: 0.5em; width:auto;">';
+            
+                if ($tabletotal) {
+                    echo '<fieldset><label for="txtName" class="fieldLabel"> Total Volume </label> '. $tabletotal.'</fieldset>'; 
+                }
+            
+                if (trim($lengthtext)) {
+                    echo '<fieldset><label for="txtName" class="fieldLabel"> 
+                    Time Taken </label>'.$lengthtext. ' from collection to delivery.</fieldset>';
+                }
+            
+            
+                echo '</div>';
+            }
+        
+        } // ends rum rows loop
+        
+        
+        
+    
+}
+
+    if (($lookuppage=='individexpense') and (isset($_POST['expenseid']))) {
+        if ($globalprefrow['forcehttps']>'0') { if ($serversecure=='') {  exit(); } }
+    
+        $expenseid=(trim($_POST['expenseid']));
+    
+        try {
+            $query= ' SELECT *
+            FROM expenses
+            left JOIN Cyclist ON expenses.cyclistref = Cyclist.CyclistID 
+            left join expensecodes ON expenses.expensecode = expensecodes.expensecode 
+            WHERE expenseref = :expenseid ';
+            
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':expenseid', $expenseid, PDO::PARAM_INT);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row) {
+                if ($row['paymentdate']>'10') { $paymentdate= date('d-m-Y', strtotime($row['paymentdate'])); }
+                if ($row['expc1']>0) { $expmethod='expc1'; }
+                if ($row['expc2']>0) { $expmethod='expc2'; }
+                if ($row['expc3']>0) { $expmethod='expc3'; }
+                if ($row['expc4']>0) { $expmethod='expc4'; }
+                if ($row['expc5']>0) { $expmethod='expc5'; }
+                if ($row['expc6']>0) { $expmethod='expc6'; }
+                $displaydate='';
+
+                if (date('U', strtotime($row['expensedate']))>20) {
+                    $displaydate=date('d-m-Y', strtotime($row['expensedate']));
+                }
+                    
+                echo '<script>';
+                
+                if ($row['isactive']<>1) {
+                            
+                    echo " $('#cyclistref').append($('<option>', {
+                        value: ".$row['cyclistref'].",
+                        text: '".$row['cojmname']." Inactive'
+                    })); ";
+                }
+                
+                echo '
+                allok=1;
+                message=" Expense '.$row['expenseref'].' Located ";
+                
+                $("#amount").val("'.$row['expensecost'].'");
+                $("expenseid").val("'.$row['expenseref'].'");
+                $("#expensevat").val("'.$row['expensevat'].'");
+                $("select#expensecode").val("'.$row['expensecode'].'");
+                $("#expensedescription").html("'.$row['expensedescription'].'");
+                $("#explastupdated").html("'.date('H:i D jS M Y', strtotime($row['expts'])).'");
+                $("#whoto").val("'.$row['whoto'].'");              
+                $("select#cyclistref").val("'.$row['cyclistref'].'");
+                $("#expensedate").val("'. $displaydate.'");  
+                $("select#paid").val("'.$row['paid'].'");
+                $("select#paymentmethod").val("'.$expmethod.'");
+                $("#chequeref").val("'.$row['chequeref'].'");
+                var str = "'.(trim($row['description'])).'";
+                var regex = /<br\s*[\/]?>/gi;
+                $("#expensecomment").val(str.replace(regex, "\n"));
+                $("#expensedetails").removeClass("hideuntilneeded");
+                $("#expensecomment").trigger("autosize.resize");
+                
+                window.history.pushState("object or string", "Expense '.$row['expenseref'].'", "/cojm/live/singleexpense.php?expenseref='.$row['expenseref'].'"); ';
+                
+                if ($row['expensecode']=='6') {
+                    echo ' $("#riderselect").removeClass("hideuntilneeded"); ';
+                } else {
+                    echo ' $("#riderselect").addClass("hideuntilneeded"); ';
+                }
+                
+                echo ' </script>';
+                
+            } else {
+                echo '<script>
+                $("#amount").val("");
+                $("#expensevat").val("");
+                $("select#expensecode").val("");
+                $("#whoto").val(""); 
+                $("select#cyclistref").val("");
+                $("#expensedate").val("");
+                $("#explastupdated").html("");
+                $("select#paid").val("0");
+                $("#chequeref").val("");
+                $("select#paymentmethod").val("");
+                $("#expensecomment").val("");
+                $("#expensedescription").val("");
+                $("#editexpense").addClass("hideuntilneeded");
+                $("#expensedetails").addClass("hideuntilneeded");
+                $("#riderselect").addClass("hideuntilneeded");
+                allok=0;
+                message=" No Expense Located ";
+                </script>';
+            }
+        }
+            
+        catch(PDOException $e) {
+            echo $e->getMessage();
+        }
+
+    }
+    
+
+
+    if ($lookuppage=='paymentdetail'){
+        if (isset($_POST['paymentref'])) {
+            $paymentref=(trim($_POST['paymentref']));
+            try {
+                $query= ' SELECT paymentdate, paymentamount, paymentclient, paymenttypename, paymentcomment, CompanyName, isactiveclient
+                FROM cojm_payments
+                left JOIN Clients ON cojm_payments.paymentclient = Clients.CustomerID 
+                left JOIN cojm_paymenttype ON cojm_payments.paymenttype = cojm_paymenttype.paymenttypeid 
+                WHERE paymentid = :paymentid LIMIT 0,1';
+                
+                $stmt = $dbh->prepare($query);
+                $stmt->bindParam(':paymentid', $paymentref, PDO::PARAM_INT);
+                $stmt->execute();
+                $total = $stmt->rowCount();
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($total) {
+                    if ($row['paymentdate']>'10') { echo date('d-m-Y', strtotime($row['paymentdate'])); }
+                    
+                    echo ' &'. $globalprefrow['currencysymbol'].$row['paymentamount'].' '.
+                    $row['paymenttypename'].' '.
+                    
+                    $row['CompanyName'].' '.$row['paymentcomment'];
+
+                }
+            }
+            catch(PDOException $e) {
+                echo $e->getMessage();
+            }
+        }
+    }
+
+
+    
+    if ($lookuppage=='paymentstuff'){
+
+        if (isset($_POST['paymentid'])) {  
+            $paymentid=(trim($_POST['paymentid']));
+            try {
+                $query= ' SELECT paymentdate, paymentamount, paymentclient, paymenttype, paymentcomment, CompanyName, isactiveclient
+                FROM cojm_payments
+                left JOIN Clients ON cojm_payments.paymentclient = Clients.CustomerID 
+                WHERE paymentid = :paymentid LIMIT 0,1';
+                
+                $stmt = $dbh->prepare($query);
+                $stmt->bindParam(':paymentid', $paymentid, PDO::PARAM_INT);
+                $stmt->execute();
+                $total = $stmt->rowCount();
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($total) {
+                        
+                    if ($row['paymentdate']>'10') { $paymentdate= date('d-m-Y', strtotime($row['paymentdate'])); }
+                    
+                    echo '<script>
+                    allok=1;
+                    message=" Payment Located ";
+                    $("#paymentdetails").show();
+                    $("#amountpaid").val("'.$row['paymentamount'].'");
+                    $("#paymentdate").val("'.$paymentdate.'");  
+                    $("select#paymentmethod").val("'.$row['paymenttype'].'");';
+                    
+                    if ($row['isactiveclient']<>'1') {
+                        echo '
+                        $("#combobox").prepend("<option selected value='.$row['paymentclient'].'>'.$row['CompanyName'].'</option> " ); ';
+                    }
+        
+                    echo '            
+                    $("#combobox").combobox("autocomplete", "'.$row['paymentclient'].'","'.$row['CompanyName'].'"); 
+                    $("select#combobox").val("'.$row['paymentclient'].'");
+                    $("#combobox").val("'.$row['paymentclient'].'");  
+        
+                    var str = "'.(trim($row['paymentcomment'])).'";
+                    var regex = /<br\s*[\/]?>/gi;
+                    $("#paymentcomment").val(str.replace(regex, "\n"));
+                    $("#editpayment").removeClass("hideuntilneeded");
+                    window.history.pushState("object or string", "Payment Ref '.$paymentid.'", "/cojm/live/paymentsin.php?paymentid='.$paymentid.'");
+                    
+                    </script>';
+                    
+                } else {
+                    echo '<script>
+                    $("#paymentdetails").hide();
+                    $("#amountpaid").val("");
+                    $("#paymentdate").val(""); 
+                    $("select#paymentmethod").val("");
+                    $("select#combobox").val("");
+                    $("#paymentcomment").val("");
+                    $("#addnewpayment").removeClass("hideuntilneeded");
+                    $("#editpayment").addClass("hideuntilneeded");
+                    $("#combobox").combobox("autocomplete", "","");
+                    allok=0;
+                    message=" No Payment Located ";
+                    </script>';
+                }
+            }
+            
+            catch(PDOException $e) {
+                echo $e->getMessage();
+            }
+        
+        }
+
+        
+        $view=$_POST['view'];
+        $clientid=trim($_POST['clientid']);
+        if (!$clientid) {
+            $view='initial';
+        }
+        
+        
+        if ($view=='initial') {
+            $sql="
+            SELECT paymentid, paymentdate, paymentamount, paymentclient, paymenttype, paymenttypename, paymentcomment, paymentedited, paymentcreated, CompanyName FROM cojm_payments 
+            left JOIN cojm_paymenttype ON cojm_payments.paymenttype = cojm_paymenttype.paymenttypeid 
+            left JOIN Clients ON cojm_payments.paymentclient = Clients.CustomerID
+            ORDER BY paymentdate DESC LIMIT 0,10";
+            $stmt = $dbh->query($sql);
+        }
+        
+        if ($view=='client') {
+            $sql="
+            SELECT paymentid, paymentdate, paymentamount, paymentclient, paymenttype, paymenttypename, paymentcomment, paymentedited, paymentcreated, CompanyName FROM cojm_payments 
+            left JOIN cojm_paymenttype ON cojm_payments.paymenttype = cojm_paymenttype.paymenttypeid 
+            left JOIN Clients ON cojm_payments.paymentclient = Clients.CustomerID
+            WHERE Clients.CustomerID = :clientid
+            ORDER BY paymentdate DESC LIMIT 0,10";        
+            
+            $prep = $dbh->prepare($sql);
+            $prep->bindParam(':clientid', $clientid, PDO::PARAM_INT);
+            $prep->execute();
+            $stmt = $prep->fetchAll();
+        }
+        
+        
+        if ($stmt) {
+        
+            echo ' <table class="acc" id="lastten" style="float:left;">
+            <caption>Last 10 Payments</caption>
+            <tr>
+            <thead>
+            <th scope="col">Reference</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Date</th>
+            <th scope="col">Client</th>
+            <th scope="col">Type</th>
+            <th scope="col">Comments</th>
+            <th> Created</th>
+            <th> Edited</th>
+            </tr>
+            </thead><tbody> ';
+            
+    
+            foreach ($stmt as $row) {
+                echo '<tr> <td> <a href="paymentsin.php?paymentid='.$row['paymentid']. '">'.$row['paymentid'].'</a></td>';
+                echo '<td class="rh"> &'. $globalprefrow['currencysymbol']. $row['paymentamount']. '</td> ';
+                echo '<td class="rh">'. date('D jS M Y', strtotime($row['paymentdate'])).'</td> ';
+                echo '<td> '.$row['CompanyName'].' </td> ';
+                echo '<td>'.$row['paymenttypename'].' </td>';
+                echo '<td>'. $row['paymentcomment'].'</td>';
+                echo '<td class="rh">'. date('H:i D jS M Y', strtotime($row['paymentcreated'])).'</td> ';
+                echo '<td class="rh">'. date('H:i D jS M Y', strtotime($row['paymentedited'])).'</td> ';
+                echo '</tr>';
+            } // ends expense ref loop
+            
+            
+            echo ' </tbody> </table> ';
+            
+            
+        }
+            
+            
+            
+        if ($view=='initial') {
+            $sql="
+            SELECT paymentid, paymentdate, paymentamount, paymentclient, paymenttype, paymenttypename, paymentcomment, paymentedited, paymentcreated, CompanyName 
+            FROM cojm_payments 
+            left JOIN cojm_paymenttype ON cojm_payments.paymenttype = cojm_paymenttype.paymenttypeid 
+            left JOIN Clients ON cojm_payments.paymentclient = Clients.CustomerID
+            ORDER BY paymentedited DESC LIMIT 0,10";
+            $stmt = $dbh->query($sql);
+        }
+        
+        if ($view=='client') {
+            $sql="
+            SELECT paymentid, paymentdate, paymentamount, paymentclient, paymenttype, paymenttypename, paymentcomment, paymentedited, paymentcreated, CompanyName 
+            FROM cojm_payments 
+            left JOIN cojm_paymenttype ON cojm_payments.paymenttype = cojm_paymenttype.paymenttypeid 
+            left JOIN Clients ON cojm_payments.paymentclient = Clients.CustomerID
+            WHERE cojm_payments.paymentclient = :clientid
+            ORDER BY paymentedited DESC LIMIT 0,10";        
+            
+            $prep = $dbh->prepare($sql);
+            $prep->bindParam(':clientid', $clientid, PDO::PARAM_INT);
+            $prep->execute();
+            $stmt = $prep->fetchAll();
+        }
+        
+                        
+            
+        if ($stmt) {    
+            echo '
+            <table class="acc" id="lastedit" style="float:left;">
+            <caption>Last 10 Edited Payments</caption>
+            <tr>
+            <thead>
+            <th scope="col">Reference</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Date</th>
+            <th scope="col">Client</th>
+            <th scope="col">Type</th>
+            <th scope="col">Comments</th>
+            <th> Created</th>
+            <th> Edited</th>
+            </tr>
+            </thead>
+            <tbody> ';
+            
+            foreach ($stmt as $row) {
+                echo '<tr> <td> <a href="paymentsin.php?paymentid='.$row['paymentid']. '">'.$row['paymentid'].'</a></td>';
+                echo '<td class="rh"> &'. $globalprefrow['currencysymbol']. $row['paymentamount']. '</td> ';
+                echo '<td class="rh">'. date('D jS M Y', strtotime($row['paymentdate'])).'</td> ';
+                echo '<td> '.$row['CompanyName'].' </td> ';
+                echo '<td>'.$row['paymenttypename'].' </td>';
+                echo '<td>'. $row['paymentcomment'].'</td>';
+                echo '<td class="rh">'. date('H:i D jS M Y', strtotime($row['paymentcreated'])).'</td> ';
+                echo '<td class="rh">'. date('H:i D jS M Y', strtotime($row['paymentedited'])).'</td> ';
+                echo '</tr>';
+            } // ends expense ref loop
+            
+            echo '
+            </tbody>
+            </table> ';
+        }
+    
+            
+        if ($view=='initial') {
+            $sql="
+            SELECT paymentid, paymentdate, paymentamount, paymentclient, paymenttype, paymenttypename, paymentcomment, paymentedited, paymentcreated, CompanyName FROM cojm_payments 
+            left JOIN cojm_paymenttype ON cojm_payments.paymenttype = cojm_paymenttype.paymenttypeid 
+            left JOIN Clients ON cojm_payments.paymentclient = Clients.CustomerID
+            ORDER BY paymentcreated DESC LIMIT 0,10";
+            $stmt = $dbh->query($sql);
+        }
+        
+        if ($view=='client') {
+            $sql="
+            SELECT paymentid, paymentdate, paymentamount, paymentclient, paymenttype, paymenttypename, paymentcomment, paymentedited, paymentcreated, CompanyName FROM cojm_payments 
+            left JOIN cojm_paymenttype ON cojm_payments.paymenttype = cojm_paymenttype.paymenttypeid 
+            left JOIN Clients ON cojm_payments.paymentclient = Clients.CustomerID
+            WHERE Clients.CustomerID = :clientid
+            ORDER BY paymentcreated DESC LIMIT 0,10";        
+            
+            $prep = $dbh->prepare($sql);
+            $prep->bindParam(':clientid', $clientid, PDO::PARAM_INT);
+            $prep->execute();
+            $stmt = $prep->fetchAll();
+        }
+        
+    
+        if ($stmt) {
+    
+            echo '
+            <table class="acc" id="lastten" style="float:left;">
+            <caption>Last 10 Created Payments</caption>
+            <tr>
+            <thead>
+            <th scope="col">Reference</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Date</th>
+            <th scope="col">Client</th>
+            <th scope="col">Type</th>
+            <th scope="col">Comments</th>
+            <th> Created</th>
+            <th> Edited</th>
+            </tr>
+            </thead><tbody> ';
+
+            foreach ($stmt as $row) {
+                echo '<tr> <td> <a href="paymentsin.php?paymentid='.$row['paymentid']. '">'.$row['paymentid'].'</a></td>';
+                echo '<td class="rh"> &'. $globalprefrow['currencysymbol']. $row['paymentamount']. '</td> ';
+                echo '<td class="rh">'. date('D jS M Y', strtotime($row['paymentdate'])).'</td> ';
+                echo '<td> '.$row['CompanyName'].' </td> ';
+                echo '<td>'.$row['paymenttypename'].' </td>';
+                echo '<td>'. $row['paymentcomment'].'</td>';
+                echo '<td class="rh">'. date('H:i D jS M Y', strtotime($row['paymentcreated'])).'</td> ';
+                echo '<td class="rh">'. date('H:i D jS M Y', strtotime($row['paymentedited'])).'</td> ';
+                echo '</tr>';
+            } // ends expense ref loop
+    
+            echo '</tbody> </table> ';
+        }
+
+    }
+
+
+    if ($lookuppage=='updateexptable') { // update expense tables
+        // echo ' Updating Expense Tables ';
+        echo ' <script> $("#explastupdated").html("'.date("H:i ").'Today"); </script> ';
+        $sql="
+        SELECT expenseref, expts, paid, expensecost, expensevat, expensedate, whoto, smallexpensename, CyclistID, cojmname, expc1, expc2, expc3, expc4, expc5, expc6, chequeref, description FROM expenses 
+        INNER JOIN Cyclist 
+        INNER JOIN expensecodes
+        ON expenses.cyclistref = Cyclist.CyclistID 
+        AND expenses.expensecode = expensecodes.expensecode 
+        ORDER BY expts DESC LIMIT 0,10
+        ";
+        
+        $stmt = $dbh->query($sql);
+        
+        
+        echo ' <table class="acc" id="lastedit" style="float:left;">
+        <caption>Last 10 Edited Expenses</caption>
+        <tr>
+        <thead>
+        <th scope="col">Reference</th>
+        <th title="Incl. VAT" scope="col">Net Amount</th>
+        <th scope="col">VAT </th>
+        <th scope="col">Edited</th>
+        <th scope="col">'. $globalprefrow['glob5'] .' </th>
+        <th scope="col">Paid to</th>
+        <th scope="col">Type</th>
+        <th scope="col">Method </th>
+        <th scope="col">Comments</th>
+        </tr>
+        </thead>
+        <tbody> ';
+        
+        
+        
+        
+        
+        foreach ($stmt as $row) {
+            $loop.= '<tr> <td> <a href="singleexpense.php?expenseref='.$row['expenseref']. '">'.$row['expenseref'].'</a>';     
+            if ($row['paid']<'1') { $loop.= ' UNPAID'; }
+            $loop.= '</td> <td class="rh"> &'. $globalprefrow['currencysymbol']. $row['expensecost']. '</td><td> ';
+            if ($row['expensevat']>'0') { $loop.=' &'.$globalprefrow['currencysymbol']. $row['expensevat']; }
+            $loop.= ' </td> <td class="rh">'. date('H:i D jS M Y', strtotime($row['expts'])).'</td> <td>';
+            if ($row['CyclistID']<>'1') { $loop.= $row['cojmname']; }
+            $loop.= '</td> <td>'.$row['whoto'].'</td> <td>'.$row['smallexpensename'].'  </td> <td>';
+            if ($row['expc1']>0) { $loop.= $globalprefrow['gexpc1']; } 
+            if ($row['expc2']>0) { $loop.= $globalprefrow['gexpc2']; } 
+            if ($row['expc3']>0) { $loop.= $globalprefrow['gexpc3']; } 
+            if ($row['expc4']>0) { $loop.= $globalprefrow['gexpc4']; } 
+            if ($row['expc5']>0) { $loop.= $globalprefrow['gexpc5']; } 
+            if ($row['expc6']>0) { $loop.= $globalprefrow['gexpc6'].' '.$row['chequeref']; }
+            $loop.= '</td><td>'. $row['description'].'</td></tr>';
+        } // ends expense ref loop
+        
+        echo $loop;
+        echo ' </tbody> </table> ';
+        
+        echo ' <table class="acc" id="lastten" style="float:left;">
+        <caption>Last 10 Created Expenses</caption>
+        <tr>
+        <thead>
+        <th scope="col">Reference</th>
+        <th title="Incl. VAT" scope="col">Net Amount</th>
+        <th scope="col">VAT </th>
+        <th scope="col">Created</th>
+        <th scope="col">'. $globalprefrow['glob5'] .' </th>
+        <th scope="col">Paid to</th>
+        <th scope="col">Type</th>
+        <th scope="col">Method </th>
+        <th scope="col">Comments</th>
+        </tr>
+        </thead>
+        <tbody> ';
+
+        $sql="
+        SELECT expenseref, paid, expensecost, expensevat, expensedate, whoto, smallexpensename, CyclistID, cojmname, expc1, expc2, expc3, expc4, expc5, expc6, chequeref, description FROM expenses 
+        left JOIN Cyclist ON expenses.cyclistref = Cyclist.CyclistID 
+        left JOIN expensecodes ON expenses.expensecode = expensecodes.expensecode 
+        ORDER BY expenseref DESC LIMIT 0,10; ";
+       
+        $stmt = $dbh->query($sql);
+        foreach ($stmt as $row) {
+            
+            echo '
+            <tr> 
+            <td>
+            <a href="singleexpense.php?expenseref='.$row['expenseref']. '">'.$row['expenseref'].'</a>'; 
+            
+            
+            if ($row['paid']<'1') { echo ' UNPAID'; }
+            
+            echo '</td>
+            <td class="rh"> &'. $globalprefrow['currencysymbol']. $row['expensecost'].
+            '</td>
+            <td> ';
+            
+            if ($row['expensevat']>'0') { echo' &'.$globalprefrow['currencysymbol']. $row['expensevat']; }
+            
+            echo '
+            </td>
+            <td class="rh">'. date('H:i D jS M Y', strtotime($row['expensedate'])).'</td>
+            <td>';
+            
+            if ($row['CyclistID']<>'1') { echo $row['cojmname']; }   
+            echo '</td>
+            <td>' . $row['whoto'].'</td>
+            <td>' . $row['smallexpensename'] . ' </td> <td>';
+            if ($row['expc1']>0) { echo $globalprefrow['gexpc1']; } 
+            if ($row['expc2']>0) { echo $globalprefrow['gexpc2']; } 
+            if ($row['expc3']>0) { echo $globalprefrow['gexpc3']; } 
+            if ($row['expc4']>0) { echo $globalprefrow['gexpc4']; } 
+            if ($row['expc5']>0) { echo $globalprefrow['gexpc5']; } 
+            if ($row['expc6']>0) { echo $globalprefrow['gexpc6'].' '.$row['chequeref']; } 
+            
+            echo '</td><td>'. $row['description'].'</td>';
+            echo '</tr>';
+            
+        } // ends expense ref loop
+
+        echo '
+        </tbody>
+        </table> ';
+        
+    }
+
+    
+    if ($lookuppage=='allclientjson') {
+        // tell the browser what's coming
+        header('Content-type: application/json');
+        $sql="SELECT CustomerID, CompanyName FROM Clients order by CompanyName asc";
+        $prep = $dbh->prepare($sql);
+        $prep->execute();
+        $stmt = $prep->fetchAll(); 
+        $string= ' [ ';
+        foreach ($stmt as $favrow) {
+            $string .= ' {"oV":"'. $favrow['CustomerID'].'","oD":"'. $favrow['CompanyName'].'"},';
+        }
+        echo rtrim($string,',') . ']';
+    }
 
 
 
-	// cojm_audit
-	
-	// auditid
-	// audituser
-	// auditorderid ( if ID )
-	// auditpage
-	// auditfilename
-	// auditmobdevice
-	// auditbrowser
-	// audittext
-	// auditcjtime
-	// auditpagetime
-	// auditmidtime
-	// auditinfotext
-	// auditfavadrid
-	// auditscreenheight
-	// auditscrrenwidth	
-	
-// Total website visits
-// The day with most accesses
-// Website visits in current and previous day
-// Top online visitors
-// Unique visitors in the current and previous day
-// Number of online visitors in the last 60 seconds
-// List with last accessed pages
-// List with Top accessed pages
-// List with most accessed pages in current month
-// The number of visits of current page
-// Date when the current page was last time accessed
-// The IP of the current visitor
-	
+    if ($lookuppage=='allfavjson') {
+        // tell the browser what's coming
+        header('Content-type: application/json');
+        
+        if ($_POST['clientid']) {
+            $clientid=$_POST['clientid'];
+            $sql="SELECT favadrid, favadrft, favadrpc FROM cojm_favadr WHERE favadrisactive ='1' and favadrclient = :clientid GROUP BY favadrft, favadrpc ";
+            $prep = $dbh->prepare($sql);
+            $prep->bindParam(':clientid', $clientid, PDO::PARAM_INT);
+            $prep->execute();
+        }
+
+        if ($_POST['clientid']=='all'){
+            $sql="SELECT favadrid, favadrft, favadrpc FROM cojm_favadr WHERE favadrisactive ='1' GROUP BY favadrft, favadrpc ";
+            $prep = $dbh->prepare($sql);
+            $prep->execute();
+        }
+
+        $stmt = $prep->fetchAll();        
+        
+        $string= ' [ ';
+        foreach ($stmt as $favrow) {
+            if ((trim($favrow['favadrft'])) or (trim($favrow['favadrpc']))) { 
+                $string .= ' {"oV":"'. $favrow['favadrid'].'","oD":"'. $favrow['favadrft'].', '. $favrow['favadrpc'].'"},';
+            }
+        }
+        echo rtrim($string,',') . ']';
+    }
 
 
+    
+    if ($lookuppage=='ajaxgpsorderlookup') { 
+        $markervar=(trim($_POST['markervar']));
+        $markervarexploded=explode( '_', $markervar );
+        // echo ' time is '.$markervarexploded[0].' rider is '.$markervarexploded[1];
+        $timetocheck=date('Y-m-d H:i:59', $markervarexploded[0]);
+        $timetocheckearly=date('Y-m-d H:i:00', ($markervarexploded[0])-60);
+    
+        try {
+            
+            $query= ' SELECT ID, CompanyName, depname
+            FROM Orders 
+            INNER JOIN Cyclist ON Orders.CyclistID = Cyclist.CyclistID
+            INNER JOIN Clients ON Orders.CustomerID = Clients.CustomerID
+            left join clientdep ON Orders.orderdep = clientdep.depnumber
+            WHERE trackerid = :trackerid
+            AND ( ';
+            $query.='( (collectiondate < :timetochecka) and (starttrackpause > :timetocheckb) ) ';
+            $query.='or ( ( collectiondate < :timetocheckc ) and ( ShipDate > :timetocheckd ) and ( finishtrackpause = "0000-00-00 00:00:00" ) ) and ( starttrackpause = "0000-00-00 00:00:00" ) ';
+            $query.='or ( (finishtrackpause < :timetocheckf ) and ( finishtrackpause <> "0000-00-00 00:00:00" ) and ( starttrackpause <> "0000-00-00 00:00:00" ) and ( ShipDate = "0000-00-00 00:00:00" ) ) ';
+            $query.='or ( (finishtrackpause < :timetocheckg ) and ( finishtrackpause <> "0000-00-00 00:00:00" ) and ( ShipDate > :timetochecke ) ) ';
+            $query.='or ( ( collectiondate < :timetocheckh ) and ( ShipDate = "0000-00-00 00:00:00" ) and ( finishtrackpause = "0000-00-00 00:00:00" ) and ( starttrackpause = "0000-00-00 00:00:00" ) and ( collectiondate <> "0000-00-00 00:00:00" )  ) ';
+            $query.=') ';
+            
+            // btwn collection & pause,  
+            // between collection & delivery, no pause or resume
+            // between resume and now , no delivery
+            // > resume, resume exists, < delivery
+            // > collection, collection exists, no pause, resume or delivery
+            
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':timetochecka', $timetocheck, PDO::PARAM_INT);
+            $stmt->bindParam(':timetocheckb', $timetocheckearly, PDO::PARAM_INT);
+            $stmt->bindParam(':timetocheckc', $timetocheck, PDO::PARAM_INT);
+            $stmt->bindParam(':timetocheckd', $timetocheckearly, PDO::PARAM_INT);
+            $stmt->bindParam(':timetochecke', $timetocheckearly, PDO::PARAM_INT);
+            $stmt->bindParam(':timetocheckf', $timetocheck, PDO::PARAM_INT);
+            $stmt->bindParam(':timetocheckg', $timetocheck, PDO::PARAM_INT);
+            $stmt->bindParam(':timetocheckh', $timetocheck, PDO::PARAM_INT);
+            $stmt->bindParam(':trackerid', ($markervarexploded[1]), PDO::PARAM_INT);
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                
+                echo '<a href="order.php?id='.$row['ID'].'" title="" >'.$row['ID'].'</a> '.
+                $row['CompanyName'];
+                if ($row['depname']<>"") { echo ' ('.$row['depname'].') '; }
+                echo '<br />';
+            }
+        }
+        
+        catch(PDOException $e) {
+            echo $e->getMessage();
+        }
+    }
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+/////////////////      FUNCTION FOR FORMATTING MONEY VALUES ////////////////////////////////////////
+function formatMoney($money) {
+    if (floor($money) == $money) {
+$money=number_format(($money), 0, '.', ',');
+} 
+else if (round($money, 1)==$money){
+$money=number_format(($money), 1, '.', ',');
+}
+else { 
+$money=number_format(($money), 2, '.', ',');
+}
+return $money; } 
 
 
 
@@ -1356,6 +2017,7 @@ else {
  
         }
     }
+
 
 
 ?>

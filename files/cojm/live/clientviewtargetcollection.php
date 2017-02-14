@@ -628,7 +628,7 @@ ORDER BY `timestamp` ASC
 LIMIT 1"; 
 $sql_result2 = mysql_query($findlast,$conn_id)  or mysql_error(); 
 while ($foundlast = mysql_fetch_array($sql_result2)) { extract($foundlast); $englishlast= date('H:i A D jS ', $foundlast['timestamp']); 
-$trackingtext= 'Tracking started ' . $englishlast . ', '; } 
+$trackingtext= 'Tracking started ' . $englishlast . ', '; }
 
 $findlast="SELECT timestamp FROM `instamapper` 
 WHERE `device_key` = '$thistrackerid' 
@@ -691,7 +691,17 @@ $dsql_result = mysql_query($depsql,$conn_id)  or mysql_error();
 
 while ($drow = mysql_fetch_array($dsql_result)) {
      extract($drow);
-echo '<a href="new_cojm_department.php?depid='.$drow['depnumber'].'">'.$drow['depname'].'</a>';	 
+        if ($clientview=='normal') {
+    
+        echo ' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$drow['depname'].'</a>) ';
+    }
+    else {
+        
+    echo ' '.$drow['depname'].' ';
+    }
+     
+     
+     
 }
 
 echo '</td>'; }
@@ -709,8 +719,17 @@ WHERE Orders.orderdep='$tempdep' LIMIT 0,1";
 $dsql_result = mysql_query($depsql,$conn_id)  or mysql_error();
 
 while ($drow = mysql_fetch_array($dsql_result)) {
-     extract($drow);
-echo ' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$drow['depname'].'</a>) ';
+    extract($drow);
+     
+    if ($clientview=='normal') {
+    
+        echo ' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$drow['depname'].'</a>) ';
+    }
+    else {
+        
+    echo ' '.$drow['depname'].' ';
+    }
+     
 }
 
 echo '</td>'; }
@@ -751,35 +770,35 @@ echo '</td>'; }
 echo '<td>'. $row['statusname'].' </td><td>';
 
 
-if ((trim($row['fromfreeaddress'])) or (trim($row['CollectPC']))) { echo ' PU ';}
+if ((trim($row['enrft0'])) or (trim($row['enrpc0']))) { echo ' PU ';}
 
-echo $row['fromfreeaddress']. ' ';  
+echo $row['enrft0']. ' ';  
 
-if (trim($row['CollectPC'])) { 
+if (trim($row['enrpc0'])) { 
 
-$linkCollectPC = strtoupper(str_replace(' ','+',$row['CollectPC'])); 
+$linkenrpc0 = strtoupper(str_replace(' ','+',$row['enrpc0'])); 
 
-echo '<a target="_blank" class="newwin" href="http://maps.google.com/maps?q='. $linkCollectPC.'">'. $row['CollectPC'].'</a>'; }
+echo '<a target="_blank" class="newwin" href="http://maps.google.com/maps?q='. $linkenrpc0.'">'. $row['enrpc0'].'</a>'; }
 
 
-if ((trim($row['fromfreeaddress'])) or (trim($row['CollectPC']))) { 
-if ( (trim($row['tofreeaddress'])) or (trim($row['ShipPC']))) { echo '<br /> '; }
+if ((trim($row['enrft0'])) or (trim($row['enrpc0']))) { 
+if ( (trim($row['enrft21'])) or (trim($row['enrpc21']))) { echo '<br /> '; }
 }
 
 
 
 
 
-if ( (trim($row['tofreeaddress'])) or (trim($row['ShipPC']))) { echo ' To '; }
+if ( (trim($row['enrft21'])) or (trim($row['enrpc21']))) { echo ' To '; }
 
-echo $row['tofreeaddress'].' ';
+echo $row['enrft21'].' ';
 
-if (trim($row['ShipPC'])) {
+if (trim($row['enrpc21'])) {
 	
 	
-$linkShipPC = strtoupper(str_replace(' ','+',$row['ShipPC'])); 	
+$linkenrpc21 = strtoupper(str_replace(' ','+',$row['enrpc21'])); 	
 	
-echo ' <a target="_blank" class="newwin" href="http://maps.google.com/maps?q='. $linkShipPC.'">'. $row['ShipPC'].'</a>'; }
+echo ' <a target="_blank" class="newwin" href="http://maps.google.com/maps?q='. $linkenrpc21.'">'. $row['enrpc21'].'</a>'; }
  
  
  
@@ -1080,13 +1099,18 @@ $(document).ready(function() {
 			$( "#combobox" ).toggle();
 		});
 	    $("#rangeBa, #rangeBb").daterangepicker();  
+        ';
         
+if ($clientview=='normal') {
     
-var menuheight=$("#sticky_navigation").height();
-$("#clientviewtargetcollection").floatThead({
-    position: "fixed",
-    top: menuheight
-});
+    echo ' var menuheight=$("#sticky_navigation").height();
+    $("#clientviewtargetcollection").floatThead({
+        position: "fixed",
+        top: menuheight
+    });';
+}
+
+echo '
 			 });
 
 function comboboxchanged() { }
@@ -1094,7 +1118,5 @@ function comboboxchanged() { }
 </script>';
 
 include 'footer.php';
-
-mysql_close();  
 
 echo '</body></html>';

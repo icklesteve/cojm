@@ -330,6 +330,4 @@ $(document).ready(function() {
 
 include 'footer.php';
 
-mysql_close();  
-
 echo '</body></html>';

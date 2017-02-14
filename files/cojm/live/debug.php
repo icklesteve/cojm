@@ -52,7 +52,5 @@ echo '<br><br>';
 
 
 
-
-
-mysql_close(); ?>
+ ?>
 </div></body></html>

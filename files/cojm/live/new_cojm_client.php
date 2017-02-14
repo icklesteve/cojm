@@ -769,7 +769,7 @@ $date180agou=  date ("U", strtotime ($date180ago));
 // echo ' 180 days ago? '. $date180ago;  
 
  
- $newsql = "SELECT numberitems, FreightCharge, vatcharge, status , ShipDate, fromfreeaddress, CollectPC, tofreeaddress, ShipPC 
+ $newsql = "SELECT numberitems, FreightCharge, vatcharge, status , ShipDate, enrft0, enrpc0, enrft21, enrpc21 
  FROM Orders WHERE Orders.CustomerID = '$clientid' ";
 
 
@@ -789,13 +789,13 @@ $date180agou=  date ("U", strtotime ($date180ago));
 // echo ' <br /> '. $date180ago.' '. $row['ShipDate'].' '.$date180agou.' '.$checkdate;
  
  
- $tempaddress=$row['fromfreeaddress'].' '.$row['CollectPC'];
+ $tempaddress=$row['enrft0'].' '.$row['enrpc0'];
  
    if (trim($tempaddress)<>'') {
 //	   echo ' found address '. $tempaddress;
 	   array_push($fromarray,$tempaddress);     }
 	   
-	  $tempaddress=$row['tofreeaddress'].' '.$row['ShipPC'];
+	  $tempaddress=$row['enrft21'].' '.$row['enrpc21'];
  
    if (trim($tempaddress)<>'') {
 //	   echo ' found address '. $tempaddress;
@@ -1178,10 +1178,10 @@ while ($row = mysql_fetch_array($sql_result)) {
 //	 $numberitems= number_format($row['numberitems'], 0, '.', ',');
 	 
 
-$CollectPC=$row['CollectPC'];
-$ShipPC=$row['ShipPC'];
-$prShipPC= str_replace(" ", "%20", "$ShipPC", $count);
-$prCollectPC= str_replace(" ", "%20", "$CollectPC", $count);
+$enrpc0=$row['enrpc0'];
+$enrpc21=$row['enrpc21'];
+$prenrpc21= str_replace(" ", "%20", "$enrpc21", $count);
+$prenrpc0= str_replace(" ", "%20", "$enrpc0", $count);
 	
 
 echo '<tr><td><a href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> ';
@@ -1194,9 +1194,9 @@ echo '</td><td>';
 echo $row['cojmname'].'</td>';
 
 echo '
-<td><a target="_blank" href="http://maps.google.co.uk/maps?q='. $prCollectPC.'">'. $CollectPC.'</a>';
-if ((!$ShipPC) or ($ShipPC==' ')) {} else {echo " to "; }
-echo '<a target="_blank" href="http://maps.google.co.uk/maps?q='. $prShipPC.'">'. $ShipPC.'</a></td>
+<td><a target="_blank" href="http://maps.google.co.uk/maps?q='. $prenrpc0.'">'. $enrpc0.'</a>';
+if ((!$enrpc21) or ($enrpc21==' ')) {} else {echo " to "; }
+echo '<a target="_blank" href="http://maps.google.co.uk/maps?q='. $prenrpc21.'">'. $enrpc21.'</a></td>
 
 ';
 
@@ -1329,5 +1329,4 @@ $(document).ready(function() {
 
 include "footer.php";
 
- mysql_close(); 
 echo '</body></html>';

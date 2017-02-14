@@ -24,8 +24,6 @@ $alpha_time = microtime(TRUE);
 include "C4uconnect.php";
 if ($globalprefrow['forcehttps']>0) { if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
 
-$script='';
-
 if (isset($_POST['expenseref'])) {
     $expenseref=$_POST['expenseref'];
 } else if (isset($_GET['expenseref'])) {
@@ -35,9 +33,7 @@ else {
     $expenseref='';
 }
 
-if ($expenseref) {
-    $script.=' setTimeout( function() { $("#expensesearchbyid").click() }, 150 ); ';
-}
+
 
 //  if expenseref, add js to click search button
 
@@ -64,7 +60,8 @@ $filename='singleexpense.php';
 include "cojmmenu.php"; 
 
 ?>
-<div class="Post" id="Post">
+<div class="Post clearfix" id="Post">
+
 <div class="ui-state-highlight ui-corner-all p15 aligned" > 
 
 <form id="singleexpense">
@@ -75,10 +72,15 @@ include "cojmmenu.php";
  placeholder="Search ID" value="<?php echo $expenseref ?>">
 
 <button id="expensesearchbyid">Search Expense Ref</button>
-
+ <button id="addnewexpense"> New Expense </button>
 </fieldset>
 </form>
 <hr />
+
+
+
+
+
 <div id="expensedetails" class="hideuntilneeded ">
 
 <fieldset>
@@ -88,7 +90,7 @@ include "cojmmenu.php";
 
 <fieldset><label class="fieldLabel">
  of which VAT <span style="position:relative; float:right;">
- &<?php echo $globalprefrow['currencysymbol'];?> &nbsp;</span></label>
+ &<?php echo $globalprefrow['currencysymbol']; ?> &nbsp;</span></label>
 <input class="caps ui-state-default ui-corner-all" type="text" name="expensevat" id="expensevat" size="6">
 </fieldset>
 
@@ -115,7 +117,11 @@ $expensetext='';
 
 $query = "SELECT expensecode, smallexpensename FROM expensecodes ORDER BY expensecode"; 
 
-$result_id = mysql_query ($query, $conn_id); 
+$result_id = mysql_query ($query, $conn_id);
+
+
+echo ' <option value=""> Select Expense Code </option> ';
+
 while (list ($expensecode, $smallexpensename) = mysql_fetch_row ($result_id)) {  
     $expensecode = htmlspecialchars ($expensecode);
     $smallexpensename = htmlspecialchars ($smallexpensename); 
@@ -143,23 +149,11 @@ while (list ($CyclistID, $cojmname) = mysql_fetch_row ($result_id)) {
 ?>
 </select>
 </fieldset> 
- 
- 
- 
- 
- 
- 
+
  
 <fieldset><label class="fieldLabel">Who To </label>
 <input class="caps ui-state-default ui-corner-all" type="text" name="whoto" id="whoto" value="">
 </fieldset>
-
-
-
-
-
-
-
 
 
 <fieldset>
@@ -175,24 +169,36 @@ while (list ($CyclistID, $cojmname) = mysql_fetch_row ($result_id)) {
  if ($globalprefrow['gexpc6']){ echo '<option value="expc6"> '.$globalprefrow['gexpc6'].'</option>'; }
 ?>
 </select>
-<span id="chequeref"></span>
-</fieldset>
+        <span id="chequeref"></span>
+        </fieldset>
 
-<fieldset><label class="fieldLabel">Comments </label>
-<textarea class="ui-state-default ui-corner-all" name="expensecomment" id="expensecomment" rows="2" cols="40" placeholder="eg, Cheque Ref" ></textarea>
-</fieldset>
+        <fieldset><label class="fieldLabel">Comments </label>
+        <textarea 
+        class="ui-state-default ui-corner-all" 
+        name="expensecomment" 
+        id="expensecomment" 
+        rows="2" 
+        cols="40" 
+        placeholder="eg, Cheque Ref"
+        style="padding-left: 3px;"
+        ></textarea>
+        </fieldset>
 
-<input type="hidden" id="newcomment" name="newcomment" value="">
+        <fieldset><label class="fieldLabel">Last Updated </label>
+        <span id="explastupdated"></span>
+        </fieldset>
+        
+        
+            <input type="hidden" id="newcomment" name="newcomment" value="">
 
-<hr />
+            <hr />
+        </div>
+    </div>
+
+<div id="expensestats"> </div>
+
 </div>
-
-<fieldset><label class="fieldLabel"> &nbsp; </label>
-<button id="addnewexpense"> Create New Expense </button>
-</fieldset>
-
-</div>
-</div>
+    
 <script type="text/javascript">
 $(document).ready(function() {
     $(function (){ // autosize
@@ -200,7 +206,7 @@ $(document).ready(function() {
     });
     var formbirthday=<?php echo date("U"); ?>;
     
-	$(function() {
+	$(function() { // expensedate datepicker
 		var dates = $( "#expensedate" ).datepicker({
 			numberOfMonths: 1,
 			changeYear:false,
@@ -249,6 +255,7 @@ $(document).ready(function() {
                     $("#Post").append(data);
                 },
                 complete: function () {
+                    $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' }, function() {});
                     showmessage();
                 },
                 error:function (xhr, ajaxOptions, thrownError){
@@ -271,9 +278,7 @@ $(document).ready(function() {
             } else {
                 $("#expensevat").focus().val(newvat);
             }
-            
         }
-        
     });
 
     
@@ -316,17 +321,11 @@ $(document).ready(function() {
             error:function (xhr, ajaxOptions, thrownError){
                 alert(thrownError); //throw any errors
             }
-        });            
-        
+        });
         }
-    
-        
     }
     
-    
-    $("#expensevat").change(function () {
-        // expvatsubmit();
-    });
+
     
     $("#expensevat").blur(function () {
         expvatsubmit();
@@ -426,7 +425,8 @@ $(document).ready(function() {
 
     $('#expensedate').change(function (){
         var expenseref=$("#expenseid").val();
-        if (expenseref) {
+        var expensedate=$("#expensedate").val();
+        if (expensedate) {
         message='';
         $.ajax({
             url: 'ajaxchangejob.php',
@@ -435,7 +435,7 @@ $(document).ready(function() {
                 whatchanged: 'expensedate',
                 formbirthday: formbirthday,
                 expenseref: expenseref,
-                expensedate: $("#expensedate").val()
+                expensedate: expensedate
             },
             type: 'post',
             success:function(data){
@@ -449,6 +449,10 @@ $(document).ready(function() {
                 alert(thrownError); //throw any errors
             }
         });            
+        } else {
+            message=' Please enter date ';
+            allok=0;
+            showmessage();
         }
     });
 
@@ -552,8 +556,11 @@ $(document).ready(function() {
             var formdata=$('#singleexpense').serializeArray();
             $.ajax({
                 type: 'POST',
-                url: 'ajax_expense_lookup.php',
-                data: formdata,
+                url: 'ajax_lookup.php',
+                data: {
+                    lookuppage: 'individexpense',
+                    expenseid: $("#expenseid").val()
+                },
                 success:function(data){
                     $("#Post").append(data);
                 },
@@ -602,6 +609,7 @@ $(document).ready(function() {
                 $("#Post").append(data);
             },
             complete: function () {
+                
                 $('#expensecomment').trigger('autosize.resize');
                 showmessage();
             },
@@ -610,7 +618,23 @@ $(document).ready(function() {
             }
         });
     });    
-    <?php echo $script; ?>
+
+function downloadJSAtOnload() {
+
+    <?php if ($expenseref) {
+    echo ' $("#expensesearchbyid").click(); ';
+    
+} ?>
+
+    $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' }, function() {});
+
+}
+if (window.addEventListener)
+window.addEventListener("load", downloadJSAtOnload, false);
+else if (window.attachEvent)
+window.attachEvent("onload", downloadJSAtOnload);
+else window.onload = downloadJSAtOnload;
+
 });
 
 
@@ -618,9 +642,6 @@ $(document).ready(function() {
 <?php
 
 include "footer.php";
-
 echo '</body></html>';
-mysql_close(); 
-$dbh=null;
  
 ?>

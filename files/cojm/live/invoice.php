@@ -457,14 +457,14 @@ while ($row = mysql_fetch_array($sql_result)) {
     }
     $html.='<td colspan="5" >'; 
 
-    $CollectPC=trim($row['CollectPC']);
-    $ShipPC=trim($row['ShipPC']);
-    $CollectPC2 = str_replace(" ", "%20", "$CollectPC", $count);
-    $ShipPC2 = str_replace(" ", "%20", "$ShipPC", $count);
+    $enrpc0=trim($row['enrpc0']);
+    $enrpc21=trim($row['enrpc21']);
+    $enrpc02 = str_replace(" ", "%20", "$enrpc0", $count);
+    $enrpc212 = str_replace(" ", "%20", "$enrpc21", $count);
  
  
-    $fromfreeaddresspc = str_replace(" ", "%20", "$fromfreeaddress", $count);
-    $tofreeaddresspc = str_replace(" ", "%20", "$tofreeaddress", $count); 
+    $enrft0pc = str_replace(" ", "%20", "$enrft0", $count);
+    $enrft21pc = str_replace(" ", "%20", "$enrft21", $count); 
     $htmlb='';
 
     if ($row['hourlyothercount']) {
@@ -486,15 +486,15 @@ while ($row = mysql_fetch_array($sql_result)) {
     }
 
 
-    if ((trim($row['CollectPC'])) or (trim($fromfreeaddress))) {
+    if ((trim($row['enrpc0'])) or (trim($row['enrft0']))) {
 
         if ($addresstype=='postcode') { // display just postcode
-            $htmlb.='<span title="PickUp">PU</span> <a target="_blank" href="http://maps.google.com/maps?q='.$fromfreeaddresspc.'+'.$CollectPC2.'">'.$row['CollectPC'].'</a> '; 
+            $htmlb.='<span title="PickUp">PU</span> <a target="_blank" href="http://maps.google.com/maps?q='.$fromfreeaddresspc.'+'.$enrpc02.'">'.$row['enrpc0'].'</a> '; 
         }
 
         if ($addresstype=='full') { // use freetext details
 
-            $htmlb.='<span title="PickUp">PU</span> <a target="_blank" href="http://maps.google.com/maps?q='.$fromfreeaddresspc.'+'.$CollectPC2.'">'.$fromfreeaddress.' '.$row['CollectPC'].'</a> <br />';
+            $htmlb.='<span title="PickUp">PU</span> <a target="_blank" href="http://maps.google.com/maps?q='.$row['enrft0'].'+'.$row['enrpc0'].'">'.$row['enrft0'].' '.$row['enrpc0'].'</a> <br />';
         }
 
 
@@ -521,14 +521,14 @@ while ($row = mysql_fetch_array($sql_result)) {
 
     if ($showdeliveryaddress=='1') {
 
-        if ((trim($row['ShipPC'])) or (trim($tofreeaddress))) {
+        if ((trim($row['enrpc21'])) or (trim($enrft21))) {
 
             if ($addresstype=='postcode') { // display just postcode
-                $htmlb.='To <a target="_blank" href="http://maps.google.com/maps?q='.$tofreeaddresspc.'%20'.$ShipPC2.'">'.$row["ShipPC"].'</a>. ';
+                $htmlb.='To <a target="_blank" href="http://maps.google.com/maps?q='.$enrft21pc.'%20'.$enrpc212.'">'.$row["enrpc21"].'</a>. ';
             }
 
             if ($addresstype=='full') { // display full
-                $htmlb.='To <a target="_blank" href="http://maps.google.com/maps?q='.$tofreeaddresspc.'%20'.$ShipPC2.'">'.$tofreeaddress.' '.$row["ShipPC"].'</a>. <br />';
+                $htmlb.='To <a target="_blank" href="http://maps.google.com/maps?q='.$enrft21pc.'%20'.$enrpc212.'">'.$enrft21.' '.$row["enrpc21"].'</a>. <br />';
             }
 
         } // ends check for having text AND postcode

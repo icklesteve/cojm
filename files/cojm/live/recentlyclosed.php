@@ -70,8 +70,8 @@ $sql = "SELECT ID,
 ShipDate, 
 Orders.CyclistID, 
 cojmname, 
-CollectPC, 
-ShipPC, 
+enrpc0, 
+enrpc21, 
 CompanyName, 
 depname, 
 numberitems, 
@@ -97,14 +97,14 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     date(' H:i A D jS', strtotime($row['ShipDate'])).'</td><td>';
     if ($row['CyclistID']>1) { echo $row['cojmname']; }
     echo '</td><td>';
-    if ((trim($row['CollectPC']))<>'') { 
+    if ((trim($row['enrpc0']))<>'') { 
         echo '<a target="_blank" href="http://maps.google.co.uk/maps?q='. 
-    str_replace(" ", "+", (trim($row['CollectPC']))) .'">'. trim($row['CollectPC']).'</a>';
+    str_replace(" ", "+", (trim($row['enrpc0']))) .'">'. trim($row['enrpc0']).'</a>';
     }
 
-    if ((trim($row['ShipPC']))<>'') { 
+    if ((trim($row['enrpc21']))<>'') { 
         echo ' to <a target="_blank" href="http://maps.google.co.uk/maps?q='. 
-    str_replace(" ", "+", $row['ShipPC']) . '">'. trim($row['ShipPC']).'</a>';
+    str_replace(" ", "+", $row['enrpc21']) . '">'. trim($row['enrpc21']).'</a>';
     }
     echo '</td>
     <td>'. $row['CompanyName'];
@@ -132,4 +132,3 @@ $(document).ready(function() {
 include "footer.php";
 
 echo '</body></html>';
-mysql_close();

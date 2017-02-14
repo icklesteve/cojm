@@ -22,7 +22,7 @@ $title = "COJM";
 <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>'; ?>
 <title><?php print ($title); ?> Add or Edit PostCode </title>
-    <script src="https://maps.google.co.uk/maps?file=api&amp;v=2&amp;key=AIzaSyAQR0YkeZdeyV_u2tnRHD-v28PR4upoVaI" type="text/javascript"></script>
+    <script src="https://maps.google.co.uk/maps?file=api&amp;v=2&amp;key=<?php echo $globalprefrow['googlemapapiv3key']; ?>" type="text/javascript"></script>
     <script type="text/javascript">
  function load() {
       if (GBrowserIsCompatible()) {
@@ -79,6 +79,10 @@ $title = "COJM";
             if (!point) {
               alert(address + " Postcode not found.");
             } else {
+                
+                $("#para").show();
+                $("#map2").show();
+                
 		  document.getElementById("lat").innerHTML = point.lat().toFixed(5);
 	   document.getElementById("lng").innerHTML = point.lng().toFixed(5);
 		 map2.clearOverlays()
@@ -135,6 +139,7 @@ var postcode = name_element.value;
 	var newHTML = newHTML + "<input type='hidden' name='lng' value='" + oldlHTML + "' />"
 	var newHTML = newHTML + "<input type='hidden' name='id' value='<?php echo $id; ?>' />"
 	var newHTML = newHTML + "<input type='hidden' name='newpc' value='" + postcode + "' />"
+	var newHTML = newHTML + "<input type='hidden' name='formbirthday' value='<? echo date("U");?>' />"
 	var newHTML = newHTML + "<button type='submit'>Add Postcode to Database</button>";
 	document.getElementById('para').innerHTML = newHTML;
 }
@@ -143,42 +148,65 @@ var postcode = name_element.value;
 </head>
 <body onload="load()" onunload="GUnload()" >
 <?php 
- $adminmenu=0; $settingsmenu=1;
+$adminmenu=0;
+$settingsmenu=1;
 $filename='newpc.php';
- include "cojmmenu.php"; 
+include "cojmmenu.php"; 
  
- if (isset($_GET['selectpc'])) {  $selectpc=trim($_GET['selectpc']); } else { $selectpc=''; }
+if (isset($_GET['selectpc'])) {
+    $selectpc=trim($_GET['selectpc']);
+} else {
+    $selectpc=''; 
+ 
+ if (isset($_POST['selectpc'])) {  $selectpc=trim($_POST['selectpc']); }
+ 
+ }
  
 ?><div class="Post">
 <div class="ui-state-highlight ui-corner-all p15" >
 
 
-<strong>Enter Postcode, then move marker if needed.</strong>
+
 <form action="#" onsubmit="showAddress(this.address.value); return false">
        Postcode to add :       
       <input class="ui-state-default ui-corner-all" style="text-transform: uppercase;" id="newpc" type="text" 
 	  size="10" name="address" value=" <?php echo $selectpc; ?>" />
       <button type="submit"  > Search </button>
+      <br />
       </form>
 	
 <form action="<?php if ($ID) { echo 'order.php'; } else echo '#'; ?>" method="post" >
 <input type="hidden" name="page" value="newpostcode" />
-<div style="position:relative; float:left;">
-<input type="hidden" name="formbirthday" value="<?php echo date("U");  ?>"></div>
-<div id="para" > <button onclick='changeText3()' >Confirm Position on Map</button></div> 
+<input type="hidden" name="formbirthday" value="<?php echo date("U");  ?>">
+
+
+
+
+<div id="para" class="hideuntilneeded"> 
+
+<strong>Move marker if needed, then </strong> <br />
+<button onclick='changeText3()' >Confirm Position on Map</button>
+</div> 
+
+
+
+
+</div>
 </form>
 
-</div><br />
+<span class="" id="lat"></span>, 
+<span class="" id="lng"></span>
+
+
+<br />
 <div class='line'></div>
 
-<div id="map2" class="ordermap"><br/></div>
+<div id="map2" class="ordermap hideuntilneeded"><br/></div>
 <a href="getlatlon.php"> Get Latitude / Longitude from a Single Postcode </a>
-<div style="opacity:0" id="lat"></div>
-<div style="opacity:0" id="lng"></div>
 </div>
 
 <?php 
 include 'footer.php';
-mysql_close(); 
+
 
 echo '</body></html>';

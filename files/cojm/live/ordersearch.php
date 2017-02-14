@@ -94,8 +94,8 @@ $found='1';
 
 // fromfreeaddress
 $sql="SELECT * FROM Orders
-WHERE Orders.fromfreeaddress LIKE '%".$searchid."%' 
-OR Orders.CollectPC LIKE '%".$searchid."%' 
+WHERE Orders.enrft0 LIKE '%".$searchid."%' 
+OR Orders.enrpc0 LIKE '%".$searchid."%' 
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
 $sql_result = mysql_query($sql,$conn_id)  or mysql_error();
@@ -105,7 +105,7 @@ if ($num_rows>'0') {
  if ($num_rows>'49') { echo 'At least '; } echo $num_rows.' Job';
  if ($num_rows<>'1') { echo 's'; } echo ' found with '.$searchid.' as collection address </h3>';
  while ($row = mysql_fetch_array($sql_result)) { extract($row);
- echo '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['fromfreeaddress'].' , '.$row['CollectPC'].') </p>'; }
+ echo '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['enrft0'].' , '.$row['enrpc0'].') </p>'; }
 echo '</div></div><br /><div class="line"></div><br />';
 $found='1';
 } // ends rum_rows loop
@@ -119,10 +119,10 @@ $found='1';
 
 
 
-// tofreeaddress
+// enrft21
 $sql="SELECT * FROM Orders
-WHERE Orders.tofreeaddress LIKE '%".$searchid."%' 
-OR Orders.ShipPC LIKE '%".$searchid."%' 
+WHERE Orders.enrft21 LIKE '%".$searchid."%' 
+OR Orders.enrpc21 LIKE '%".$searchid."%' 
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
 $sql_result = mysql_query($sql,$conn_id)  or mysql_error();
@@ -132,7 +132,7 @@ if ($num_rows>'0') {
  if ($num_rows>'49') { echo 'At least '; } echo $num_rows.' Job';
  if ($num_rows<>'1') { echo 's'; } echo ' found with '.$searchid.' as delivery address</h3>';
  while ($row = mysql_fetch_array($sql_result)) { extract($row);
- echo '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['tofreeaddress'].' , '.$row['ShipPC'].') </p>'; }
+ echo '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['enrft21'].' , '.$row['enrpc21'].') </p>'; }
 echo '</div></div><br /><div class="line"></div><br />';
 $found='1';
 } // ends rum_rows loop

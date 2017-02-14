@@ -288,4 +288,8 @@ header('Content-type: application/vnd.google-earth.kml+xml');
 header('Content-Disposition:attachment; filename="'.$jobid.'-'.$globalprefrow['globalshortname'].'-tracking-' . $filenamedate.'.kml"');
 
 echo $kmlOutput;
+
+mysql_close();
+$dbh=null;
+
 ?>

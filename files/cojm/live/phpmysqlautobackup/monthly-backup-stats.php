@@ -6,6 +6,10 @@ $transfer_backup_infotext=' Monthly Backup Email ';
 
 // $infotext.= ' got to ln 13 in backupstats <br />';
 
+
+$hidelastfiredstats=0;
+
+
 require "cronstats.php";
 
 

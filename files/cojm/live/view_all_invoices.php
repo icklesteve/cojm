@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	view_all_invoices.php - New Job Ajax Helper for Clients with Departments
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -20,56 +20,46 @@
 
 */
 $alpha_time = microtime(TRUE);
-
 $tempthree='';
 $trow='';
-
 
 include "C4uconnect.php";
 if ($globalprefrow['forcehttps']>'0') { if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
 
 include('changejob.php');
 
-
 if (isset($_GET['viewtype'])) { $viewtype=trim($_GET['viewtype']); } else { $viewtype=''; }
 if (isset($_POST['viewtype'])) { $viewtype=trim($_POST['viewtype']); } 
-
 if (isset($_GET['clientview'])) { $clientview=trim($_GET['clientview']); } else { $clientview=''; }
 if (isset($_POST['clientview'])) { $clientview=trim($_POST['clientview']); }
-
 if (isset($_GET['viewselectdep'])) { $viewselectdep=trim($_GET['viewselectdep']); } else { $viewselectdep=''; }
 if (isset($_POST['viewselectdep'])) { $viewselectdep=trim($_POST['viewselectdep']); } 
-
-
 if (isset($_GET['showinactive'])) { $showinactive=trim($_GET['showinactive']); } else { $showinactive=''; }
 if (isset($_POST['showinactive'])) { $showinactive=trim($_POST['showinactive']); } 
-
-
 if (isset($_GET['clientid'])) { $clientid=trim($_GET['clientid']); } else { $clientid='all'; }
 if (isset($_POST['clientid'])) { $clientid=trim($_POST['clientid']); } 
 
+if (isset($_GET['orderby'])) { $orderby=trim($_GET['orderby']); } else { $orderby=''; }
+if (isset($_POST['orderby'])) { $orderby=trim($_POST['orderby']); } 
+
+
+if (isset($_GET['invoicesearchphrase'])) { $invoicesearchphrase=trim($_GET['invoicesearchphrase']); } else { $invoicesearchphrase=''; }
+if (isset($_POST['invoicesearchphrase'])) { $orinvoicesearchphrasederby=trim($_POST['invoicesearchphrase']); } 
 
 
 if ($clientid<>'all') {
-
-$tempwaitingcheck = mysql_result(mysql_query("
-SELECT isactiveclient FROM Clients WHERE CustomerID=$clientid  LIMIT 1
-", $conn_id), 0);
-
-if ($tempwaitingcheck<>'1') { $showinactive='1'; }
-
+    $sql = "SELECT isactiveclient FROM Clients WHERE CustomerID=?  LIMIT 1";
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute([$clientid]);
+    $tempwaitingcheck = $stmt->fetchColumn();
+    
+    if ($tempwaitingcheck<>'1') {
+        $showinactive='1';
+    }
 }
 
-// $query = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName";
 
-
-
-
-
-
-
-// $infotext=$infotext.'<br />'. $viewselectdep;
-
+$adminmenu = "0";
 $invoicemenu = "1";
 $toptext='';
 $b='';
@@ -92,12 +82,7 @@ if (isset($_POST['deliveryear'])) {
 }
 
 
-$adminmenu = "0";
 
-
-
-
-// %2F1
 
 if (isset($_GET['from'])) { $tstart=trim($_GET['from']); } else { $tstart=''; }
 if (isset($_POST['from'])) { $tstart=trim($_POST['from']); }
@@ -146,286 +131,69 @@ if ($year) {
 
 if ($viewtype=='') {
 
-
-    $bview='';
-
     $tablecost='0';
-    $todayDate = date("Y-m-d");// current date
-    //Add one day to today
+    $awcount=0;
 
-    $dateOneMonthAdded = strtotime(date("Y-m-d", strtotime($todayDate)) . "");
-
-    $dateamonthago = date('Y-m-d H:i:s', $dateOneMonthAdded);
-
-    $sql = "SELECT * FROM invoicing 
-    INNER JOIN Clients 
-    ON invoicing.client = Clients.CustomerID 
-    WHERE (`invoicing`.`paydate` =0 ) 
-    AND (`invoicing`.`invdue` < '$dateamonthago' ) 
-    ORDER BY `invoicing`.`invdue` ASC ";
-    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
-	 
-	$num_rows = mysql_num_rows($sql_result);
-	if ($num_rows>'0') {
-        $a='<tr>
-        <th scope="col">Invoice Ref</th>
-        <th scope="col">Client</th>
-        <th scope="col" class="rh" >Net Amount</th>
-        <th scope="col">Date Sent</th>
-        <th scope="col">Due Date</th>
-        <th scope="col">Reminded</th>
-        <th scope="col">2nd Reminder</th>
-        <th scope="col">3rd Reminder</th>
-        <th style="width: 20%;" scope="col">Comments</th>
-        </tr> ';
-
-        while ($row = mysql_fetch_array($sql_result)) {
-            extract($row);
-            $a.= '<tr><td>
-            <form action="view_all_invoices.php#" method="post"> 
-            <input type="hidden" name="viewtype" value="individualinvoice" >
-            <input type="hidden" name="formbirthday" value="'. date("U") .'">
-            <input type="hidden" name="page" value="" >
-            <input type="hidden" name="ref" value="'.$ref.'">
-            <input type="hidden" name="from" value="'. $inputstart.'">
-            <input type="hidden" name="to" value="'. $inputend.'">
-            <input type="hidden" name="clientid" value="'.$clientid.'" />
-            <button type="submit" >'.$ref.'</button></form>
-            </td><td>';
-            
-            $a.= ' <a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'.$CompanyName.'</a>';
-            $tempdep=$row['invoicedept'];
-            if ($tempdep) {
-                $dclientname = mysql_result(mysql_query("SELECT depname FROM clientdep WHERE depnumber='$tempdep' LIMIT 0,1"), '0');
-                $a.= ' (<a href="new_cojm_department.php?depid='.$tempdep.'">'.$dclientname.'</a>) ';
-            }
+    $sqlcostage = "SELECT SUM(FreightCharge + vatcharge) AS cost, count(*) AS number FROM Orders WHERE status > '98' AND status < '108' ";    
+    $awaiting = $dbh->query($sqlcostage)->fetchAll();
     
-            $a.= '</td><td class="rh">&'. $globalprefrow['currencysymbol']. number_format(($cost+$invvatcost), 2, '.', ',').'
-            </td><td>'. date('D j M Y', strtotime($invdate1)) .'</td><td>'.date('D j M Y', strtotime($invdue)).'</td><td>'; 
-    
-            if ($chasedate>'2') { $a.=date('D j M Y', strtotime($chasedate)); }
- 
-            $a.= '</td><td>'; 
-            if ($chasedate2>'2') { $a.= date('D j M Y', strtotime($chasedate2));} 
-            $a.= '</td><td>'; 
-            if ($chasedate3>'2') { $a.= date('D j M Y', strtotime($chasedate3));} 
-            $a.= '</td><td>'.$row['invcomments'].'</td></tr>';
-            $tablecost=$tablecost+$cost+$invvatcost;
-        }
-
-        $invcount=$num_rows;
-        $costcount=$tablecost;
-
-
-        $tablecost= number_format($tablecost, 2, '.', ','); 
-
-
-        $bview.='<table class="acc" >
-        <tbody>
-        <caption> <h3>'.$num_rows.' Overdue Invoices (&'. $globalprefrow['currencysymbol']. $tablecost.')</h3></caption>'. 
-        $a. '</tbody></table><div class="vpad line"></div>';
-
-
-        $toptext.=' '.$num_rows.' Overdue Invoices (&'. $globalprefrow['currencysymbol']. $tablecost.'). ';
-    } // ends check for overdue
-
-
-    $todayDate = date("Y-m-d");// current date
-    //Add one day to today
-    $dateOneMonthAdded = strtotime(date("Y-m-d", strtotime($todayDate)) . "-1 month");
-    $dateOneMonthAdded = strtotime(date("Y-m-d", strtotime($todayDate)) . "");
-
-    $dateamonthago = date('Y-m-d H:i:s', $dateOneMonthAdded);
-
-    $tablecost='0';
-
-    $sql = "SELECT CompanyName, ref, invdate1, cost, invoicedept, invdue, CustomerID, invcomments FROM invoicing 
-    INNER JOIN Clients 
-    ON invoicing.client = Clients.CustomerID 
-    WHERE (`invoicing`.`paydate` =0 ) 
-    AND (`invoicing`.`invdue` > '$dateamonthago' ) 
-    ORDER BY `invoicing`.`invdue` ASC ";
-    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
-
-
-	$num_rows = mysql_num_rows($sql_result);
-	if ($num_rows>'0') {
-        $b= '
-        <tr>
-        <th scope="col">Invoice Ref</th>
-        <th scope="col">Client</th>
-        <th scope="col" class="rh" >Net Amount</th>
-        <th scope="col">Date Sent</th>
-        <th scope="col">Due Date</th>
-        <th scope="col">Comments</th>
-        </tr>';
-        $trow='';
-        $tempthree='';
-        
-        while ($row = mysql_fetch_array($sql_result)) {
-            extract($row);
-            $b.= '<tr><td>
-            <form action="view_all_invoices.php#" method="post"> 
-            <input type="hidden" name="viewtype" value="individualinvoice" >
-            <input type="hidden" name="formbirthday" value="'. date("U") .'">
-            <input type="hidden" name="page" value="" >
-            <input type="hidden" name="ref" value="'.$ref.'">
-            <input type="hidden" name="from" value="'. $inputstart.'">
-            <input type="hidden" name="to" value="'. $inputend.'">
-            <input type="hidden" name="clientid" value="'.$clientid.'" />
-            <button type="submit" >'.$row['ref'].'</button></form>
-            </td><td><a href="new_cojm_client.php?clientid='.$CustomerID.'">'.$CompanyName.'</a>';
-            
-            $tempdep=$row['invoicedept'];
-            if ($tempdep) {
-                $dclientname = mysql_result(mysql_query("SELECT depname FROM clientdep WHERE depnumber='$tempdep' LIMIT 0,1"), '0');
-                $b.= ' (<a href="new_cojm_department.php?depid='.$tempdep.'">'.$dclientname.'</a>) ';
-            }
-
-            // $tablecost= number_format($tablecost, 2, '.', ''); 
-
-            $b.= '</td>
-            <td class="rh">&'. $globalprefrow['currencysymbol'] .number_format(($cost), 2, '.', ','). '</td>
-            <td>'. date('D j M Y', strtotime($invdate1)).'</td><td>'. date('D j M Y', strtotime($invdue)). 
-            '</td><td>'.$row['invcomments'].'</td></tr>';
-            $tablecost=$tablecost+$cost;
-        }
-
-        $intimecost= number_format($tablecost, 2, '.', ',');
-
-        $bview.= '<div class="vpad"></div>
-        <div class="ui-widget">	<div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
-        <table  class="acc" >
-        <caption><h3>'.$num_rows.' within time limit (&'. $globalprefrow['currencysymbol']. ($intimecost).')</h3></caption>
-        <tbody>'.$b.'</tbody></table>
-        </div></div>
-        <div class=" vpad line"></div>';
-
-
-        $toptext.=' '.($num_rows+$invcount).' in total, (&'. $globalprefrow['currencysymbol']. number_format(($costcount+$tablecost), 2, '.', ',').'). ';
-
-    } // ends check for rows
-
-
-
-
-
-
-
-
-    // starts check for awaiting invoicing
-    $awcount='';
-    $sql = "SELECT CustomerID, CompanyName, lastinvoicedate FROM Clients ORDER BY lastinvoicedate";
-    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
-    while ($row = mysql_fetch_array($sql_result)) {
-        extract($row);
-        $CustomerID = $row['CustomerID'];
-        $lastdate = "
-        SELECT collectiondate FROM Orders 
-        WHERE CustomerID=$CustomerID 
-        AND status < '108' 
-        AND status > '98' 
-        ORDER BY collectiondate DESC 
-        LIMIT 0 , 1";
-
-        $sql_result_last = mysql_query($lastdate,$conn_id) or die(mysql_error());
-        while ($lastrow = mysql_fetch_array($sql_result_last)) {
-            extract($lastrow); 
-            $tarow= '<tr><td><a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'.$row['CompanyName'].'</a></td><td>';
-            if ($row['lastinvoicedate']<>'0000-00-00 00:00:00') {
-                $tarow=$tarow.date('D j M Y', strtotime($row['lastinvoicedate']));
-            }
-
-            $tarow.='</td><td>';
-
-
-            $firstdate = mysql_result(mysql_query("SELECT collectiondate FROM Orders WHERE CustomerID=$CustomerID AND status < '108' AND status > '98' ORDER BY collectiondate ASC LIMIT 0 , 1"), '0');
-            $tarow.=date('D j M Y', strtotime($firstdate));
-            $tarow.='</td><td>';
-            $tarow.= date('D j M Y', strtotime($lastrow['collectiondate'])).'</td><td class="rh">  &'. $globalprefrow['currencysymbol']; $temptwo='';
-            $tempdate=$lastrow['collectiondate']; 
-            $sqlcostage = "SELECT FreightCharge, vatcharge FROM Orders WHERE CustomerID = '$CustomerID' 
-            AND status > '98' 
-            AND status < '108' 
-            AND collectiondate <= '$tempdate' ";
-
-
-            $sql_resultcost = mysql_query($sqlcostage,$conn_id)  or mysql_error(); 
-            while ($costrow = mysql_fetch_array($sql_resultcost)) {
-                extract($costrow);
-                $temptwo=$temptwo+$costrow['FreightCharge']+$costrow['vatcharge']; $awcount++;
-            }
-
-            $tempthree=$tempthree+$temptwo;
- 
-            $temptwo= number_format($temptwo, 2, '.', ',');
-            $tarow.=$temptwo. '</td></tr>';
-
-            if ($temptwo<>'0.00') {
-                $trow=$trow.$tarow;
-            }
-        }
-    }
-
-    $tempthree= number_format($tempthree, 2, '.', ',');
-
-
-
-    $bview.= '
-    <div class="vpad"> </div>
-    <div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
-    <table class="acc" >
-    <caption>
-    <h3>'.$awcount.' Jobs Require Invoicing ('. '&'.$globalprefrow['currencysymbol'].$tempthree. ' Net ) </h3>
-    </caption>
-    <tbody>
-    <tr>
-    <th scope="col">Client</th>
-    <th scope="col">Last Invoiced</th>
-    <th scope="col">Invoice from</th>
-    <th scope="col">Last Collected</th>
-    <th scope="col" class="rh" title="Incl. VAT" >Net Amount</th>
-    </tr>'. $trow. '
-    <tr><td> </td><td> </td><td></td><td class="rh"> Total : </td><td class="rh"> &'.$globalprefrow['currencysymbol'].$tempthree.'</td></tr>
-    </tbody></table>
-    </div>';
-
-    $toptext.=' '.$awcount.' Jobs awaiting Invoicing (&'.$globalprefrow['currencysymbol'].$tempthree.' Net ) ';
-
-} // ends page==''
+    $toptext.=' '.$awaiting[0]['number'].' Jobs awaiting Invoicing 
+    (&'.$globalprefrow['currencysymbol'].number_format($awaiting[0]['cost'], 2, '.', ',').' Net ) ';
+}
 
 if ($viewtype=='individualinvoice') { $hasforms='1'; } // adds a page timeout
-
-
-
 
 $filename='view_all_invoices.php';
 
 ?><!doctype html>
 <html lang="en"><head>
 <meta name="HandheldFriendly" content="true" >
-<meta name="viewport" content="width=device-width, height=device-height, user-scalable=no" >
+<meta name="viewport" content="width=device-width, height=device-height" >
 <meta http-equiv="Content-Type"  content="text/html; charset=utf-8">
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <title>COJM : View Invoice by Date</title>
 <?php echo '<link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
+<script type="text/javascript" src="js/jquery.floatThead.js"></script>
 </head>
 <body>';
 $adminmenu ="0";
-include "cojmmenu.php"; 
-
-
-
-
+include "cojmmenu.php";
 
 echo '<div class="Post">
+<div class="ui-state-highlight ui-corner-all p15" id="searchdiv" >
 <form action="view_all_invoices.php" method="get"> 
-<div class="ui-state-highlight ui-corner-all p15" >
+Invoices ';
 
-Invoices Sent From <input class="ui-state-highlight ui-corner-all pad" size="11" type="text" name="from" value="'. $inputstart.'" id="rangeBa" />			
-To <input class="ui-state-highlight ui-corner-all pad" size="11" type="text" name="to" value="'. $inputend.'" id="rangeBb" />			
+
+echo '
+<select id="orderby" name="orderby" class="ui-state-highlight ui-corner-left">
+<option ';
+if ($orderby=='due') {
+echo ' selected ';
+}
+echo ' value="due">Due</option> ';
+echo ' <option ';
+if ($orderby=='sent') {
+    echo ' selected ';
+}
+echo ' value="sent">Sent</option> ';
+echo ' <option ';
+if ($orderby=='recon') {
+    echo ' selected ';
+}
+echo ' value="recon">Reconciled</option> ';
+echo '
+</select>
+';
+
+
+echo '
+From 
+<input title="Leave Dates Blank for Unreconciled" class="ui-state-highlight ui-corner-all pad" size="11" type="text" name="from" value="'. $inputstart.'" id="rangeBa" />			
+To 
+<input title="Leave Dates Blank for Unreconciled" class="ui-state-highlight ui-corner-all pad" size="11" type="text" name="to" value="'. $inputend.'" id="rangeBb" />			
 <input type="hidden" name="formbirthday" value="'. date("U").'">
 Client : <select id="combobox" class="ui-state-highlight" name="clientid">
 <option value="">Select one...</option>
@@ -439,10 +207,11 @@ if ($showinactive>'0') {
 } else {
     $query = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName";
 }
-$result_id = mysql_query ($query, $conn_id);
-while (list ($CustomerID, $CompanyName) = mysql_fetch_row ($result_id)) {
-	$CustomerID = htmlspecialchars ($CustomerID);
-	$CompanyName = htmlspecialchars ($CompanyName);
+    $data = $dbh->query($query)->fetchAll();
+    foreach ($data as $clientrow ) {
+        $CustomerID = htmlspecialchars ($clientrow['CustomerID']);
+        $CompanyName = htmlspecialchars ($clientrow['CompanyName']);
+
 	print"<option ";
 	if ($CustomerID == $clientid) { echo "SELECTED "; }
     print ("value=\"$CustomerID\">$CompanyName</option>\n");
@@ -454,28 +223,27 @@ echo ' Show Inactive Clients? <input type="checkbox" name="showinactive" value="
  if ($showinactive>0) { echo 'checked';} 
 echo ' /> ';
 
-$query = "SELECT depnumber, depname FROM clientdep WHERE associatedclient = '$clientid' ORDER BY depname"; 
-$result_id = mysql_query ($query, $conn_id) or mysql_error();  
-$sumtot=mysql_affected_rows();
+$query = "SELECT depnumber, depname FROM clientdep WHERE associatedclient = :clientid ORDER BY depname"; 
+$cbstmt = $dbh->prepare($query);
+$cbstmt->bindParam(':clientid', $clientid, PDO::PARAM_INT); 
+$cbstmt->execute();
+$data = $cbstmt->fetchAll();
 
-
-if ($sumtot>'0') {
+if ($data) {
     echo '<select class="ui-state-default ui-corner-left" name="viewselectdep" >
     <option value="">All Departments</option>';
-    while (list ($CustomerIDlist, $CompanyName) = mysql_fetch_row ($result_id)) {
-        $CustomerID = htmlspecialchars ($CustomerID); 
-        $CompanyName = htmlspecialchars($CompanyName); 
+    foreach ($data as $deprow ) {  
+        $CompanyName = htmlspecialchars($deprow['depname']);
+        $CustomerIDlist = htmlspecialchars ($deprow['depnumber']);
         print'<option ';
         if ($CustomerIDlist==$viewselectdep) { echo ' SELECTED '; }
         echo 'value= "'.$CustomerIDlist.'" >'.$CompanyName.'</option>';
     }
     echo '</select> ';
 
-} else { $viewselectdep=''; }  // ends end of check for sumtot
-
-
-
-
+} else {
+    $viewselectdep='';
+}  // ends end of check for sumtot
 
 
 
@@ -488,73 +256,81 @@ if ($clientview=='client') { echo ' SELECTED="SELECTED" '; }
 
 echo ' value="client">Copy / Paste </option>
 </select>
-<button type="submit"> Search </button><br />
+<input id="invoicesearchphrase" 
+name="invoicesearchphrase" 
+placeholder="Amount or Reference" 
+class="caps ui-state-default ui-corner-all pad" 
+title="Include decimal places for price search"
+value="'.$invoicesearchphrase.'"/>
+
+<button id="invoiceajaxsearch" type="submit"> Search </button><br />
+
+<select name="viewtype" class="ui-state-highlight ui-corner-left">
+<option value="searchinvoice" ';
+if ($viewtype=='searchinvoice') {
+    echo ' selected ';
+}
+echo '> Search Invoices</option>
+<option value="statmnt" ';
+if ($viewtype=='statmnt') {
+    echo ' selected ';
+}
+echo '> Statement View </option>
+<option value="individualinvoice" ';
+if ($viewtype=='individualinvoice') {
+    echo ' selected ';
+}
+echo '> Single Invoice </option>
+</select>
+</form>
+<hr />
 '.$toptext.'
-<input type="hidden" name="viewtype" value="searchinvoice" />
-
-</div></form><div class="vpad"> </div>'; 
-
-
-
-
+</div>
+';
 
 if ($viewtype=='individualinvoice') {
 
     if (isset($_POST['ref'])) { $ref=trim($_POST['ref']); }
-    if (!isset($ref)) { $ref=trim($_GET['ref']); }
-
-    if ($ref) {
-
-
-
+    if (!$ref) { $ref=trim($_GET['ref']); }
+  
     $sql="SELECT * FROM invoicing
     INNER JOIN Clients ON invoicing.client = Clients.CustomerID 
-    WHERE invoicing.ref='$ref'
+    LEFT JOIN  clientdep ON clientdep.depnumber = invoicing.invoicedept
+    WHERE invoicing.ref= ?
     LIMIT 0,1 ";
 
-
-    $sql_result=mysql_query($sql,$conn_id) or mysql_error();
-
-    // echo $sql;
-
-
-    $sumtot=mysql_affected_rows();
-
-    if ($sumtot>0)  {
-        while ($row = mysql_fetch_array($sql_result)) {
-            extract($row);
-        }
-
-
+    $parameters = array($ref);
+    $statement = $dbh->prepare($sql);
+    $statement->execute($parameters);
+    $row = $statement->fetch(PDO::FETCH_ASSOC);
+    
+    if ($row) {
         echo '
-        <div class="ui-widget">	<div class="ui-state-default ui-corner-all p15" >
-        <fieldset><form action="view_all_invoices.php#" method="post"> <label for="txtName" class="fieldLabel"> <button type="submit" >'.$ref.'</button> </label>
-        <input type="hidden" name="clientid" value="'. $clientid.'">
+        <div class="ui-state-default ui-corner-all p15" >
+        <fieldset>
+        <form action="view_all_invoices.php#" method="post">
+        <label class="fieldLabel">
+        <button type="submit" >'.$row['ref'].'</button> </label>
+        <input type="hidden" name="clientid" value="'. $row['client'].'">
         <input type="hidden" name="viewtype" value="individualinvoice" >
         <input type="hidden" name="formbirthday" value="'. date("U") .'">
         <input type="hidden" name="page" value="" >
-        <input type="hidden" name="ref" value="'.$ref.'">
+        <input type="hidden" name="ref" value="'.$row['ref'].'">
         <input type="hidden" name="from" value="'. $inputstart.'">
         <input type="hidden" name="to" value="'. $inputend.'">
         <input type="hidden" name="viewselectdep" value="'.$viewselectdep.'" />
-        </form>
+        </form> '.$row['ref'].'
         </fieldset>
         <div class="vpad"></div>
-        <fieldset><label for="txtName" class="fieldLabel">Client </label>';
+        <fieldset><label class="fieldLabel">Client </label>';
         // . $CompanyName.'';
 
-        echo '<a href="new_cojm_client.php?clientid='.$clientid.'">'.$CompanyName.'</a>';
+        echo '<a href="new_cojm_client.php?clientid='.$row['client'].'">'.$row['CompanyName'].'</a>';
 
 
-        $depsql="SELECT * from clientdep WHERE depnumber='$invoicedept' LIMIT 0,1";
-        $dsql_result = mysql_query($depsql,$conn_id)  or mysql_error();
 
-        while ($drow = mysql_fetch_array($dsql_result)) {
-            extract($drow); 
-            // echo ' ('.$drow['depname'].') ';
-
-            echo ' (<a href="new_cojm_department.php?depid='.$drow['depnumber'].'">'.$drow['depname'].'</a>) ';
-
+        if ($row['invoicedept']) {
+            echo ' (<a href="new_cojm_department.php?depid='.$row['depnumber'].'">'.$row['depname'].'</a>) ';
         }
         echo '</fieldset>';
  
@@ -565,30 +341,31 @@ if ($viewtype=='individualinvoice') {
         echo '
 
         <div class="vpad"> </div>
-        <fieldset><label for="txtName" class="fieldLabel">Charge </label> &'.$globalprefrow['currencysymbol']. number_format($cost, 2, '.', ',').'</fieldset>
+        <fieldset><label  class="fieldLabel">Charge </label> &'.$globalprefrow['currencysymbol']. number_format($row['cost'], 2, '.', ',').'</fieldset>
         <div class="vpad"> </div>
-        <fieldset><label for="txtName" class="fieldLabel">VAT Element </label> &'.$globalprefrow['currencysymbol']. number_format($invvatcost, 2, '.', ',').'</fieldset>
+        <fieldset><label  class="fieldLabel">VAT Element </label> &'.$globalprefrow['currencysymbol']. number_format($row['invvatcost'], 2, '.', ',').'</fieldset>
         <div class="vpad"> </div>
         <fieldset>
-        <label for="txtName" class="fieldLabel">Invoice Total </label>
-        &'.$globalprefrow['currencysymbol']. '<strong>'.number_format(($cost+$invvatcost), 2, '.', ',').'</strong>
+        <label  class="fieldLabel">Invoice Total </label>
+        &'.$globalprefrow['currencysymbol']. '<strong>'.number_format(($row['cost']+$row['invvatcost']), 2, '.', ',').'</strong>
         </fieldset>';
  
  
-        if (strtotime($invdate1)<>"") {
+        if (strtotime($row['invdate1'])<>"") {
             echo '<div class="vpad"></div>
             <fieldset>
-            <label for="txtName" class="fieldLabel"> Invoice Date </label>
-            '.date('D jS M Y', strtotime($invdate1)).'</fieldset>';
+            <label class="fieldLabel"> Invoice Date </label>
+            '.date('D jS M Y', strtotime($row['invdate1'])).'</fieldset>';
         }
 
 
-        $invoicedon= (strtotime($invdate1));
-        $paidon=(strtotime($paydate));
-        if ((strtotime($paydate))>0) {
+        $invoicedon= (strtotime($row['invdate1']));
+        $paidon=(strtotime($row['paydate']));
+        
+        if ((strtotime($row['paydate']))>0) {
             $diff=$paidon-$invoicedon;
         } else {
-            $diff=((date('U'))-$invoicedon);
+            $diff=(((date('U'))-$invoicedon));
         }
         // echo $diff;
         
@@ -596,21 +373,22 @@ if ($viewtype=='individualinvoice') {
             echo '
             <div class="vpad"></div>
             <fieldset>
-            <label for="txtName" class="fieldLabel"> Days from Invoice Date</label>
-            '.number_format(($diff/3600)/24).'</fieldset>';
+            <label class="fieldLabel"> Days from Invoice Date</label>
+            '.((number_format(($diff/3600)/24))-1).'</fieldset>';
         }
         
-        if (strtotime($invdue)<>"") {
+        if (strtotime($row['invdue'])<>"") {
             echo '<div class="vpad"></div>
             <fieldset>
-            <label for="txtName" class="fieldLabel"> Invoice Due by </label>
-            '.date('D jS M Y', strtotime($invdue)).'
+            <label class="fieldLabel"> Invoice Due by </label>
+            '.date('D jS M Y', strtotime($row['invdue'])).'
             </fieldset>'; 
 
 
 
-            $invoicedon= (strtotime($invdue)); $paidon=(strtotime($paydate));
-            if ((strtotime($paydate))>"0") {
+            $invoicedon= (strtotime($row['invdue']));
+            $paidon=(strtotime($row['paydate']));
+            if ((strtotime($row['paydate']))>"0") {
                 $diff=$paidon-$invoicedon;
                 } else {
                     $diff=((date('U'))-$invoicedon);
@@ -619,24 +397,41 @@ if ($viewtype=='individualinvoice') {
  
  
             if ($diff>0) {
+                
+                $daysoverdue=number_format((($diff/3600)/24));
+                
                 echo '
                 <div class="vpad"></div>
                 <fieldset>
-                <label for="txtName" class="fieldLabel"> Days after Due Date</label>
-                '.number_format(($diff/3600)/24).'</fieldset>';
+                <label class="fieldLabel"> Days after Due Date</label>
+                '.$daysoverdue.'</fieldset>';
+                
+                
+                $partialyear=$daysoverdue/365;
+                $irate=($globalprefrow['invoice7']/100);
+                $interest=($row["cost"]+$row["invvatcost"])*(pow((1+(($irate)/365)),(365*$partialyear)));
+                $interest=$interest-($row["cost"]+$row["invvatcost"]);
+                
+                echo '
+                <div class="vpad"></div>
+                <fieldset>
+                <label class="fieldLabel"> Overdue Interest ( '.$globalprefrow['invoice7'].'% ) </label>
+                &'.$globalprefrow['currencysymbol']. number_format(($interest), 2, '.', ',').'</fieldset>';
+                
+                
             }
 
             if ($diff<0) { echo '
                 <div class="vpad"></div>
                 <fieldset>
-                <label for="txtName" class="fieldLabel"> Days until Due Date</label>
-                '.number_format(($diff/3600)/-24).'</fieldset>';
+                <label class="fieldLabel"> Days until Due Date</label>
+                '.number_format((($diff/3600)/-24)+1).'</fieldset>';
             }
         }
         
-        if ((strtotime($paydate))>"0") {
+        if ((strtotime($row['paydate']))>"0") {
             echo '<div class="vpad"></div>
-            <fieldset><label for="txtName" class="fieldLabel"> Reconcilliation Date </label>'.date(' D jS M Y ', strtotime($paydate)).'</fieldset> ';
+            <fieldset><label class="fieldLabel"> Reconciled </label>'.date(' D jS M Y ', strtotime($row['paydate'])).'</fieldset> ';
 
 
         }
@@ -645,39 +440,28 @@ if ($viewtype=='individualinvoice') {
         echo '
         <form action="view_all_invoices.php#" method="post"> 
  
- 
- 
         <input type="hidden" name="viewtype" value="individualinvoice" >
         <input type="hidden" name="formbirthday" value="'. date("U") .'">
         <input type="hidden" name="page" value="editinvcomment" >
-        <input type="hidden" name="ref" value="'.$ref.'">
+        <input type="hidden" name="ref" value="'.$row['ref'].'">
         <input type="hidden" name="from" value="'. $inputstart.'">
         <input type="hidden" name="to" value="'. $inputend.'">
         <input type="hidden" name="clientid" value="'. $clientid.'">
         <input type="hidden" name="viewselectdep" value="'.$viewselectdep.'" >
         
-        
-        
-        
-        <fieldset><label for="invcomments" class="fieldLabel"> <button type="submit" > Edit Comments </button> </label><textarea 
+        <fieldset>
+        <label class="fieldLabel"> <button type="submit" > Edit Comments </button> </label><textarea 
         id="invcomments" placeholder="Invoice Comments" class="normal caps ui-state-default ui-corner-all " name="invcomments" 
-        style="width: 65%; outline: none;">'.$invcomments.'</textarea></fieldset></form>';
+        style="width: 65%; outline: none;">'.$row['invcomments'].'</textarea></fieldset></form>';
         
         
-        if ((strtotime($paydate))>0) {
+        if ((strtotime($row['paydate']))>0) {
         
         
             echo ' 
             <fieldset><label class="fieldLabel">
             
-            
             <button title="Using payment(s) for same day as invoice reconciled" id="previewpdfreceipt">Preview PDF Receipt</button> </label> 
-            
-            
-            
-            
-            
-            
             <button title="Using payment(s) for same day as invoice reconciled" id="createpdfreceipt">Create PDF Receipt</button>
             
             
@@ -686,53 +470,33 @@ if ($viewtype=='individualinvoice') {
             echo '
             <form id="f1" name="f1" action="receipt.php" method="post"> 
             <input type="hidden" id="invpage" name="invpage" value="" >
-            <input type="hidden" name="invref" value="'.$ref.'">
+            <input type="hidden" name="invref" value="'.$row['ref'].'">
             </form>
-            
-            
-            
             ';
-
-
-
-
-
-
-
-
-
-
-
-
             
         }
         
         
         
         
-        
-        echo '
-        </div></div>';
-        
-        
-        if (((strtotime($paydate))>"0") and  ((strtotime($chasedate))<"0") ) {} else { 
+        if (((strtotime($row['paydate']))>"0") and  ((strtotime($chasedate))<"0") ) {} else { 
             echo '<div class="vpad"> </div>
             <div class="ui-widget">	<div class="ui-state-default ui-corner-all" style="padding: 0.5em; width:auto;">';
         }
         
         
-        if ((strtotime($chasedate))<"0") {
-            if ((strtotime($paydate))<"0") { // unchased 1st time
+        if ((strtotime($row['chasedate']))<"0") {
+            if ((strtotime($row['paydate']))<"0") { // unchased 1st time
         
                 echo '
                 <form action="view_all_invoices.php#" method="post"> 
-                <fieldset><label for="txtName" class="fieldLabel"> <button type="submit" > Add 1st Reminder </button> </label>
+                <fieldset><label class="fieldLabel"> <button type="submit" > Add 1st Reminder </button> </label>
         
                 <input type="hidden" name="invchasetype" value="1" >
                 <input type="hidden" name="viewtype" value="individualinvoice" >
                 <input type="hidden" name="formbirthday" value="'. date("U") .'">
                 <input type="hidden" name="page" value="editinvchase" >
-                <input type="hidden" name="ref" value="'.$ref.'">
+                <input type="hidden" name="ref" value="'.$row['ref'].'">
                 <input type="hidden" name="from" value="'. $inputstart.'">
                 <input type="hidden" name="to" value="'. $inputend.'">
                 <input type="hidden" name="clientid" value="'. $clientid.'">
@@ -752,9 +516,9 @@ if ($viewtype=='individualinvoice') {
         
         
             echo  '<form action="view_all_invoices.php#" method="post"> 
-            <fieldset><label for="txtName" class="fieldLabel">'; 
+            <fieldset><label class="fieldLabel">'; 
         
-            if ((strtotime($chasedate2))>"0") {
+            if ((strtotime($row['chasedate2']))>"0") {
                 echo ' 1st Reminder ';
             } else {
         
@@ -767,13 +531,13 @@ if ($viewtype=='individualinvoice') {
             <input type="hidden" name="page" value="editinvchase" >
             <input type="hidden" name="formbirthday" value="'. date("U") .'">
             <input type="hidden" name="invchasetype" value="1" >
-            <input type="hidden" name="ref" value="'.$ref.'">
+            <input type="hidden" name="ref" value="'.$row['ref'].'">
             <input type="hidden" name="from" value="'. $inputstart.'">
             <input type="hidden" name="to" value="'. $inputend.'">
             <input type="hidden" name="chasedate" value="69">
             <input type="hidden" name="clientid" value="'. $clientid.'">
             <input type="hidden" name="viewselectdep" value="'.$viewselectdep.'" />
-            '. date('D jS M Y', strtotime($chasedate)). ' </fieldset></form>';
+            '. date('D jS M Y', strtotime($row['chasedate'])). ' </fieldset></form>';
             
         } // ends already chased
         
@@ -784,15 +548,15 @@ if ($viewtype=='individualinvoice') {
         
         
         
-        if ((strtotime($chasedate2))<"0") { // not already chased
-            if ((strtotime($paydate))<"0") { // unpaid
-                if ((strtotime($chasedate))>"0") { // has been chased 1st time
+        if ((strtotime($row['chasedate2']))<"0") { // not already chased
+            if ((strtotime($row['paydate']))<"0") { // unpaid
+                if ((strtotime($row['chasedate']))>"0") { // has been chased 1st time
         
         
                     echo '
                     <form action="view_all_invoices.php#" method="post"> 
                     <div class="vpad"></div>
-                    <fieldset><label for="txtName" class="fieldLabel">';
+                    <fieldset><label class="fieldLabel">';
                     
                     
                     echo ' <button type="submit" > Add 2nd Reminder </button>';
@@ -803,7 +567,7 @@ if ($viewtype=='individualinvoice') {
                     <input type="hidden" name="formbirthday" value="'. date("U") .'">
                     <input type="hidden" name="page" value="editinvchase" >
                     <input type="hidden" name="invchasetype" value="2" >
-                    <input type="hidden" name="ref" value="'.$ref.'">
+                    <input type="hidden" name="ref" value="'.$row['ref'].'">
                     <input type="hidden" name="from" value="'. $inputstart.'">
                     <input type="hidden" name="to" value="'. $inputend.'">
                     <input type="hidden" name="clientid" value="'. $clientid.'">
@@ -823,9 +587,9 @@ if ($viewtype=='individualinvoice') {
             <div class="vpad"></div>
         
             <form action="view_all_invoices.php#" method="post"> 
-            <fieldset><label for="txtName" class="fieldLabel"> ';
+            <fieldset><label class="fieldLabel"> ';
         
-            if ((strtotime($chasedate3))>"0") {
+            if ((strtotime($row['chasedate3']))>"0") {
                 echo ' 2nd Reminder ';
             } else {
                 echo '<button type="submit" > Remove 2nd Reminder </button>';
@@ -833,12 +597,12 @@ if ($viewtype=='individualinvoice') {
             }   
         
             echo ' </label>
-            '.date('D jS M Y', strtotime($chasedate2)).'
+            '.date('D jS M Y', strtotime($row['chasedate2'])).'
             <input type="hidden" name="viewtype" value="individualinvoice" >
             <input type="hidden" name="formbirthday" value="'. date("U") .'">
             <input type="hidden" name="page" value="editinvchase" >
             <input type="hidden" name="invchasetype" value="2" >
-            <input type="hidden" name="ref" value="'.$ref.'">
+            <input type="hidden" name="ref" value="'.$row['ref'].'">
             <input type="hidden" name="from" value="'. $inputstart.'">
             <input type="hidden" name="to" value="'. $inputend.'">
             <input type="hidden" name="chasedate" value="69">
@@ -853,20 +617,20 @@ if ($viewtype=='individualinvoice') {
         
         // chase 3rd time
         
-        if ((strtotime($chasedate3))<"0") { 
-            if ((strtotime($chasedate))>"0")  {
-                if ((strtotime($chasedate2))>"0") {
+        if ((strtotime($row['chasedate3']))<"0") { 
+            if ((strtotime($row['chasedate']))>"0")  {
+                if ((strtotime($row['chasedate2']))>"0") {
         
         
                     echo '<form action="view_all_invoices.php#" method="post"> 
                     <div class="vpad"></div>
                     
-                    <fieldset><label for="txtName" class="fieldLabel"> <button type="submit" > Add 3rd Reminder </button> </label>
+                    <fieldset><label class="fieldLabel"> <button type="submit" > Add 3rd Reminder </button> </label>
                     <input type="hidden" name="viewtype" value="individualinvoice" >
                     <input type="hidden" name="formbirthday" value="'. date("U") .'">
                     <input type="hidden" name="page" value="editinvchase" >
                     <input type="hidden" name="invchasetype" value="3" >
-                    <input type="hidden" name="ref" value="'.$ref.'">
+                    <input type="hidden" name="ref" value="'.$row['ref'].'">
                     <input type="hidden" name="from" value="'. $inputstart.'"> 
                     <input type="hidden" name="to" value="'. $inputend.'">
                     <input type="hidden" name="clientid" value="'. $clientid.'">
@@ -888,53 +652,35 @@ if ($viewtype=='individualinvoice') {
             echo '<form action="view_all_invoices.php#" method="post">
             <div class="vpad"></div>
             
-            <fieldset><label for="txtName" class="fieldLabel"> <button type="submit" > Remove 3rd Reminder </button> </label>
-            '.date('D jS M Y', strtotime($chasedate3)).'
+            <fieldset><label class="fieldLabel"> <button type="submit" > Remove 3rd Reminder </button> </label>
+            '.date('D jS M Y', strtotime($row['chasedate3'])).'
             
             <input type="hidden" name="viewtype" value="individualinvoice" >
             <input type="hidden" name="formbirthday" value="'. date("U") .'">
             <input type="hidden" name="page" value="editinvchase" >
             <input type="hidden" name="invchasetype" value="3" >
-            <input type="hidden" name="ref" value="'.$ref.'">
+            <input type="hidden" name="ref" value="'.$row['ref'].'">
             <input type="hidden" name="from" value="'. $inputstart.'"> 
             <input type="hidden" name="to" value="'. $inputend.'">
             <input type="hidden" name="chasedate" value="69">
             <input type="hidden" name="clientid" value="'. $clientid.'">
             <input type="hidden" name="viewselectdep" value="'.$viewselectdep.'" />
             </fieldset></form>';
-            
-            
         }
         
-        
-        
-        
-        
-
-        
-        
-        
-        
-        
-        if (((strtotime($paydate))>"0") and  ((strtotime($chasedate))<"0") ) {} else { 
+        if (((strtotime($row['paydate']))>"0") and  ((strtotime($row['chasedate']))<"0") ) {} else { 
             echo '</div></div>';
         }
         
-        
-        
-        
-        
-        
-        if ((strtotime($paydate))<"0") { // unpaid 
-        
+        if ((strtotime($row['paydate']))<"0") { // unpaid 
         
             echo '
             <div class="vpad"> </div>
-            <div class="ui-widget">	<div class="ui-state-default ui-corner-all p15">
+            <div class="ui-state-default ui-corner-all p15">
             <form action="view_all_invoices.php#" method="post"> 
             <input type="hidden" name="formbirthday" value="'. date("U").'">
             <input type="hidden" name="page" value="markinvpaid" />
-            <input type="hidden" name="ref" value="'.$ref.'" />
+            <input type="hidden" name="ref" value="'.$row['ref'].'" />
             <input type="hidden" name="viewtype" value="individualinvoice" />
             
             <input type="hidden" name="from" value="'. $inputstart.'"> 
@@ -943,385 +689,224 @@ if ($viewtype=='individualinvoice') {
             <input type="hidden" name="viewselectdep" value="'.$viewselectdep.'" />
             
             
-            
-            <fieldset><label for="invoicedate" class="fieldLabel">
+            <fieldset><label class="fieldLabel">
             <button type="submit"> Mark as Reconciled </button>
             </label> 
             <input class="ui-state-default ui-corner-all caps" type="text" value="'. date('d-m-Y', strtotime('now')).'" 
             id="invoicedate" size="12" name="invoicedate"></fieldset>
 
 
-            </form></div></div>
+            </form></div>
             '; 
         }
         
-        $sql = "
-        SELECT * FROM Orders 
-        INNER JOIN Services 
-        INNER JOIN Cyclist 
-        INNER JOIN Clients 
-        INNER JOIN status 
-        ON Orders.ServiceID = Services.ServiceID 
-        AND Orders.CyclistID = Cyclist.CyclistID 
-        AND Orders.status = status.status 
-        AND Orders.CustomerID = Clients.CustomerID 
-        WHERE Orders.invoiceref = '$ref' 
-        ORDER BY `Orders`.`ShipDate` ASC";
-        
-        
-        
-        
-        // normal
-        // client
-        // clientprice
-        
-        $sql_result = mysql_query($sql,$conn_id)  or mysql_error();
-        $num_rows = mysql_num_rows($sql_result);
-        $firstrun='1';
-        $today = date(" H:i A, D j M");
-        
-        if ($num_rows>'0') {
 
-            $i='1';
-            $tablecost='';
-            $tabletotal='';
-            $temptrack='';
-            $tottimedif='';
-            $secmod='';
-            echo '<div class="vpad"></div>
-            <table class="acc" style="width:100%;">
-            <tbody>
-            <tr>
-            <th scope="col">COJM ID</th>
-            <th scope="col">'.$globalprefrow['glob5'].'</th>
-            <th scope="col">Service</th>
-            <th scope="col">Cost ex VAT</th>
-            <th scope="col">From </th>
-            <th scope="col">To </th>
-            <th scope="col">Collection</th>
-            <th scope="col">Delivery</th>
-            </tr>';
-            
-            while ($row = mysql_fetch_array($sql_result)) {
-                extract($row);
-            
-                echo '
-                <tr>
-                <td><a href="order.php?id='. $ID.'">'. $ID.'</a></td>
-                <td>'. $cojmname.'</td>
-                <td>'. formatmoney($row["numberitems"]) .' x '. $Service.'</td>
-                <td>&'. $globalprefrow['currencysymbol'].$row["FreightCharge"].'</td>
-                <td>'. $fromfreeaddress;  
-                if (trim($CollectPC)) {
-                    echo ' <a target="_blank" href="http://maps.google.com/maps?q='. $row['CollectPC'].'">'. $row['CollectPC'].'</a>';
-                    }
-                echo '</td><td>'. $tofreeaddress.' ';
-                if (trim($ShipPC)) {
-                    echo ' <a target="_blank" href="http://maps.google.com/maps?q='. $row['ShipPC'].'">'. $row['ShipPC'].'</a>';
-                }
-                echo '</td>
-                <td>'.date('H:i D jS M ', strtotime($row['collectiondate'])).'</td>
-                <td>'.date('H:i D jS M ', strtotime($row['ShipDate'])).'</td></tr>';
-                
-                $tablecost = $tablecost + $row["FreightCharge"];
-                $tabletotal = $tabletotal + $numberitems;
-                
-                $temptrack=$temptrack.'<input type="hidden" name="tr'.$i.'" value="'.$ID.'" />';
-                
-                $i++;
-                
-                $tottimec=strtotime($row['starttrackpause']);
-                $tottimed=strtotime($row['finishtrackpause']);
-                if (($tottimec>'1') AND ($tottimed>'1')) { $secmod=($tottimed-$tottimec); }
-                $tottimea=strtotime($row['collectiondate']); 
-                $tottimeb=strtotime($row['ShipDate']); 
-                $tottimedif=($tottimedif+$tottimeb-$tottimea-$secmod);
-            
-            
-            } 
-            
-            echo '';
-            echo '</tbody></table>';
-            
-            
-            
-            
-            
-            $lengthtext='';
-            
-            
-            $inputval = $tottimedif; // USER DEFINES NUMBER OF SECONDS FOR WORKING OUT | 3661 = 1HOUR 1MIN 1SEC 
-            $unitd ='86400';
-            $unith ='3600';        // Num of seconds in an Hour... 
-            $unitm ='60';            // Num of seconds in a min... 
-            $dd = intval($inputval / $unitd);       // days
-            $hh_remaining = ($inputval - ($dd * $unitd));
-            $hh = intval($hh_remaining / $unith);    // '/' given value by num sec in hour... output = HOURS 
-            $ss_remaining = ($hh_remaining - ($hh * $unith)); // '*' number of hours by seconds, then '-' from given value... output = REMAINING seconds 
-            $mm = intval($ss_remaining / $unitm);    // take remaining sec and devide by sec in a min... output = MINS 
-            $ss = ($ss_remaining - ($mm * $unitm));        // '*' number of mins by seconds, then '-' from remaining sec... output = REMAINING seconds. 
-            if ($dd=='1') {$lengthtext=$lengthtext. $dd . " day "; } if ($dd>'1' ) { $lengthtext=$lengthtext. $dd . " days "; }
-            if ($hh=='1') {$lengthtext=$lengthtext. $hh . " hr "; } if ($hh>'1') { $lengthtext=$lengthtext. $hh . " hrs "; }
-            if ($mm>'1' ) {$lengthtext=$lengthtext. $mm . " mins. "; } if ($mm=='1') {$lengthtext=$lengthtext. $mm . " min. "; }
-            // number_format($tablecost, 2, '.', '')
-            if ($dd) {} else { if ($mm) {   $lengthtext=$lengthtext. "(". number_format((($mm/'60')+$hh), 2, '.', ''). 'hrs)'; } }
-            // echo ($tottimedif/60).' minutes';
-            
-            
-            
-            
-            if (($lengthtext) or ($tabletotal)) {
-                echo '<div class="vpad"></div>
-                <div class="ui-widget">	<div class="ui-state-default ui-corner-all" style="padding: 0.5em; width:auto;">';
-            
-                if ($tabletotal) {
-                    echo '<fieldset><label for="txtName" class="fieldLabel"> Total Volume </label> '. $tabletotal.'</fieldset>'; 
-                }
-            
-                if (trim($lengthtext)) {
-                    echo '<fieldset><label for="txtName" class="fieldLabel"> 
-                    Time Taken </label>'.$lengthtext. ' from collection to delivery.</fieldset>';
-                }
-            
-            
-                echo '</div></div>';
-            }
-        
-        } // ends rum rows loop
-        
-        
-        
-        
         
         echo '
+        <div id="orderdetails"> </div>
         <div class="vpad"> </div>
-        <div class="ui-widget">	<div class="ui-state-error ui-corner-all" style="padding: 0.5em; width:auto;">
-        <fieldset><label for="invoicedate" class="fieldLabel">
+        <div class="ui-state-error ui-corner-all" style="padding: 0.5em; width:auto;"> ';
+
         
         
-        <form action="#" method="post" id="frm1"> 
-        <input type="hidden" name="formbirthday" value="'. date("U").'">
-        <input type="hidden" name="page" value="deleteinv" />
-        <input type="hidden" name="ref" value="'.$ref.'" />
-        <input type="hidden" name="from" value="'. $inputstart.'"> 
-        <input type="hidden" name="to" value="'. $inputend.'">
-        <input type="hidden" name="clientid" value="'. $clientid.'">
-        <input type="hidden" name="viewselectdep" value="'.$viewselectdep.'" />
-        
-        <a href="javascript:void(0)" id="deleteinv"><button> Delete Invoice </button></a>
-        </form>
-        </label>';
-        
-        
-        if ((strtotime($paydate))>"0") {
-        
+        if ((strtotime($row['paydate']))>"0") {
             echo '
             <form action="#" method="post" id="frm2"> 
+            <fieldset><label class="fieldLabel">
             <input type="hidden" name="formbirthday" value="'. date("U").'">
             <input type="hidden" name="page" value="invnotpaid" />
-            <input type="hidden" name="ref" value="'.$ref.'" />
+            <input type="hidden" name="ref" value="'.$row['ref'].'" />
             <input type="hidden" name="from" value="'. $inputstart.'"> 
             <input type="hidden" name="to" value="'. $inputend.'">
             <input type="hidden" name="clientid" value="'. $clientid.'">
             <input type="hidden" name="viewselectdep" value="'.$viewselectdep.'" />
             <input type="hidden" name="viewtype" value="individualinvoice" />
-            
-            <a href="javascript:void(0)" id="invnotpaid"><button> Remove Reconciliation </button></a>
+            <button id="invnotpaid"> Remove Reconciliation </button>
+            </label>
+            </fieldset>
             </form>
-            ';
-            
+            '; 
+        } else {  
+          echo '  
+        <form action="#" method="post" id="frm1"> 
+        <fieldset><label class="fieldLabel">
+        <input type="hidden" name="formbirthday" value="'. date("U").'">
+        <input type="hidden" name="page" value="deleteinv" />
+        <input type="hidden" name="ref" value="'.$row['ref'].'" />
+        <input type="hidden" name="from" value="'. $inputstart.'"> 
+        <input type="hidden" name="to" value="'. $inputend.'">
+        <input type="hidden" name="clientid" value="'. $clientid.'">
+        <input type="hidden" name="viewselectdep" value="'.$viewselectdep.'" />
+        
+        <button id="deleteinv"> Delete Invoice </button>
+        </label>
+        </fieldset>
+        </form>';  
         }
         
         
-        echo '</fieldset></div></div>';
-        echo '<script type="text/javascript"> ';
-
-?>
-
-        $('#deleteinv').bind('click', function(e) {
-            e.preventDefault();
-            $.zebra_dialog('<strong>Are you sure ?</strong><br />Invoice <?php echo $ref; ?> will be deleted. <br />All jobs will revert to completed status.',
-            {
-                'type':'warning',
-                'width':'350',
-                'title':'Delete Invoice ?',
-                'buttons':[
-                    {caption: 'Delete', callback: function() { document.getElementById("frm1").submit(); } },
-                    {caption: 'Do NOT Delete', callback: function() {} }
-                ]
+        echo '</div>'; // error box
+        echo '</div>'; // invoice div
+        
+        echo '<script type="text/javascript"> 
+        $(document).ready(function(){
+            $( "#orderdetails" ).load( "ajax_lookup.php", { lookuppage: "invoiceorderlist", invoiceref: "'.$row['ref'].'" }, function() {
+                $("#toploader").fadeOut();
             });
         });
+        </script>';
 
-
-
-
-        $('#invnotpaid').bind('click', function(e) {
-            e.preventDefault();
-            $.zebra_dialog('<strong>Are you sure ?</strong><br />Reconcilliation details for this invoice ref <?php echo $ref; ?><br />will be cancelled.', {
-                'type':'warning',
-                'width':'350',
-                'title':'Remove Reconcilliation Details ?',
-                'buttons':[{
-                caption: 'Remove Reconcilliation', callback: function() { document.getElementById("frm2").submit(); }},
-                {caption: 'Cancel', callback: function() {}}
-            ]});
-        });
-        
-
-        
-        $(document).ready(function() {
-            var max = 0;
-            $("label").each(function(){
-                if ($(this).width() > max)
-                max = $(this).width();    
-            });
-            $("label").width((max+15));
-        });         
-        
-        
-        
-        $(function() {
-            var dates = $( "#invoicedate" ).datepicker({
-                numberOfMonths: 1,
-                changeYear:false,
-                firstDay: 1,
-                dateFormat: 'dd-mm-yy',
-                changeMonth:false,
-                beforeShow: function(input, instance) { 
-                    $(input).datepicker('setDate',  new Date() );
-                }
-            });
-            
-            
-            
-        });
-function datepickeronchange() { }
-        </script>
-        <?php
-        } // ends check for valid invoice ref
-    } // ends check for ref
+    } // ends check for valid invoice ref
+    
 } // ends viewtype == individualinvoice
+else if (($viewtype=='searchinvoice') or ($viewtype=='')) {
+    
+    $conditions = array();
+    $parameters = array();
+    $where = "";
+    
+    if ($orderby=='sent') {
+        $orderbydb='invdate1';
+    } else if ($orderby=='recon') {
+        $orderbydb='paydate';
+    } else {
+        $orderbydb='invdue';    
+    }
+
+    
+    if (($sqlstart) and ($sqlend)) {
+        $conditions[] = " " . $orderbydb . " >= :sqlstart ";
+        $parameters[":sqlstart"] = $sqlstart;
+    
+        $conditions[] = " " . $orderbydb . " <= :sqlend ";
+        $parameters[":sqlend"] = $sqlend;
+    }
+    else {
+        $conditions[] = " invoicing.paydate = :paydate ";
+        $parameters[":paydate"] = '0000-00-00 00:00:00';
+    }
+        
+    if ($invoicesearchphrase) {
+        $conditions[] = " ( invoicing.ref LIKE :testrefa OR invoicing.cost LIKE :testrefb OR invoicing.invcomments LIKE :testrefc ) ";
+        $parameters[":testrefa"] = "%".$invoicesearchphrase."%";
+        $parameters[":testrefb"] = "%".$invoicesearchphrase."%";
+        $parameters[":testrefc"] = "%".$invoicesearchphrase."%";    
+    }
 
 
-
-
-if ($viewtype=='searchinvoice' ) {
 
     // echo $clientid.$collectionsfromdate.$collectionsuntildate;
 
     if (($clientid=='all') or ($clientid=='' )) {
 
-        $sql="SELECT * FROM invoicing
-        INNER JOIN Clients ON invoicing.client = Clients.CustomerID 
-        WHERE invdate1 >= '$sqlstart' 
-        AND invdate1 <= '$sqlend' 
-        ORDER BY `invoicing`.`invdate1` ASC"; 
+    }
+    else {
 
-    } else {
-
-
-        // need to add check for client having department to the if below
-        if ($viewselectdep<>'') {
-
-            $sql="SELECT * FROM invoicing
-            INNER JOIN Clients ON invoicing.client = Clients.CustomerID 
-            WHERE invdate1 >= '$sqlstart' 
-            AND invdate1 <= '$sqlend'
-            AND CustomerID = '$clientid' 
-            AND invoicedept = '$viewselectdep'
-            ORDER BY `invoicing`.`invdate1` ASC";
-
-        } else {
-
-
-            $sql="SELECT * FROM invoicing
-            INNER JOIN Clients ON invoicing.client = Clients.CustomerID 
-            WHERE invdate1 >= '$sqlstart' 
-            AND invdate1 <= '$sqlend'
-            AND CustomerID = '$clientid' 
-            ORDER BY `invoicing`.`invdate1` ASC";
-
-        } // ends dep check
+        echo '<script>
+        $(document).ready(function(){
+            $( "#paymentstats" ).load( "ajax_lookup.php", { view: "client", clientid: "'.$clientid.'", lookuppage: "paymentstuff" }, function() {
+                // alert( "Load was performed." );
+            });
+        });
+        </script>';
+    }
+    
+    
+    if ($clientid<>'all') {
+        $conditions[] = " CustomerID = :clientid ";
+        $parameters[":clientid"] = $clientid;
+    }
+    
+    
+    if ($viewselectdep<>'') {
+        $conditions[] = " invoicedept = :invoicedept ";
+        $parameters[":invoicedept"] = $viewselectdep;
+    }
+    
+    
+    if (count($conditions) > 0) {
+        $where = implode(' AND ', $conditions);
     }
 
+    // check if $where is empty string or not
+    $query = "SELECT * FROM invoicing
+        INNER JOIN Clients ON invoicing.client = Clients.CustomerID 
+        LEFT JOIN  clientdep ON clientdep.depnumber = invoicing.invoicedept
+    " . ($where != "" ? " WHERE $where" : "");
+        
+        
+    if ($orderby=='sent') {
+        $query.= " ORDER BY `invoicing`.`invdate1` ASC ";
+    }  else if ($orderby=='recon') {
+        $query.= " ORDER BY `invoicing`.`paydate` ASC ";
+    } else {
+        $query.= " ORDER BY `invoicing`.`invdue` ASC ";
+    }
+    
+    
+    
+    // echo $query;
+    
+    
 
-    if (!($sqlstart) AND (!($sqlend)) AND ($clientid)) { 
-
-        // echo 'no start or end but client'; 
-
-
-        if ($viewselectdep<>'') {
-
-            $sql="SELECT * FROM invoicing
-            INNER JOIN Clients ON invoicing.client = Clients.CustomerID 
-            AND invoicing.paydate = '0000-00-00 00:00:00'
-            AND CustomerID = '$clientid' 
-            AND invoicedept = '$viewselectdep'
-            ORDER BY `invoicing`.`invdate1` ASC";
-
-        } else {
-
-            $sql="SELECT * FROM invoicing
-            INNER JOIN Clients ON invoicing.client = Clients.CustomerID 
-            AND invoicing.paydate = '0000-00-00 00:00:00'
-            AND CustomerID = '$clientid' 
-            ORDER BY `invoicing`.`invdate1` ASC";
-
-        } // ends dep check 
-
-
-        if ($clientid=='all') {
-
-            $sql="SELECT * FROM invoicing
-            INNER JOIN Clients ON invoicing.client = Clients.CustomerID 
-            AND invoicing.paydate = '0000-00-00 00:00:00'
-            ORDER BY `invoicing`.`invdate1` ASC";
+    try {
+        if (empty($parameters)) {
+            $result = $dbh->query($query);
+        }
+        else {
+            $statement = $dbh->prepare($query);
+            $statement->execute($parameters);
+            if (!$statement) throw new Exception("Query execution error.");
+            $result = $statement->fetchAll();
         }
     }
-
-    $sql_result=mysql_query($sql,$conn_id) or mysql_error();
-    // echo $sql;
-    $sumtot=mysql_affected_rows();
-    if ($sumtot>'0') {
-        $today = date(" H:i A, D j M");
+    catch(Exception $ex)
+    {
+        echo $ex->getMessage();
+    }
+    
+    
+   
+    if ($result) {
+        
+        $tablecost='';
+        $numrows=0;
+        $overduecount=0;
+        $duecount=0;
+        $reconcilecolumn=0;
+        
         if ($clientview=='client') {
             echo '<br />';
         }
         
-        echo '<table class="acc 1426"';
+        $a= '<table class="acc 1426" id="expenseview" ';
 
         if ($clientview<>'client') {
-
-            echo 'style="width:100%;" ';
+            $a.= 'style="width:100%;" ';
         }
  
-        echo '><tbody>
-        <tr><th scope="col">Invoice Ref</th>
-        <th scope="col" class="rh">Net &'.$globalprefrow['currencysymbol'].'</th>
-        <th scope="col">Client</th>
-        <th scope="col">Invoice Date</th>
-        <th scope="col">Due Date</th>
-        <th scope="col">Days</th>
-        <th scope="col">Reconcilliation Date</th>';
+        $a.= '><thead>
+        <tr><th scope="col">Invoice Ref </th>
+        <th scope="col" class="rh">Net &'.$globalprefrow['currencysymbol'].' </th>
+        <th scope="col">Client </th>
+        <th scope="col">Invoice Date </th>
+        <th scope="col">Sent Days </th>
+        <th scope="col">Due Date </th>
+        <th scope="col">Due Days </th>
+        <th scope="col" class="reconcilecolumn" >Reconciled </th>';
 
 
-        if ($clientview<>'client') { 
-
-            echo '
+        if ($clientview<>'client') {
+            $a.= '
             <th scope="col"> </th>
             <th scope="col">Chase 1</th>
             <th scope="col">Chase 2</th>
             <th scope="col">Chase 3</th>';
         }
         
-        echo '<th scope="col">Comments</th> </tr>';
-        
-        $b='';
-        $tablecost='';
+        $a.= '<th scope="col">Comments</th> </tr> </thead> <tbody>';
 
-        // Loop through the data set and extract each row in to it's own variable set
-        while ($row = mysql_fetch_array($sql_result)) {
-            extract($row);
+        foreach ($result as $row ) {
             $date5 = (strtotime($row['invdate1'])); 
             $date2 = (strtotime($row['chasedate'])); 
             $date3 = (strtotime($row['chasedate2'])); 
@@ -1329,9 +914,22 @@ if ($viewtype=='searchinvoice' ) {
             $invoicedon= (strtotime($row['invdate1'])); 
             $paidon=(strtotime($row['paydate'])); // now reconciled date
 
+            $a.='<tr id="tr'.$row['ref'].'"><td>';
 
-            $a='<tr><td>';
+            
+            if ($row['paydate']=='0000-00-00 00:00:00'){
+                $duecount++;
+                $duemoney=$duemoney+$row["cost"]+$row["invvatcost"];
+            }
+            
 
+            if (($row['invdue'] < date("Y-m-d 00:00:00")) and ($row['paydate']=='0000-00-00 00:00:00')) {
+                $overduecount++;
+                $overduemoney=$overduemoney+$row["cost"]+$row["invvatcost"];
+                
+            // $a.= ' overdue ';    
+            }
+            
             if ($clientview<>'client') {
 
                 $a.= '
@@ -1339,18 +937,24 @@ if ($viewtype=='searchinvoice' ) {
                 <input type="hidden" name="viewtype" value="individualinvoice" >
                 <input type="hidden" name="formbirthday" value="'. date("U") .'">
                 <input type="hidden" name="page" value="" >
-                <input type="hidden" name="ref" value="'.$ref.'">
+                <input type="hidden" name="ref" value="'.$row['ref'].'">
                 <input type="hidden" name="from" value="'. $inputstart.'">
                 <input type="hidden" name="to" value="'. $inputend.'">
                 <input type="hidden" name="clientid" value="'.$clientid.'" />
                 <input type="hidden" name="viewselectdep" value="'.$viewselectdep.'" />
-                <button type="submit" >'.$ref.'</button></form>';
+                <button type="submit" >'.$row['ref'].'</button></form>
+                
+                
+                 <button id="invoicedetails'.$row['ref'].'" class="invoicedetails "> ▼ </button>
+                <button id="hideinvoicedetails'.$row['ref'].'" class="hideinvoicedetails hideuntilneeded"> ▲ </button>
+                
+                
+                ';
             } else {
-                $a=$a.$ref;
+                $a.=$row['ref'];
             }
 
 
-            // $temptwo= number_format($temptwo, 2, '.', '');
 
 
             $a.='</td>
@@ -1358,23 +962,20 @@ if ($viewtype=='searchinvoice' ) {
             <td>';
 
             if ($clientview<>'client') {
-                $a.='<a href="new_cojm_client.php?clientid='.$clientid.'">'.$CompanyName.'</a>';
+                $a.='<a href="new_cojm_client.php?clientid='.$clientid.'">'.$row['CompanyName'].'</a>';
             } else {
-                $a.= $CompanyName.' ';
+                $a.= $row['CompanyName'].' ';
             }
 
-            $tempdep=$row['invoicedept'];
-	 
-            if ($tempdep) {
-	
-                $clientdepname = mysql_result(mysql_query("SELECT depname FROM clientdep WHERE depnumber='$tempdep' LIMIT 0,1"), '0');
-	 
+
+            if ($row['invoicedept']) {
                 if ($clientview<>'client') {
-                    $a.=' (<a href="new_cojm_department.php?depid='.$tempdep.'">'.$clientdepname.'</a>) ';
+                    $a.=' (<a href="new_cojm_department.php?depid='.$row['invoicedept'].'">'.$row['depname'].'</a>) ';
                 } else {
-                    $a.=' ('.$clientdepname.') ';
+                    $a.=' ('.$row['depname'].') ';
                 }
             }
+     
             
             $a.='</td><td>';
             if (strtotime($row['invdate1'])=="") { } else {
@@ -1385,8 +986,30 @@ if ($viewtype=='searchinvoice' ) {
                 }
             }
             
-            $a.='</td>
-            <td>';
+            $a.='</td> ';
+            
+
+            if ((strtotime($row['paydate']))>"0") {
+                $a.=' <td title=" From Sent until Reconciled ">';
+                $diff=$paidon-$invoicedon;
+                $days=(number_format(($diff/3600)/24));
+                if ($days>0) {
+                    $a.= $days;
+                }
+                echo ' </td> ';
+            } else {
+                $a.=' <td title="Since Sent"> ';
+                $diff=((date('U'))-$invoicedon);
+                $days=(number_format(($diff/3600)/24))-1;
+                if ($days>0) {
+                    $a.= $days;
+                }
+                echo '</td>';
+            }
+                        
+            
+            
+            $a.=' <td>';
             
             if ((strtotime($row['invdue']))>"0") {
                 if ($clientview<>'client') {
@@ -1395,32 +1018,64 @@ if ($viewtype=='searchinvoice' ) {
                     $a=$a. date('l jS F Y', strtotime($row['invdue']));
                 }
             }
-            $a=$a.'</td> <td> ';
-
-
- 
-            // days
+            $a.='</td> ';
+            
+            $stinvdue=strtotime($row['invdue']);
 
             if ((strtotime($row['paydate']))>"0") {
-                $diff=$paidon-$invoicedon;
+                $a.=' <td title="Paid vs Due Date"> ';
+                $diff=$paidon-$stinvdue;
+                $days=(number_format(($diff/3600)/24));
+                $interest=0;
             } else {
-                $diff=((date('U'))-$invoicedon);
+                $a.=' <td title="Days Outstanding"> ';
+                $diff=((date('U'))-$stinvdue);
+                $days=((number_format(($diff/3600)/24))-1);
+                
+                
+                
+                $partialyear=$days/365;
+                $irate=($globalprefrow['invoice7']/100);
+                $interest=($row["cost"]+$row["invvatcost"])*(pow((1+(($irate)/365)),(365*$partialyear)));
+                $interest=$interest-($row["cost"]+$row["invvatcost"]);
+                
+            }
+
+            $a.= ' <span ';
+            if ($days<1) {
+                $a.= ' style="color:green;"';
+            } else {
+                $a.= ' style="color:red;"';                
             }
             
-            if ($diff>0) {
-                $a=$a. number_format(($diff/3600)/24);
-            }
-            $a=$a.'</td>';
+            if ($days=='-0') { $days=0; }
+            
+            
+            $a.= '>';            
+            $a.= $days;
+            $a.=' </span> ';    
+      
+            $a.=' </td> ';
+            
+            
+            
+            
+            
+            
+            
+            
+            
  
  
 
-            $a=$a.'<td>';
+            $a.='<td class="reconcilecolumn" >';
             $date1 = (strtotime($row['paydate']));
             if ((strtotime($row['paydate']))>"0") {
+                $reconcilecolumn++;
                 if ($clientview<>'client') {
-                    $a=$a. date('D j M Y', strtotime($row['paydate']));
+                    $a.= date('D j M Y', strtotime($row['paydate']));
                 } else {
-                    $a=$a. date('l jS F Y', strtotime($row['paydate']));
+                    $a.= date('l jS F Y', strtotime($row['paydate']));
                 }
             }
             
@@ -1449,27 +1104,127 @@ if ($viewtype=='searchinvoice' ) {
                 $a.= '</td>';
             } // ends check for clientview
     
-            echo $a;
-            echo '<td>'.$row['invcomments'].'</td>';
-            echo '</tr>'.$b;
+            // echo $a;
+            $a.= '<td>'.$row['invcomments'].' ';
+            
+
+            if ($interest>0) {
+                $a.='Interest &'.$globalprefrow['currencysymbol']. number_format(($interest), 2, '.', ',');
+            }
+            
+            $a.= '</td>';
+            $a.= '</tr>';
             $tablecost = $tablecost + $row["cost"]+$row["invvatcost"];
             // echo ' 1664 ' . $tablecost;
+            $numrows++;
         }
  
+        // echo $a;
+        
+        
+        $a.=' </tbody> <tfoot>  ';
+        
+        
 
         if ($clientview=='client') {
-            echo '<tr><td> Total </td><td class="rh"> &'. $globalprefrow['currencysymbol']. number_format($tablecost, 2, '.', ',').'</td><td colspan="6"></td></tr>';
+            $a.= '<tr><td> Total </td><td class="rh"> &'. $globalprefrow['currencysymbol']. number_format($tablecost, 2, '.', ',').'</td><td colspan="6"></td></tr>';
         }
-        echo '</tbody> </table>';
+        
+        else {
+            
+            $a.= '<tr><td> Total </td><td class="rh"> &'. $globalprefrow['currencysymbol']. number_format($tablecost, 2, '.', ',').'</td><td colspan="7"></td></tr>';            
+        }
+        
+        
+        
+        $a.= '</tfoot> </table>';
+    
+    
+    
+
+    
+    
     
         if ($clientview=='client') {
             echo '<br /><p>Total : &'. $globalprefrow['currencysymbol']. number_format($tablecost, 2, '.', ',').'</p>' ;
-        } else {    
-            echo '<div class="vpad"> </div>
-            <div class="ui-widget">	<div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;"><p>
-            Total Net Cost within date range : &'. $globalprefrow['currencysymbol']. number_format($tablecost, 2, '.', ',').'
-            </p></div></div>';
+        } else {
+            
+            
+            
+            if ($overduecount) {
+                echo '<div class="ui-state-highlight ui-corner-all clearfix undersearch" >
+                <h3> '.$overduecount.' Invoice';
+                if ($overduecount<>1) { echo 's'; } 
+                echo ' Overdue </h3>
+                <p title="Incl. VAT">Total Net Cost : &'. $globalprefrow['currencysymbol']. number_format($overduemoney, 2, '.', ',').'
+                </p>
+                </div>
+                ';
+            }
+            
+            if ($duecount) {
+                echo '<div class="ui-state-highlight ui-corner-all clearfix undersearch">
+                <h3> '.$duecount.' Invoice';
+                if ($duecount<>1) { echo 's'; } 
+                echo ' Due </h3>
+                <p title="Incl. VAT">Total Net Cost : &'. $globalprefrow['currencysymbol']. number_format($duemoney, 2, '.', ',').'
+                </p>
+                </div>
+                ';
+            }            
+            
+            
+            if ($viewtype=='searchinvoice') {
+            
+                echo ' 
+                <div class="ui-state-highlight ui-corner-all clearfix undersearch" style="">
+                <h3> '.$numrows.' Invoice';
+                if ($numrows<>1) { echo 's'; } 
+                echo ' </h3>
+    
+                <p title="Incl. VAT">Total Net Cost : &'. $globalprefrow['currencysymbol']. number_format($tablecost, 2, '.', ',').'
+                </p>
+                </div> ';
+           
+            }
+            
+            
+            
+            if ((!$tstart) and (!$end)) {
+            
+            echo ' 
+            <div class="ui-state-highlight ui-corner-all clearfix undersearch" style="">
+            <h3> No Dates Selected </h3>
+ 
+            <p> Displaying unreconciled Invoices </p>
+            </div>
+            ';
+                        
+            
+            
+            
+            }
+            
+            
+            
+            
         }
+        
+        
+        
+        echo $a;
+        
+        if (($reconcilecolumn==0) and ($clientview<>'client')) {
+            echo '
+            <script>
+            $(".reconcilecolumn").hide();
+            </script>
+            ';
+        }        
+        
+        
+        
+        
     } else { // ends number rows, no invoices found
 
         if (($clientid) and ($sqlend)) {
@@ -1480,24 +1235,537 @@ if ($viewtype=='searchinvoice' ) {
         }
     }
 } // ends page = searchinvoice
+else if ($viewtype=='statmnt') {
+    
+    $tablerow = array();
+    $tablecost='';
+    $numrows=0;
+    $overduecount=0;
+    $duecount=0;
+    $a.= '';    
+    
+    $conditions = array();
+    $parameters = array();
+    $where = "";
+    
+    if (($sqlstart) and ($sqlend)) {
+        $conditions[] = " invdate1 >= :sqlstart ";
+        $parameters[":sqlstart"] = $sqlstart;
+    
+        $conditions[] = " invdate1 <= :sqlend ";
+        $parameters[":sqlend"] = $sqlend;
+    }
+    
+    if ($clientid<>'all') {
+        $conditions[] = " CustomerID = :clientid ";
+        $parameters[":clientid"] = $clientid;
+    }
+    
+    
+    if (count($conditions) > 0) {
+        $where = implode(' AND ', $conditions);
+    }
+
+    $query = "SELECT * FROM invoicing
+        INNER JOIN Clients ON invoicing.client = Clients.CustomerID 
+        LEFT JOIN  clientdep ON clientdep.depnumber = invoicing.invoicedept
+    " . ($where != "" ? " WHERE $where" : "");
+
+    try {
+        if (empty($parameters)) {
+            $result = $dbh->query($query);
+        }
+        else {
+            $statement = $dbh->prepare($query);
+            $statement->execute($parameters);
+            if (!$statement) throw new Exception("Query execution error.");
+            $result = $statement->fetchAll();
+        }
+    }
+    catch(Exception $ex) {
+        echo $ex->getMessage();
+    }
+    
+    $numinvoice=0;
+   
+    if ($result) {
+        foreach ($result as $row ) {
+            
+            if ($row['paydate'] == '0000-00-00 00:00:00'){
+                $notpaid=1;
+            } else {
+                $notpaid=0;
+            }
+            
+            
+            $tablerow[] = array(
+            "date"=>(strtotime($row['invdate1'])),
+            "ref"=>$row['ref'],
+            "amount"=>($row["cost"]+$row["invvatcost"]),
+            "isinvoice"=>1,
+            "client"=>$clientid,
+            "CompanyName"=>($row['CompanyName']),
+            "depname"=>($row['depname']),
+            "notpaid"=>$notpaid,
+            "comments"=>($row['invcomments'])
+            );
+
+            $invoicecost+=$row["cost"]+$row["invvatcost"];
+            $numinvoice++;
+        }
+ 
 
 
+        
+        echo ' 
+        <div class="ui-state-highlight ui-corner-all clearfix undersearch" >
+        <h3> '.$numinvoice.' Invoice';
+        if ($numinvoice<>1) { echo 's'; } 
+        echo ' </h3>
+
+        <p title="Incl. VAT">Total Net Cost : &'. $globalprefrow['currencysymbol']. number_format($invoicecost, 2, '.', ',').'
+        </p>
+        </div>
+        ';
+        
+    } else { // ends number rows, no invoices found
+
+        echo ' No Invoices for selected dates. ';
+    }
 
 
-if ($viewtype=='') { 
-    echo $bview;
+    $conditions = array();
+    $parameters = array();
+    $where = "";
+    
+
+    if ($sqlstart) {
+        $conditions[] = " paymentdate >= :sqlstart ";
+        $parameters[":sqlstart"] = $sqlstart;
+    }
+    
+    if ($sqlend) {
+        $conditions[] = " paymentdate <= :sqlend ";
+        $parameters[":sqlend"] = $sqlend;
+    }
+    
+    if ($clientid<>'all') {
+        $conditions[] = " CustomerID = :clientid ";
+        $parameters[":clientid"] = $clientid;
+    }
+    
+    
+    
+    if (count($conditions) > 0) {
+        $where = implode(' AND ', $conditions);
+    }
+
+    // check if $where is empty string or not
+    $query = " SELECT paymentid, paymentdate, paymentamount, paymentclient, paymenttype, paymenttypename, paymentcomment, paymentedited, paymentcreated, CompanyName FROM cojm_payments 
+        left JOIN cojm_paymenttype ON cojm_payments.paymenttype = cojm_paymenttype.paymenttypeid 
+        left JOIN Clients ON cojm_payments.paymentclient = Clients.CustomerID
+    " . ($where != "" ? " WHERE $where" : "");
+
+    try {
+        if (empty($parameters)) {
+            $result = $dbh->query($query);
+        }
+        else {
+            $statement = $dbh->prepare($query);
+            $statement->execute($parameters);
+            if (!$statement) throw new Exception("Query execution error.");
+            $result = $statement->fetchAll();
+        }
+    }
+    catch(Exception $ex) {
+        echo $ex->getMessage();
+    }
+    
+    
+    
+        $numpayments=0;
+        $paymentcost=0;
+   
+    if ($result) {
+        foreach ($result as $row ) {
+            $tablerow[] = array(
+            "date"=>(strtotime($row['paymentdate'])),
+            "ref"=>$row['paymentid'],
+            "amount"=>$row["paymentamount"],
+            "isinvoice"=>0,
+            "client"=>$clientid,
+            "paymenttypename"=>($row['paymenttypename']),
+            "CompanyName"=>($row['CompanyName']),
+            "comments"=>($row['paymentcomment'])
+            );
+
+            $paymentcost=$paymentcost+$row["paymentamount"];
+            $numpayments++;
+        }
+ 
+
+        echo ' 
+        <div class="ui-state-highlight ui-corner-all clearfix undersearch" >
+        <h3> '.$numpayments.' Payment';
+        if ($numpayments<>1) { echo 's'; } 
+        echo ' </h3>
+
+        <p title="Incl. VAT">Total Payments : &'. $globalprefrow['currencysymbol']. number_format($paymentcost, 2, '.', ',').'
+        </p>
+        </div>
+        ';
+        
+    } else { // ends number rows, no invoices found
+
+        echo ' No Payments for selected dates. ';
+    }
+    
+    
+    
+    
+    
+    
+
+    $conditions=array();
+    $parameters=array();   
+    if (($sqlstart) and ($sqlend)) {
+        if ($clientid<>'all') {
+            $conditions[] = " paymentclient = :clientid ";
+            $parameters[":clientid"] = $clientid;
+        }
+        $conditions[] = " paymentdate <= :sqlend ";
+        $parameters[":sqlend"] = $sqlstart;
+        $where = implode(' AND ', $conditions);
+        $query = "SELECT SUM(paymentamount) AS paymentamount FROM cojm_payments ". ($where != "" ? " WHERE $where" : "");
+        try {
+            $statement = $dbh->prepare($query);
+            $statement->execute($parameters);
+            if (!$statement) throw new Exception("Query execution error.");
+            $prevpayresult = $statement->fetchAll();
+        }
+        catch(Exception $ex) {
+            echo $ex->getMessage();
+        }
+        
+        
+    // print_r ($prevpayresult);
+    }
+    
+    
+    
+    $conditions=array();
+    $parameters=array();   
+    if (($sqlstart) and ($sqlend)) {
+        if ($clientid<>'all') {
+            $conditions[] = " client = :clientid ";
+            $parameters[":clientid"] = $clientid;
+        }
+        $conditions[] = " invdate1 <= :sqlend ";
+        $parameters[":sqlend"] = $sqlstart;
+        $where = implode(' AND ', $conditions);
+        $query = "SELECT SUM(cost + invvatcost) AS cost FROM invoicing ". ($where != "" ? " WHERE $where" : "");
+        try {
+            $statement = $dbh->prepare($query);
+            $statement->execute($parameters);
+            if (!$statement) throw new Exception("Query execution error.");
+            $prevresult = $statement->fetchAll();
+        }
+        catch(Exception $ex) {
+            echo $ex->getMessage();
+        }
+    }
+    
+    
+    $runningtotal=0;
+    $runningtotal=$prevresult[0]['cost']-$prevpayresult[0]['paymentamount'];
+    
+    echo ' <div class="ui-state-highlight ui-corner-all clearfix undersearch">
+    <p> Previously Invoiced : 
+    &'. $globalprefrow['currencysymbol']. number_format($prevresult[0]['cost'], 2, '.', ',').' </p>
+    <p> Previous Payments : 
+    &'. $globalprefrow['currencysymbol']. number_format($prevpayresult[0]['paymentamount'], 2, '.', ',').' </p>
+    <p> Carried Balance :  <span class="rh strong"> 
+    &'. $globalprefrow['currencysymbol']. number_format($runningtotal, 2, '.', ',').' </span> </p> 
+    </div> ';
+    
+    
+
+    // var_dump($tablerow); 
+
+    $sortArray = array(); 
+
+    foreach($tablerow as $tableitem){
+        foreach($tableitem as $key=>$value){ 
+            if(!isset($sortArray[$key])){ 
+                $sortArray[$key] = array(); 
+            } 
+            $sortArray[$key][] = $value; 
+        } 
+    } 
+    
+    $orderby = "date"; //change this to whatever key you want from the array
+    array_multisort($sortArray[$orderby],SORT_ASC,$tablerow);
+    // var_dump($tablerow); 
+    
+    
+    echo ' <div style="clear:both;"> </div> ';
+    
+        if ($clientview=='client') {
+        echo ' <br /> ';
+    }
+
+    echo '
+    <table class="acc clear';
+    if ($clientview<>'client') {
+        echo ' biggertext';
+    }
+    echo '">
+    <thead>
+    <tr>
+    <th>Date</th>
+    <th>Ref</th>
+    <th>Invoice</th>
+    <th>Payment</th>
+    <th>Balance</th>
+    <th> </th>
+    </tr>
+    </thead>
+    <tbody> ';
+    
+    
+    
+    if ($prevresult[0]['cost']) {
+        echo ' <tr>
+        <td colspan="4"> </td>
+        <td class="rh">&'. $globalprefrow['currencysymbol']. number_format($runningtotal, 2, '.', ',').'</td>
+        <td>Previous Transactions</td>
+        </tr>';
+    }
+    
+    
+    foreach($tablerow as $tableitem) {
+        if ($tableitem['isinvoice']=='1') {
+            $runningtotal=$runningtotal+$tableitem['amount'];
+        } else {
+            $runningtotal=$runningtotal-$tableitem['amount'];
+        }
+        
+        if (number_format($runningtotal, 2, '.', ',')=='-0.00') {
+            $runningtotal=0;
+        }
+        
+        //            "date"=>(strtotime($row['invdate1'])),
+        //            "ref"
+        //            "amount"=>($row["cost"]+$row["invvatcost"]),
+        //            "isinvoice"=>1,
+        //            "client"=>$clientid,
+        //            "CompanyName"=>($row['CompanyName']),
+        //            "depname"=>($row['depname']),
+        //            "comments"=>($row['invcomments'])
+        
+        
+        echo '<tr id="tr'.$tableitem['ref'].'">';
+        echo '<td class="rh">'.date('D j M Y', $tableitem['date']).'</td>';
+        
+        if ($tableitem['isinvoice']) {
+            echo '<td> Invoice ';
+            
+            if ($clientview<>'client') {            
+            
+                echo '<a
+                href="view_all_invoices.php?viewtype=individualinvoice&amp;ref='.$tableitem['ref'].'"
+                title="Invoice '.$tableitem['ref'].'">'.$tableitem['ref'].'</a>
+                <button id="invoicedetails'.$tableitem['ref'].'" class="invoicedetails "> ▼ </button>
+                <button id="hideinvoicedetails'.$tableitem['ref'].'" class="hideinvoicedetails hideuntilneeded"> ▲ </button> ';
+            } else {
+                
+                echo $tableitem['ref'];
+            }
+            
+            
+            echo '
+            </td>';
+        } else {
+            echo '<td> Payment ';
+            if ($clientview<>'client') {            
+                        
+                echo '<a 
+                href="paymentsin.php?paymentid='.$tableitem['ref'].'"
+                title="Payment '.$tableitem['ref'].'">'.$tableitem['ref'].'</a>
+                <button id="paymentdetails'.$tableitem['ref'].'" class="paymentdetails "> ▼ </button>
+                <button id="hidepaymentdetails'.$tableitem['ref'].'" class="hidepaymentdetails hideuntilneeded"> ▲ </button>
+                </td>';
+            } else {
+                echo $tableitem['ref'];
+            }
+        }
+        
+        
+        if ($tableitem['isinvoice']) {
+            echo '<td class="rh">&'. $globalprefrow['currencysymbol']. number_format($tableitem['amount'], 2, '.', ',').'</td> <td> </td>';
+        } else {
+            echo '<td> </td><td class="rh" title="'.$tableitem['paymenttypename'].'" >&'. $globalprefrow['currencysymbol']. number_format($tableitem['amount'], 2, '.', ',').'</td>';
+        }
+        
+        echo '<td class="rh">  &'. $globalprefrow['currencysymbol']. number_format($runningtotal, 2, '.', ',').' </td> ';
+        
+        echo '<td>';
+        if (($tableitem['notpaid']==1) and ($clientview<>'client')) {
+            echo '  <button id="reconcile'.$tableitem['ref'].'" class="reconcileinvoicebutton"> Reconcile </button> ';
+        }
+        echo $tableitem['comments'].' ';
+        
+        if ($clientid=='all'){
+            echo $tableitem['CompanyName'];
+        }
+        
+        
+        
+        echo '</td>';
+        echo '</tr>';
+    }
+    echo ' 
+    </tbody>    
+    <tfoot>
+    <tr>
+    <td colspan="2"></td>
+    <td> &'. $globalprefrow['currencysymbol']. number_format($invoicecost, 2, '.', ',').' </td>
+    <td> &'. $globalprefrow['currencysymbol']. number_format($paymentcost, 2, '.', ',').'</td>
+    <td class="rh">  &'. $globalprefrow['currencysymbol']. number_format($runningtotal, 2, '.', ',').'</td>
+    <td> Outstanding Due </td>
+    </tr>
+    </tfoot>
+    </table>';
 }
 
-echo '
-<br />
-</div>
-<br />';
- 
- 
+
 ?>
+<br />
+<div id="paymentstats"> </div>
+</div>
+<br />
 <script type="text/javascript">	
 $(document).ready(function() {
+
+    $(".paymentdetails").bind("click", function (e) {
+        var paymentid = e.target.id;
+        paymentid = parseInt(paymentid.match(/(\d+)$/)[0], 10);
+        $("#toploader").show();
+        $("#paymentdetails"+paymentid).hide();
+        $("#hidepaymentdetails"+paymentid).show();
+        
+        $("#tr"+paymentid).after("<tr><td colspan='6' id='stats" + paymentid + "'> </td></tr>");
+        $("#stats"+paymentid).load( "ajax_lookup.php", { lookuppage: "paymentdetail", paymentref: paymentid }, function() {
+            $("#toploader").fadeOut();
+        });
+    });
+
+
+    $(".hidepaymentdetails").bind("click", function (e) {
+        var paymentid = e.target.id;
+        paymentid = parseInt(paymentid.match(/(\d+)$/)[0], 10);
+        $("#paymentdetails"+paymentid).show();
+        $("#hidepaymentdetails"+paymentid).hide();
+        $("#stats"+paymentid).remove();
+    });
+
+
+
+
+
+
+
+
+    $(".hideinvoicedetails").bind("click", function (e) {
+        var invoiceid = e.target.id;
+        invoiceid = parseInt(invoiceid.match(/(\d+)$/)[0], 10);
+        $("#invoicedetails"+invoiceid).show();
+        $("#hideinvoicedetails"+invoiceid).hide();
+        $("#stats"+invoiceid).remove();
+    });
+
+    $(".invoicedetails").bind("click", function (e) {
+        var invoiceid = e.target.id;
+        invoiceid = parseInt(invoiceid.match(/(\d+)$/)[0], 10);
+        $("#toploader").show();
+        $("#invoicedetails"+invoiceid).hide();
+        $("#hideinvoicedetails"+invoiceid).show();
+        
+        $("#tr"+invoiceid).after("<tr><td colspan='6' id='stats" + invoiceid + "'> </td></tr>");
+        $("#stats"+invoiceid).load( "ajax_lookup.php", { lookuppage: "invoiceorderlist", invoiceref: invoiceid }, function() {
+            $("#toploader").fadeOut();
+        });
+    });
+
+
+
+    $(".reconcileinvoicebutton").bind("click", function (e) {
+        var invoiceid = e.target.id;
+        invoiceid = parseInt(invoiceid.match(/(\d+)$/)[0], 10);
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth()+1; //January is 0!
+        var yyyy = today.getFullYear();
+        
+        if(dd<10) {
+            dd='0'+dd
+        } 
+        
+        if(mm<10) {
+            mm='0'+mm
+        } 
+        
+        today = dd + '-' + mm + '-' + yyyy;
+
+        e.preventDefault();
+        $.Zebra_Dialog(' ' +
+            ' <input class="ui-state-default ui-corner-all caps" type="text" value="' + today + '" id="dateselector" size="12" > ' +
+            '  ',
+            {
+            "type": "question",
+            "title": "Please select Date",
+            "buttons": [{
+                caption: "Reconcile",
+                callback: function () {
+                    $("#toploader").show();
+                    var dateselector=$("#dateselector").val();
     
+                    $.ajax({
+                        type: "post",
+                        data: { page: "reconcileinvoice", 
+                            ref: invoiceid, 
+                            invoicedate:dateselector
+                            },
+                        url: "ajaxchangejob.php",
+                        success: function (data) {
+                            $('#searchdiv').append(data);
+                            },
+                        complete: function() {
+                            showmessage();
+                            $("#toploader").fadeOut();
+                        }
+                    });
+                }
+            },{
+                caption: "Cancel"
+            } ]
+            }
+            
+        );
+        
+        
+        var dates = $( "#dateselector" ).datepicker({
+            numberOfMonths: 1,
+            changeYear:false,
+            firstDay: 1,
+            dateFormat: "dd-mm-yy",
+            changeMonth:false,
+            yearRange: "1940:2020"
+        });
+
+
+    });
+
     $( "#combobox" ).combobox();
 	$( "#toggle" ).click(function() {
 		$( "#combobox" ).toggle();
@@ -1505,9 +1773,6 @@ $(document).ready(function() {
 	$("#rangeBa, #rangeBb").daterangepicker();  
 	$(function(){ $(".normal").autosize();	});  
 			 
-             
-             
-             
     
     $("#createpdfreceipt").click(function () {
     $("#invpage").val("createreceipt");
@@ -1521,49 +1786,78 @@ $(document).ready(function() {
     });          
              
              
+<?php if ($clientview<>'client') { ?>
+    
+    
+    var menuheight=$("#sticky_navigation").height();
+    $("#expenseview").floatThead({
+        position: "fixed",
+        top: menuheight
+    });
+
+<?php } ?>
              
              
              
-             
-             
-             
-             
-             
-             
-             
-             
+    $('#deleteinv').bind('click', function(e) {
+        e.preventDefault();
+        $.Zebra_Dialog('<strong>Are you sure ?</strong><br />Invoice <?php echo $row['ref']; ?> will be deleted. <br />All jobs will revert to completed status.',
+        {
+            'type':'warning',
+            'width':'350',
+            'title':'Delete Invoice ?',
+            'buttons':[
+                {caption: 'Delete', callback: function() { document.getElementById("frm1").submit(); } },
+                {caption: 'Do NOT Delete', callback: function() {} }
+            ]
+        });
+    });
+
+
+
+
+    $('#invnotpaid').bind('click', function(e) {
+        e.preventDefault();
+        $.Zebra_Dialog('<strong>Are you sure ?</strong><br />Reconcilliation details for this invoice ref <?php echo $row['ref']; ?><br />will be cancelled.', {
+            'type':'warning',
+            'width':'350',
+            'title':'Remove Reconcilliation Details ?',
+            'buttons':[{
+            caption: 'Remove Reconcilliation', callback: function() { document.getElementById("frm2").submit(); }},
+            {caption: 'Cancel', callback: function() {}}
+        ]});
+    });
+    
+
+    
+    $(document).ready(function() {
+        var max = 0;
+        $("label").each(function(){
+            if ($(this).width() > max)
+            max = $(this).width();    
+        });
+        $("label").width((max+15));
+    });         
+    
+    
+        var dates = $( "#invoicedate" ).datepicker({
+            numberOfMonths: 1,
+            changeYear:false,
+            firstDay: 1,
+            dateFormat: 'dd-mm-yy',
+            changeMonth:false,
+            beforeShow: function(input, instance) { 
+                $(input).datepicker('setDate',  new Date() );
+            }
+        });
+
+
+    function datepickeronchange() { }
 });
-			 
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-			 
+
 function comboboxchanged() { }				 
 </script>
-
-<?php
- 
-include "footer.php";
+<?php include "footer.php";
   
-mysql_close(); 
- 
+
 ?></body></html>

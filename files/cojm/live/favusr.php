@@ -8,8 +8,15 @@ include "C4uconnect.php";
 $title = "COJM";
 $clientid='';
 
-if (isset($_POST['thisfavadrid'])) { $thisfavadrid=trim($_POST['thisfavadrid']); } else { $thisfavadrid=''; 
-if (isset($_GET['thisfavadrid'])) { $thisfavadrid=trim($_GET['thisfavadrid']); } }
+if (isset($_POST['thisfavadrid'])) {
+    $thisfavadrid=trim($_POST['thisfavadrid']);
+} 
+else { 
+    $thisfavadrid=''; 
+    if (isset($_GET['thisfavadrid'])) {
+        $thisfavadrid=trim($_GET['thisfavadrid']);
+    } 
+}
 if (isset($_POST['cojmid'])) { $cojmid=trim($_POST['cojmid']); } else { $cojmid=''; }
 if (isset($_POST['showinactive'])) { $showinactive=trim($_POST['showinactive']); } else { $showinactive=''; }
 
@@ -21,7 +28,6 @@ if ($clientid=='') { $clientid='all'; }
 $infotext=$infotext.'<p>id: '.$clientid.'</p>';
 
 $i='0';
-
 
 include "changejob.php";
 
@@ -246,6 +252,10 @@ $(document).ready(function() {
     });
     $("label").width((max+15));
 });
+
+function comboboxchanged() {};
+
+
 </script>';
 
 include "footer.php";
@@ -253,3 +263,4 @@ include "footer.php";
 echo '</body></html>';
 
 mysql_close(); 
+$dbh=null;

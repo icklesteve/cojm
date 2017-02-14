@@ -52,7 +52,7 @@ if ($sumtot>0.5) {
 while ($map = mysql_fetch_array($sql_result)) {
      extract($map); 
 $sGMTMySqlString = gmdate("d-m-Y", $tUnixTime);
-// echo $sGMTMySqlString;	
+
 
 // declare some start variables 
 $ThisYear = (date("Y")); $MarStartDate = ($ThisYear."-03-25"); $OctStartDate = ($ThisYear."-10-25"); $MarEndDate = ($ThisYear."-03-31"); 
@@ -122,7 +122,7 @@ ORDER BY `Orders`.`nextactiondate`
  $toutstanding=mysql_affected_rows();
  while ($outsrow = mysql_fetch_array($outssql_result)) {
      extract($outsrow);
-$outs=$outs."<br/><a href='order.php?id=".$outsrow['ID']."'>".$outsrow['ID'].'</a> '.$outsrow['CollectPC'].' to '.$outsrow['ShipPC'].', '.$outsrow['statusname'];
+$outs=$outs."<br/><a href='order.php?id=".$outsrow['ID']."'>".$outsrow['ID'].'</a> '.$outsrow['enrpc0'].' to '.$outsrow['enrpc21'].', '.$outsrow['statusname'];
 }
 
 $cyclistts=date('H:i', ($map['timestamp'])) ;
@@ -186,9 +186,9 @@ ORDER BY `Orders`.`nextactiondate`
 //	 echo $uncrow['cojmname'];
 	 
 	 
-if ($uncrow['CollectPC']) {	 
+if ($uncrow['enrpc0']) {	 
 	 
-$pc1 = str_replace (" ", "", $uncrow['CollectPC']);
+$pc1 = str_replace (" ", "", $uncrow['enrpc0']);
 $query="SELECT * 
 FROM  `postcodeuk` 
 WHERE  `PZ_Postcode` =  '$pc1'
@@ -219,7 +219,7 @@ if ($uncrow['allowcollectww']=="1") { $collecttime=$collecttime. '- '.date('H:i 
 $outsc="<br/><a href='order.php?id=".$uncid."'>".$uncid.'</a> ';
    $temptitle= 'Collection Due '.$collecttime.' by '.$cojmname;
    $tempcontent='<div><strong>Uncollected</strong>'.$outsc.' Collection due '.$collecttime.'<br>From '.
-   $uncrow['CollectPC'].' to '.$uncrow['ShipPC']. " <br />$numberitems x $Service<br /> $CompanyName</div>";
+   $uncrow['enrpc0'].' to '.$uncrow['enrpc21']. " <br />$numberitems x $Service<br /> $CompanyName</div>";
 
      if ($jobcomments) {$tempcontent=$tempcontent.'<div>'.$jobcomments.'</div>'; }
   if ($privatejobcomments) {$tempcontent=$tempcontent.'<div>'.$privatejobcomments.'</div>'; }
@@ -255,7 +255,7 @@ ORDER BY `Orders`.`nextactiondate` ";
 $undsql_result = mysql_query($seeifundel,$conn_id)  or mysql_error();
 $totundel=mysql_affected_rows(); while ($undrow = mysql_fetch_array($undsql_result)) { extract($undrow);
 
-if ((trim($undrow['ShipPC'])) and (trim($undrow['CollectPC']))) { $pc1 = str_replace (" ", "", $undrow['ShipPC']);
+if ((trim($undrow['enrpc21'])) and (trim($undrow['enrpc0']))) { $pc1 = str_replace (" ", "", $undrow['enrpc21']);
 $query="SELECT * FROM  `postcodeuk` WHERE  `PZ_Postcode` =  '$pc1' LIMIT 1"; 
 $result=mysql_query($query, $conn_id); $pcrow=mysql_fetch_array($result); 
 $undid=$undrow['ID']; $pclon=$pcrow['PZ_easting']; $pclat=$pcrow['PZ_northing'];
@@ -277,7 +277,7 @@ $outsd="<br/><a href='order.php?id=".$undid."'>".$undid."</a> ";
    else {$temptitle=$temptitle.'Uncollected, ';}
 
    $temptitle=$temptitle." due $collecttime by $cojmname, ";
-   $tempcontent='<div><strong>Delivery not yet collected, due '.$collecttime.'</strong>'.$outsd.' From '.$undrow['CollectPC'].' to '.$undrow['ShipPC'];
+   $tempcontent='<div><strong>Delivery not yet collected, due '.$collecttime.'</strong>'.$outsd.' From '.$undrow['enrpc0'].' to '.$undrow['enrpc21'];
    if ($undrow['status']>52)  { 
    $tempcontent='<br /><strong>'.$cojmname.'</strong> Collected at '.date('H:i A', strtotime($undrow['collectiondate'])).'.'; }
     
@@ -341,8 +341,8 @@ ORDER BY `Orders`.`nextactiondate`
  while ($unsrow = mysql_fetch_array($unssql_result)) {
      extract($unsrow);
 
-if ($unsrow['CollectPC']) {	 
-$pc1 = str_replace (" ", "", $unsrow['CollectPC']);
+if ($unsrow['enrpc0']) {	 
+$pc1 = str_replace (" ", "", $unsrow['enrpc0']);
 $query="SELECT * 
 FROM  `postcodeuk` 
 WHERE  `PZ_Postcode` =  '$pc1'
@@ -363,7 +363,7 @@ $outs="<br/><a href='order.php?id=".$unsid."'>".$unsid.'</a> ';
 
    $temptitle='Unscheduled, Collection Due '.$collecttime;
    $tempcontent= "<div><strong>Unscheduled</strong><br/><a href=$outs Collection due $collecttime<br>From ".
-   $unsrow['CollectPC'].' to '.$unsrow['ShipPC']. " <br />$numberitems x $Service<br /> $CompanyName</div>";
+   $unsrow['enrpc0'].' to '.$unsrow['enrpc21']. " <br />$numberitems x $Service<br /> $CompanyName</div>";
   
   
   if ($jobcomments) {$tempcontent=$tempcontent.'<div>'.$jobcomments.'</div>'; }
@@ -402,5 +402,5 @@ $idtext =rstrtrim($idtext, ',');
 
 echo '{"categories":['.$cattext.'],"markers":['; 
 echo $idtext.']}';
-mysql_close(); 
+
 ?>

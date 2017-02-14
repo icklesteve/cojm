@@ -108,8 +108,8 @@ p.cbb20,
 p.CustomerID,
 p.orderdep,
 p.numberitems,
-p.CollectPC,
-p.fromfreeaddress,
+p.enrpc0,
+p.enrft0,
 p.enrpc1,
 p.enrpc2,
 p.enrpc3,
@@ -155,8 +155,8 @@ p.CyclistID,
 p.collectiondate, 
 p.FreightCharge, 
 p.vatcharge,
-p.ShipPC,
-p.tofreeaddress,
+p.enrpc21,
+p.enrft21,
 t.asapservice,
 t.cargoservice,
 u.CompanyName,
@@ -442,16 +442,16 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
 
     
-    if ((trim($row['CollectPC'])) or ($row['fromfreeaddress'])) {
+    if ((trim($row['enrpc0'])) or ($row['enrft0'])) {
         if ( $globalprefrow["inaccuratepostcode"]=='1') { // echo ' full address link '; 
             echo ' <a class="newwin" target="_blank" href="https://www.google.com/maps/?q='.
-            str_replace(" ", "+", trim($row['fromfreeaddress'])).'+'.str_replace(" ", "+", trim($row['CollectPC'])) .'">'.$row["fromfreeaddress"].' '.trim($row['CollectPC']).'</a> ';
+            str_replace(" ", "+", trim($row['enrft0'])).'+'.str_replace(" ", "+", trim($row['enrpc0'])) .'">'.$row["enrft0"].' '.trim($row['enrpc0']).'</a> ';
         }
         else { // uk style address link
-            echo $row['fromfreeaddress'].' ';
-            if (trim($row['CollectPC'])) {
+            echo $row['enrft0'].' ';
+            if (trim($row['enrpc0'])) {
                 echo '<a target="_blank" class="newwin" href="https://www.google.com/maps/?q='.
-                str_replace(" ", "+", trim($row['CollectPC'])).'">'.trim($row['CollectPC']) .'</a> ';
+                str_replace(" ", "+", trim($row['enrpc0'])).'">'.trim($row['enrpc0']) .'</a> ';
             }
         }
     } // ends check to see if needs to display links and From
@@ -552,16 +552,16 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     if ($row['opsname']<>'') {  echo '<span title="'.$row['descrip'].'">'.$row['opsname'].'</span> '; }
     if ($row['subareaname']<>'') {  echo ' <span title="'.$row['subareadescrip'].'">('.$row['subareaname'].')</span> '; }
     
-    if ((trim($row['ShipPC'])) or ($row['tofreeaddress'])) {
+    if ((trim($row['enrpc21'])) or ($row['enrft21'])) {
         if ( $globalprefrow["inaccuratepostcode"]=='1'){
             echo '<a target="_blank" class="newwin" href="https://www.google.com/maps/?q='.
-            str_replace(" ", "+", trim($row["tofreeaddress"])).'+'. str_replace(" ", "+", trim($row['ShipPC'])).'">'.$row['tofreeaddress'].' '. $ShipPC.'</a> ';
+            str_replace(" ", "+", trim($row["enrft21"])).'+'. str_replace(" ", "+", trim($row['enrpc21'])).'">'.$row['enrft21'].' '. $enrpc21.'</a> ';
         }
         else { // uk address
-            echo $row['tofreeaddress'];
-            if (trim($row['ShipPC'])) {
+            echo $row['enrft21'];
+            if (trim($row['enrpc21'])) {
                 echo ' <a target="_blank" class="newwin" href="https://www.google.com/maps/?q=';
-                echo str_replace(" ", "+", trim($row['ShipPC'])).'">'. trim($row['ShipPC']).'</a> ';
+                echo str_replace(" ", "+", trim($row['enrpc21'])).'">'. trim($row['enrpc21']).'</a> ';
             }
         }
     }
@@ -628,5 +628,4 @@ echo '<div class="linevpad"></div>
 include "footer.php";
   
 echo ' </body></html>';
-mysql_close();
-$dbh=null;
+

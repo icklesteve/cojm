@@ -1,5 +1,26 @@
 <?php 
 
+/*
+    COJM Courier Online Operations Management
+	cojmglobalstatus.php - Edit status names
+    Copyright (C) 2017 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
 $alpha_time = microtime(TRUE);
 error_reporting( E_ERROR | E_WARNING | E_PARSE );
 include "C4uconnect.php";
@@ -38,26 +59,28 @@ include "cojmmenu.php";
 <th scope="col"><?php echo $globalprefrow['glob5']; ?> (if active)</th>
 <th scope="col">Comments</th></tr>
 <tr><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>
-<?php $query = "SELECT status, statusname, publicstatusname, activestatus, activestatuscyclist, statuscomment FROM status ORDER BY status"; 
-$result_id = mysql_query ($query, $conn_id); 
-while (list ($status, $statusname, $publicstatusname, $activestatus, $activestatuscyclist, $statuscomment) = mysql_fetch_row ($result_id)) { 
-$publicstatusname = htmlspecialchars ($publicstatusname); 
-$statusname = htmlspecialchars ($statusname);
-echo '<tr><td>'. $status.'</td>
-<input type="hidden" name="statusid'. $status.'" value="1" />
-<td><input type="checkbox" name="activestatus'. $status.'" value="1" ';
- if ($activestatus) { echo 'checked';} 
- echo ' ></td>
-<input type="hidden" name="activestatus110" value="1">
-<td><input type="text" class="ui-state-default ui-corner-all" size="30" name="statusname'. $status.'" value=" '. $statusname.'"></td>
-<td><input type="text" class="ui-state-default ui-corner-all" size="50" name="publicstatusname'. $status.'" value=" '. $publicstatusname.'"></td>
-<td>';
+<?php
 
-if ($activestatuscyclist=='1') { echo '<img height="16px" width="16px" alt="Yes" src="images/icon_accept.gif">'; } else {
-echo '<img height="16px" width="16px" alt="No" src="images/action_stop.gif">'; }
-
-echo '</td><td>'. $statuscomment.'</td></tr><tr><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>';
- } 
+$query = "SELECT status, statusname, publicstatusname, activestatus, activestatuscyclist, statuscomment FROM status ORDER BY status";
+$stmt = $dbh->query($query);
+foreach ($stmt as $row) {
+    $publicstatusname = htmlspecialchars ($row['publicstatusname']); 
+    $statusname = htmlspecialchars ($row['statusname']);
+    echo '<tr><td>'. $row['status'].'</td>
+    <input type="hidden" name="statusid'. $row['status'].'" value="1" />
+    <td><input type="checkbox" name="activestatus'. $row['status'].'" value="1" ';
+    if ($row['activestatus']) { echo 'checked';} 
+    echo ' ></td>
+    <input type="hidden" name="activestatus110" value="1">
+    <td><input type="text" class="ui-state-default ui-corner-all" size="30" name="statusname'. $row['status'].'" value=" '. $statusname.'"></td>
+    <td><input type="text" class="ui-state-default ui-corner-all" size="50" name="publicstatusname'. $row['status'].'" value=" '. $publicstatusname.'"></td>
+    <td>';
+    
+    if ($row['activestatuscyclist']=='1') { echo '<img height="16px" width="16px" alt="Yes" src="images/icon_accept.gif">'; } else {
+    echo '<img height="16px" width="16px" alt="No" src="images/action_stop.gif">'; }
+    
+    echo '</td><td>'. $row['statuscomment'].'</td></tr><tr><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>';
+}
 ?>
 </table><br /><div class="line"> </div><button type="submit"> Edit Status Names</button>
 </form><div class="line"></div></div></div>
@@ -66,5 +89,5 @@ echo '</td><td>'. $statuscomment.'</td></tr><tr><td> </td><td> </td><td> </td><t
 
 include 'footer.php';
 
-mysql_close(); ?>
+ ?>
 </body></html>

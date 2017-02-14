@@ -2,8 +2,6 @@
 
 $alpha_time = microtime(TRUE);
 
-if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) ob_start("ob_gzhandler"); else ob_start();
-
 include "C4uconnect.php";
 
 if ($globalprefrow['forcehttps']>'0') { if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
@@ -45,7 +43,6 @@ if (isset($_GET['from'])) {
 }
 
 if (isset($_GET['to'])) {
-
     $end=trim($_GET['to']);
     
     if ($end) {
@@ -70,19 +67,36 @@ $invoicemenu = "1";
 $adminmenu = "0";
 $filename='expenseview.php';
 
+
+if (isset($_GET['view'])) { $view=trim($_GET['view']); } else { $view=''; }
+if (isset($_POST['view'])) { $view=trim($_POST['view']); }
+
+
+if (isset($_GET['searchphrase'])) { $searchphrase=trim($_GET['searchphrase']); } else { $searchphrase=''; }
+if (isset($_POST['searchphrase'])) { $searchphrase=trim($_POST['searchphrase']); }
+
+
+
+
+
+
 if (isset($_GET['thiscyclist'])) { $thiscyclist=trim($_GET['thiscyclist']); } else { $thiscyclist=''; }
 if (isset($_GET['paymentmethod'])) { $paymentmethod=trim($_GET['paymentmethod']); } else { $paymentmethod=''; }
-// if ($paymentmethod=='') { $paymentmethod='All'; }
+
+
+if (($paymentmethod<>'expc1') and ($paymentmethod<>'expc2') and ($paymentmethod<>'expc3') and ($paymentmethod<>'expc4') and ($paymentmethod<>'expc5') and ($paymentmethod<>'expc6')) {
+    $paymentmethod='';
+}
+
+
+
+
 if (isset($_GET['collectyear'])) { $year=trim($_GET['collectyear']); } else { if (isset($_GET['collectyear'])) { $year=trim($_GET['collectyear']); }}
 if (isset($_GET['collectmonth'])) { $month=trim($_GET['collectmonth']); } else {if (isset($_GET['collectmonth'])) { $month=trim($_GET['collectmonth']);} }
 if (isset($_GET['collectday'])) { $day=trim($_GET['collectday']); } else {if (isset($_GET['collectday'])) { $day=trim($_GET['collectday']);} }
 
-$hour="23";
-$minutes="59";
-
 if (isset($year)) {
-
-    $collectionsuntildate = $year . "-" . $month . "-" . $day . " " . $hour . ":" . $minutes . ":59";
+    $collectionsuntildate = $year . "-" . $month . "-" . $day . " 23:59:59";
     $inputend=$day.'/'.$month.'/'.$year; 
 
 } else { $collectionsuntildate=''; }
@@ -114,9 +128,7 @@ if (isset($_GET['deliverday']))   {
 $hour="00"; $minutes="00"; 
 
 if (isset($year)) {
-
 $collectionsfromdate = $year . "-" . $month . "-" . $day . " " . $hour . ":" . $minutes . ":00";
-
 }
 
 if (isset($_GET['from'])) { 
@@ -126,17 +138,12 @@ $collectionsfromdate=$sqlstart;
 if (isset($year)) {
 $inputstart=$day.'/'.$month.'/'.$year;
 }
-// $infotext=$infotext. 'starts : '.$inputstart.'<br /> ends : '.$inputend;
-
 }
 
-// $infotext=$infotext. ' from '.$collectionsfromdate.' until '.$collectionsuntildate;
 
 if (isset($_GET['searchexpensecode'])) { $searchexpensecode=trim($_GET['searchexpensecode']); }
 
 else { $searchexpensecode=''; }
-
-// echo 'search id : '.$searchexpensecode;
 
 
 if (isset($inputstart)) { if ($inputstart=='//') { $inputstart=''; } } else { $inputstart=''; }
@@ -151,21 +158,13 @@ $vattablecost='0';
 <head> 
 <meta http-equiv="Content-Type"  content="text/html; charset=utf-8" >
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
-<title>COJM : Search Expenses</title>
+<title>COJM : P+L Search</title>
 <link rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
 <link rel="stylesheet" href="css/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <script type="text/javascript" src="js/jquery-ui.1.8.7.min.js"></script>
 <script type="text/javascript" src="js/jquery.floatThead.js"></script>
-<style>
-@media print {
-    .infotext { display:none; }
-    .moreinfotext { display:none; }
-    .cojmcopyright { display:none; }
-    .loggedinas { display:none; }
-}
-</style>
 </head>
 <body>
 <? 
@@ -175,29 +174,91 @@ $invoicemenu='1';
 
 include "cojmmenu.php"; ?>
 <div class="Post">
-<form action="expenseview.php#" method="get">
+<form action="expenseview.php" method="get">
 <div class="ui-state-highlight ui-corner-all p15" >
 
 From <input class="ui-state-highlight ui-corner-all pad" size="11" type="text" name="from" value="<?php echo $inputstart; ?>" id="rangeBa" />
-To <input class="ui-state-highlight ui-corner-all pad"  size="11" type="text" name="to" value="<?php echo $inputend; ?>" id="rangeBb" />	Category <select class="ui-state-highlight ui-corner-left" name="searchexpensecode">
-<option value="all">All Categories</option>        
+To <input class="ui-state-highlight ui-corner-all pad"  size="11" type="text" name="to" value="<?php echo $inputend; ?>" id="rangeBb" />
+
+<?php
+
+echo '<select id="view" name="view" class="ui-state-highlight ui-corner-left">
+
+<option value="statmnt" ';
+if ($view=='statmnt') {
+    echo ' selected ';
+}
+echo '> Statement View </option>
+
+<option value="expenses" ';
+if ($view=='expenses') {
+    echo ' selected ';
+}
+echo '> Just Expenses </option>
+
+<option value="payments" ';
+if ($view=='payments') {
+    echo ' selected ';
+}
+echo '> Just Payments </option>
+</select>
+';
+
+?>
+
+
+<select class="ui-state-highlight ui-corner-left" name="orderby">
+    <option value="">Order by Date </option>
+    <option
+    <?php if ($orderby=='highlo') { echo 'selected'; } ?>
+        value="highlo">High to Low</option>
+</select>
+
+<input 
+id="searchphrase" 
+name="searchphrase" 
+class="ui-state-highlight ui-corner-all pad" 
+placeholder="Search Values"
+title="Search Amounts, Comments, Expenses Paid To  "
+value="<?php echo htmlspecialchars($searchphrase); ?>" 
+size="14" 
+type="text">
+
+<button type="submit" >Search</button>
+
+<hr />
+
+<div id="expensesearchbar" <?php
+
+if ($view<>'expenses') {
+    echo ' class="hideuntilneeded" ';
+}
+
+?> 
+>
+
+Expense Category
+<select class="ui-state-highlight ui-corner-left" name="searchexpensecode" id="searchexpensecode">
+<option value="all">All Expense Departments</option>        
 <?php 
+
 $query = "SELECT expensecode, smallexpensename, expensedescription FROM expensecodes ORDER BY expensecode";
 $result_id = mysql_query ($query, $conn_id); 
 
-while (list ($expensecode, $smallexpensename, $expensedescription) = mysql_fetch_row ($result_id)) { 
+while (list ($expensecode, $smallexpensename, $expensedescription) = mysql_fetch_row ($result_id)) {
     $expensedescription = htmlspecialchars ($expensedescription);
     $expensecode = htmlspecialchars ($expensecode); 
     $smallexpensename = htmlspecialchars ($smallexpensename); 
-    print"
-            <option ";
+    print" <option ";
     if ($expensecode == $searchexpensecode) {echo "SELECTED "; }
     print ("value=\"$expensecode\">$smallexpensename</option>\n");
 } ?>
         </select>
-        Method
-        <select class="ui-state-highlight ui-corner-left" name="paymentmethod"> 
-            <option value="">All</option>
+        
+        
+Expense Method
+<select class="ui-state-highlight ui-corner-left" name="paymentmethod" > 
+            <option value="">All Expense Methods </option>
 <?php 
  if ($globalprefrow['gexpc1']){ echo '<option value="expc1" '; if ('expc1'==$paymentmethod) { echo 'selected'; }  echo '> '.$globalprefrow['gexpc1'].'</option>'; } 
  if ($globalprefrow['gexpc2']){ echo '<option value="expc2" '; if ('expc2'==$paymentmethod) { echo 'selected'; }  echo '> '.$globalprefrow['gexpc2'].'</option>'; }  
@@ -211,34 +272,23 @@ while (list ($expensecode, $smallexpensename, $expensedescription) = mysql_fetch
 </select>
 
 <select class="ui-state-highlight ui-corner-left" name="ifpaid">
-
-    <option value="">Paid &amp; Future </option>
-    <option <?php if ($ifpaid=='paid') { echo 'selected'; } ?> value="paid">Paid</option>
-    <option <?php if ($ifpaid=='future') { echo 'selected'; } ?> value="future">Future</option>
-
-</select>
-
-
- 
-<select class="ui-state-highlight ui-corner-left" name="orderby">
-    <option value="">Order by Date </option>
-    <option
-    <?php if ($orderby=='highlo') { echo 'selected'; } ?>
-        value="highlo">High to Low</option>
+    <option value="">Paid &amp; Future Expenses</option>
+    <option <?php if ($ifpaid=='paid') { echo 'selected'; } ?> value="paid">Paid Expenses</option>
+    <option <?php if ($ifpaid=='future') { echo 'selected'; } ?> value="future">Future Expenses</option>
 </select>
 
 <?php
 
-if ($searchexpensecode=="6") {
-
-    echo $globalprefrow['glob5']. ' : ';
-    // . $thiscyclist;
 
     $query = "SELECT CyclistID, cojmname FROM Cyclist WHERE isactive='1' ORDER BY CyclistID"; 
     $result_id = mysql_query ($query, $conn_id); 
-    print ("<select class=\"ui-state-highlight ui-corner-left\" name=\"thiscyclist\">\n"); 
+    echo '<select class="ui-state-highlight ui-corner-left';
+    if ($searchexpensecode<>6) {
+        echo ' hideuntilneeded';
+    }
+    echo '" name="thiscyclist" id="thiscyclist"> ' ; 
  
-    echo '<option value="All" >All</option>';
+    echo '<option value="All" >All '. $globalprefrow['glob5']  .'s </option>';
  
     while (list ($CyclistID, $cojmname) = mysql_fetch_row ($result_id)) {
         print ("<option ");
@@ -249,109 +299,136 @@ if ($searchexpensecode=="6") {
     }
     print ("</select>"); 
 
-
-
-
     echo '
-    <select class="ui-state-highlight ui-corner-left" name="viewtype">
+    <select name="viewtype" id="viewtype" class="ui-state-highlight ui-corner-left';
+    
+    if ($searchexpensecode<>6) {
+        echo ' hideuntilneeded';
+    }
+    
+    echo '" >
         <option '; if ($viewtype=='normal')   { echo 'selected'; } echo ' value="normal">Normal View</option>
         <option '; if ($viewtype=='view2') { echo 'selected'; } echo ' value="view2">Print for Rider</option>
     </select> ';
 
 
 
-}
-
-
-echo ' 
-
-<button type="submit" >Search</button>
-
+echo ' </div>
 </div>
-</form>
-';
+</form> ';
 
-if (isset($collectionsfromdate)) {
+if ($view=='expenses') {
+
+    $conditions = array();
+    $parameters = array();
+    $where = "";
+    $numpayments=0;
+    $paymentcost=0;    
+
+    if ($collectionsfromdate) {
+        $conditions[] = " expenses.expensedate >= :sqlstart ";
+        $parameters[":sqlstart"] = $collectionsfromdate;
+    }
+    
+    if ($collectionsuntildate) {
+        $conditions[] = " expenses.expensedate <= :sqlend ";
+        $parameters[":sqlend"] = $collectionsuntildate;
+    }
 
     
+    if ($searchexpensecode<>'all') {
+        $conditions[] = " expenses.expensecode = :expensecode ";
+        $parameters[":expensecode"] = $searchexpensecode;        
+    }
     
-    $sql="
-    SELECT * FROM expenses 
-    INNER JOIN Cyclist 
-    INNER JOIN expensecodes
-    ON expenses.cyclistref = Cyclist.CyclistID 
-    AND expenses.expensecode = expensecodes.expensecode 
-    ";
+    if ($ifpaid=='paid') {
+        $conditions[] = " expenses.paid='1' ";
+        }
+        
+    if ($ifpaid=='future') {
+        $conditions[] = " expenses.paid='0' ";
+        }
     
-    $sql.= " WHERE expensedate >= '$collectionsfromdate' AND expensedate <= '$collectionsuntildate' "; 
+    if ($paymentmethod) {
+        $conditions[] = " expenses.$paymentmethod <> '0.00'  ";
+    }
+
+    
+    if (($searchexpensecode==6) AND ($thiscyclist>1)) {
+        $conditions[] = " expenses.cyclistref = :cyclistref ";
+        $parameters[":cyclistref"] = $thiscyclist;        
+    }    
     
     
-    
-    if ($searchexpensecode=='all') {
-        $sql.= " ";
-    } else {
-        $sql.=" AND expenses.expensecode=$searchexpensecode ";
+    if ($searchphrase) {
+        $conditions[] = " ( 
+        expenses.expensecost LIKE :testrefa 
+        OR expenses.whoto LIKE :testrefb 
+        OR expenses.description LIKE :testrefc 
+        ) ";
+        $parameters[":testrefa"] = "%".$searchphrase."%";
+        $parameters[":testrefb"] = "%".$searchphrase."%";
+        $parameters[":testrefc"] = "%".$searchphrase."%";    
     }
     
     
-    if ($ifpaid=='paid') { $sql = $sql. " AND paid='1' "; }
-    if ($ifpaid=='future') { $sql = $sql. " AND paid='0' "; }
     
     
-    if (($searchexpensecode==6) AND ($thiscyclist>1)) { $sql.= "
-    AND expenses.expensecode=$searchexpensecode 
-    AND expenses.cyclistref= '$thiscyclist'  
-    "; }
-    
-    
-    // echo ' pm: '. $paymentmethod;
-    
-    if ($paymentmethod) { $sql.= " AND expenses.$paymentmethod <> '0.00'  "; }
-    
-    
-    
-    
-    
-    
-    
+    if (count($conditions) > 0) {
+        $where = implode(' AND ', $conditions);
+    }
+
+    $query = " SELECT *
+            FROM expenses
+            left JOIN Cyclist ON expenses.cyclistref = Cyclist.CyclistID 
+            left join expensecodes ON expenses.expensecode = expensecodes.expensecode 
+    " . ($where != "" ? " WHERE $where" : "");
+
     
     if ($orderby=='highlo') {
+        $query .= " ORDER BY expensecost DESC";    
+    } else {
+        $query .= " ORDER BY expensedate ASC";  
+    }
+
     
-    $sql = $sql. " ORDER BY `expenses`.`expensecost` DESC ";
-    
-        } else {
-    
-    $sql = $sql. " ORDER BY `expenses`.`expensedate` ASC ";
-    
+    try {
+        if (empty($parameters)) {
+            $result = $dbh->query($query);
+        }
+        else {
+            $statement = $dbh->prepare($query);
+            $statement->execute($parameters);
+            if (!$statement) throw new Exception("Query execution error.");
+            $result = $statement->fetchAll();
+        }
+    }
+    catch(Exception $ex) {
+        echo $ex->getMessage();
     }
     
+
     
     
-    // echo $sql;
-        $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-        $num_rows = mysql_num_rows($sql_result);
-    
-    
-    
-    
-    
-    if (($searchexpensecode) and ($inputstart) and ($num_rows>'0')) {
+    if ($result) {
+
+        $temptab='<br /><div class="vpad"> </div>
+        <table class="acc';
         
+        if ($clientview<>'client') {
+            $temptab.= ' biggertext';
+        }
         
-        
-        
-        $temptab='<p><br /><div class="vpad"> </div>
-        <table class="acc" id="expenseview">        
-        <tr>
+        $temptab.='" id="expenseview">        
         <thead>
-        <th scope="col">Reference</th>
-        <th title="Incl. VAT" scope="col">Net Amount</th>
-        <th scope="col">VAT </th>
-        <th scope="col">Date</th>';
+        <tr>
+        <th scope="col">Date</th>
+        <th scope="col">Ref</th>
+        <th title="Incl. VAT" scope="col">Net </th>
+        <th scope="col">VAT </th>';
         
         if ($viewtype<>'view2') {
             $temptab.= '
-            <th scope="col">'.$globalprefrow['glob5'].'</th>
             <th scope="col">Paid to</th>
             <th scope="col">Type</th>';
         }
@@ -360,36 +437,31 @@ if (isset($collectionsfromdate)) {
         <th scope="col">Method </th>
         <th scope="col"> </th>
         </tr>
-        <thead>
+        </thead>
         <tbody>';
         
         
         $tablecost='';
+        $numexpenses=0;
         
         // echo ' payment : '.$paymentmethod;
         
-        while ($row = mysql_fetch_array($sql_result)) {
-            
-            extract($row);
+        foreach ($result as $row ) {
+            $numexpenses++;
                     
             $tablecost = $tablecost + $row["expensecost"];
             $vattablecost = $vattablecost + $row["expensevat"];	
                     
-            $temptab.= '
-            <tr> 
-            <td>';
-            
+            $temptab.= ' <tr> ';
+            $temptab.=  '<td class="rh">'.date('D j M Y', strtotime($row['expensedate'])).'</td>';
+            $temptab.= ' <td> ';            
             
             
             if ($viewtype=='view2') { // view is rider report
-            
-                $temptab.= $expenseref. ' '; 
-            } else { // view is NOT rider report
-            
-            $temptab.= '
-            <a class="newwin" href="singleexpense.php?expenseref='.$expenseref. '" target="_blank">'.$expenseref.'</a>'; 
-            
-            } // ends check rider report
+                $temptab.= $row['expenseref']. ' '; 
+            } else {
+                $temptab.= ' <a href="singleexpense.php?expenseref='.$row['expenseref']. '" >'.$row['expenseref'].'</a>';
+            }
             
             if ($row['paid']<'1') { $temptab.= ' UNPAID'; }
             
@@ -398,33 +470,20 @@ if (isset($collectionsfromdate)) {
             '</td>
             <td> ';
             
-            if ($row['expensevat']>'0') {  $temptab=$temptab. ' &'.$globalprefrow['currencysymbol']. $row['expensevat']; }
+            if ($row['expensevat']>'0') {  $temptab.= ' &'.$globalprefrow['currencysymbol']. $row['expensevat']; }
             
-            $temptab=$temptab. '
-            
-            </td>
-            <td class="rh">'. date('j / m / Y', strtotime($row['expensedate'])).'</td>';
-            
-            
-            
+            $temptab.= ' </td> ';
             
             if ($viewtype<>'view2') { // NOT rider report view
                 
-                $temptab.= '<td>';
-                if ($CyclistID<>'1') { $temptab.= $cojmname; }   
+                $temptab.=' <td>'.$row['whoto'];
+                if ($row['CyclistID']<>'1') { $temptab.= ' '.$row['cojmname']; }                  
+
                 $temptab.='</td>
-                <td>'.$row['whoto'].'</td>
                 <td>'.$row['smallexpensename'].'  </td>';
-            
             }
             
-            
-            
-            
-            
-            
             $temptab.='<td>';
-            
             
             if ($row['expc1']>0) { $temptab.= $globalprefrow['gexpc1']; } 
             if ($row['expc2']>0) { $temptab.= $globalprefrow['gexpc2']; } 
@@ -438,65 +497,103 @@ if (isset($collectionsfromdate)) {
         } // ends expense ref loop
         
         
-        $temptab.='</tbody></table></p>';
-        
-        
-        
-        
-        
-        
+        $temptab.= '<tfoot>
+        <tr>
+        <td colspan="2"> Total </td>
+        <td class="rh"> &'. $globalprefrow['currencysymbol']. number_format($tablecost, 2, '.', ',').'</td>
+        <td class="rh"> &'. $globalprefrow['currencysymbol']. number_format($vattablecost, 2, '.', ',').'</td>
+        ';
         if ($viewtype=='view2') { // rider report view
-            $sqlc = "SELECT * FROM Cyclist WHERE CyclistID=$thiscyclist LIMIT 0,1";  
-            $sql_resultc = mysql_query($sqlc,$conn_id)  or mysql_error(); 
-            while ($rowc = mysql_fetch_array($sql_resultc)) {
-                extract($rowc);
-            
-                echo ''.$globalprefrow['courier9'].'
-                <br />
-                <h3>Payments from </h3>
-                
-                <h5>'.$globalprefrow['globalname'].'</h5>
-                <p>'.$globalprefrow['myaddress1'].'
-                <br />'.$globalprefrow['myaddress2'].'
-                <br />'.$globalprefrow['myaddress3'].'
-                <br />'.$globalprefrow['myaddress4'].'
-                <br />'.$globalprefrow['myaddress5'].'</p>
-                
-                <h2>Payments to</h2>
-                
-                <h5>'.$rowc['poshname'].'</h5>
-                <p>'.$rowc['housenumber'].'
-                <br />'.$rowc['streetname'].'
-                <br />'.$rowc['city'].'
-                <br />'.$rowc['postcode'].'</p>
-                <h3>'.$start.' until '.$end.'</h3>';
-                
-            }
+            $temptab.='<td > </td> ';
+        } else {
+            $temptab.='<td colspan="4"> </td> ';            
+        }
         
-        } // ends rider report view
+        $temptab.='
+        </tr>
+        </tfoot> ';
         
+        
+        $temptab.='</tbody></table>';
         
         $grosscost=$tablecost-$vattablecost;
         $ttablecost= number_format($tablecost, 2, '.', ',');
         $tvattablecost= number_format($vattablecost, 2, '.', ',');
         $tgrosscost= number_format($grosscost, 2, '.', ',');
-        
-        
-        echo '
-        <br />
-        <p> Grand Total : &'. $globalprefrow['currencysymbol']. $ttablecost;
-        
-        if ($tvattablecost>'0') {
+
+    }
+
+    
+    echo ' <div class="ui-state-highlight ui-corner-all clearfix undersearch" >
+    <h3> '.$numexpenses.' Expense'; if ($numexpenses<>1) { echo 's'; } 
+    echo ' </h3>
+    <p title="Incl. VAT">Total Expenses : &'. $globalprefrow['currencysymbol']. number_format($tablecost, 2, '.', ',').'
+    </p> ';
+    
+    if ($tvattablecost>'0') {
             echo ' <br /> Excl. VAT : &'. $globalprefrow['currencysymbol']. $tgrosscost;
             echo '<br /> Total Vat : &'. $globalprefrow['currencysymbol'] .$tvattablecost;
         }
+    
+    
+    echo '
+    </div> ';    
+
+    
+    if ($viewtype=='view2') { // rider report view
+    
+        $query = "SELECT * FROM Cyclist WHERE CyclistID=? LIMIT 0,1";
+        $parameters = array($thiscyclist);
+        $statement = $dbh->prepare($query);
+        $statement->execute($parameters);
+        $rowc = $statement->fetch(PDO::FETCH_ASSOC);
+
+        if ($rowc) {
+            
+            echo '
+            
+            <div class="clear">
+            <br />
+            <hr />
+            <br />
+            
+            '.$globalprefrow['courier9'].'
+            <br />
+            
+            
+            <div class="ui-state-highlight ui-corner-all clearfix undersearch">
+            <h3>Payments from </h3>
+            
+            <h5>'.$globalprefrow['globalname'].'</h5>
+            <p>'.$globalprefrow['myaddress1'].'
+            <br />'.$globalprefrow['myaddress2'].'
+            <br />'.$globalprefrow['myaddress3'].'
+            <br />'.$globalprefrow['myaddress4'].'
+            <br />'.$globalprefrow['myaddress5'].'</p>
+            
+            </div>
+            
+            <div class="ui-state-highlight ui-corner-all clearfix undersearch">
+            
+            <h3>Payments to</h3>
+            
+            <h5>'.$rowc['poshname'].'</h5>
+            <p>'.$rowc['housenumber'].'
+            <br />'.$rowc['streetname'].'
+            <br />'.$rowc['city'].'
+            <br />'.$rowc['postcode'].'</p>
+            
+            </div>
+            
+            <h2 class="clear">'.$start.' until '.$end.'</h3>
+            
+            </div> ';
+            
+        }
+    
+    } // ends rider report view
         
-        echo ' </p> ';
-        
-        
-        
-        
-        
+    
         echo $temptab;
         
         if ($viewtype=='view2') { // rider report view
@@ -508,16 +605,490 @@ if (isset($collectionsfromdate)) {
         } // ends rider report view
         
         
-        
-    } else if ($num_rows==0){
-        echo '
-        <div class="ui-state-highlight ui-corner-all p15" >
-        <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
-        <strong> No Expenses found.</strong>
-        </div>';
-    } // ends searchexpensecode check
+    
+}
 
-} // ends collectionsfromdate
+
+
+else if ($view=='statmnt') {
+    $tablerow = array();
+    $tablecost='';
+    $numrows=0;
+    $expenserows=0;
+    $expensetotal=0;
+    $duecount=0;
+    $a.= '';    
+    
+    $conditions = array();
+    $parameters = array();
+    $where = "";
+    
+    $sql=" ";
+    
+    if ($collectionsfromdate)  {
+        $conditions[] = " expensedate >= :sqlstart ";
+        $parameters[":sqlstart"] = $collectionsfromdate;
+    }
+    
+    
+    if ($collectionsuntildate) {
+        $conditions[] = " expensedate <= :sqlend ";
+        $parameters[":sqlend"] = $collectionsuntildate;
+    }
+
+
+    
+    if ($searchphrase) {
+        $conditions[] = " ( 
+        expenses.expensecost LIKE :testrefa 
+        OR expenses.whoto LIKE :testrefb 
+        OR expenses.description LIKE :testrefc 
+        ) ";
+        $parameters[":testrefa"] = "%".$searchphrase."%";
+        $parameters[":testrefb"] = "%".$searchphrase."%";
+        $parameters[":testrefc"] = "%".$searchphrase."%";    
+    }    
+    
+    
+    
+    
+    if (count($conditions) > 0) {
+        $where = implode(' AND ', $conditions);
+    }
+
+    $query = "SELECT *
+            FROM expenses
+            left JOIN Cyclist ON expenses.cyclistref = Cyclist.CyclistID 
+            left join expensecodes ON expenses.expensecode = expensecodes.expensecode 
+    " . ($where != "" ? " WHERE $where" : "");
+
+    try {
+        if (empty($parameters)) {
+            $result = $dbh->query($query);
+        }
+        else {
+            $statement = $dbh->prepare($query);
+            $statement->execute($parameters);
+            if (!$statement) throw new Exception("Query execution error.");
+            $result = $statement->fetchAll();
+        }
+    }
+    catch(Exception $ex) {
+        echo $ex->getMessage();
+    }
+    
+
+    if ($result) {
+        foreach ($result as $row ) {
+            $expenserows++;
+            $comments='';
+            $expensetotal=$expensetotal + $row["expensecost"] + $row["expensevat"];
+            
+            if ($row['CyclistID']<2) { $row['cojmname']=''; }
+
+            $temptab='';
+            if ($row['expc1']>0) { $temptab= $globalprefrow['gexpc1']; } 
+            if ($row['expc2']>0) { $temptab= $globalprefrow['gexpc2']; } 
+            if ($row['expc3']>0) { $temptab= $globalprefrow['gexpc3']; } 
+            if ($row['expc4']>0) { $temptab= $globalprefrow['gexpc4']; } 
+            if ($row['expc5']>0) { $temptab= $globalprefrow['gexpc5']; } 
+            if ($row['expc6']>0) { $temptab= $globalprefrow['gexpc6'].' '.$row['chequeref']; } 
+
+            
+            
+            // if ($row['paid']<'1') { $comments.= ' UNPAID '; }
+            
+            $comments.=$row['description'];
+            
+            $tablerow[] = array(
+            "date"=>(strtotime($row['expensedate'])),
+            "ref"=>$row['expenseref'],
+            "amount"=>($row["expensecost"] + $row["expensevat"]),
+            "isexpense"=>1,
+            "client"=>$clientid,
+            "CompanyName"=>($row['cojmname'].' '.$row['whoto'].' '.$temptab),
+            "depname"=>($row['depname']),
+            "notpaid"=>($row['paid']),
+            "comments"=>($comments)
+            );
+        }
+
+        }
+
+    
+    
+        echo ' <div class="ui-state-highlight ui-corner-all clearfix undersearch" >
+        <h3> '.$expenserows.' Expense'; if ($expenserows<>1) { echo 's'; } 
+        echo ' </h3>
+        <p title="Incl. VAT">Total Expenses : &'. $globalprefrow['currencysymbol']. number_format($expensetotal, 2, '.', ',').'
+        </p>
+        </div> ';
+    
+    
+    
+    
+    
+    
+
+    
+    $conditions = array();
+    $parameters = array();
+    $where = "";
+    
+
+    if ($collectionsfromdate) {
+        $conditions[] = " paymentdate >= :sqlstart ";
+        $parameters[":sqlstart"] = $collectionsfromdate;
+    }
+    
+    if ($collectionsuntildate) {
+        $conditions[] = " paymentdate <= :sqlend ";
+        $parameters[":sqlend"] = $collectionsuntildate;
+    }
+    
+    if ($clientid<>'all') {
+        // $conditions[] = " CustomerID = :clientid ";
+        // $parameters[":clientid"] = $clientid;
+    }
+    
+    
+        if ($searchphrase) {
+        $conditions[] = " ( 
+        cojm_payments.paymentamount LIKE :testrefa 
+        OR cojm_payments.paymentcomment LIKE :testrefb
+        ) ";
+        $parameters[":testrefa"] = "%".$searchphrase."%";
+        $parameters[":testrefb"] = "%".$searchphrase."%";  
+    }  
+    
+    if (count($conditions) > 0) {
+        $where = implode(' AND ', $conditions);
+    }
+
+    // check if $where is empty string or not
+    $query = " SELECT paymentid, paymentdate, paymentamount, paymentclient, paymenttype, paymenttypename, paymentcomment, paymentedited, paymentcreated, CompanyName FROM cojm_payments 
+        left JOIN cojm_paymenttype ON cojm_payments.paymenttype = cojm_paymenttype.paymenttypeid 
+        left JOIN Clients ON cojm_payments.paymentclient = Clients.CustomerID
+    " . ($where != "" ? " WHERE $where" : "");
+
+    try {
+        if (empty($parameters)) {
+            $result = $dbh->query($query);
+        }
+        else {
+            $statement = $dbh->prepare($query);
+            $statement->execute($parameters);
+            if (!$statement) throw new Exception("Query execution error.");
+            $result = $statement->fetchAll();
+        }
+    }
+    catch(Exception $ex) {
+        echo $ex->getMessage();
+    }
+    
+    
+    
+        $numpayments=0;
+        $paymentcost=0;
+   
+    if ($result) {
+        foreach ($result as $row ) {
+            $tablerow[] = array(
+            "date"=>(strtotime($row['paymentdate'])),
+            "ref"=>$row['paymentid'],
+            "amount"=>$row["paymentamount"],
+            "isexpense"=>0,
+            "client"=>$clientid,
+            "CompanyName"=>($row['CompanyName']),
+            "comments"=>($row['paymentcomment'])
+            );
+
+            $paymentcost=$paymentcost+$row["paymentamount"];
+            $numpayments++;
+        }
+ 
+
+
+        
+    }
+
+    echo ' <div class="ui-state-highlight ui-corner-all clearfix undersearch" >
+    <h3> '.$numpayments.' Payment'; if ($numpayments<>1) { echo 's'; } 
+    echo ' </h3>
+    <p title="Incl. VAT">Total Payments : &'. $globalprefrow['currencysymbol']. number_format($paymentcost, 2, '.', ',').'
+    </p>
+    </div> ';
+
+    
+    if ($tablerow) {
+        $sortArray = array(); 
+    
+        foreach($tablerow as $tableitem){ 
+            foreach($tableitem as $key=>$value){ 
+                if(!isset($sortArray[$key])){ 
+                    $sortArray[$key] = array(); 
+                } 
+                $sortArray[$key][] = $value; 
+            } 
+        } 
+        
+        
+        if ($orderby=='highlo') {
+            $orderby = "amount";
+                array_multisort($sortArray[$orderby],SORT_DESC,$tablerow);
+        } else {
+            $orderby = "date";
+                array_multisort($sortArray[$orderby],SORT_ASC,$tablerow);
+        }
+    
+        
+    
+        echo ' <div style="clear:both;"> </div> ';
+        
+            if ($clientview=='client') {
+            echo ' <br /> ';
+        }
+    
+        echo '
+        <table class="acc clear';
+        if ($clientview<>'client') {
+            echo ' biggertext';
+        }
+        echo '">
+        <thead>
+        <tr>
+        <th>Date</th>
+        <th>Ref</th>
+        <th>Expense</th>
+        <th>Payment</th>
+        <th>Balance</th>
+        <th> </th>
+        </tr>
+        </thead>
+        <tbody> ';
+        
+        
+        
+        if ($prevresult[0]['cost']) {
+            echo ' <tr>
+            <td colspan="4"> </td>
+            <td class="rh">&'. $globalprefrow['currencysymbol']. number_format($runningtotal, 2, '.', ',').'</td>
+            <td>Previous Transactions</td>
+            </tr>';
+        }
+        
+        
+        foreach($tablerow as $tableitem) {
+            if ($tableitem['isexpense']<>'1') {
+                $runningtotal=$runningtotal+$tableitem['amount'];
+            } else {
+                $runningtotal=$runningtotal-$tableitem['amount'];
+            }
+            
+            if (number_format($runningtotal, 2, '.', ',')=='-0.00') {
+                $runningtotal=0;
+            }
+    
+            echo '<tr id="tr'.$tableitem['ref'].'">';
+            echo '<td class="rh">';
+
+
+            if (($tableitem['isexpense']) and ($tableitem['notpaid']<>1)) {
+                echo ' UNPAID ';
+            }
+
+
+            
+            echo date('D j M Y', $tableitem['date']);
+            
+            
+            
+            echo '</td>';
+            
+            if ($tableitem['isexpense']) {
+                echo '<td> Expense 
+                
+                <a href="singleexpense.php?expenseref='.$tableitem['ref']. '" >'.$tableitem['ref'].'</a>
+                
+                </td>';
+            } else {
+                echo '<td> Payment ';
+                if ($clientview<>'client') {            
+                            
+                    echo '<a 
+                    href="paymentsin.php?paymentid='.$tableitem['ref'].'"
+                    title="Payment '.$tableitem['ref'].'">'.$tableitem['ref'].'</a></td>';
+                } else {
+                    echo $tableitem['ref'];
+                }
+            }
+            
+            
+            if ($tableitem['isexpense']) {
+                echo '<td class="rh">&'. $globalprefrow['currencysymbol']. number_format($tableitem['amount'], 2, '.', ',').'</td> <td> </td>';
+            } else {
+                echo '<td> </td>
+                <td class="rh">&'. $globalprefrow['currencysymbol']. number_format($tableitem['amount'], 2, '.', ',').'</td>';
+            }
+            
+            echo '<td class="rh">  &'. $globalprefrow['currencysymbol']. number_format($runningtotal, 2, '.', ',').' </td> ';
+            
+            echo '<td>';
+    
+            echo $tableitem['CompanyName'].' '.$tableitem['comments'].'</td>';
+            echo '</tr>';
+        }
+        echo ' 
+        </tbody>    
+        <tfoot>
+        <tr>
+        <td class="rh" colspan="2"> Total </td>
+        <td class="rh"> &'. $globalprefrow['currencysymbol']. number_format($expensetotal, 2, '.', ',').'</td>
+        <td class="rh"> &'. $globalprefrow['currencysymbol']. number_format($paymentcost, 2, '.', ',').'</td>
+        <td class="rh">  &'. $globalprefrow['currencysymbol']. number_format($runningtotal, 2, '.', ',').'</td>
+        <td> </td>
+        </tr>
+        </tfoot>
+        </table>';
+    }
+    
+    
+    
+} // view stmnt
+
+else if ($view=='payments') {
+    
+    $conditions = array();
+    $parameters = array();
+    $where = "";
+    $numpayments=0;
+    $paymentcost=0;    
+
+    if ($collectionsfromdate) {
+        $conditions[] = " paymentdate >= :sqlstart ";
+        $parameters[":sqlstart"] = $collectionsfromdate;
+    }
+    
+    if ($collectionsuntildate) {
+        $conditions[] = " paymentdate <= :sqlend ";
+        $parameters[":sqlend"] = $collectionsuntildate;
+    }
+
+    
+    if ($searchphrase) {
+        $conditions[] = " ( 
+        cojm_payments.paymentamount LIKE :testrefa 
+        OR cojm_payments.paymentcomment LIKE :testrefb
+        ) ";
+        $parameters[":testrefa"] = "%".$searchphrase."%";
+        $parameters[":testrefb"] = "%".$searchphrase."%";  
+    }    
+    
+    
+    
+    if (count($conditions) > 0) {
+        $where = implode(' AND ', $conditions);
+    }
+
+    $query = " SELECT paymentid, paymentdate, paymentamount, paymentclient, paymenttype, paymenttypename, paymentcomment, paymentedited, paymentcreated, CompanyName FROM cojm_payments 
+        left JOIN cojm_paymenttype ON cojm_payments.paymenttype = cojm_paymenttype.paymenttypeid 
+        left JOIN Clients ON cojm_payments.paymentclient = Clients.CustomerID
+    " . ($where != "" ? " WHERE $where" : "");
+
+    
+    if ($orderby=='highlo') {
+        $query .= " ORDER BY paymentamount DESC";    
+    } else {
+        $query .= " ORDER BY paymentdate ASC";  
+    }
+    
+    try {
+        if (empty($parameters)) {
+            $result = $dbh->query($query);
+        }
+        else {
+            $statement = $dbh->prepare($query);
+            $statement->execute($parameters);
+            if (!$statement) throw new Exception("Query execution error.");
+            $result = $statement->fetchAll();
+        }
+    }
+    catch(Exception $ex) {
+        echo $ex->getMessage();
+    }
+    
+
+   
+    if ($result) {
+        $table.=' 
+        <table class="acc clear';
+        
+        if ($clientview<>'client') {
+            $table.= ' biggertext';
+        }
+        $table.=' " >
+        <thead>
+        <tr>
+        <td> Date </td>
+        <td> Ref </td>
+        <td> Amount </td>
+        <td> Method </td>
+        <td> </td>
+        </tr>
+        </thead><tbody> ';
+        
+        
+        foreach ($result as $row ) {
+            $table.=' <tr>';
+            $table.=  '<td class="rh">'.date('D j M Y', strtotime($row['paymentdate'])).'</td>';
+            $table.= '<td> ';
+            
+            if ($clientview<>'client') {
+                $table.= '<a 
+                href="paymentsin.php?paymentid='.$row['paymentid'].'"
+                title="Payment '.$row['paymentid'].'">'.$row['paymentid'].'</a></td>';
+            } else {
+                $table.= $row['paymentid'];
+            }
+            
+            
+            $table.= ' </td> <td class="rh">  &'. $globalprefrow['currencysymbol']. number_format($row['paymentamount'], 2, '.', ',').' </td> ';
+            
+            
+            $table.='<td> '.$row['paymenttypename'].' </td>';        
+            $table.= '<td>' .$row['paymentcomment'].' '. $row['CompanyName'].' </td>';
+            $table.=' </tr> ';
+
+            $paymentcost=$paymentcost+$row["paymentamount"];
+            $numpayments++;
+        }
+        
+        $table.= '
+        <tfoot>
+        <tr>
+        <td colspan="2">Total Payments</td>
+        <td class="rh">  &'. $globalprefrow['currencysymbol']. number_format($paymentcost, 2, '.', ',').'</td>
+        <td colspan="2"> </td>
+        </tr>
+        </tfoot> ';
+        
+        $table.=' </tbody> </table> ';
+ 
+
+        
+    }
+    echo ' 
+    <div class="ui-state-highlight ui-corner-all clearfix undersearch" >
+    <h3> '.$numpayments.' Payment';
+    if ($numpayments<>1) { echo 's'; } 
+    echo ' </h3>
+
+    <p title="Incl. VAT">Total Payments : &'. $globalprefrow['currencysymbol']. number_format($paymentcost, 2, '.', ',').'
+    </p>
+    </div>
+    '.$table;    
+}
+
 
 echo '<br />';
 echo '</div>';
@@ -526,7 +1097,38 @@ include 'footer.php';
 
 ?>
 <script type="text/javascript">	
-$(document).ready(function() {	
+$(document).ready(function() {
+    
+    
+    $('#view').change(function() {
+        var view=$("select#view").val();
+        
+        if (view==='expenses') {
+            $("#expensesearchbar").show();            
+        } else {
+            $("#expensesearchbar").hide();
+        }
+    });
+    
+    
+    
+    
+    $('#searchexpensecode').change(function() {
+        var searchexpensecode=$("select#searchexpensecode").val();
+        
+        if (searchexpensecode==='6') {
+            $("#thiscyclist").show();
+            $("#viewtype").show();
+        } else {
+            $("#thiscyclist").hide();
+            $("#viewtype").hide();
+        }
+    });    
+    
+    
+    
+    
+    
 	$(function(){
 				  $('#rangeBa, #rangeBb').daterangepicker();  
 			 });
@@ -537,18 +1139,18 @@ $(document).ready(function() {
 		});
 	});
     
+<?php if ($viewtype<>'view2') { ?>
     
     var menuheight=$("#sticky_navigation").height();
-$("#expenseview").floatThead({
+$(".acc").floatThead({
     position: "fixed",
     top: menuheight
 });
+
+<?php } ?>
+
 });
     
 	</script>
-
-
 <?php
-
 echo '</body></html>';
-mysql_close(); 

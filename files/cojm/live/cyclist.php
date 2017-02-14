@@ -60,7 +60,6 @@ $title=$globalprefrow['glob5'].' : '.$cojmname; }
 
 // $title="COJM : ".$globalprefrow['glob5'].' ';
 
-// while (list ($cojmname) = mysql_fetch_row ($result_id)) { $title=$title.$cojmname; }
 
 ?><!DOCTYPE html> 
 <html lang="en"> 

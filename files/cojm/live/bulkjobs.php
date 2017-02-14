@@ -1,5 +1,26 @@
 <?php 
 
+/*
+    COJM Courier Online Operations Management
+	bulkjobs.php - Shows audit log via ajax
+    Copyright (C) 2017 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
 include "C4uconnect.php";
 if ($globalprefrow['forcehttps']>0) {
 if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
@@ -62,10 +83,10 @@ echo '<tr>
 
 while ($row = mysql_fetch_array($sql_result)) { extract($row);
 $numberitems= trim(strrev(ltrim(strrev($numberitems), '0')),'.');
-$CollectPC=$row['CollectPC'];
-$ShipPC=$row['ShipPC'];
-$prShipPC= str_replace(" ", "%20", "$ShipPC", $count);
-$prCollectPC= str_replace(" ", "%20", "$CollectPC", $count);
+$enrpc0=$row['enrpc0'];
+$enrpc21=$row['enrpc21'];
+$prenrpc21= str_replace(" ", "%20", "$enrpc21", $count);
+$prenrpc0= str_replace(" ", "%20", "$enrpc0", $count);
 
 echo '<tr><td><a href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> ';
 echo ''.date(' D j M Y', strtotime($row['ShipDate'])); 
@@ -101,5 +122,3 @@ echo '</td><td>'. $row['statusname'] .'</td>
 } // End while loop
 
 echo '</tbody></table></div></div><br /></div></body></html>';
-
-mysql_close();

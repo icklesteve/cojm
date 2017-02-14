@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	mail7.php - Sends single job email
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -103,59 +103,45 @@ $query="SELECT * FROM Orders, Clients, Services, status
  AND Orders.ServiceID = Services.ServiceID 
  AND Orders.status = status.status 
  AND Orders.ID = '$id' LIMIT 1";
- $result=mysql_query($query);
- $row=mysql_fetch_array($result);
+$result=mysql_query($query);
+$row=mysql_fetch_array($result);
  
-
- $clientemail = $row['EmailAddress']; 
+$clientemail = $row['EmailAddress']; 
  
- if ($row['orderdep'])  {
- // $infotext=$infotext.'Is Department';  
- $orderdep=$row['orderdep']; $depquery="SELECT * FROM clientdep WHERE depnumber = '$orderdep' LIMIT 1";
- $result=mysql_query($depquery); $drow=mysql_fetch_array($result);
- // $infotext=$infotext.'<br />Dep is '.$drow['depname'];
- 
-  if ($drow['depemail']) { $clientemail=$drow['depemail']; }
- if ($drow['deprequestor'])  { $custforename = $drow['deprequestor'];} 
- 
- 
+if ($row['orderdep'])  {
+    // $infotext=$infotext.'Is Department';  
+    $orderdep=$row['orderdep']; $depquery="SELECT * FROM clientdep WHERE depnumber = '$orderdep' LIMIT 1";
+    $result=mysql_query($depquery); $drow=mysql_fetch_array($result);
+    // $infotext=$infotext.'<br />Dep is '.$drow['depname'];
+    
+    if ($drow['depemail']) { $clientemail=$drow['depemail']; }
+    if ($drow['deprequestor'])  { $custforename = $drow['deprequestor'];} 
  
  }  
  $cost = $row['FreightCharge'];
  $collectiondate = $row['collectiondate'];
- $deliverytime = ($row['ShipDate']) ;
  $carbonsavingthis = $row['CO2Saved'];
  $pm10this = $row['PM10Saved'];
  $numberitems = $row['numberitems'];
  $CustomerID=$row['CustomerID'];
  $numberitems= trim(strrev(ltrim(strrev($row['numberitems']), '0')),'.');
  
- $shippc = $row['ShipPC'];
- $collectpc = $row['CollectPC'];
+ $enrpc21 = $row['enrpc21'];
+ $enrpc0 = $row['enrpc0'];
  $customername=$row['CompanyName'];
  $podsurname = $row['podsurname'];
  $custforename = $row['Forename'].' '.$row['Surname'];
  $status = $row['status'];
  $service = $row['Service'];
-
-
  $publictrackingreference= $row['publictrackingref'];
 
   
  // getting month and year variables to display pod
- $temp_ar=explode("-",$deliverytime);
+ $temp_ar=explode("-",$row['ShipDate']);
  $spltime_ar=explode(" ",$temp_ar['2']); $temptime_ar=explode(":",$spltime_ar['1']); 
  if (($temptime_ar['0'] == '') || ($temptime_ar['1'] == '') || ($temptime_ar['2'] == '')) { $temptime_ar['0'] = '0'; $temptime_ar['1'] = '0'; 
  $temptime_ar['2'] = '0'; }
  $day=$spltime_ar['0']; $month=$temp_ar['1']; $year=$temp_ar['0']; $hour=$temptime_ar['0']; $minutes=$temptime_ar['1'];
-
-
- $query = "SELECT statusname, status FROM status ORDER BY status"; $result_id = mysql_query ($query, $conn_id); 
-while (list ($statusname, $status) = mysql_fetch_row ($result_id)) { $status = htmlspecialchars ($status); 
-$statusname = htmlspecialchars ($statusname); 
-if ($row['status'] == $status) { $statustext = $statusname; } 
-}
-
 
 
 // $emailtext1='Dear '.$custforename.',';
@@ -168,7 +154,7 @@ if (trim($row['clientjobreference'])) { $emailtext2=$emailtext2. ' / '.$row['cli
   
  
 
-$emailtext3= $globalprefrow['email3'].' '.$statustext;
+$emailtext3= $globalprefrow['email3'].' '.$row['statusname'];
 if ($podsurname) { $emailtext3=$emailtext3.$globalprefrow['email8'].' '.$podsurname.'.';}
 
 
@@ -179,10 +165,10 @@ $emailtext4 = $emailtext4 . $globalprefrow['email4'].' '. date('H:i A', strtotim
  if ($row['allowcollectww']=="1") { $emailtext4 = $emailtext4 . '- '.date('H:i A', strtotime($row['collectionworkingwindow'])); } 
 $emailtext4 = $emailtext4 . date(', l jS F Y.', strtotime($row['targetcollectiondate'])) . ''; 
 } else { // collected
-$emailtext4=$emailtext4.$globalprefrow['email5'].' '.date('H:i A, l jS F Y.', strtotime($collectiondate)); }
+$emailtext4=$emailtext4.$globalprefrow['email5'].' '.date('H:i A, l jS F Y.', strtotime($row['collectiondate'])); }
 
 // from address
-if ( trim($row['CollectPC']) or (trim($row['fromfreeaddress']))) { $emailtext4 = $emailtext4 . ' From ' .$row['fromfreeaddress'].' '. $row['CollectPC'].'.'; }
+if ( trim($row['enrpc0']) or (trim($row['enrft0']))) { $emailtext4 = $emailtext4 . ' From ' .$row['enrft0'].' '. $row['enrpc0'].'.'; }
 
 
 
@@ -200,9 +186,9 @@ $emailtext5=$emailtext5. date(' A, ', strtotime($row['duedate'])); }}
 if ($row['allowdeliverww']=="1") { $emailtext5=$emailtext5. '- '.date('H:i A, ', strtotime($row['deliveryworkingwindow'])); }   
 $emailtext5=$emailtext5. date('l jS F Y.', strtotime($row['duedate'])); 
 } else { // delivered
-$emailtext5=$emailtext5. $globalprefrow['email7'].' '. date('H:i A, l jS F Y.', strtotime($deliverytime)); }
+$emailtext5=$emailtext5. $globalprefrow['email7'].' '. date('H:i A, l jS F Y.', strtotime($row['ShipDate'])); }
 
-if (trim($row['ShipPC']) or (trim($row['tofreeaddress']))) { $emailtext5=$emailtext5 . ' To '.$row['tofreeaddress'].' ' . $row['ShipPC'] . '.'; }
+if (trim($row['enrpc21']) or (trim($row['enrft21']))) { $emailtext5=$emailtext5 . ' To '.$row['enrft21'].' ' . $row['enrpc21'] . '.'; }
 
 
 
@@ -320,7 +306,7 @@ $emailtext12=$globalprefrow['emailfooter'];
 
 
 
-$totco2sql="SELECT * FROM Orders, Services 
+$totco2sql="SELECT co2saving, numberitems, CO2Saved, pm10saving, PM10Saved FROM Orders, Services 
 WHERE Orders.ServiceID = Services.ServiceID 
 AND Orders.status >= 77 
 AND Orders.CustomerID='$CustomerID'";
@@ -335,7 +321,6 @@ while ($totco2row = mysql_fetch_array($totco2sql_result)) {
 	 if ($totco2row['pm10saving']>'0.1') {$ttablepm10=$ttablepm10+$totco2row["pm10saving"]; }
      else { $ttablepm10=$ttablepm10 + (($totco2row['numberitems'])*($totco2row["PM10Saved"])); }	 
 }
-
 
 $tcomppm10=$ttablepm10;
 $tcompco2=$ttableco2;
@@ -423,8 +408,8 @@ if ($emailchang4=='0') {
 
 // if ($newemailtext4)  { $fhtmltext=$fhtmltext.'<p>4'.$newemailtext4.'</p>'.PHP_EOL ;  }
 
- $CollectPC=trim($row['CollectPC']);
- $CollectPC2 = str_replace(" ", "+", "$CollectPC", $count);
+ $enrpc0=trim($row['enrpc0']);
+ $enrpc02 = str_replace(" ", "+", "$enrpc0", $count);
 
 
 ///// start of text collection
@@ -439,15 +424,17 @@ $fhtmltext=$fhtmltext. date(', l jS F Y.', strtotime($row['targetcollectiondate'
 $fhtmltext=$fhtmltext.$globalprefrow['email5'].' '.date('H:i A, l jS F Y.', strtotime($collectiondate)); }
 
 // from address
-if ( trim($row['CollectPC']) or (trim($row['fromfreeaddress']))) { $fhtmltext=$fhtmltext. ' From ' .$row['fromfreeaddress'].' '. 
-'<a target="_blank" href="http://maps.google.co.uk/maps?q'.'&#61;'. $CollectPC2.'">'.$row['CollectPC'].'</a>'.'.'; }
+if ( trim($row['enrpc0']) or (trim($row['enrft0']))) {
+    $fhtmltext=$fhtmltext. ' From ' .$row['enrft0'].' '. 
+'<a target="_blank" href="http://maps.google.co.uk/maps?q'.'&#61;'. $enrpc02.'">'.$row['enrpc0'].'</a>'.'.';
+}
 
 ///// end of collection
 
 } else if ($newemailtext4)  { $fhtmltext=$fhtmltext.'<p>'.$newemailtext4.'</p>'.PHP_EOL;  }
 
- $ShipPC=trim($row['ShipPC']);
- $ShipPC2 = str_replace(" ", "+", "$ShipPC", $count);
+ $enrpc21=trim($row['enrpc21']);
+ $enrpc212 = str_replace(" ", "+", "$enrpc21", $count);
 
 
 
@@ -465,11 +452,11 @@ $fhtmltext=$fhtmltext. date(' A, ', strtotime($row['duedate'])); }}
 if ($row['allowdeliverww']=="1") { $fhtmltext=$fhtmltext. '- '.date('H:i A, ', strtotime($row['deliveryworkingwindow'])); }   
 $fhtmltext=$fhtmltext. date('l jS F Y.', strtotime($row['duedate'])); 
 } else { // delivered
-$fhtmltext=$fhtmltext. $globalprefrow['email7'].' '. date('H:i A, l jS F Y.', strtotime($deliverytime)); }
+$fhtmltext=$fhtmltext. $globalprefrow['email7'].' '. date('H:i A, l jS F Y.', strtotime($row['ShipDate'])); }
 
 
-$fhtmltext=$fhtmltext. ' To ' . $row['tofreeaddress'].' '.
-'<a target="_blank" href="http://maps.google.co.uk/maps?q'.'&#61;'. $ShipPC2.'">'.$row['ShipPC'].'</a>';
+$fhtmltext=$fhtmltext. ' To ' . $row['enrft21'].' '.
+'<a target="_blank" href="http://maps.google.co.uk/maps?q'.'&#61;'. $enrpc212.'">'.$row['enrpc21'].'</a>';
 
 $fhtmltext=$fhtmltext .'.</p>'.PHP_EOL;
 
@@ -709,4 +696,6 @@ $(document).ready(function() {
 echo '</body></html>';
 
 mysql_close();
+$dbh=null;
+
 ?>

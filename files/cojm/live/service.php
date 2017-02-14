@@ -336,7 +336,6 @@ $rpttext=$rpttext.'</tr>';
 
 $i='0';
 $query = "SELECT * FROM Services ORDER BY activeservice DESC, serviceorder DESC, ServiceID ASC"; 
-// while ($costrow = mysql_fetch_array($result_id)) { extract($row);
 
 $sql_result = mysql_query($query,$conn_id)  or mysql_error(); 
 while ($row = mysql_fetch_array($sql_result)) { extract($row);

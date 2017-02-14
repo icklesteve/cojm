@@ -20,7 +20,7 @@
 */
 
 
-if(preg_match('/iPhone|Android|Blackberry/i', $_SERVER['HTTP_USER_AGENT'])) {  $mobdevice="1";} else { $mobdevice=''; }
+if(preg_match('/iPhone|Android|Blackberry/i', $_SERVER['HTTP_USER_AGENT'])) {  $mobdevice="1";} else { $mobdevice='0'; }
 if (isset($hasforms)) { $hasforms='1'; } else { $hasforms=''; }
 if ((isset($adminmenu)) and ($adminmenu=='1')) { $adminmenu='1'; } else { $adminmenu=''; }		
 if ((isset($settingsmenu)) and ($settingsmenu=='1')) { $settingsmenu='1'; } else { $settingsmenu=''; }		
@@ -41,6 +41,7 @@ var alertslide=1000;
 var allok=1;
 var message="";
 var showdebug='.$globalprefrow['showdebug'].';
+var mobdevice='.$mobdevice.';
 </script>
 ';
 
@@ -48,7 +49,7 @@ var showdebug='.$globalprefrow['showdebug'].';
 if ($globalprefrow['showdebug']=='1') { 
 echo '
 <script>
-ptdelay=10000;
+ptdelay=12000;
 alertdelay=15000;
 </script>
 ';
@@ -179,10 +180,13 @@ if (($settingsmenu<>'1') and ($invoicemenu<>'1') and ($adminmenu<>'1')) {} else 
     echo '<li><a href="view_all_invoices.php"'; if ($filename=='view_all_invoices.php') { echo ' class="selected"'; }
     echo '>Invoicing</a></li>';
     echo '<li><a href="pdfview.php"'; if ($filename=='pdfview.php') { echo ' class="selected"'; }
-    echo '>Invoice</a></li>';
+    echo '>New Invoice</a></li>';
     echo '<li><a href="paymentsin.php"'; if ($filename=='paymentsin.php') { echo ' class="selected"'; }
     echo '>Payment</a></li>';
-    
+
+
+    // echo '<li><a href="paymentsin.php"'; if ($filename=='reconcile.php') { echo ' class="selected"'; }
+    // echo '>Reconcile / Statement</a></li>';    
     
     
     echo '<li><a href="singleexpense.php"'; if ($filename=='singleexpense.php') echo ' class="selected"'; echo '>Expense</a></li>';
@@ -210,7 +214,7 @@ if (($settingsmenu<>'1') and ($invoicemenu<>'1') and ($adminmenu<>'1')) {} else 
         echo '<li><a href="debug.php"'; if ($filename=='debug.php') echo ' class="selected"'; echo '>Debug</a></li>';
     }  
     if (($globalprefrow['inaccuratepostcode'])=='0') {
-        echo '<li><a href="newpc.php"';
+        echo '<li><a title="Add or Edit Postcode" href="newpc.php"';
         if ($filename=='newpc.php') { echo ' class="selected"'; }
         echo '>Add Postcode</a></li>';
     }
@@ -226,8 +230,6 @@ if (($settingsmenu<>'1') and ($invoicemenu<>'1') and ($adminmenu<>'1')) {} else 
 
 echo '<div id="togglenewjob" class="ui-widget spaceout ui-state-highlight ui-corner-all innerpad clearfix" >';
 
-$query = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName"; 
-$result_id = mysql_query ($query, $conn_id); 
 
 $CustomerID='';
 
@@ -239,9 +241,12 @@ echo '<form action="order.php" method="post" id="newjob_form" accept-charset="ut
 <select class="caps ui-state-default ui-corner-all" id="newjobselectclient" name="newjobselectclient" >
 <option value="">Select one...</option>';
 
-while (list ($CustomerIDlist, $CompanyName) = mysql_fetch_row ($result_id)) {
-     $CompanyName = htmlspecialchars ($CompanyName);
-     print'<option value="'.$CustomerIDlist.'">'.$CompanyName.'</option>';
+
+$query = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName"; 
+
+$data = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
+foreach($data as $CustomerIDlist => $CompanyName) {
+    print'<option value="'.$CustomerIDlist.'">'.htmlspecialchars ($CompanyName).'</option>';
 }
 echo '</select> </div>  
 <div id="afterclientselect" class="left">

@@ -470,5 +470,3 @@ echo '</div> ';
 include "footer.php";
 
 echo '</body>';
-
-mysql_close(); 

@@ -3020,62 +3020,61 @@ $(function(){  $.konami(function(){
 
 	
 	
-var toAppend = "";
+
 
 
 $(document).on("click","#showallfav",function(event){
- event.preventDefault();
- 
- 
-$("#showallfav").show(); 
- 
-$("#showallfav").addClass("loader");
+    
+    var toAppend = "";
+    event.preventDefault();
+    $("#showallfav").show(); 
+    $("#showallfav").addClass("loader");
+    
+    // save current address details
+    
+    var temptoval = $("#tobox").val();
+    var tempto = $("#modtobox").val();
+    
+    var tempfromval = $("#frombox").val();
+    var tempfrom = $("#modfrombox").val();
+    
+    
 
-// save current address details
+    $.ajax({
+        type: "POST",
+        url: "ajax_lookup.php",
+        data: {
+            lookuppage: "allfavjson",
+            clientid: "all"
+        },
+        cache: true,
+        dataType: "json",
+        success: function(data){
+            $("#frombox").children().remove().end();
+            $("#tobox").children().remove().end();
 
-var temptoval = $("#tobox").val();
-var tempto = $("#modtobox").val();
-
-var tempfromval = $("#frombox").val();
-var tempfrom = $("#modfrombox").val();
-
-
-if(toAppend.length <5) {
-	$.ajax({
-    type: "POST",
-    url: "ajax_lookup.php",
-    data: {
-        lookuppage: "allfavjson",
-        clientid: "all"
-    },
-    cache: true,
-	dataType: "json",
-	success: function(data){
-        $.each(data,function() {
-            toAppend+="<option value=" + this.oV + ">" + this.oD + "</option>";
-        });
-    }
+            $.each(data,function() {
+                toAppend=toAppend + " <option value='" + this.oV + "'>" + this.oD + "</option> ";
+            });
+        },
+        complete: function(){
+            // alert(toAppend);            
+            $("#frombox").html(toAppend);
+            $("#tobox").html(toAppend);  
+        
+            $("#modtobox").val(tempto);
+            $("#tobox").val(temptoval);
+            $("#modfrombox").val(tempfrom);
+            $("#frombox").val(tempfromval);	
+        
+        
+            $("#toselectbutton").click();     
+            $("#showallfav").hide();
+    
+        }
     }); 
-}
 
-$("#frombox").children().remove().end();
-$("#frombox").html(toAppend);
-$("#tobox").children().remove().end();
-$("#tobox").html(toAppend);
-
-
-		
- $("#modtobox").val(tempto);
- $("#tobox").val(temptoval);
- $("#modfrombox").val(tempfrom);
- $("#frombox").val(tempfromval);	
-
-		
-	$("#toselectbutton").click();     
-	$("#showallfav").hide();
-	
-
- });
+});
 
 
 $(document).on("click","a#showinactiveclient",function(event){
@@ -3374,31 +3373,22 @@ pic1 = new Image(16, 16);
 pic1.src = "images/loader.gif";
 var usr = $("#newjobselectdep").val();
 // var usr = value ;
-if(usr.length >= 1)
-{
-
-
-$("#afterdepselect").html('<a href="#" class="loader"></a> ');
-
-
-
-    $.ajax({  
-    type: "POST",  
-    url: "ajaxcheckdep.php",  
-    data: "newjobdepid="+ usr ,  
-    success: function(msg){  
-   $("#status").ajaxComplete(function(event, request, settings){ 
-	if(msg == 'OK')
-	{ 
-		$(this).html('&nbsp;<img src="images/tick.gif" align="absmiddle">');
-	}  
-	else  
-	{  
-		$(this).html(msg);
-	}  
-   });
- }    
-  }); 
+if(usr.length >= 1) {
+    $("#afterdepselect").html('<a href="#" class="loader"></a> ');
+    $("#toploader").show();
+    $.ajax({
+        type: "POST",  
+        url: "ajax_lookup.php",  
+        data: "lookuppage=ajaxcheckdep&newjobdepid="+ usr ,  
+        success: function(data){
+            $("#status").append(data);
+            $("#newjobdetails").show();
+        },
+        complete: function (data) {
+            $("#toploader").fadeOut();
+            $("input[name=requestedby]").focus().setCursorPosition(42);
+        }
+    }); 
 }
 else
 	{
@@ -3473,144 +3463,6 @@ else
 	})( jQuery );
 
 
-(function($) { $.widget( "ui.newjobselectcheckdep", {
-			_create: function() {
-				var self = this,
-					select = this.element.hide(),
-					selected = select.children( ":selected" ),
-					value = selected.val() ? selected.text() : "";
-				var input = this.input = $( "<input>" )
-					.insertAfter( select )
-					.val( value )
-					.autocomplete({
-						delay: 0,
-						minLength: 0,
-						source: function( request, response ) {
-							var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
-							response( select.children( "option" ).map(function() {
-								var text = $( this ).text();
-								if ( this.value && ( !request.term || matcher.test(text) ) )
-									return {
-										label: text.replace(
-											new RegExp(
-												"(?![^&;]+;)(?!<[^<>]*)(" +
-												$.ui.autocomplete.escapeRegex(request.term) +
-												")(?![^<>]*>)(?![^&;]+;)", "gi"
-											), "<strong>$1</strong>" ),
-										value: text,
-										option: this
-									};
-							}) );
-						},
-						select: function( event, ui ) {						
-							ui.item.option.selected = true;
-							self._trigger( "selected", event, {
-								item: ui.item.option
-								});
-	var params='value='+ value;
-pic1 = new Image(16, 16); 
-pic1.src = "images/loader.gif";
-var usr = $("#newjobselectcheckdep").val();
-// var usr = value ;
-if(usr.length >= 1)
-{
-	
-	
-	
-$("#afterdepselect").html('<a href="#" class="loader"></a>  ');
-
-// alert("cojm.js\nnewjobdep 2435");
-
-
-
-
-
-    $.ajax({  
-    type: "POST",  
-    url: "ajaxcheckdep.php",  
-    data: "newjobdepid="+ usr ,  
-    success: function(msg){  
-   $("#status").ajaxComplete(function(event, request, settings){ 
-	if(msg == 'OK')
-	{ 
-		$(this).html('&nbsp;<img src="tick.gif" align="absmiddle">');
-	}  
-	else  
-	{  
-		$(this).html(msg);
-	}  
-   });
- }    
-  }); 
-}
-else
-	{
-	$("#status").html('<font color="red">Please select a department.</font>');
-	}							
-	},
-						change: function( event, ui ) {
-							if ( !ui.item ) {
-								var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( $(this).val() ) + "$", "i" ),
-									valid = false;
-								select.children( "option" ).each(function() {
-									if ( $( this ).text().match( matcher ) ) {
-										this.selected = valid = true;
-										return false;
-									}
-								});
-								if ( !valid ) {
-									// remove invalid value, as it didn't match anything
-									$( this ).val( "" );
-									select.val( "" );
-									input.data( "autocomplete" ).term = "";
-									return false;
-								}
-							}
-						}
-					})
-					.addClass( "ui-widget ui-widget-content ui-corner-left" );
-				input.data( "autocomplete" )._renderItem = function( ul, item ) {
-					return $( "<li></li>" )
-						.data( "item.autocomplete", item )
-						.append( "<a>" + item.label + "</a>" )
-						.appendTo( ul );
-				};
-				this.button = $( "<button type='button'>&nbsp;</button>" )
-					.attr( "tabIndex", -1 )
-					.attr( "title", "Show All" )
-					.attr( "id", "notdepselectbutton" )
-					.insertAfter( input )
-					.button({
-						icons: {
-							primary: "ui-icon-triangle-1-s"
-						},
-						text: false
-					})
-					.removeClass( "ui-corner-all" )
-					.addClass( "ui-corner-right ui-button-icon" )
-					.click(function() {
-						// close if already visible
-						if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
-							input.autocomplete( "close" );
-									return;					
-						}
-						// work around a bug (likely same cause as #5265)
-						$( this ).blur();
-
-						// pass empty string as value to search for, displaying all results
-						input.autocomplete( "search", "" );
-						input.focus().setCursorPosition(99);
-					});
-			},
-			destroy: function() {
-				this.input.remove();
-				this.button.remove();
-				this.element.show();
-				$.Widget.prototype.destroy.call( this );
-			}
-		});
-	})( jQuery );
-
 
 (function( $ ) { $.widget( "ui.newjobcombobox", {
 			_create: function() {
@@ -3654,22 +3506,23 @@ var usr = $("#newjobselectclient").val();
 if(usr.length >= 1)
 {
 $("#afterclientselect").html('<a href="#" class="loader"></a> ');
-    $.ajax({  
+$("#toploader").show();
+    $.ajax({
     type: "POST",  
-    url: "ajaxcheck.php",  
-    data: "newjobselectclient="+ usr ,  
-    success: function(msg){  
-   $("#status").ajaxComplete(function(event, request, settings){ 
-	if(msg == 'OK')
-	{ 
-	//	$(this).html('&nbsp;<img src="tick.gif" align="absmiddle">');
-	}  
-	else  
-	{  
-		$(this).html(msg);
-	}  
-   });
- }    
+    url: "ajax_lookup.php",  
+    data: "lookuppage=ajaxcheck&newjobselectclient="+ usr ,  
+    success: function(msg){
+		$("#status").html(msg);
+        $("input[name=requestedby]").focus().setCursorPosition(42);
+        $("#newjobselectdep").newdepcombobox();
+        $("#afterclientselect").html(clientdetails);
+	},
+    complete: function(){
+        $("#depselectbutton").click();
+        $("#toploader").fadeOut();
+        $( "#frombox" ).frombox();
+        $( "#tobox" ).tobox();
+    }    
   }); 
 }
 else
@@ -4204,155 +4057,149 @@ var Plugins;
 
 
 
-$.fn.setCursorPosition = function (pos) {
-    this.each(function (index, elem) {
-        if (elem.setSelectionRange) {
-            elem.setSelectionRange(pos, pos);
-        } else if (elem.createTextRange) {
-            var range = elem.createTextRange();
-            range.collapse(true);
-            range.moveEnd('character', pos);
-            range.moveStart('character', pos);
-            range.select();
+    $.fn.setCursorPosition = function (pos) {
+        this.each(function (index, elem) {
+            if (elem.setSelectionRange) {
+                elem.setSelectionRange(pos, pos);
+            } else if (elem.createTextRange) {
+                var range = elem.createTextRange();
+                range.collapse(true);
+                range.moveEnd('character', pos);
+                range.moveStart('character', pos);
+                range.select();
+            }
+        });
+        return this;
+    };
+
+
+
+
+
+
+
+
+
+
+
+    // Returns a function, that, as long as it continues to be invoked, will not
+    // be triggered. The function will be called after it stops being called for
+    // N milliseconds. If `immediate` is passed, trigger the function on the
+    // leading edge, instead of the trailing.
+    function debounce(func, wait, immediate) {
+        var timeout;
+        return function() {
+            var context = this, args = arguments;
+            var later = function() {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    };
+
+
+    // eg 
+    var myEfficientFn = debounce(function() {
+        // All the taxing stuff you do
+        if ($(this).scrollTop() > 700) {
+            $("#back-top").fadeIn(249);
+        } else {
+            $("#back-top").fadeOut(249);
+        }
+    }, 250);
+
+
+
+	
+
+    $(window).scroll(function () { 	// fade in #back-top
+        myEfficientFn();
+    });
+    
+            // scroll body to 0px on click
+    $("#back-top").click(function () {
+        $("body,html").animate({
+            scrollTop: 0
+            }, 800);
+        return false;
+    });
+
+ 
+
+    $("#menusearch").autosizeInput();
+    $('#menusearch').change(function() { $('#menusearch').submit(); });	
+        
+    
+    
+    
+    // initial page load
+    $('#pagetext').delay(ptdelay).slideUp(ptslide);
+    $('#alerttext').delay(alertdelay).slideUp(alertslide);
+
+
+
+    $("#togglenewjobchoose").click(function(){
+        $( "#togglenewjobchoose" ).toggleClass( "selected" )
+        if ($("#togglenewjob").is(':visible')) {
+            $("#togglenewjob").hide();
+            $('div.Post').css({ 'opacity': '1' });        
+        } else {
+            $("#togglenewjob").show(); 
+            $('div.Post').css({ 'opacity': '0.4' });
+            var newclientid=$("select#newjobselectclient").val();        
+            if (newclientid === "") {
+            setTimeout( function() { $("#newjobbutton").click() }, 150 );
+            }
         }
     });
-    return this;
-};
 
 
 
 
 
+    $("#togglesettingsmenuchoose").click(function(){
+        $( "#togglesettingsmenuchoose" ).toggleClass( "selected" );
+        $("#togglesettingsmenu").slideToggle("fast");
+    });
+    $("#toggleinvoicemenuchoose").click(function(){
+        $( "#toggleinvoicemenuchoose" ).toggleClass( "selected" );
+        $("#toggleinvoicemenu").slideToggle("fast");
+    });
 
+    $( "#menusearchinput" ).focus(function() {
+        $("#menuds").show();    
+    });
 
+    $('#sticky_navigation').Stickyfill();	
 
-
-
-
-// Returns a function, that, as long as it continues to be invoked, will not
-// be triggered. The function will be called after it stops being called for
-// N milliseconds. If `immediate` is passed, trigger the function on the
-// leading edge, instead of the trailing.
-function debounce(func, wait, immediate) {
-	var timeout;
-	return function() {
-		var context = this, args = arguments;
-		var later = function() {
-			timeout = null;
-			if (!immediate) func.apply(context, args);
-		};
-		var callNow = immediate && !timeout;
-		clearTimeout(timeout);
-		timeout = setTimeout(later, wait);
-		if (callNow) func.apply(context, args);
-	};
-};
-
-
-// eg 
-var myEfficientFn = debounce(function() {
-	// All the taxing stuff you do
+    setTimeout( function () { pageloadedfine(); }, 950 ); 
     
     
-    if ($(this).scrollTop() > 700) {
-		$("#back-top").fadeIn(249);
-	} else {
-		$("#back-top").fadeOut(249);
-	}
     
-    
-}, 250);
-
-
-
-	
-
-$(window).scroll(function () { 	// fade in #back-top
-
-myEfficientFn();
-
-
-});
-
-		// scroll body to 0px on click
-$("#back-top").click(function () {
-    $("body,html").animate({
-		scrollTop: 0
-		}, 800);
-	return false;
-});
-
- 
-
-$("#menusearch").autosizeInput();
-$('#menusearch').change(function() { $('#menusearch').submit(); });	
-	
-
-
-
-// initial page load
-$('#pagetext').delay(ptdelay).slideUp(ptslide);
-$('#alerttext').delay(alertdelay).slideUp(alertslide);
-
-
-
-$("#togglenewjobchoose").click(function(){
-    $( "#togglenewjobchoose" ).toggleClass( "selected" )
-    if ($("#togglenewjob").is(':visible')) {
-        $("#togglenewjob").hide();
-        $('div.Post').css({ 'opacity': '1' });        
-    } else {
-        $("#togglenewjob").show(); 
-        $('div.Post').css({ 'opacity': '0.4' });
-        var newclientid=$("select#newjobselectclient").val();        
-        if (newclientid === "") {
-        setTimeout( function() { $("#newjobbutton").click() }, 150 );
-        }
+    if ( showdebug >0 ) {
+        setTimeout( function () {
+            $("#activestatus").slideUp(1500); 
+        }, 20000 ); 
     }
-});
 
 
 
 
-
-$("#togglesettingsmenuchoose").click(function(){
-    $( "#togglesettingsmenuchoose" ).toggleClass( "selected" );
-    $("#togglesettingsmenu").slideToggle("fast");
-});
-$("#toggleinvoicemenuchoose").click(function(){
-    $( "#toggleinvoicemenuchoose" ).toggleClass( "selected" );
-    $("#toggleinvoicemenu").slideToggle("fast");
-});
-
-$( "#menusearchinput" ).focus(function() {
-    $("#menuds").show();
+    function b64EncodeUnicode(str) {
+        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+            return String.fromCharCode('0x' + p1);
+        }));
+    }
     
     
-//  alert( "Handler for .focus() called." );
-  
-  
-  
-});
+    
+    
 
-$('#sticky_navigation').Stickyfill();	
-
-
-
-
-
-
-
-
- setTimeout( function () { pageloadedfine(); }, 950 ); 
- 
- 
- 
-if ( showdebug >0 ) {  setTimeout( function () { $("#activestatus").slideUp(1500); }, 20000 ); }
-
-
-
-
-
+        
 
 
 
@@ -4360,3 +4207,18 @@ if ( showdebug >0 ) {  setTimeout( function () { $("#activestatus").slideUp(1500
 
 }); // ends doc ready
 
+
+
+
+    function b64DecodeUnicode(str) {
+        return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    }
+    
+
+    
+    
+    
+    
+    

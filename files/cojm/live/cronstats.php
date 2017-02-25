@@ -191,7 +191,7 @@ if ($hidelastfiredstats<1) {
     
     
     $sql="SELECT * FROM `phpmysqlautobackup_log` WHERE `date`> ".$statdatestart." ORDER BY `date` DESC ";
-    $sql_result = mysql_query($sql,$conn_id)  or mysql_error();
+    $sql_result = mysql_query($sql,$conn_id);
     while ($cojmbackups = mysql_fetch_array($sql_result)) {
         extract($cojmbackups);
 

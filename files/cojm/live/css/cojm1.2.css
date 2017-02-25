@@ -861,7 +861,6 @@ button.showallfav {
     border : none;
     color : transparent;
     position:relative;
-    top:-6px;
     cursor: pointer;
 }
 

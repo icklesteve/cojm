@@ -47,18 +47,16 @@ $filename='cojmglobalstatus.php';
 include "cojmmenu.php"; 
 ?>
 <div class="Post">
-<div class="ui-widget">	<div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
+	<div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
 <form action="#" method="post">
 <input type="hidden" name="formbirthday" value="<?php echo date("U");  ?>">
 <input type="hidden" name="page" value="editglobalstatus">
 <table class="acc">
 <tr><th scope="col">Status </th>
-<th scope="col">Active </th>
 <th scope="col">COJM Text</th>
 <th scope="col">Public Text</th>
-<th scope="col"><?php echo $globalprefrow['glob5']; ?> (if active)</th>
 <th scope="col">Comments</th></tr>
-<tr><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>
+
 <?php
 
 $query = "SELECT status, statusname, publicstatusname, activestatus, activestatuscyclist, statuscomment FROM status ORDER BY status";
@@ -66,25 +64,23 @@ $stmt = $dbh->query($query);
 foreach ($stmt as $row) {
     $publicstatusname = htmlspecialchars ($row['publicstatusname']); 
     $statusname = htmlspecialchars ($row['statusname']);
+    
     echo '<tr><td>'. $row['status'].'</td>
     <input type="hidden" name="statusid'. $row['status'].'" value="1" />
-    <td><input type="checkbox" name="activestatus'. $row['status'].'" value="1" ';
-    if ($row['activestatus']) { echo 'checked';} 
-    echo ' ></td>
-    <input type="hidden" name="activestatus110" value="1">
-    <td><input type="text" class="ui-state-default ui-corner-all" size="30" name="statusname'. $row['status'].'" value=" '. $statusname.'"></td>
-    <td><input type="text" class="ui-state-default ui-corner-all" size="50" name="publicstatusname'. $row['status'].'" value=" '. $publicstatusname.'"></td>
-    <td>';
+    <td><input type="text" class="ui-state-default ui-corner-all pad" size="30" name="statusname'. $row['status'].'" value="'. $statusname.'"></td>
+    <td><input type="text" class="ui-state-default ui-corner-all pad" size="50" name="publicstatusname'. $row['status'].'" value="'. $publicstatusname.'"></td>';
     
-    if ($row['activestatuscyclist']=='1') { echo '<img height="16px" width="16px" alt="Yes" src="images/icon_accept.gif">'; } else {
-    echo '<img height="16px" width="16px" alt="No" src="images/action_stop.gif">'; }
-    
-    echo '</td><td>'. $row['statuscomment'].'</td></tr><tr><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>';
+    echo '<td>'. $row['statuscomment'].'</td></tr>';
 }
 ?>
-</table><br /><div class="line"> </div><button type="submit"> Edit Status Names</button>
-</form><div class="line"></div></div></div>
-<br /></div>
+</table><br />
+<button type="submit"> Edit Status Names</button>
+</form>
+
+
+<hr />
+</div></div>
+<br />
 <?php 
 
 include 'footer.php';

@@ -121,7 +121,7 @@ $sql = "SELECT numberitems FROM Orders, Services
 WHERE Orders.ServiceID = Services.ServiceID 
 AND `Orders`.`status` <70 AND `Orders`.`status` > 50 
 AND `Services`.`hourlyothercount` >0 ";
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
+$sql_result = mysql_query($sql,$conn_id); 
 $tablecost=0;
 while ($temp1row = mysql_fetch_array($sql_result)) { extract($temp1row); 
 $tablecost=$tablecost+$temp1row['numberitems']; }
@@ -134,7 +134,7 @@ WHERE Orders.ServiceID = Services.ServiceID
 AND `Orders`.`status` >70 
 AND `Services`.`hourlyothercount` >0
 ";
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
+$sql_result = mysql_query($sql,$conn_id); 
 $tablecost=0; 
 while ($temp2row = mysql_fetch_array($sql_result)) { extract($temp2row); 
 $tablecost=$tablecost+$temp2row['numberitems']; }
@@ -161,7 +161,7 @@ AND Orders.targetcollectiondate <= '$sqlend'
 ";
 
 
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error();
+$sql_result = mysql_query($sql,$conn_id);
 $num_rows = mysql_num_rows($sql_result);
 $firstrun='1';
 
@@ -200,7 +200,7 @@ $unlico='';
 WHERE Orders.targetcollectiondate >= '$sqlstart' 
 AND Orders.targetcollectiondate <= '$sqlend'  
  ORDER BY `Orders`.`collectiondate` ASC";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+$sql_result = mysql_query($sql,$conn_id); 
 $tablecost='';
 $lico='';
 $batchcount='';

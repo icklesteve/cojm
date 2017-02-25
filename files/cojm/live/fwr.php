@@ -688,14 +688,11 @@ if ($globalprefrow['showdebug']>0) {
     AND `Orders`.`status` <>'40'
     AND `Orders`.`status` <>'50'
     AND `Orders`.`status` <>'60'
-    AND `Orders`.`status` <>'62'
     AND `Orders`.`status` <>'65'
     AND `Orders`.`status` <>'86'
     AND `Orders`.`status` <>'100'
-    AND `Orders`.`status` <>'102'
     AND `Orders`.`status` <>'110'
     AND `Orders`.`status` <>'120' 
-    AND `Orders`.`status` <>'122' 
     ORDER BY `Orders`.`ID` ";
     $sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
     $sumtot=mysql_affected_rows();

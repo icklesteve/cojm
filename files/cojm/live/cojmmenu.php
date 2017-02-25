@@ -251,4 +251,4 @@ foreach($data as $CustomerIDlist => $CompanyName) {
 echo '</select> </div>  
 <div id="afterclientselect" class="left">
 <a href="#" title="Add Inactive Clients" class="showinactiveclient" id="showinactiveclient"> </a> </div>
-<div id="status"></div> <div id="depstatus"></div> </form> </div>';
+<div id="status"></div>  </form> </div>';

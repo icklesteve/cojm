@@ -21,22 +21,631 @@
 */
 
 
-
 if (isSet($_GET['lookuppage'])) { $lookuppage=$_GET['lookuppage']; } elseif (isSet($_POST['lookuppage'])) { $lookuppage=$_POST['lookuppage']; }
 
 if ($lookuppage) {
     include "C4uconnect.php";
-//    echo ' 10 lookuppage : '.$lookuppage;
+    //    echo ' 10 lookuppage : '.$lookuppage;
+    $script='';
+    
+
+    if ($lookuppage=='ajaxcheck'){
+
+
+    $html='';
+    $invhtml='';
+    $tablecost=0; 
+    $itablecost=0; 
+
+    $newjobclientid = $_POST['newjobselectclient'];
+
+    
+    
+    $query="SELECT isdepartments, defaultrequestor, defaultfromtext, defaulttotext, defaultservice, CompanyName
+    FROM Clients 
+    WHERE Clients.CustomerID = ? 
+    LIMIT 1"; 
+    $parameters = array($newjobclientid);
+    $statement = $dbh->prepare($query);
+    $statement->execute($parameters);
+    $row = $statement->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
+        // starts check for unpaid invoices
+        $invoicecount=0;
+        $overduecount=0;
+        $todayDate = date("Y-m-d 00:00:00");    
+
+        $isql = "SELECT (cost + invvatcost) AS cost, invdue FROM invoicing  
+        WHERE (`invoicing`.`paydate` =0 )
+        AND (`invoicing`.`client` = :newjobclientid ) ";
+        
+        $prep = $dbh->prepare($isql);
+        $prep->bindParam(':newjobclientid', $newjobclientid, PDO::PARAM_INT);
+        $prep->execute();
+        $stmt = $prep->fetchAll();
+        foreach ($stmt as $irow) {
+            $invoicecount++;
+            $itablecost=$itablecost+$irow['cost'];
+            if ($irow['invdue']<$todayDate){
+                $tablecost+=$irow['cost'];
+                $overduecount++;
+            }
+        }
+
+
+        if ($overduecount) {
+            $itablecost= number_format($itablecost, 2, '.', ','); 
+            $tablecost= number_format($tablecost, 2, '.', ','); 
+            $invhtml=' '.$overduecount.' Overdue Invoice'; if ($overduecount>1) { $invhtml.='s '; }
+            $invhtml.=" <span title='Incl. VAT'> (&". $globalprefrow['currencysymbol']. $tablecost.') </span> ';
+            if ($invoicecount-$overduecount) {
+                $invhtml.=' + '.($invoicecount-$overduecount)." in date <span title='Incl. VAT'> ( Total &". $globalprefrow['currencysymbol']. $itablecost.') </span>. ';
+            }
+        }
+        
+        if ($row['isdepartments']) {
+            // starts has departments
+            $query = "SELECT depnumber, depname FROM clientdep 
+            WHERE associatedclient = :newjobclientid 
+            AND isactivedep='1' 
+            ORDER BY depname"; 
+            
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':newjobclientid', $newjobclientid, PDO::PARAM_INT); 
+            $stmt->execute();
+            $data = $stmt->fetchAll();
+    
+            echo '<div class="fs"> <div class="fsl"> ';
+            
+            $numdeps=0;
+            $html.= '</div> <div class="left"> <select class="ui-state-default ui-corner-all " 
+            id="newjobselectdep" name="newjobselectdep" ><option value="">Select one...</option>';
+            foreach ($data as $deprow ) {  
+                $numdeps++;
+                $depnumber = ($deprow['depnumber']); 
+                $CompanyName = htmlspecialchars($deprow['depname']); 
+                $html.= ' <option value="'.$depnumber.'">'.$CompanyName.'</option>';
+            } 
+            
+            $html.= '</select> </div> ';
+            
+            echo $numdeps.' Departments '.$html;
+            
+
+            
+            echo ' <div id="afterdepselect" class="left"> </div> 
+            <div class="clear"> </div>
+            </div> ';
+        
+            echo '<input type="hidden" name="newjobclientid" value="'.$newjobclientid.'"> '; 
+            $maindivclass=' class="hideuntilneeded" ';
+            // $maindivclass="";
+        } // ends has departments
+        else { // starts no departments
+        
+            $maindivclass="";
+        
+        }
+        
+        $html=' <div id="newjobdetails" '.$maindivclass.' > 
+        
+        <div class="cbbnewjobl">
+        
+        <div class="fs hideuntilneeded" id="deppassworddiv">
+            <div class="fsl"> Password </div>
+            <span class="red" id="deppassword"></span>
+        </div>
+        
+        <input id="newjobdepid" type="hidden" name="newjobdepid" value="">
+        
+        <div class="fs">
+        <div class="fsl">   Requested By </div>
+        <input type="text" id="requestedby" class="caps ui-state-default ui-corner-all" style="width: 250px;" name="requestedby" 
+        value="'. $row['defaultrequestor'].'">
+        
+        <span id="requestortext"> </span>
+        </div> 
+        <div class="fs">
+        <div class="fsl">
+        <button name="showallfav" title="All Favourites" id="showallfav" type="button" class="showallfav"> &nbsp; </button> 
+        
+        Collection </div>
+        <select name="frombox" id="frombox">
+        <option value=""> Select One ...</option>';
+        
+        $sql="SELECT favadrid, favadrft, favadrpc FROM cojm_favadr
+        WHERE  favadrclient = :newjobclientid
+        AND favadrisactive ='1' ";
+        
+        $stmt = $dbh->prepare($sql);
+        $stmt->bindParam(':newjobclientid', $newjobclientid, PDO::PARAM_INT); 
+        $stmt->execute();
+        $data = $stmt->fetchAll();
+        foreach ($data as $favrow) {
+            $html.= ' <option value="'.$favrow['favadrid'].'"';
+            if ($favrow['favadrid']==$row['defaultfromtext']) {
+                $html.= ' SELECTED ';
+            }
+            $html.= '>'.$favrow['favadrft'].', '.$favrow['favadrpc'].'</option>';
+        }
+
+        $html.= ' </select>
+        <span id="fromcomments"> </span>        
+        </div>
+        <div class="fs">
+        <div class="fsl">   Delivery </div>
+        <select name="tobox" id="tobox"><option value=""> Select One ...</option>';
+        
+        foreach ($data as $favrow) {
+            $html.= ' <option value="'.$favrow['favadrid'].'"';
+            if ($favrow['favadrid']==$row['defaulttotext']) { $html.= ' SELECTED '; }
+            $html.= '>'.$favrow['favadrft'].', '.$favrow['favadrpc'].'</option>';
+        }
+        $html.= '</select>'; 
+        
+        $html.= ' <span id="tocomments"> </span>  
+        </div>
+        <div class="fs">
+        <div class="fsl"> </div>
+        <input type="text" placeholder="Instructions" class="w490 caps ui-state-default ui-corner-all" name="jobcomments" /> </div>';
+        
+    
+        //////////////////////// starts service code
+        
+        $html.= ' <div class="fs"><div class="fsl">   Service </div>';
+        $html.= ' <select class="jlabel ui-state-default ui-corner-left" name="serviceID" id="newjobServiceID" > '; 
+        
+        
+        $chargedbycheck=1;
+        
+        
+        $query = "SELECT ServiceID, Service , slatime, sldtime, chargedbycheck
+        FROM Services 
+        WHERE activeservice='1' 
+        ORDER BY serviceorder DESC, ServiceID ASC"; 
+        
+        $stmt = $dbh->prepare($query);
+        $stmt->bindParam(':newjobclientid', $newjobclientid, PDO::PARAM_INT); 
+        $stmt->execute();
+        $data = $stmt->fetchAll();
+        foreach ($data as $srow) {
+            $ServiceID = ($srow['ServiceID']);	
+            $Service = htmlspecialchars ($srow['Service']);
+            $html.= ("<option "); 
+            if ($row['defaultservice'] == $ServiceID) {
+                $html.= " selected='SELECTED' "; 
+                $thisslatime=$srow['slatime'];
+                $thissldtime=$srow['sldtime'];
+                $chargedbycheck=$srow['chargedbycheck'];
+            }
+            $html.= ("value=\"$ServiceID\">$Service</option> 
+            "); 
+        }
+        $html.= ("</select>
+       
+        <span id='servicefromdefault'> </span>
+        </div>"); 
+        
+
+        $html.= '<div class="fs"><div class="fsl">   PU Due </div>';
+        $html.= '<select class="ui-state-default ui-corner-left" id="ajcolldue" name="ajcolldue">';
+        $html.= '<option value="now">Now </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:15:00') { $html.= 'SELECTED'; } $html.= ' value="15">15 mins </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:30:00') { $html.= 'SELECTED'; } $html.= ' value="30">30 mins </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:45:00') { $html.= 'SELECTED'; } $html.= ' value="45">45 mins </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='01:00:00') { $html.= 'SELECTED'; } $html.= ' value="60">1 hour </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='01:30:00') { $html.= 'SELECTED'; } $html.= ' value="90">1 &amp;1/2 hours </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='02:00:00') { $html.= 'SELECTED'; } $html.= ' value="120">2 hours </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='03:00:00') { $html.= 'SELECTED'; } $html.= ' value="180">3 hours </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:00:08') { $html.= 'SELECTED'; } $html.= ' value="next8">Next 8AM </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:00:09') { $html.= 'SELECTED'; } $html.= ' value="next9">Next 9AM </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:00:10') { $html.= 'SELECTED'; } $html.= ' value="next10">Next 10AM </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:00:11') { $html.= 'SELECTED'; } $html.= ' value="next11">Next 11AM </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:00:12') { $html.= 'SELECTED'; } $html.= ' value="next12">Next 12PM </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:00:13') { $html.= 'SELECTED'; } $html.= ' value="next13">Next 1PM </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:00:14') { $html.= 'SELECTED'; } $html.= ' value="next14">Next 2PM </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:00:15') { $html.= 'SELECTED'; } $html.= ' value="next15">Next 3PM </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:00:16') { $html.= 'SELECTED'; } $html.= ' value="next16">Next 4PM </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:00:17') { $html.= 'SELECTED'; } $html.= ' value="next17">Next 5PM </option>';
+        $html.= "\n".' <option ';  if ($thisslatime=='00:00:18') { $html.= 'SELECTED'; } $html.= ' value="next18">Next 6PM </option>';
+        $html.= "\n".' </select></div>';
+        
+        $html.= '<div class="fs">
+        <div class="fsl">   Drop Due </div> ';
+        $html.= '<select class="jlabel ui-state-default ui-corner-left" id="ajdelldue" name="ajdelldue">';
+        $html.= ' <option value="now">Now </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:15:00') { $html.= 'SELECTED'; } $html.= ' value="15">15 mins </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:30:00') { $html.= 'SELECTED'; } $html.= ' value="30">30 mins </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:45:00') { $html.= 'SELECTED'; } $html.= ' value="45">45 mins </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='01:00:00') { $html.= 'SELECTED'; } $html.= ' value="60">1 hour </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='01:30:00') { $html.= 'SELECTED'; } $html.= ' value="90">1 &amp;1/2 hours </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='02:00:00') { $html.= 'SELECTED'; } $html.= ' value="120">2 hours </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='03:00:00') { $html.= 'SELECTED'; } $html.= ' value="180">3 hours </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:00:08') { $html.= 'SELECTED'; } $html.= ' value="next8">Next 8AM  </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:00:09') { $html.= 'SELECTED'; } $html.= ' value="next9">Next 9AM  </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:00:10') { $html.= 'SELECTED'; } $html.= ' value="next10">Next 10AM  </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:00:11') { $html.= 'SELECTED'; } $html.= ' value="next11">Next 11AM </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:00:12') { $html.= 'SELECTED'; } $html.= ' value="next12">Next 12PM  </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:00:13') { $html.= 'SELECTED'; } $html.= ' value="next13">Next 1PM  </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:00:14') { $html.= 'SELECTED'; } $html.= ' value="next14">Next 2PM  </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:00:15') { $html.= 'SELECTED'; } $html.= ' value="next15">Next 3PM </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:00:16') { $html.= 'SELECTED'; } $html.= ' value="next16">Next 4PM </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:00:17') { $html.= 'SELECTED'; } $html.= ' value="next17">Next 5PM </option>';
+        $html.= "\n".' <option ';  if ($thissldtime=='00:00:18') { $html.= 'SELECTED'; } $html.= ' value="next18">Next 6PM </option>';
+        $html.= ' </select></div> ';
+        
+        $html.= ' </div> <div class="cbbnewjobr"> ';
+        
+        $html.= ' <div id="newjobcbb" ';
+            if (!$chargedbycheck) { $html.= ' class="hideuntilneeded" '; }
+        $html.='> ';
+        
+        
+        $query = "SELECT 
+        chargedbybuildid, 
+        cbbname
+        FROM chargedbybuild 
+        WHERE cbbcost <> '0.00'
+        AND chargedbybuildid > 3
+        ORDER BY cbborder";
+        
+        $stmt = $dbh->query($query);
+
+        foreach ($stmt as $crow) {            
+            $cbbname = htmlspecialchars ($crow['cbbname']);
+            $cb=$crow['chargedbybuildid'];
+            $html.= '<div class="fs">
+            <div class="fsl">    <input type="checkbox" name="chkcbb'.$cb.'" value="1" '; 
+            $html.= '></div> '.$cbbname.'  </div> ';
+        } // ends loop for valid cbbs
+        
+        
+        $html.= '
+        </div>
+        <div class="fs" > <div class="fsl"> </div>
+        <button class="newjobsubmit" type="submit"> Create New Job </button></div></div>
+        <div class="clear"> </div> ';
+        
+        $html.=' </div> 
+
+        <hr />   ';
+        echo $html;
+    
+?>        
+    <script>
+    var clientdetails=" <a href='new_cojm_client.php?clientid=<?php echo $newjobclientid; ?>' target='_blank' class='showclient' " + 
+    " title='<?php echo $row['CompanyName']; ?> Details' > &nbsp; </a> <?php echo $invhtml; ?> ";
+
+    $("#newjobServiceID").change(function () {
+        $("#toploader").show();
+        var serviceid = $("select#newjobServiceID").val();    
+        $.ajax({
+            url: 'ajax_lookup.php',
+            data: {
+                lookuppage: 'newjobservice',
+                serviceid: serviceid
+            },
+            type: 'post',
+            success: function (data) {
+                $('#status').append(data);
+            },
+            complete: function () {
+                $("#toploader").fadeOut();
+            }
+        }); 
+    });    
+    
+    </script>
+<?php
+        } else { echo 'ERROR : Unable to get client details from database.'; }
+    }
+ 
+    
+
+    if ($lookuppage=='ajaxcheckdep'){
+        
+        $html='';
+        $newjobdepid = $_POST['newjobdepid'];
+        // echo'Department selected: '.$newjobdepid;
+        
+        $query="SELECT associatedclient,
+        depname,
+        deppassword,
+        deprequestor,
+        depdeffromft,
+        depdeftoft,
+        depservice,
+            defaultrequestor, 
+            defaultfromtext, 
+            defaulttotext, 
+            defaultservice
+            FROM clientdep 
+        INNER JOIN Clients WHERE clientdep.associatedclient = Clients.CustomerID
+        AND clientdep.depnumber = ? 
+        "; 
+        
+        $parameters = array($newjobdepid);
+        $statement = $dbh->prepare($query);
+        $statement->execute($parameters);
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+        
+        if ($row) {
+            $script.=' $(#newjobdepid).val("'.$newjobdepid.'"); ';
+            
+            $script='';
+            $invhtml='';
+            
+            $invoicecount=0;
+            $overduecount=0;
+            $todayDate = date("Y-m-d 00:00:00");    
+        
+            $isql = "SELECT (cost + invvatcost) AS cost, invdue FROM invoicing  
+            WHERE (`invoicing`.`paydate` =0 )
+            AND (`invoicing`.`invoicedept` = :newjobdepid ) ";
+            
+            $prep = $dbh->prepare($isql);
+            $prep->bindParam(':newjobdepid', $newjobdepid, PDO::PARAM_INT);
+            $prep->execute();
+            $stmt = $prep->fetchAll();
+            foreach ($stmt as $irow) {
+                $invoicecount++;
+                $itablecost=$itablecost+$irow['cost'];
+                if ($irow['invdue']<$todayDate){
+                    $tablecost+=$irow['cost'];
+                    $overduecount++;
+                }
+            }
+        
+        
+            if ($overduecount) {
+                $itablecost= number_format($itablecost, 2, '.', ','); 
+                $tablecost= number_format($tablecost, 2, '.', ','); 
+                $invhtml=' '.$overduecount.' Overdue Invoice'; if ($overduecount>1) { $invhtml.='s '; }
+                $invhtml.=" <span title='Incl. VAT'> (&". $globalprefrow['currencysymbol']. $tablecost.') </span> ';
+                if ($invoicecount-$overduecount) {
+                    $invhtml.=' + '.($invoicecount-$overduecount)." in date <span title='Incl. VAT'> ( Total &". $globalprefrow['currencysymbol']. $itablecost.') </span>. ';
+                }
+            }
+        
+            $depinvhtml= ' <a href="new_cojm_department.php?depid='.$newjobdepid.'" target="_blank" class="showclient showclientdep" 
+            title="'. $row['depname'].' Details"> &nbsp; </a> '.$invhtml;
+            
+            $script.=' $("#afterdepselect").html(b64DecodeUnicode("'.base64_encode($depinvhtml).'")); ';
+            
+            if ($row['deppassword']) { // echo ' Password Found';
+                $script.='  $("#deppassword").html(b64DecodeUnicode("'.base64_encode($row['deppassword']).'"));
+                            $("#deppassworddiv").show();  ';
+            } else {
+                $script.='  $("#deppassworddiv").hide();  ';
+            }
+            
+        
+            $fromclient='';
+            if ((trim($row['deprequestor'])=='') and (trim($row['defaultrequestor'])))  { 
+                $requestor=$row['defaultrequestor']; 
+                $fromclient=' ( Client default) ';
+            } elseif (trim($row['deprequestor'])) {
+                $requestor=$row['deprequestor']; 
+                $fromclient=' ( Department default) ';    
+            } else {
+                $requestor=''; 
+                $fromclient=' ';
+            }
+            
+            
+            $script.='  $("#requestortext").html(b64DecodeUnicode("'.base64_encode($fromclient).'"));
+                        $("#requestedby").val("'.$requestor.'"); ';
+            
+            $fromclient='';
+            
+            if ((trim($row['depdeffromft'])=='') and (trim($row['defaultfromtext']))) {
+                $from=trim($row['defaultfromtext']);
+                $fromclient=' ( Client default) ';
+            } elseif (trim($row['depdeffromft'])) { 
+                $from=trim($row['depdeffromft']);
+                $fromclient=' ( Department default) ';
+            }
+            else {
+                $from='';
+                $fromclient=' ';
+            }
+            
+            $script.='  $("#frombox").removeAttr("selected");
+            $("#frombox option[value='."'".$from."'".']").attr("selected", "selected");
+            var selectedtext= $("#frombox option:selected").text();
+            $("#fromcomments").html("'.$fromclient.'"); 
+            $("#modfrombox").val( selectedtext ); ';
+            
+            if ((trim($row['depdeftoft'])=='') and (trim($row['defaulttotext']))) {
+                $to=trim($row['defaulttotext']);
+                $toclient=' ( Client default) '; 
+            } elseif (trim($row['depdeftoft'])) {
+                $to=trim($row['depdeftoft']);
+                $toclient=' ( Department default) ';
+            }
+            else {
+                $to='';
+                $toclient=' ';
+            }
+            
+            $script.='  $("#tobox").removeAttr("selected");
+            $("#tobox option[value='."'".$to."'".']").attr("selected", "selected");
+            var selectedtext= $("#tobox option:selected").text();
+            $("#tocomments").html("'.$toclient.'"); 
+            $("#modtobox").val( selectedtext ); ';
+            
+            
+            
+            
+            
+            /////////////     STARTS  SERVICE  ///////////////////////////////////////////////
+            $fromclient='';
+            
+            if (($row['depservice']=='') and  (trim($row['defaultservice'])))  {
+                $defaultservice=trim($row['defaultservice']);
+                $fromclient=' From Client ';
+            } elseif ($row['depservice']) {
+                $defaultservice=trim($row['depservice']);
+                $fromclient=' From Department ';
+            }
+            else {
+                $defaultservice='';
+                $fromclient='';    
+            }
+            
+            $script.='  $("select#newjobServiceID").removeAttr("selected");
+            $("select#newjobServiceID option[value='."'".$defaultservice."'".']").attr("selected", "selected");
+            $("#servicefromdefault").html("'.$fromclient.'"); ';
+            
+            $query = "SELECT slatime, sldtime, chargedbycheck
+            FROM Services 
+            WHERE activeservice='1' 
+            AND ServiceID = ? ";
+            
+            $parameters = array($row['defaultservice']);
+            $statement = $dbh->prepare($query);
+            $statement->execute($parameters);
+            $slarow = $statement->fetch(PDO::FETCH_ASSOC);
+            
+            
+            $thisslatime=$slarow['slatime'];
+            $thissldtime=$slarow['sldtime'];
+        
+            if ($slarow['chargedbycheck']<>'1') {
+                $script.='  $("#newjobcbb").hide(); ';
+            } else {
+                $script.='  $("#newjobcbb").show(); ';
+            }
+            
+                if ($thisslatime=='00:15:00') { $value="15";     } 
+            elseif ($thisslatime=='00:30:00') { $value="30";     } 
+            elseif ($thisslatime=='00:45:00') { $value="45";     } 
+            elseif ($thisslatime=='01:00:00') { $value="60";     } 
+            elseif ($thisslatime=='01:30:00') { $value="90";     } 
+            elseif ($thisslatime=='02:00:00') { $value="120";    } 
+            elseif ($thisslatime=='03:00:00') { $value="180";    } 
+            elseif ($thisslatime=='00:00:08') { $value="next8";  } 
+            elseif ($thisslatime=='00:00:09') { $value="next9";  } 
+            elseif ($thisslatime=='00:00:10') { $value="next10"; } 
+            elseif ($thisslatime=='00:00:11') { $value="next11"; } 
+            elseif ($thisslatime=='00:00:12') { $value="next12"; } 
+            elseif ($thisslatime=='00:00:13') { $value="next13"; } 
+            elseif ($thisslatime=='00:00:14') { $value="next14"; } 
+            elseif ($thisslatime=='00:00:15') { $value="next15"; } 
+            elseif ($thisslatime=='00:00:16') { $value="next16"; } 
+            elseif ($thisslatime=='00:00:17') { $value="next17"; } 
+            elseif ($thisslatime=='00:00:18') { $value="next18"; } 
+            else   { $value="now"; }
+        
+        
+            $script.='  $("#ajcolldue").removeAttr("selected");
+            $("#ajcolldue option[value='."'".$value."'".']").attr("selected", "selected"); ';
+        
+                if ($thissldtime=='00:15:00') { $value="15";     } 
+            elseif ($thissldtime=='00:30:00') { $value="30";     } 
+            elseif ($thissldtime=='00:45:00') { $value="45";     } 
+            elseif ($thissldtime=='01:00:00') { $value="60";     } 
+            elseif ($thissldtime=='01:30:00') { $value="90";     } 
+            elseif ($thissldtime=='02:00:00') { $value="120";    } 
+            elseif ($thissldtime=='03:00:00') { $value="180";    } 
+            elseif ($thissldtime=='00:00:08') { $value="next8";  } 
+            elseif ($thissldtime=='00:00:09') { $value="next9";  } 
+            elseif ($thissldtime=='00:00:10') { $value="next10"; } 
+            elseif ($thissldtime=='00:00:11') { $value="next11"; } 
+            elseif ($thissldtime=='00:00:12') { $value="next12"; } 
+            elseif ($thissldtime=='00:00:13') { $value="next13"; } 
+            elseif ($thissldtime=='00:00:14') { $value="next14"; } 
+            elseif ($thissldtime=='00:00:15') { $value="next15"; } 
+            elseif ($thissldtime=='00:00:16') { $value="next16"; } 
+            elseif ($thissldtime=='00:00:17') { $value="next17"; } 
+            elseif ($thissldtime=='00:00:18') { $value="next18"; } 
+            else   { $value="now"; }
+        
+            $script.='  $("#ajdelldue").removeAttr("selected");
+            $("#ajdelldue option[value='."'".$value."'".']").attr("selected", "selected"); ';
+        
+            echo ' <div class="clear"> </div>';
+        }
+    }
+    
     
 
 
 
 
 
+    if ($lookuppage=='newjobservice'){
+        $serviceid =$_POST['serviceid'];
 
-
-
-
+        $query = "SELECT slatime, sldtime, chargedbycheck
+        FROM Services 
+        WHERE activeservice='1' 
+        AND ServiceID = ? ";
+        
+        $parameters = array($serviceid);
+        $statement = $dbh->prepare($query);
+        $statement->execute($parameters);
+        $slarow = $statement->fetch(PDO::FETCH_ASSOC);
+        
+        
+        $thisslatime=$slarow['slatime'];
+        $thissldtime=$slarow['sldtime'];
+    
+        if ($slarow['chargedbycheck']<>'1') {
+            $script.='  $("#newjobcbb").hide(); ';
+        } else {
+            $script.='  $("#newjobcbb").show(); ';
+        }
+        
+            if ($thisslatime=='00:15:00') { $value="15";     } 
+        elseif ($thisslatime=='00:30:00') { $value="30";     } 
+        elseif ($thisslatime=='00:45:00') { $value="45";     } 
+        elseif ($thisslatime=='01:00:00') { $value="60";     } 
+        elseif ($thisslatime=='01:30:00') { $value="90";     } 
+        elseif ($thisslatime=='02:00:00') { $value="120";    } 
+        elseif ($thisslatime=='03:00:00') { $value="180";    } 
+        elseif ($thisslatime=='00:00:08') { $value="next8";  } 
+        elseif ($thisslatime=='00:00:09') { $value="next9";  } 
+        elseif ($thisslatime=='00:00:10') { $value="next10"; } 
+        elseif ($thisslatime=='00:00:11') { $value="next11"; } 
+        elseif ($thisslatime=='00:00:12') { $value="next12"; } 
+        elseif ($thisslatime=='00:00:13') { $value="next13"; } 
+        elseif ($thisslatime=='00:00:14') { $value="next14"; } 
+        elseif ($thisslatime=='00:00:15') { $value="next15"; } 
+        elseif ($thisslatime=='00:00:16') { $value="next16"; } 
+        elseif ($thisslatime=='00:00:17') { $value="next17"; } 
+        elseif ($thisslatime=='00:00:18') { $value="next18"; } 
+        else   { $value="now"; }
+    
+    
+        $script.='  $("#ajcolldue").removeAttr("selected");
+        $("#ajcolldue option[value='."'".$value."'".']").attr("selected", "selected"); ';
+    
+            if ($thissldtime=='00:15:00') { $value="15";     } 
+        elseif ($thissldtime=='00:30:00') { $value="30";     } 
+        elseif ($thissldtime=='00:45:00') { $value="45";     } 
+        elseif ($thissldtime=='01:00:00') { $value="60";     } 
+        elseif ($thissldtime=='01:30:00') { $value="90";     } 
+        elseif ($thissldtime=='02:00:00') { $value="120";    } 
+        elseif ($thissldtime=='03:00:00') { $value="180";    } 
+        elseif ($thissldtime=='00:00:08') { $value="next8";  } 
+        elseif ($thissldtime=='00:00:09') { $value="next9";  } 
+        elseif ($thissldtime=='00:00:10') { $value="next10"; } 
+        elseif ($thissldtime=='00:00:11') { $value="next11"; } 
+        elseif ($thissldtime=='00:00:12') { $value="next12"; } 
+        elseif ($thissldtime=='00:00:13') { $value="next13"; } 
+        elseif ($thissldtime=='00:00:14') { $value="next14"; } 
+        elseif ($thissldtime=='00:00:15') { $value="next15"; } 
+        elseif ($thissldtime=='00:00:16') { $value="next16"; } 
+        elseif ($thissldtime=='00:00:17') { $value="next17"; } 
+        elseif ($thissldtime=='00:00:18') { $value="next18"; } 
+        else   { $value="now"; }
+    
+        $script.='  $("#ajdelldue").removeAttr("selected");
+        $("#ajdelldue option[value='."'".$value."'".']").attr("selected", "selected"); ';
+    
+        
+    }
 
 
 
@@ -46,18 +655,18 @@ if ($lookuppage) {
 
 
     if ($lookuppage=='cojmaudit') {
-        if (isSet($_GET['auditpage'])) { $view=$_GET['auditpage']; } else { $view=$_POST['auditpage']; }
-if (isSet($_GET['page'])) { $page=$_GET['page']; } elseif (isSet($_POST['page'])) { $page=$_POST['page']; }
-if (isSet($_POST['showdebug'])) { $showdebug=$_POST['showdebug']; } else { $showdebug=''; }
-if (isSet($_POST['showtimes'])) { $showtimes=$_POST['showtimes']; } else { $showtimes=''; }
-if (isSet($_GET['orderid'])) { $orderid=$_GET['orderid'];   } else { $orderid=$_POST['orderid']; }
-
-if  (isset($_POST['clientid'])) { $clientid=trim($_POST['clientid']); } else { $clientid=''; }
-if  (isset($_POST['clientview'])) { $clientview=trim($_POST['clientview']); } else { $clientview=''; }
-if  (isset($_POST['newcyclistid'])) { $newcyclistid=trim($_POST['newcyclistid']); } else { $newcyclistid=''; }
-if (isset($_POST['viewselectdep'])) { $viewselectdep=trim($_POST['viewselectdep']); } else { $viewselectdep=''; }
-if (isSet($_POST['showpageviews'])) { $showpageviews=$_POST['showpageviews'];   } else { $showpageviews=''; }
-if  (isset($_POST['from'])) {
+    if (isSet($_GET['auditpage'])) { $view=$_GET['auditpage']; } else { $view=$_POST['auditpage']; }
+    if (isSet($_GET['page'])) { $page=$_GET['page']; } elseif (isSet($_POST['page'])) { $page=$_POST['page']; }
+    if (isSet($_POST['showdebug'])) { $showdebug=$_POST['showdebug']; } else { $showdebug=''; }
+    if (isSet($_POST['showtimes'])) { $showtimes=$_POST['showtimes']; } else { $showtimes=''; }
+    if (isSet($_GET['orderid'])) { $orderid=$_GET['orderid'];   } else { $orderid=$_POST['orderid']; }
+    
+    if  (isset($_POST['clientid'])) { $clientid=trim($_POST['clientid']); } else { $clientid=''; }
+    if  (isset($_POST['clientview'])) { $clientview=trim($_POST['clientview']); } else { $clientview=''; }
+    if  (isset($_POST['newcyclistid'])) { $newcyclistid=trim($_POST['newcyclistid']); } else { $newcyclistid=''; }
+    if (isset($_POST['viewselectdep'])) { $viewselectdep=trim($_POST['viewselectdep']); } else { $viewselectdep=''; }
+    if (isSet($_POST['showpageviews'])) { $showpageviews=$_POST['showpageviews'];   } else { $showpageviews=''; }
+    if  (isset($_POST['from'])) {
     
     $start=trim($_POST['from']); 
     
@@ -816,7 +1425,6 @@ else {
     
             echo '</tbody> </table> ';
         }
-
     }
 
 
@@ -974,7 +1582,7 @@ else {
         }
 
         if ($_POST['clientid']=='all'){
-            $sql="SELECT favadrid, favadrft, favadrpc FROM cojm_favadr WHERE favadrisactive ='1' GROUP BY favadrft, favadrpc ";
+            $sql="SELECT favadrid, favadrft, favadrpc FROM cojm_favadr WHERE favadrisactive ='1' GROUP BY favadrft, favadrpc";
             $prep = $dbh->prepare($sql);
             $prep->execute();
         }
@@ -1045,6 +1653,10 @@ else {
         catch(PDOException $e) {
             echo $e->getMessage();
         }
+    }
+    
+    if ($script) {
+        echo ' <script> '.$script.' </script> ';
     }
 }
 
@@ -2017,7 +2629,5 @@ return $money; }
  
         }
     }
-
-
 
 ?>

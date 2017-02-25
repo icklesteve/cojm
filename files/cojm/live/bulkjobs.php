@@ -53,15 +53,16 @@ INNER JOIN Clients
 INNER JOIN Services 
 INNER JOIN Cyclist
 INNER JOIN status
-ON Orders.CustomerID = Clients.CustomerID
+left join clientdep ON Orders.orderdep = clientdep.depnumber
+WHERE Orders.CustomerID = Clients.CustomerID
 AND Orders.ServiceID = Services.ServiceID
 AND Orders.CyclistID = Cyclist.CyclistID 
 AND Orders.status = status.status 
-WHERE Orders.FreightCharge <> 0.00 
+AND Orders.FreightCharge <> 0.00 
 ORDER BY `Orders`.`numberitems` DESC
 LIMIT 0 , 100";
 
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+
 	 
 echo '<div class="Post">
 	<div class="ui-widget">	<div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto;">
@@ -79,46 +80,47 @@ echo '<tr>
 <th scope="col">Client</th>
 <th scope="col">Status</th>
 <th scope="col" style="width:30%;">Comments</th>
-</tr><tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
-
-while ($row = mysql_fetch_array($sql_result)) { extract($row);
-$numberitems= trim(strrev(ltrim(strrev($numberitems), '0')),'.');
-$enrpc0=$row['enrpc0'];
-$enrpc21=$row['enrpc21'];
-$prenrpc21= str_replace(" ", "%20", "$enrpc21", $count);
-$prenrpc0= str_replace(" ", "%20", "$enrpc0", $count);
-
-echo '<tr><td><a href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> ';
-echo ''.date(' D j M Y', strtotime($row['ShipDate'])); 
-echo '</td>';
-echo '<td>'.$numberitems;
-echo '</td><td>&'.$globalprefrow['currencysymbol'].' '.$FreightCharge;
-echo '</td><td>';
-
-// $numberitems= trim(strrev(ltrim(strrev($numberitems), '0')),'.');
-
-
-echo number_format(($FreightCharge/$numberitems),3);
-echo '</td><td>';
-echo number_format((($FreightCharge/$numberitems)*1000),2);
-
-echo '</td><td>'. $row['CompanyName'];
-
-$tempdep=$row['orderdep'];
-
-$depsql="SELECT * from clientdep 
-INNER JOIN Orders
-On Orders.orderdep=clientdep.depnumber 
-WHERE Orders.orderdep='$tempdep' LIMIT 0,1";
-$dsql_result = mysql_query($depsql,$conn_id)  or mysql_error();
-
-while ($drow = mysql_fetch_array($dsql_result)) { extract($drow); echo ' ('.$drow['depname'].') '; }
-
-echo '</td><td>'. $row['statusname'] .'</td>
-<td>'. $row['jobcomments'].' '.$row['privatejobcomments'].'</td>
 </tr>
-<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
+';
 
+
+
+$sth = $dbh->prepare($sql);
+$sth->execute($parameters);
+
+
+while($row = $sth->fetch()) {
+    
+    
+    $numberitems= trim(strrev(ltrim(strrev($row['numberitems']), '0')),'.');
+    $enrpc0=$row['enrpc0'];
+    $enrpc21=$row['enrpc21'];
+    $prenrpc21= str_replace(" ", "%20", "$enrpc21", $count);
+    $prenrpc0= str_replace(" ", "%20", "$enrpc0", $count);
+    
+    echo '<tr><td><a href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> ';
+    echo ''.date(' D j M Y', strtotime($row['ShipDate'])); 
+    echo '</td>';
+    echo '<td>'.$numberitems;
+    echo '</td><td title="excl. VAT">&'.$globalprefrow['currencysymbol'].' '.$row['FreightCharge'];
+    echo '</td><td>';
+    
+    // $numberitems= trim(strrev(ltrim(strrev($numberitems), '0')),'.');
+    
+    
+    echo number_format(($row['FreightCharge']/$row['numberitems']),3);
+    echo '</td><td>';
+    echo number_format((($row['FreightCharge']/$row['numberitems'])*1000),2);
+    
+    echo '</td><td>'. $row['CompanyName'];
+    
+    
+    if ($row['depname']) {  echo ' ('.$row['depname'].') '; }
+    
+    echo '</td><td>'. $row['statusname'] .'</td>
+    <td>'. $row['jobcomments'].' '.$row['privatejobcomments'].'</td>
+    </tr>';
+    
 } // End while loop
 
 echo '</tbody></table></div></div><br /></div></body></html>';

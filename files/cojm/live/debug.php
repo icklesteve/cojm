@@ -5,7 +5,7 @@ if ($globalprefrow['forcehttps']>0) {
 if ($serversecure=='') {  header('Location: '.$globalprefrow['httproots'].'/cojm/live/'); exit(); } }
 $settingsmenu=1;
 $adminmenu = "1";
-
+$invoicemenu = "";
 $title = "COJM";
 ?><!DOCTYPE html> 
 <html lang="en"><head>
@@ -18,39 +18,27 @@ $title = "COJM";
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>'; ?>
 <title><?php print ($title); ?> Debug</title>
 </head><body>
-<? 
-
-$adminmenu ="1";
-$invoicemenu = "";
-include "cojmmenu.php"; 
-
-
+<?php
+include "cojmmenu.php";
 echo '<div class="Post"><br/>
-
-http://www.intodns.com/
-
+<a href="http://www.intodns.com/"> IntoDNS </a>
 <br />
-
-https://validator.w3.org/nu/
-
-<br />
-
-';
-
-
-
-
-echo '<br><br>';
-
-
-
-
-
- phpinfo();
-
-
-
-
-
+<a href="https://validator.w3.org/nu/"> W3 HTML5 Validator</a>
+<br /><br><br>';
+phpinfo();
+echo ' 
+ <hr />
+ <h2> Database Details</h2> 
+ <p> class via https://www.phpclasses.org/package/10155-PHP-Generate-documentation-for-a-MySQL-database.html  </p>    
+ <hr />';
+  
+include('phpdbdoc_class.php');
+$doc = new phpdbdoc();
+$doc->setUserdb($user_name);
+$doc->setLinkdb($host_name);
+$doc->setPassword($password);
+$doc->setDataBase($db_name);
+$doc->DBConnect();
+$doc->getDoc();
  ?>
 </div></body></html>

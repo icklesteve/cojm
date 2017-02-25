@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	cyclist.php - Edit Rider Details & Settings
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -39,11 +39,11 @@ if (isset($newcyclistid)) { $thiscyclist=$newcyclistid; }
 // if ($mobdevice) {} else {}
 
 
-$tempwaitingcheck = mysql_result(mysql_query("
-SELECT isactive FROM Cyclist WHERE CyclistID=$thiscyclist  LIMIT 1
-", $conn_id), 0);
+$tempwaitingcheck = mysql_result(mysql_query(" SELECT isactive FROM Cyclist WHERE CyclistID=$thiscyclist  LIMIT 1 ", $conn_id), 0);
 
-if ($tempwaitingcheck<>'1') { $showinactive='1'; }
+if ($tempwaitingcheck<>'1') {
+    $showinactive='1';
+}
 
 if ($thiscyclist=='1') { $title="COJM : Select ".$globalprefrow['glob5'];} else { 
 
@@ -92,8 +92,10 @@ echo '<div class="Post Spaceout">
  if ($showinactive<>'1') {
  $query = "SELECT CyclistID, cojmname, isactive FROM Cyclist WHERE isactive='1' AND CyclistID >'1' ORDER BY CyclistID"; 
  $result_id = mysql_query ($query, $conn_id); 
-} else { $query = "SELECT CyclistID, cojmname, isactive FROM Cyclist WHERE CyclistID >'1' ORDER BY CyclistID";
-$result_id = mysql_query ($query, $conn_id); }
+} else { 
+$query = "SELECT CyclistID, cojmname, isactive FROM Cyclist WHERE CyclistID >'1' ORDER BY CyclistID";
+$result_id = mysql_query ($query, $conn_id); 
+}
  print ("<select class=\"ui-state-highlight ui-corner-left\" id=\"combobox\" name=\"thiscyclist\">\n"); 
  
  echo ' <option value="">Select one...</option>';
@@ -165,7 +167,11 @@ if (!$mobdevice) {
 
 echo '<li><a href="#tabs-3">Personal</a></li>';
 
+
+} else { 
+    
 }
+
 
 echo '<li><a href="#tabs-5">'. $globalprefrow['globalshortname'].' Details</a></li>	';
 
@@ -233,38 +239,38 @@ echo '
 
 </div>';
 
+
+
+
+
+
 if (!$mobdevice) {
 
-echo '
-<div id="tabs-3">
-<fieldset><label for="dob" class="fieldLabel"> Date of Birth </label>
-<input class="ui-state-default ui-corner-all caps" type="text" value="';
- if ($row['DOB']>10) { echo date('d-m-Y', strtotime($row['DOB'])); }
-echo '" id="dob" size="12" name="dob" > </fieldset>
-
-
-<fieldset><label class="fieldLabel"> NI Number </label>
- <input class="ui-state-default ui-corner-all caps" type="text" name="ninumber" size="10" value="'. $row['ninumber'].'" />
-</fieldset>
-
-<fieldset><label class="fieldLabel"> Sort Code </label>
- <input class="ui-state-default ui-corner-all caps" type="text" name="sortcode" size="20" value="'.$row['sortcode'].'" />
- </fieldset>
- 
- <fieldset><label class="fieldLabel"> Account Number </label>
- <input class="ui-state-default ui-corner-all caps" type="text" name="accountnum" size="20" value="'.$row['accountnum'].'" />
- </fieldset>
- 
- <fieldset><label class="fieldLabel"> Bank Name </label>
- <input class="ui-state-default ui-corner-all caps" type="text" name="bankname" size="20" value="'.$row['bankname'].'" />
-</fieldset>
-
-</div>
-
-';
-
-
-
+    echo '
+    <div id="tabs-3">
+    <fieldset><label for="dob" class="fieldLabel"> Date of Birth </label>
+    <input class="ui-state-default ui-corner-all caps" type="text" value="';
+    if ($row['DOB']>10) { echo date('d-m-Y', strtotime($row['DOB'])); }
+    echo '" id="dob" size="12" name="dob" > </fieldset>
+    
+    
+    <fieldset><label class="fieldLabel"> NI Number </label>
+    <input class="ui-state-default ui-corner-all caps" type="text" name="ninumber" size="10" value="'. $row['ninumber'].'" />
+    </fieldset>
+    
+    <fieldset><label class="fieldLabel"> Sort Code </label>
+    <input class="ui-state-default ui-corner-all caps" type="text" name="sortcode" size="20" value="'.$row['sortcode'].'" />
+    </fieldset>
+    
+    <fieldset><label class="fieldLabel"> Account Number </label>
+    <input class="ui-state-default ui-corner-all caps" type="text" name="accountnum" size="20" value="'.$row['accountnum'].'" />
+    </fieldset>
+    
+    <fieldset><label class="fieldLabel"> Bank Name </label>
+    <input class="ui-state-default ui-corner-all caps" type="text" name="bankname" size="20" value="'.$row['bankname'].'" />
+    </fieldset>
+    
+    </div> ';
 } // ends mobile check
 
 
@@ -436,5 +442,5 @@ echo '  setTimeout( function() { $("#comboboxbutton").click() }, 100 ); '; }
 	
 	include "footer.php";
 	
-mysql_close(); 
+
 echo '</body></html>';

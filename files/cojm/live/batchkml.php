@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	batchkml.php - Outputs tracking / map in kml/z format for google earth
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -47,15 +47,24 @@ $arrlength = count($areagpxarray);
  
 reset($gpxarray);
 while (list(, $id) = each($gpxarray)) {
-$query="SELECT ID, ShipDate, status, collectiondate FROM Orders WHERE Orders.publictrackingref = '$id' LIMIT 0,1";
-$result=mysql_query($query, $conn_id); $orow=mysql_fetch_array($result);
-$testfile="cache/jstrack/".date('Y', strtotime($orow['ShipDate']))."/".date('m', strtotime($orow['ShipDate']))."/".$orow['ID'].'tracks.kml';
-if (!file_exists($testfile)) { $errorjobs++; } else { 
-$foundjobs++;
-$foundid=$id;
-$cached[]  = file_get_contents($testfile);
+    
+    $query="SELECT ID, ShipDate, status, collectiondate FROM Orders WHERE Orders.publictrackingref = ? LIMIT 0,1";
+
+    $parameters = array($id);
+    $statement = $dbh->prepare($query);
+    $statement->execute($parameters);
+    $orow = $statement->fetch(PDO::FETCH_ASSOC);
+
+
+    $testfile="cache/jstrack/".date('Y', strtotime($orow['ShipDate']))."/".date('m', strtotime($orow['ShipDate']))."/".$orow['ID'].'tracks.kml';
+    if (!file_exists($testfile)) {
+        $errorjobs++;
+    } else { 
+        $foundjobs++;
+        $foundid=$id;
+        $cached[]  = file_get_contents($testfile);
+    }
 }
-}  
  
 $kml = array('<?xml version="1.0" encoding="UTF-8"?>');
 $kml[] = ' <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2">';
@@ -184,50 +193,52 @@ $areacoord=array();
 
 
 while ( $areax < ($arrlength)) {
-$areaid=$areagpxarray[$areax];
-$btmareaquery = "SELECT opsname, descrip FROM opsmap WHERE opsmapid='".$areaid."' "; 
-$btmareaqueryres = mysql_query ($btmareaquery, $conn_id); 
-$trow=mysql_fetch_array($btmareaqueryres);
-if ($trow['opsname']) { // starts area stuff
-$areadesc[]=$trow['opsname'];
-$result = mysql_query("SELECT AsText(g) AS POLY FROM opsmap WHERE opsmapid=".$areaid);
-if (mysql_num_rows($result)) {
-	$areacoord='';
-    $score = mysql_fetch_assoc($result);
-	$p=$score['POLY'];
-$trans = array("POLYGON" => "", "((" => "", "))" => "");
-$p= strtr($p, $trans);
-$pexploded=explode( ',', $p );
-foreach ($pexploded as $v) {
-$transf = array(" " => ",");
-$v= strtr($v, $transf);
-	$vexploded=explode( ',', $v );
-	$tmpi='0';
-	foreach ($vexploded as $testcoord) {
-	if ($tmpi % 2 == 0) {
-	$holdforasec=$testcoord; 
-	$tempb=$holdforasec;
-	} 
-else	{
-$areacoord[]=$testcoord.','.$holdforasec.',0.0 ';
+    $areaid=$areagpxarray[$areax];
+    
+    $btmareaquery = "SELECT opsname, descrip, AsText(g) AS POLY FROM opsmap WHERE opsmapid=? "; 
 
-$totlon=$totlon+$testcoord;
-$totlat=$totlat+$holdforasec;
-$i++;
+    $parameters = array($areaid);
+    $statement = $dbh->prepare($btmareaquery);
+    $statement->execute($parameters);
+    $trow = $statement->fetch(PDO::FETCH_ASSOC);    
 
-$tempa=$testcoord;
-	}
-$tmpi++;
-	} // ends every single coord loop
-}
-}
-$areacoordout = join("\n", $areacoord);
+    $areadesc[]=$trow['opsname'];
 
-$arkml[] = '<innerBoundaryIs><LinearRing><coordinates>';
-$arkml[]=$areacoordout;
-$arkml[] = '</coordinates></LinearRing></innerBoundaryIs>';
-} // ends check for area name
-$areax++;
+    $areacoord='';
+
+    $p=$trow['POLY'];
+    $trans = array("POLYGON" => "", "((" => "", "))" => "");
+    $p= strtr($p, $trans);
+    $pexploded=explode( ',', $p );
+    foreach ($pexploded as $v) {
+        $transf = array(" " => ",");
+        $v= strtr($v, $transf);
+        $vexploded=explode( ',', $v );
+        $tmpi='0';
+        foreach ($vexploded as $testcoord) {
+            if ($tmpi % 2 == 0) {
+                $holdforasec=$testcoord; 
+                $tempb=$holdforasec;
+            } 
+            else {
+                $areacoord[]=$testcoord.','.$holdforasec.',0.0 ';
+                
+                $totlon=$totlon+$testcoord;
+                $totlat=$totlat+$holdforasec;
+                $i++;
+                
+                $tempa=$testcoord;
+            }
+            $tmpi++;
+        } // ends every single coord loop
+    }
+    $areacoordout = join("\n", $areacoord);
+    
+    $arkml[] = '<innerBoundaryIs><LinearRing><coordinates>';
+    $arkml[]=$areacoordout;
+    $arkml[] = '</coordinates></LinearRing></innerBoundaryIs>';
+    
+    $areax++;
 } // ends area loop
 
 
@@ -319,15 +330,17 @@ if ($collecttime < 10) { $collecttime=9999999999;}
 
 $sql = "
 SELECT longitude, latitude FROM `instamapper` 
-WHERE `device_key` = '$trackerid' 
-AND `timestamp` > '$collecttime' 
-AND `timestamp` NOT BETWEEN '$startpause' 
-AND '$finishpause' 
-AND `timestamp` < '$delivertime' 
+WHERE `device_key` = ?
+AND `timestamp` > ?
+AND `timestamp` NOT BETWEEN ?
+AND ?
+AND `timestamp` < ?
 ORDER BY `timestamp` ASC LIMIT 0,1";
 
+$parameters = array($trackerid,$collecttime,$startpause,$finishpause,$delivertime);
+
 $sth = $dbh->prepare($sql);
-$sth->execute();
+$sth->execute($parameters);
 
 
 
@@ -335,7 +348,8 @@ $sth->execute();
 
 
 
-while($map = $sth->fetch(/* PDO::FETCH_ASSOC */)) {
+
+while($map = $sth->fetch()) {
 	
  
  $kml[] = '

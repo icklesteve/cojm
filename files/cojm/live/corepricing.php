@@ -373,8 +373,5 @@ $('.Post').append(data);
 
 include 'footer.php';
 
-mysql_close();
-$dbh=null;
-
 ?>
 </body></html>

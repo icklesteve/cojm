@@ -135,7 +135,7 @@ if (date_default_timezone_get()=='UTC') { $nowepoch=-900000000000000; }
 if ($nowepoch < $globalprefrow['formtimeout']) {
 
 
-       if (isset($_POST['vertices'])) { $vertices=trim($_POST['vertices']); } else { $vertices=''; }
+    if (isset($_POST['vertices'])) { $vertices=trim($_POST['vertices']); } else { $vertices=''; }
     // vertices used in a few pages
 
     if ($page=='uploadkml') {
@@ -210,11 +210,9 @@ if ($nowepoch < $globalprefrow['formtimeout']) {
         }
     }
 
-    $infotext.=' vertices: '.$vertices;
-
-
-
-        if ($vertices) {
+    
+    if ($vertices) {
+            $infotext.=' vertices: '.$vertices;
             $pexploded=explode( ',', $vertices );
         
             foreach ($pexploded as $tv) {
@@ -249,7 +247,7 @@ if ($nowepoch < $globalprefrow['formtimeout']) {
         }
 
         
-        if ($page=='uploadkml') {
+    if ($page=='uploadkml') {
             if (isset($_POST['areaname'])) {
                 $areaname=trim($_POST['areaname']);
                 
@@ -279,7 +277,7 @@ if ($nowepoch < $globalprefrow['formtimeout']) {
             }
         }
         
-        if ($page=='editarea') {
+    if ($page=='editarea') {
             $infotext =$infotext. ' in edit ops map area ';
             if (isset($_POST['areaid'])) { $areaid=trim($_POST['areaid']);} else { $areaid=''; }
             if (isset($_POST['areaname'])) { $areaname=trim($_POST['areaname']);} else { $areaname=''; }
@@ -319,7 +317,7 @@ if ($nowepoch < $globalprefrow['formtimeout']) {
         } // ends page editarea
 
     
-        if ($page=='opsmapnewarea') {
+    if ($page=='opsmapnewarea') {
             $infotext =$infotext. ' new ops map area ';
             if (isset($_POST['areaname'])) { $areaname=trim($_POST['areaname']);} else {$areaname=''; }
             if (isset($_POST['areacomments'])) { $areacomments=trim($_POST['areacomments']);} else { $areacomments=''; }
@@ -431,15 +429,46 @@ email18='$email18' ,
 email19='$email19' ,
 email20='$email20' 
 "; 
-$result = mysql_query($sql, $conn_id);
-if ($result){ 
+
+
+ try {
+
+        $dbh->prepare($sql)->execute([$emailfrom, 
+        $emailbcc, 
+        $emailfromname, 
+        $htmlemailheader, 
+        $emailbody, 
+        $htmlemailbody, 
+        $emailfooter, 
+        $htmlemailfooter, 
+        $email1, 
+        $email2, 
+        $email3, 
+        $email4,
+        $email5,
+        $email6,
+        $email7,
+        $email8,
+        $email9,
+        $email10,
+        $email11,
+        $email12,
+        $email13,
+        $email14,
+        $email15,
+        $email16,
+        $email17,
+        $email18,
+        $email19,
+        $email20]);
+        
+
 $infotext.="<br />Updated Email Setup"; 
 $pagetext.="<p>Updated Email Setup</p>"; 
 } 
-else { 
-$infotext.=mysql_error()."<br /><strong>An error occured during updating email settings</strong>"; 
-$alerttext.="<p><strong>An error occured during updating email settings</strong></p>"; 
-} 
+catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessage(); }
+
+
 
 } // ends chek for emai from
 } // finishes global email
@@ -458,54 +487,52 @@ $alerttext.="<p><strong>An error occured during updating email settings</strong>
         $infotext.='<br />Adding new postcode '.$newpc;
         
         
-        $existingquery=" SELECT `PZ_Postcode`
+        $query=" SELECT `PZ_Postcode`
         FROM  `postcodeuk` 
         WHERE  `PZ_Postcode` 
-        LIKE  '$newpc' LIMIT 0,1
+        LIKE  ? LIMIT 0,1
         ";
 
-        // echo $existingquery;
-
-        $ifexistingpc = mysql_num_rows(mysql_query($existingquery, $conn_id));
 
 
+        $parameters = array($newpc);
+        $statement = $dbh->prepare($query);
+        $statement->execute($parameters);
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
 
     
     
-    if ($ifexistingpc>0) {  
+    if ($row) {
     
-    
-    // $infotext.='<br />ifexistingpc : '.$ifexistingpc; 
-    // $infotext.='<br />lat : '.$lat; 
-    // $infotext.='<br />lon : '.$lng; 
-    
-    $sql = "UPDATE `postcodeuk` 
-    SET  `PZ_zero` =  '1' ,
-    `PZ_northing` =  '$lat' ,
-    `PZ_easting` =  '$lng'
-    WHERE 
-    `PZ_Postcode` =  '$newpc' LIMIT 1;";
-    
-    $result = mysql_query($sql, $conn_id);
-    if ($result){ 
-    $infotext.='<br /> Postcode updated ';
-    $pagetext.='<p> Postcode updated </p>';
-    
-    } else { $infotext.="<br /><strong>Error occured in updating postcode</strong>".$sql; }
-    
+        // $infotext.='<br />ifexistingpc : '.$ifexistingpc; 
+        // $infotext.='<br />lat : '.$lat; 
+        // $infotext.='<br />lon : '.$lng; 
+        try {
+            $sql = "UPDATE `postcodeuk` 
+            SET  `PZ_zero` =  '1' ,
+            `PZ_northing` =  ? ,
+            `PZ_easting` =  ?
+            WHERE 
+            `PZ_Postcode` =  ? LIMIT 1;";
+            
+            $dbh->prepare($sql)->execute([$lat,$lng,$newpc]);
+            
+            $infotext.='<br /> Postcode updated ';
+            $pagetext.='<p> Postcode '.$newpc.' updated </p>';
+            
+        }
+        catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessage(); }
+        
     } else {  // ends no existing pc
     
-    
-    $sql="INSERT INTO `postcodeuk` (`PZ_Postcode`, `PZ_northing`, `PZ_easting`, `PZ_zero`) VALUES 
-    ('$newpc', '$lat', '$lng', '1');";
-    $result = mysql_query($sql, $conn_id);
-    if ($result){ 
-        $pagetext.='<p> Postcode added </p>';
-        $infotext.='<br /> Postcode added ';
-    } else { 
-        $alerttext.="<p><strong>Error occured in adding postcode</strong></p>"; 
-        $infotext.="<br /><strong>Error occured in adding postcode</strong>".$sql; 
-        } // sql result
+        try {
+            $sql="INSERT INTO `postcodeuk` (`PZ_Postcode`, `PZ_northing`, `PZ_easting`, `PZ_zero`) VALUES 
+            (?, ?, ?, '1');";
+            $dbh->prepare($sql)->execute([$newpc,$lat,$lng]);
+            $pagetext.='<p> Postcode added </p>';
+            $infotext.='<br /> Postcode added ';
+        }
+        catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessage(); }
     } // ends existing postcode
 
     if ($id) {
@@ -516,782 +543,698 @@ $alerttext.="<p><strong>An error occured during updating email settings</strong>
     }
     
     
-} // ends page =editpostcode
-
+    } // ends page =editpostcode
 
 
 
     if ($page=='editglobalstatus') {
-
-// $infotext.='<br />Editing Status Text';
-$i=0;
-While ($i < 500) {
-if (isset($_POST["statusid$i"])) {
-if (($_POST["statusid$i"])=='1') {
-
-// do check to make sure that no jobs with that current status are selected
-
-if (isset($_POST["activestatus$i"])) { $activestatus= trim($_POST["activestatus$i"]); } else { $activestatus='0'; }
-$statusname=trim($_POST["statusname$i"]);
-$publicstatusname=trim($_POST["publicstatusname$i"]);
-
- // check for active jobs at changed status
- $sql = "SELECT * FROM Orders 
- WHERE (`Orders`.`status` = '$i' )
- ORDER BY `Orders`.`ID` ";
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); $sumtot=mysql_affected_rows(); 
-
-if ($sumtot>0)  {
-if ($activestatus=='0') {
-
-$infotext.= '<br /><strong>Unable to deactive status'.$i.',</strong><br /><strong>'.$sumtot.' Jobs Outstanding.';
-$pagetext.= '<p><strong>Unable to deactive status'.$i.',</strong><br /><strong>'.$sumtot.' Jobs Outstanding.</p>';
-
-while ($row = mysql_fetch_array($sql_result)) { extract($row); 
-$infotext.= '<br /><a target="_blank" href="order.php?id='. $row['ID'] .'">'. $row['ID'].'</a>';
-$pagetext.= '<p><a target="_blank" href="order.php?id='. $row['ID'] .'">'. $row['ID'].'</p>';
-} // ends check for jobs in loop 
-$activestatus='1';
-} // see if active
-} // see if need to loop
-$infotext.= '<br />'.$i.' '.$activestatus.' '.$statusname.' '.$publicstatusname;
-$sql = "UPDATE status SET statusname='$statusname', activestatus='$activestatus', 
-publicstatusname='$publicstatusname' WHERE status='$i' LIMIT 1"; $result = mysql_query($sql, $conn_id);
-if ($result){ 
-// $infotext.="<br />Status updated for id ".$i.' '.$sql; 
-} 
-else { 
-$alerttext.='<p>Problem updating status '.$i.'</p>';
-$infotext.="<br /><strong>An error occured during updating updating status".$i."!</strong>".$sql; }
-
-} // ends check for activeid
-
-} // ends isset check
-
-$i++; }
-$pagetext.='<p>Statuses updated</p>';
-$infotext.='<p>Status update complete</p>';
-} // ends edit global status text
+        // $infotext.='<br />Editing Status Text';
+        $i=1;
+        While ($i < 125) {
+            if (isset($_POST["statusid$i"])) {
+                if (($_POST["statusid$i"])=='1') {
+                    $statusname=trim($_POST["statusname$i"]);
+                    $publicstatusname=trim($_POST["publicstatusname$i"]);
+                    $infotext.= '<br />'.$i.' '.$activestatus.' '.$statusname.' '.$publicstatusname;
+                    try {
+                        $sql = "UPDATE status SET statusname=?, publicstatusname=? WHERE status=? LIMIT 1";
+                        $dbh->prepare($sql)->execute([$statusname,$publicstatusname,$i]);
+                    }
+                    catch(PDOException $e) {
+                        $alerttext.= $e->getMessage(); $infotext.= $e->getMessage();
+                        $alerttext.='<p>Problem updating status '.$i.'</p>';
+                        $infotext.="<br /><strong>An error occured during updating updating status".$i."!</strong>".$sql;                        
+                    }
+                } // ends check for activeid
+            } // ends isset check
+            $i++;
+        }
+        $pagetext.='<p>Statuses updated</p>';
+        $infotext.='<p>Status update complete</p>';
+    } // ends edit global status text
 
 
 
 
     if ($page=="editcyclistdetails") {
+        $infotext.= '<br />Editing Cyclist Details';    
+        
+        $thiscyclist=$_POST['thiscyclist'];
+        
+        
+        if ((isset($_POST['dob'])) and ($_POST['dob'])) {
+            $dob=trim($_POST['dob']);
+            $dob = str_replace("/", ":", "$dob", $count);
+            $dob = str_replace(",", ":", "$dob", $count);
+            $dob = str_replace("-", ":", "$dob", $count);
+            $temp_ar=explode(":",$dob); 
+            $dobday=$temp_ar[0]; 
+            $dobmonth=$temp_ar[1]; 
+            $dobyear=$temp_ar[2]; 
+            $dobdate=date("Y-m-d H:i:s", mktime(01, 01, 01, $dobmonth, $dobday, $dobyear));
+        } else {
+            $dobdate='';
+        }
+        
+        
+        if ((isset($_POST['contractstartdate'])) and ($_POST['contractstartdate'])) {
+            $contractstartdate=trim($_POST['contractstartdate']);
+            $contractstartdate = str_replace("/", ":", "$contractstartdate", $count);
+            $contractstartdate = str_replace(",", ":", "$contractstartdate", $count);
+            $contractstartdate = str_replace("-", ":", "$contractstartdate", $count);
+            $temp_ar=explode(":",$contractstartdate); 
+            $startday=$temp_ar[0]; 
+            $startmonth=$temp_ar[1]; 
+            $startyear=$temp_ar[2];
+            $startdate=date("Y-m-d H:i:s", mktime(01, 01, 01, $startmonth, $startday, $startyear));
+            if (!$contractstartdate) { $startdate=''; }
+        } else {
+            $startdate='';
+        }
+        
+        $mobilenumber=trim($_POST['mobilenumber']);
+        $cojmname=trim($_POST['cojmname']);
+        $poshname=trim($_POST['poshname']);
+        $trackerid=trim($_POST['trackerid']);
+        $housenumber=trim($_POST['housenumber']);
+        $streetname=trim($_POST['streetname']);
+        $postcode=trim($_POST['postcode']);
+        $icename=trim($_POST['icename']);
+        $icenumber=trim($_POST['icenumber']);
+        $ninumber=trim($_POST['ninumber']);
+        $sortcode=trim($_POST['sortcode']);
+        $accountnum=trim($_POST['accountnum']);
+        $bankname=trim($_POST['bankname']);
+        $notes=trim($_POST['description']);
+        $city=trim($_POST['city']);
+        
+        if (($globalprefrow['inaccuratepostcode'])==0) {
+            $postcode = str_replace (" ", "", strtoupper($postcode));
+            $start=substr($postcode, 0, -3);  $postcode=trim($start.' '.substr($postcode, -3)); // 'ies'  
+        }
+        
+        if (isset($_POST['isactive'])) { $isactive=trim($_POST['isactive']); } else { $isactive=''; }
+        
+        $cyclistjoomlanumber=trim($_POST['cyclistjoomlanumber']);
+        
+        $sql = "SELECT CyclistID FROM Cyclist 
+        WHERE `Cyclist`.`CyclistID` <> ?  
+        AND `Cyclist`.`isactive` = '1'      
+        AND  `Cyclist`.`cojmname` = ? LIMIT 1 ";
+        
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute([$thiscyclist,$cojmname]);
+        $userExists = $stmt->fetchColumn();
 
 
-$thiscyclist=$_POST['thiscyclist'];
+        if ($userExists) {
+            $alerttext.='<p><strong>'.$cojmname.' already exists, please use a different name.</strong></p>';
+            $infotext.='<br /><strong>'.$cojmname.' already exists</strong>';
+        } else {
+            if (($thiscyclist) and ($cojmname)) {
+                $sql = "UPDATE Cyclist SET 
+                poshname=(UPPER(?)) , 
+                isactive=? ,  
+                cojmname=(UPPER(?)) , 
+                mobilenumber=? , 
+                trackerid=? ,  
+                cyclistjoomlanumber=? ,
+                housenumber=(UPPER(?)) , 
+                streetname=(UPPER(?)) , 
+                city=(UPPER(?)) , 
+                postcode=(UPPER(?)) ,  
+                contractstartdate=? , 
+                icename=(UPPER(?)) , 
+                icenumber=(UPPER(?)) , 
+                notes=(UPPER(?))
+                WHERE CyclistID = ? LIMIT 1 ";
+                
+                try {
+                    $sth=$dbh->prepare($sql);
+                    $data=array($poshname,$isactive,$cojmname,$mobilenumber,$trackerid,$cyclistjoomlanumber,$housenumber,$streetname,$city,$postcode,$startdate,$icename,$icenumber,$notes,$thiscyclist);
+                    $sth->execute($data);
+                    $infotext.="<br />Success";
+                    $pagetext.='<p>'.$globalprefrow['glob5'].' details updated</p>';                    
+                }
+            
+                catch(PDOException $e) {
+                    $alerttext.= $e->getMessage();
+                    $infotext.= $e->getMessage();
+                    $infotext.=" An error occured during update!<br>".$sql;  
+                    $alerttext.=" <p>An error occured during update!</p>";
+                }
 
-
-if ((isset($_POST['dob'])) and ($_POST['dob'])) {
-$dob=trim($_POST['dob']);
-$dob = str_replace("/", ":", "$dob", $count);
-$dob = str_replace(",", ":", "$dob", $count);
-$dob = str_replace("-", ":", "$dob", $count);
-$temp_ar=explode(":",$dob); 
-$dobday=$temp_ar[0]; 
-$dobmonth=$temp_ar[1]; 
-$dobyear=$temp_ar[2]; 
-$dobdate=date("Y-m-d H:i:s", mktime(01, 01, 01, $dobmonth, $dobday, $dobyear));
-if (!$dob) { $dobdate=''; }
-} else { $dobdate=''; }
-
-
-if ((isset($_POST['contractstartdate'])) and ($_POST['contractstartdate'])) {
-$contractstartdate=trim($_POST['contractstartdate']);
-$contractstartdate = str_replace("/", ":", "$contractstartdate", $count);
-$contractstartdate = str_replace(",", ":", "$contractstartdate", $count);
-$contractstartdate = str_replace("-", ":", "$contractstartdate", $count);
-$temp_ar=explode(":",$contractstartdate); 
-$startday=$temp_ar[0]; 
-$startmonth=$temp_ar[1]; 
-$startyear=$temp_ar[2];
-$startdate=date("Y-m-d H:i:s", mktime(01, 01, 01, $startmonth, $startday, $startyear));
-if (!$contractstartdate) { $startdate=''; }
-} else { $startdate=''; }
-
-$mobilenumber=trim($_POST['mobilenumber']);
-$cojmname=trim($_POST['cojmname']);
-$poshname=trim($_POST['poshname']);
-$trackerid=trim($_POST['trackerid']);
-$housenumber=trim($_POST['housenumber']);
-$streetname=trim($_POST['streetname']);
-$postcode=trim($_POST['postcode']);
-$icename=trim($_POST['icename']);
-$icenumber=trim($_POST['icenumber']);
-$ninumber=trim($_POST['ninumber']);
-$sortcode=trim($_POST['sortcode']);
-$accountnum=trim($_POST['accountnum']);
-$bankname=trim($_POST['bankname']);
-$notes=trim($_POST['description']);
-$city=trim($_POST['city']);
-
-
-if (($globalprefrow['inaccuratepostcode'])==0) {
-$postcode = str_replace (" ", "", strtoupper($postcode));
-$start=substr($postcode, 0, -3);  $postcode=trim($start.' '.substr($postcode, -3)); // 'ies'  
-}
-
-
-
-
-
-if (isset($_POST['isactive'])) { $isactive=trim($_POST['isactive']); } else { $isactive=''; }
-
-
-$infotext = $infotext . '<br />Editing Cyclist Details';
-// echo 'Mobile Number : ' . $mobilenumber;
-
-$cyclistjoomlanumber=trim($_POST['cyclistjoomlanumber']);
-
-$sql = "SELECT * FROM Cyclist 
-WHERE `Cyclist`.`CyclistID` <> $thiscyclist  
-AND `Cyclist`.`isactive` = '1'      
-AND  `Cyclist`.`cojmname` = '$cojmname' LIMIT 1 ";
-
-
-$sql_result = mysql_query($sql,$conn_id); 
-$sumtot=mysql_affected_rows(); if ($sumtot>0)  {
-
-$alerttext.='<p><strong>'.$cojmname.' already exists, please use a different name.</strong></p>';
-$infotext.='<br /><strong>'.$cojmname.' already exists</strong>'; } 
-
-if ($thiscyclist) {
-if ($cojmname) {
-
-if ($mobdevice) {
-
-
-
-
- $sql = "UPDATE Cyclist SET 
- poshname=(UPPER('$poshname')) , 
- isactive='$isactive' ,  
- cojmname=(UPPER('$cojmname')) , 
- mobilenumber='$mobilenumber' , 
- trackerid='$trackerid' ,  
- cyclistjoomlanumber='$cyclistjoomlanumber' ,
- housenumber=(UPPER('$housenumber')) , 
- streetname=(UPPER('$streetname')) , 
- city=(UPPER('$city')) , 
- postcode=(UPPER('$postcode')) ,  
- contractstartdate='$startdate' , 
- icename=(UPPER('$icename')) , 
- icenumber=(UPPER('$icenumber')) , 
- notes=(UPPER('$notes')) 
- WHERE CyclistID='$thiscyclist' 
- LIMIT 1"; 
-
-
-} else {
-
- $sql = "UPDATE Cyclist SET 
- poshname=(UPPER('$poshname')) , 
- isactive='$isactive' ,  
- cojmname=(UPPER('$cojmname')) , 
- mobilenumber='$mobilenumber' , 
- trackerid='$trackerid' ,  
- DOB='$dobdate' , 
- cyclistjoomlanumber='$cyclistjoomlanumber' ,
- housenumber=(UPPER('$housenumber')) , 
- streetname=(UPPER('$streetname')) , 
- city=(UPPER('$city')) , 
- postcode=(UPPER('$postcode')) ,  
- contractstartdate='$startdate' , 
- ninumber=(UPPER('$ninumber')) , 
- icename=(UPPER('$icename')) , 
- icenumber=(UPPER('$icenumber')) , 
- sortcode='$sortcode' , 
- accountnum='$accountnum' , 
- bankname=(UPPER('$bankname')) , 
- notes=(UPPER('$notes')) 
- WHERE CyclistID='$thiscyclist' 
- LIMIT 1"; 
- 
- 
- 
- } // ends mobile device check
- 
- 
- } // ends cojmname
-  
- 
- $result = mysql_query($sql, $conn_id);
- if ($result){ 
- $infotext.="<br />Success";
- $pagetext.='<p>'.$globalprefrow['glob5'].' details updated</p>';
- } else {
- $infotext.=mysql_error()." An error occured during update!<br>".$sql;  
- $alerttext.=mysql_error()." <p>An error occured during update!</p>";
- } // ends 
- } // ends check on thiscyclist
- 
-
-} // ends page=editcyclist details
-
+            
+                if (!$mobdevice) {
+                    
+                    $sql = "UPDATE Cyclist SET 
+                    DOB=? , 
+                    ninumber=(UPPER(?)) , 
+                    sortcode=? , 
+                    accountnum=? , 
+                    bankname=(UPPER(?))
+                    WHERE CyclistID=?
+                    LIMIT 1"; 
+        
+                    try {
+                        $sth=$dbh->prepare($sql);
+                        $data=array($dobdate,$ninumber,$sortcode,$accountnum,$bankname,$thiscyclist);
+                        $sth->execute($data);
+                        $infotext.="<br />Success";
+                        $pagetext.='<p>'.$globalprefrow['glob5'].' Personal details updated</p>';                    
+                    }
+                
+                    catch(PDOException $e) {
+                        $alerttext.= $e->getMessage();
+                        $infotext.= $e->getMessage();
+                        $infotext.=" An error occured during personal details update!<br>".$sql;  
+                        $alerttext.=" <p>An error occured during update!</p>";
+                    }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+                } // ends mobile device check            
+        
+            } // ends cojmname
+        }
+    } // ends page=editcyclist details
 
 
 
     if ($page=='addnewcyclist') {
+        $infotext.='<p><b>New Cyclist</b></p>'; 
+    
+        if (isset($_POST['CompanyName'])) { $cojmname=trim($_POST['CompanyName']); }
+        if (isset($_POST['CompanyName'])) { $poshname=trim($_POST['CompanyName']); }
+        
 
-if (isset($_POST['CompanyName'])) { $cojmname=trim($_POST['CompanyName']); }
-if (isset($_POST['CompanyName'])) { $poshname=trim($_POST['CompanyName']); }
+        $trackerid=mt_rand(1000099, 99999999);
+        
+        
 
-
-
-$trackerid=mt_rand(99, 99999999);
-
-
-$sql = "SELECT CyclistID FROM Cyclist WEHRE trackerid ='$trackerid' LIMIT 0,1"; $result = mysql_query($sql, $conn_id);
-
-// $infotext.='Res:'.$result;
-
-
-if ($result>'0') { $trackerid=mt_rand(99, 99999999); }
-
+        $sql = "SELECT CyclistID FROM Cyclist 
+        WHERE `Cyclist`.`CyclistID` <> ?  
+        AND `Cyclist`.`isactive` = '1'      
+        AND  `Cyclist`.`cojmname` = ? LIMIT 1 ";
 
 
 
-
-
-
- $infotext.='<p><b>New Cyclist</b></p>'; 
-
-   $sql="INSERT INTO Cyclist 
-   (poshname, isactive, cojmname, trackerid) 
-    VALUES
-  ('$poshname',
-   '1',
-   '$cojmname',
-   '$trackerid'
-)   ";
-   
-   
-
-   
-   
-    $result = mysql_query($sql, $conn_id);
- if ($result){
- $infotext.="<br />Success";
- $pagetext.='<p>'.$globalprefrow['glob5'].' details updated</p>';
- 
-  
- $thiscyclist=mysql_insert_id(); 
-   $newcyclistid=$thiscyclist;
-      $pagetext.='<p>New '.$globalprefrow['glob5'].' '.$thiscyclist.' '.$cojmname.' created.</p>';
-   $infotext.='<p>New Rider No. '.$thiscyclist.' created.</p>'; 
-   
- 
- } else {
- $infotext.=mysql_error()." An error occured during update!<br>".$sql;  
- $alerttext.=mysql_error()." <p>An error occured during update!</p>";
- } // ends 
-
-
-
-   
-
-
-
-   
-} // ends page=addnewcyclist
+        $sql = "SELECT CyclistID FROM Cyclist WHERE trackerid = ? LIMIT 1";
+        
+        
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute([$trackerid]);
+        $alreadyExists = $stmt->fetchColumn();
+        if ($alreadyExists) {
+            $trackerid=mt_rand(100099, 99999999);
+        }
+        
+        
+        $sql="INSERT INTO Cyclist 
+            (poshname, isactive, cojmname, trackerid) 
+            VALUES 
+            (?,'1',?,?); ";
+        
+        
+        try {
+            $dbh->prepare($sql)->execute([$poshname, $cojmname, $trackerid]);
+            $infotext.="<br />Success";
+            $pagetext.='<p>'.$globalprefrow['glob5'].' details updated</p>';
+        
+        
+            $thiscyclist = $dbh->lastInsertId();
+            $newcyclistid=$thiscyclist;
+            $pagetext.='<p>New '.$globalprefrow['glob5'].' '.$thiscyclist.' '.$cojmname.' created.</p>';
+            $infotext.='<p>New Rider No. '.$thiscyclist.' created.</p>'; 
+        
+        }
+        catch(PDOException $e) {
+            $alerttext.= $e->getMessage();
+            $infotext.= $e->getMessage();
+            $infotext.=" An error occured during update!<br>".$sql;  
+            $alerttext." <p>An error occured during update!</p>";
+        }
+        
+    
+    } // ends page=addnewcyclist
 
 
 
     if ($page=="editthisservice") {
 
-// $infotext.='<br><strong>editing service details</strong>';
+        // $infotext.='<br><strong>editing service details</strong>';
+        
+        $Service=trim($_POST['Service']);
+        $servicecomments=trim($_POST['servicecomments']);
+        $Price=trim($_POST['Price']);
+        $CO2Saved=trim($_POST['CO2Saved']);
+        $PM10Saved=trim($_POST['PM10Saved']);
+        
+        if (isset($_POST['LicensedCount'])) { $LicensedCount=trim($_POST['LicensedCount']); } else { $LicensedCount=''; }
+        if (isset($_POST['UnlicensedCount'])) { $UnlicensedCount=trim($_POST['UnlicensedCount']); } else { $UnlicensedCount=''; }
+        if (isset($_POST['batchdropcount'])) { $batchdropcount=trim($_POST['batchdropcount']); } else { $batchdropcount=''; }
+        if (isset($_POST['hourlyothercount'])) { $hourlyothercount=trim($_POST['hourlyothercount']); } else { $hourlyothercount=''; }
+        if (isset($_POST['asapservice'])) { $asapservice=trim($_POST['asapservice']); } else { $asapservice=''; }
+        if (isset($_POST['cargoservice'])) { $cargoservice=trim($_POST['cargoservice']); } else { $cargoservice=''; }
+        if (isset($_POST['RMcount'])) { $RMcount=trim($_POST['RMcount']); } else { $RMcount=''; }
+        if (isset($_POST['activeservice'])) { $activeservice=trim($_POST['activeservice']); } else { $activeservice=''; }
+        if (isset($_POST['isregular'])) { $isregular=trim($_POST['isregular']); } else { $isregular=''; }
+        if (isset($_POST['chargedbybuild'])) { $chargedbybuild=trim($_POST['chargedbybuild']); } else { $chargedbybuild=''; }
+        if (isset($_POST['chargedbycheck'])) { $chargedbycheck=trim($_POST['chargedbycheck']); } else { $chargedbycheck=''; }
+        if (isset($_POST['canhavemap'])) { $canhavemap=trim($_POST['canhavemap']); } else { $canhavemap=''; }
+        
+        $slatime=trim($_POST['slatime']);
+        $sldtime=trim($_POST['sldtime']);
+        $serviceorder=trim($_POST['serviceorder']);
+        $vatband=trim($_POST['vatband']);
+        $thisserviceid=trim($_POST['serviceid']);
+        
+        if ($thisserviceid) {
+        
+            $sql = "UPDATE Services SET Service=? ,
+            servicecomments=? , 
+            Price=? , 
+            serviceorder=? ,
+            CO2Saved=? , 
+            PM10Saved=? , 
+            LicensedCount=? , 
+            UnlicensedCount=? , 
+            batchdropcount=? , 
+            hourlyothercount=? , 
+            RMcount=? , 
+            slatime=? , 
+            sldtime=? , 
+            asapservice=? ,
+            cargoservice=? , 
+            vatband=? ,
+            activeservice=? , 
+            isregular=? ,
+            chargedbybuild=? ,
+            chargedbycheck=? ,
+            canhavemap=?
+            WHERE ServiceID=? LIMIT 1"; 
+            
+            try {
+                $dbh->prepare($sql)->execute([$Service, $servicecomments, $Price,$serviceorder,$CO2Saved,$PM10Saved,$LicensedCount,$UnlicensedCount,$batchdropcount,$hourlyothercount,$RMcount,$slatime,$sldtime,$asapservice,$cargoservice,$vatband,$activeservice,$isregular,$chargedbybuild,$chargedbycheck,$canhavemap,$thisserviceid]);
+                $infotext.="<br />Update service Success"; 
+                $pagetext.="<p>".$Service." Updated</p>";
+            }
+            catch(PDOException $e) {
+                $alerttext.= $e->getMessage();
+                $infotext.= $e->getMessage();
+                $infotext.=" An error occured during update!<br>".$sql;  
+                $alerttext." <p>An error occured during Service update!</p>";
+            }
+        }
+        
+        
+        
+        
+        
+        if ($thisserviceid=='') {
+            if ($Service) {
+                $infotext.='<p><strong>New Service</strong></p>';
 
-$Service=trim($_POST['Service']);
-$servicecomments=trim($_POST['servicecomments']);
-$Price=trim($_POST['Price']);
-$CO2Saved=trim($_POST['CO2Saved']);
-$PM10Saved=trim($_POST['PM10Saved']);
-
-if (isset($_POST['LicensedCount'])) { $LicensedCount=trim($_POST['LicensedCount']); } else { $LicensedCount=''; }
-if (isset($_POST['UnlicensedCount'])) { $UnlicensedCount=trim($_POST['UnlicensedCount']); } else { $UnlicensedCount=''; }
-if (isset($_POST['batchdropcount'])) { $batchdropcount=trim($_POST['batchdropcount']); } else { $batchdropcount=''; }
-if (isset($_POST['hourlyothercount'])) { $hourlyothercount=trim($_POST['hourlyothercount']); } else { $hourlyothercount=''; }
-if (isset($_POST['asapservice'])) { $asapservice=trim($_POST['asapservice']); } else { $asapservice=''; }
-if (isset($_POST['cargoservice'])) { $cargoservice=trim($_POST['cargoservice']); } else { $cargoservice=''; }
-if (isset($_POST['RMcount'])) { $RMcount=trim($_POST['RMcount']); } else { $RMcount=''; }
-if (isset($_POST['activeservice'])) { $activeservice=trim($_POST['activeservice']); } else { $activeservice=''; }
-if (isset($_POST['isregular'])) { $isregular=trim($_POST['isregular']); } else { $isregular=''; }
-if (isset($_POST['chargedbybuild'])) { $chargedbybuild=trim($_POST['chargedbybuild']); } else { $chargedbybuild=''; }
-if (isset($_POST['chargedbycheck'])) { $chargedbycheck=trim($_POST['chargedbycheck']); } else { $chargedbycheck=''; }
-if (isset($_POST['canhavemap'])) { $canhavemap=trim($_POST['canhavemap']); } else { $canhavemap=''; }
-
-$slatime=trim($_POST['slatime']);
-$sldtime=trim($_POST['sldtime']);
-$serviceorder=trim($_POST['serviceorder']);
-$vatband=trim($_POST['vatband']);
-$thisserviceid=trim($_POST['serviceid']);
-
-
-
-
-
-//28th june
-
-if ($thisserviceid) {
-
-$sql = "UPDATE Services SET Service='$Service' ,
- servicecomments='$servicecomments' , 
- Price='$Price' , 
- serviceorder='$serviceorder' ,
- CO2Saved='$CO2Saved' , 
-PM10Saved='$PM10Saved' , 
-LicensedCount='$LicensedCount' , 
-UnlicensedCount='$UnlicensedCount' , 
-batchdropcount='$batchdropcount' , 
-hourlyothercount='$hourlyothercount' , 
-RMcount='$RMcount' , 
-slatime='$slatime' , 
-sldtime='$sldtime' , 
-asapservice='$asapservice' ,
-cargoservice='$cargoservice' , 
-vatband='$vatband' ,
-activeservice='$activeservice' , 
-isregular='$isregular' ,
-chargedbybuild='$chargedbybuild' ,
-chargedbycheck='$chargedbycheck' ,
-canhavemap='$canhavemap' 
-WHERE ServiceID='$thisserviceid' LIMIT 1"; 
-$result = mysql_query($sql, $conn_id);
-if ($result){ 
-$infotext.="<br />Update service Success"; 
-$pagetext.="<p>".$Service." Updated</p>"; 
-
-} 
-else { 
-$infotext.=mysql_error()."<br /><strong>An error occured during updating service</strong>".$sql; 
-$alerttext.="<p><strong>An error occured during updating service</strong></p>"; 
-
-} 
- }
-if ($thisserviceid=='') { if ($Service) { $infotext.='<p><strong>New Service</strong></p>';
-   mysql_query("LOCK TABLES Services WRITE", $conn_id);
-   mysql_query("INSERT INTO Services 
-   (Service, 
-   serviceorder,
-   servicecomments, 
-   Price, 
-   CO2Saved, 
-   PM10Saved, 
-   LicensedCount, 
-   UnlicensedCount, 
-   batchdropcount, 
-   hourlyothercount, 
-   RMcount, 
-   slatime, 
-   sldtime, 
-   activeservice,
-   isregular,
-   chargedbybuild, 
-   vatband   ) 
-     VALUES
-   ('$Service',
-   '$serviceorder',
-   '$servicecomments',
-   '$Price',
-   '$CO2Saved', 
-   '$PM10Saved', 
-   '$LicensedCount',
-   '$UnlicensedCount',
-   '$batchdropcount',
-   '$hourlyothercount',
-   '$RMcount',
-   '$slatime',
-   '$sldtime',
-   '$activeservice',
-   '$isregular',
-   '$chargedbybuild',
-   '$vatband'   )
-   ", $conn_id )
-     or die(mysql_error()); 
-   
-  $thisserviceid=mysql_insert_id();  
-mysql_query("UNLOCK TABLES", $conn_id);   
-
-  $pagetext.='<p>New service '.$thisserviceid.' '.$Service.' Created.</p>';
-  $infotext.='<br />New service '.$thisserviceid.' '.$Service.' Created.'.$sql;
-   
- } // end new service
-
-} // ends check for name > 0
-
-} // ends page=editservice
+                $sql="INSERT INTO Services 
+                (Service,activeservice  ) 
+                    VALUES
+                ('New Service ','1'   )
+                ";
+                
+                
+                
+                try {
+                    $dbh->prepare($sql)->execute();
+                    $thisserviceid = $dbh->lastInsertId();
+                    $pagetext.='<p>New service '.$thisserviceid.' '.$Service.' Created.</p>';
+                    $infotext.='<br />New service '.$thisserviceid.' '.$Service.' Created.'.$sql;
+                    }
+                    
+                catch(PDOException $e) {
+                    $alerttext.= $e->getMessage();
+                    $infotext.= $e->getMessage();
+                    $infotext.=" An error occured during New Service!<br>".$sql;  
+                    $alerttext." <p>An error occured during update!</p>";
+                }
+                
+            } // end new service
+        
+        } // ends check for name > 0
+    
+    } // ends page=editservice
 
 
 
 
     if ($page=="editclient") {
 
-if (isset($_POST['CompanyName'])) { $CompanyName=trim($_POST['CompanyName']); }
+        if (isset($_POST['CompanyName'])) { $CompanyName=trim($_POST['CompanyName']); }
+        
+        $Notes=trim($_POST['Notes']);
+        $JoomlaUser=trim($_POST['JoomlaUser']);
+        $JoomlaUser2=trim($_POST['JoomlaUser2']);
+        $JoomlaUser3=trim($_POST['JoomlaUser3']);
+        $htmlemail=trim($_POST['htmlemail']);
+        // $monthlyinvoice=trim($_POST['monthlyinvoice']);    NO LONGER USED?
+        
+        if (isset($_POST['isactiveclient'])) { $isactiveclient=trim($_POST['isactiveclient']); } else { $isactiveclient='0'; }
+        
+        $invoiceterms=trim($_POST['invoiceterms']);
+        $invoicetype=trim($_POST['invoicetype']);
+        $Surname=trim($_POST['Surname']);
+        $Address=trim($_POST['Address']);
+        $Address2=trim($_POST['Address2']);
+        
+        if (isset($_POST['County'])) { $County=trim($_POST['County']); } else { $County=''; }
+        if (isset($_POST['City'])) { $city=trim($_POST['City']); } else { $city=''; }
+        $Postcode=trim($_POST['Postcode']);
+        
+        $emailaddress=trim($_POST['emailaddress']);
+        $invoiceEmailAddress=trim($_POST['invoiceemailaddress']);
+        $invoiceAddress=trim($_POST['invoiceAddress']);
+        $invoiceAddress2=trim($_POST['invoiceAddress2']);
+        $invoiceCity=trim($_POST['invoiceCity']);
+        $invoiceCounty=trim($_POST['invoiceCounty']);
+        $invoicePostcode=trim($_POST['invoicePostcode']);
+        $invoiceCountryOrRegion=trim($_POST['invoiceCountryOrRegion']);
+        $co2apiref=trim($_POST['co2apiref']);
+        // $creditaccount=trim($_POST['creditaccount']); NO LONGER USED, 1 or 0
+        $cbbdiscount=trim($_POST['cbbdiscount']);
+        // $defaultfrompc=trim($_POST['defaultfrompc']);
+        // $defaulttopc=trim($_POST['defaulttopc']);
+        // $defaultfromtext=trim($_POST['defaultfromtext']);
+        // $defaulttotext=trim($_POST['defaulttotext']);
+        $defaultrequestor=trim($_POST['defaultrequestor']);
+        $defaultservice=trim($_POST['defaultservice']);
+        $clientvatno=trim($_POST['clientvatno']);
+        $clientregno=trim($_POST['clientregno']);
+        
+        if (isset($_POST['isdepartments'])) { $isdepartments=trim($_POST['isdepartments']); } else { $isdepartments=''; }
+        
+        $PhoneNumber=trim($_POST['PhoneNumber']);
+        $Title=trim($_POST['Title']);
+        $Forename=trim($_POST['Forname']);
+        
+        
+        // $co2=trim($_POST['co2']);
+        // $pm10=trim($_POST['pm10']);
+        // $totalvolume=trim($_POST['totalvolume']);
+        
+        $CountryOrRegion=trim($_POST['CountryOrRegion']);
+        
+        
+        $MobileNumber=trim($_POST['MobileNumber']);
+        
+        if (isset($_POST['cemail1'])) { $cemail1=trim($_POST['cemail1']); } else { $cemail1='0'; }
+        if (isset($_POST['cemail2'])) { $cemail2=trim($_POST['cemail2']); } else { $cemail2='0'; }
+        if (isset($_POST['cemail3'])) { $cemail3=trim($_POST['cemail3']); } else { $cemail3='0'; }
+        if (isset($_POST['cemail4'])) { $cemail4=trim($_POST['cemail4']); } else { $cemail4='0'; }
+        if (isset($_POST['cemail5'])) { $cemail5=trim($_POST['cemail5']); } else { $cemail5='0'; }
+        
+        
+        $clientid=$_POST['clientid'];
+        
+        if (!$invoiceEmailAddress) { $invoiceEmailAddress=$emailaddress; $pagetext.='<p>Invoice email set to main client as was missing</p>'; }
+        if (!$invoiceAddress) { $invoiceAddress=$Address; $pagetext.='<p>Invoice Address1 set to main client as was missing</p>'; }
+        if (!$invoiceAddress2) { $invoiceAddress2 = $Address2; $pagetext.='<p>Invoice Address2 set to main client as was missing</p>'; }
+        if (!$invoiceCity) { $invoiceCity = $city; $pagetext.='<p>Invoice City set to main client as was missing</p>'; }
+        if (!$invoiceCounty) { $invoiceCounty=$County; $pagetext.='<p>Invoice County set to main client as was missing</p>'; }
+        if (!$invoicePostcode) { $invoicePostcode=$Postcode; $pagetext.='<p>Invoice Postcode set to main client as was missing</p>'; }
+        if (!$invoiceCountryOrRegion) { $invoiceCountryOrRegion = $CountryOrRegion; $pagetext.='<p>Invoice Country set to main client as was missing</p>'; }
+        
+        
+        $defaultfrom=$_POST['defaultfrom'];
+        $defaultto=$_POST['defaultto'];
+        
+        
+        if (($globalprefrow['inaccuratepostcode'])==0) {
+            $Postcode = str_replace (" ", "", strtoupper($Postcode));
+            $start=substr($Postcode, 0, -3);  
+            $Postcode=trim($start.' '.substr($Postcode, -3)); // 'ies'  
+        }
+        
+        if (($globalprefrow['inaccuratepostcode'])==0) {
+            $invoicePostcode = str_replace (" ", "", strtoupper($invoicePostcode));
+            $start=substr($invoicePostcode, 0, -3);  
+            $invoicePostcode=trim($start.' '.substr($invoicePostcode, -3)); // 'ies'  
+        }
+        
+        
+        
+        
+        
+        $infotext.='<br />Editing client details<br />defaultfrom is'.$defaultfrom.'<br />defaultto is'.$defaultto;
+        
+        if (($clientid) and ($CompanyName)) {
 
-$Notes=trim($_POST['Notes']);
-$JoomlaUser=trim($_POST['JoomlaUser']);
-$JoomlaUser2=trim($_POST['JoomlaUser2']);
-$JoomlaUser3=trim($_POST['JoomlaUser3']);
-$htmlemail=trim($_POST['htmlemail']);
-// $monthlyinvoice=trim($_POST['monthlyinvoice']);    NO LONGER USED?
-
-if (isset($_POST['isactiveclient'])) { $isactiveclient=trim($_POST['isactiveclient']); } else { $isactiveclient='0'; }
-
-$invoiceterms=trim($_POST['invoiceterms']);
-$invoicetype=trim($_POST['invoicetype']);
-$Surname=trim($_POST['Surname']);
-$Address=trim($_POST['Address']);
-$Address2=trim($_POST['Address2']);
-
-if (isset($_POST['County'])) { $County=trim($_POST['County']); } else { $County=''; }
-if (isset($_POST['City'])) { $city=trim($_POST['City']); } else { $city=''; }
-$Postcode=trim($_POST['Postcode']);
-
-$emailaddress=trim($_POST['emailaddress']);
-$invoiceEmailAddress=trim($_POST['invoiceemailaddress']);
-$invoiceAddress=trim($_POST['invoiceAddress']);
-$invoiceAddress2=trim($_POST['invoiceAddress2']);
-$invoiceCity=trim($_POST['invoiceCity']);
-$invoiceCounty=trim($_POST['invoiceCounty']);
-$invoicePostcode=trim($_POST['invoicePostcode']);
-$invoiceCountryOrRegion=trim($_POST['invoiceCountryOrRegion']);
-$co2apiref=trim($_POST['co2apiref']);
-// $creditaccount=trim($_POST['creditaccount']); NO LONGER USED, 1 or 0
-$cbbdiscount=trim($_POST['cbbdiscount']);
-// $defaultfrompc=trim($_POST['defaultfrompc']);
-// $defaulttopc=trim($_POST['defaulttopc']);
-// $defaultfromtext=trim($_POST['defaultfromtext']);
-// $defaulttotext=trim($_POST['defaulttotext']);
-$defaultrequestor=trim($_POST['defaultrequestor']);
-$defaultservice=trim($_POST['defaultservice']);
-$clientvatno=trim($_POST['clientvatno']);
-$clientregno=trim($_POST['clientregno']);
-
-if (isset($_POST['isdepartments'])) { $isdepartments=trim($_POST['isdepartments']); } else { $isdepartments=''; }
-
-$PhoneNumber=trim($_POST['PhoneNumber']);
-$Title=trim($_POST['Title']);
-$Forename=trim($_POST['Forname']);
-
-
-// $co2=trim($_POST['co2']);
-// $pm10=trim($_POST['pm10']);
-// $totalvolume=trim($_POST['totalvolume']);
-
-$CountryOrRegion=trim($_POST['CountryOrRegion']);
-
-
-$MobileNumber=trim($_POST['MobileNumber']);
-
-if (isset($_POST['cemail1'])) { $cemail1=trim($_POST['cemail1']); } else { $cemail1='0'; }
-if (isset($_POST['cemail2'])) { $cemail2=trim($_POST['cemail2']); } else { $cemail2='0'; }
-if (isset($_POST['cemail3'])) { $cemail3=trim($_POST['cemail3']); } else { $cemail3='0'; }
-if (isset($_POST['cemail4'])) { $cemail4=trim($_POST['cemail4']); } else { $cemail4='0'; }
-if (isset($_POST['cemail5'])) { $cemail5=trim($_POST['cemail5']); } else { $cemail5='0'; }
-
-
-$clientid=$_POST['clientid'];
-
-if (!$invoiceEmailAddress) { $invoiceEmailAddress=$emailaddress; $pagetext.='<p>Invoice email set to main client as was missing</p>'; }
-if (!$invoiceAddress) { $invoiceAddress=$Address; $pagetext.='<p>Invoice Address1 set to main client as was missing</p>'; }
-if (!$invoiceAddress2) { $invoiceAddress2 = $Address2; $pagetext.='<p>Invoice Address2 set to main client as was missing</p>'; }
-if (!$invoiceCity) { $invoiceCity = $city; $pagetext.='<p>Invoice City set to main client as was missing</p>'; }
-if (!$invoiceCounty) { $invoiceCounty=$County; $pagetext.='<p>Invoice County set to main client as was missing</p>'; }
-if (!$invoicePostcode) { $invoicePostcode=$Postcode; $pagetext.='<p>Invoice Postcode set to main client as was missing</p>'; }
-if (!$invoiceCountryOrRegion) { $invoiceCountryOrRegion = $CountryOrRegion; $pagetext.='<p>Invoice Country set to main client as was missing</p>'; }
-
-
-$defaultfrom=$_POST['defaultfrom'];
-$defaultto=$_POST['defaultto'];
-
-
-if (($globalprefrow['inaccuratepostcode'])==0) {
-
-
-$Postcode = str_replace (" ", "", strtoupper($Postcode));
-
-$start=substr($Postcode, 0, -3);  
-$Postcode=trim($start.' '.substr($Postcode, -3)); // 'ies'  
-}
-
-if (($globalprefrow['inaccuratepostcode'])==0) {
-$invoicePostcode = str_replace (" ", "", strtoupper($invoicePostcode));
-$start=substr($invoicePostcode, 0, -3);  
-$invoicePostcode=trim($start.' '.substr($invoicePostcode, -3)); // 'ies'  
-}
-
-
-
-
-
-$infotext.='<br />Editing client details<br />defaultfrom is'.$defaultfrom.'<br />defaultto is'.$defaultto;
-if (($clientid) and ($CompanyName)) {
-$sql = "UPDATE Clients SET 
-CompanyName='$CompanyName' , 
-EmailAddress='$emailaddress' , 
-invoiceEmailAddress='$invoiceEmailAddress' , 
-PhoneNumber='$PhoneNumber' , Title='$Title' , 
-Forename='$Forename' , 
-Surname='$Surname' , 
-MobileNumber='$MobileNumber' , 
-Address='$Address' , 
-Address2='$Address2' , 
-invoiceAddress='$invoiceAddress' , 
-invoiceAddress2='$invoiceAddress2' , 
-co2apiref='$co2apiref' , 
-isactiveclient='$isactiveclient' , 
-City='$city' , 
-County='$County' , 
-Postcode=(UPPER('$Postcode')) , 
-CountryOrRegion='$CountryOrRegion' , 
-MobileNumber='$MobileNumber' , 
-Notes='$Notes' ,
-htmlemail='$htmlemail' , 
-JoomlaUser='$JoomlaUser' , 
-JoomlaUser2='$JoomlaUser2' , 
-JoomlaUser3='$JoomlaUser3' , 
-invoiceCity='$invoiceCity' , 
-invoiceCounty='$invoiceCounty' , 
-invoicePostcode=(UPPER('$invoicePostcode')) , 
-invoiceterms='$invoiceterms' ,
-invoiceCountryOrRegion='$invoiceCountryOrRegion' ,
-invoicetype='$invoicetype' ,
-cbbdiscount='$cbbdiscount' ,
-defaultfromtext=(UPPER('$defaultfrom')) ,
-defaulttotext=(UPPER('$defaultto')) ,
-defaultrequestor=(UPPER('$defaultrequestor')) ,
-defaultservice='$defaultservice' ,
-clientvatno=(UPPER('$clientvatno')) ,
-clientregno=(UPPER('$clientregno')) ,
-isdepartments='$isdepartments',
-cemail1='$cemail1',
-cemail2='$cemail2',
-cemail3='$cemail3',
-cemail4='$cemail4',
-cemail5='$cemail5'
-WHERE CustomerID='$clientid' LIMIT 1"; 
-$result = mysql_query($sql, $conn_id);
-if ($result){ 
-$infotext.="<br />Success!"; 
-$pagetext.="<p>Details updated for ".$CompanyName.".</p>"; 
-} else { 
-$infotext.=mysql_error()." An error occured during update!<br>"; 
-$alerttext.="<p>An error occured during update!</p>"; 
-} 
- 
- 
-$i='1';
-while ( $i < '5000') {
- 
- 
- if (isset($_POST["favadrid$i"] )) { 
- 
- $infotext.='<br />Found an address';
- 
- 
- }
- 
- $i++;
- 
- } // ends favourite address loop
- 
-} // ends check to see if client updated, not new client
-
-} // ends page=editclient
+            $sql = "UPDATE Clients SET 
+            CompanyName=? , 
+            EmailAddress=? , 
+            invoiceEmailAddress=? , 
+            PhoneNumber=?, 
+            Title=? , 
+            Forename=? , 
+            Surname=? , 
+            MobileNumber=? , 
+            Address=? , 
+            Address2=? , 
+            invoiceAddress=? , 
+            invoiceAddress2=? , 
+            co2apiref=? , 
+            isactiveclient=? , 
+            City=? , 
+            County=? , 
+            Postcode=(UPPER(?)) , 
+            CountryOrRegion=? , 
+            Notes=? ,
+            htmlemail=? , 
+            JoomlaUser=? , 
+            JoomlaUser2=? , 
+            JoomlaUser3=? , 
+            invoiceCity=? , 
+            invoiceCounty=? , 
+            invoicePostcode=(UPPER(?)) , 
+            invoiceterms=? ,
+            invoiceCountryOrRegion=? ,
+            invoicetype=? ,
+            cbbdiscount=? ,
+            defaultfromtext=(UPPER(?)) ,
+            defaulttotext=(UPPER(?)) ,
+            defaultrequestor=(UPPER(?)) ,
+            defaultservice=? ,
+            clientvatno=(UPPER(?)) ,
+            clientregno=(UPPER(?)) ,
+            isdepartments=?,
+            cemail1=?,
+            cemail2=?,
+            cemail3=?,
+            cemail4=?,
+            cemail5=?
+            WHERE CustomerID=? LIMIT 1";
+            try {
+                $dbh->prepare($sql)->execute([$CompanyName, $emailaddress, $invoiceEmailAddress,$PhoneNumber,$Title,$Forename,$Surname,$MobileNumber,$Address,$Address2,$invoiceAddress,$invoiceAddress2,$co2apiref,$isactiveclient,$city,$County,$Postcode,$CountryOrRegion,$Notes,$htmlemail,$JoomlaUser,$JoomlaUser2,$JoomlaUser3,$invoiceCity,$invoiceCounty,$invoicePostcode,$invoiceterms,$invoiceCountryOrRegion,$invoicetype,$cbbdiscount,$defaultfrom,$defaultto,$defaultrequestor,$defaultservice,$clientvatno,$clientregno,$isdepartments,$cemail1,$cemail2,$cemail3,$cemail4,$cemail5,$clientid]);
+                $infotext.="<br />Success!"; 
+                $pagetext.="<p>Details updated for ".$CompanyName.".</p>"; 
+            }
+            catch(PDOException $e) {
+                $alerttext.= $e->getMessage();
+                $infotext.= $e->getMessage();
+                $infotext.=" An error occured during update!<br>".$sql;  
+                $alerttext." <p>An error occured during Client update!</p>";
+            }
+        } // ends check to see if client updated, not new client
+    } // ends page=editclient
  
 
 
     if ($page=='createnewcl') {
-
-
-if (isset($_POST['CompanyName'])) { $CompanyName=trim($_POST['CompanyName']); } else { $CompanyName=''; }
-
-
- if ($CompanyName) {
- $infotext.='<br />New client'; 
-   mysql_query("LOCK TABLES Clients WRITE", $conn_id);
-   mysql_query("INSERT INTO Clients 
-   (CompanyName, 
- isactiveclient ) 
-     VALUES
-   ('$CompanyName',
-   '1' )
-   ", $conn_id
-   )  or die(mysql_error()); 
-   $clientid=mysql_insert_id();  
-mysql_query("UNLOCK TABLES", $conn_id);   
-
-$infotext.='<br />New client ID : '.$clientid;
-
-
-$infotext.="<br />Success! ".$clientid; 
-$pagetext.="<p>New client added with name ".$CompanyName.".</p>"; 
-
-} // end  check companyname>0 
-
-
-} // ends page=createnewcl
- 
-
-
- 
+        if (isset($_POST['CompanyName'])) {
+            $CompanyName=trim($_POST['CompanyName']);
+            if ($CompanyName) {
+                $infotext.='<br />New client';
+                
+                $sql="INSERT INTO Clients 
+                (CompanyName, isactiveclient ) 
+                    VALUES
+                (?, '1' ) ";               
+                
+                try {
+                    $dbh->prepare($sql)->execute([$CompanyName]);
+                    $clientid = $dbh->lastInsertId();
+                    $infotext.=" New Client!<br>".$clientid.' '.$CompanyName;
+                    $pagetext.=" <p>New Client</p>".$clientid." ".$companyname;                
+                }
+                catch(PDOException $e) {
+                    $alerttext.= $e->getMessage();
+                    $infotext.= $e->getMessage();
+                    $infotext.=" An error occured New Client!<br>".$sql;  
+                    $alerttext." <p>An error occured during update!</p>";
+                }
+            }
+        } // end  check companyname>0 
+    } // ends page=createnewcl
  
 
     if ($page=="editdepartment") {
 
-$clientid=trim($_POST['clientid']);
-// $infotext.='<br />Editing Department details';
+        $clientid=trim($_POST['clientid']);
+        // $infotext.='<br />Editing Department details';
+        
+        $i=1;
+        
+        while ($i<1000) {
+            
+            if (isset($_POST["depname$i"])) { $depname=trim($_POST["depname$i"]); } else { $depname=''; }
+            if (isset($_POST["deprequestor$i"])) { $deprequestor=trim($_POST["deprequestor$i"]); } else { $deprequestor=''; }
+            if (isset($_POST["deppassword$i"])) { $deppassword=trim($_POST["deppassword$i"]); } else { $deppassword=''; }
+            if (isset($_POST["depemail$i"])) { $depemail=trim($_POST["depemail$i"]); } else { $depemail=''; }
+            if (isset($_POST["depaddone$i"])) { $depaddone=trim($_POST["depaddone$i"]); } else { $depaddone=''; }
+            if (isset($_POST["depaddtwo$i"])) { $depaddtwo=trim($_POST["depaddtwo$i"]); } else { $depaddtwo=''; }
+            if (isset($_POST["depaddthree$i"])) { $depaddthree=trim($_POST["depaddthree$i"]); } else { $depaddthree=''; }
+            if (isset($_POST["depaddfour$i"])) { $depaddfour=trim($_POST["depaddfour$i"]); } else { $depaddfour=''; }
+            if (isset($_POST["depaddfive$i"])) { $depaddfive=trim($_POST["depaddfive$i"]); } else { $depaddfive=''; }
+            if (isset($_POST["depaddsix$i"])) { $depaddsix=trim($_POST["depaddsix$i"]); } else { $depaddsix=''; }
+            if (isset($_POST["depdeffromft$i"])) { $depdeffromft=trim($_POST["depdeffromft$i"]); } else { $depdeffromft=''; }
+            if (isset($_POST["depdeftoft$i"])) { $depdeftoft=trim($_POST["depdeftoft$i"]); } else { $depdeftoft=''; }
+            if (isset($_POST["depcomment$i"])) { $depcomment=trim($_POST["depcomment$i"]); } else { $depcomment=''; }
+            if (isset($_POST["isactivedep$i"])) { $isactivedep=trim($_POST["isactivedep$i"]); } else { $isactivedep=''; }
+            if (isset($_POST["depphone$i"])) { $depphone=trim($_POST["depphone$i"]); } else { $depphone=''; }
+            if (isset($_POST["depservice$i"])) { $depservice=trim($_POST["depservice$i"]); } else { $sepservice=''; }
+            if (isset($_POST["depjoom$i"])) { $depjoom=trim($_POST["depjoom$i"]); } else { $depjoom=''; }
+            
+            
+            
+            $sPattern = ' /\s*/m'; 
+            $sReplace = '';
+            $depaddsix=preg_replace( $sPattern, $sReplace, $depaddsix );
+            
+            if (($globalprefrow['inaccuratepostcode'])==0) {
+                $start=substr($depaddsix, 0, -3);  $depaddsix=trim($start.' '.substr($depaddsix, -3)); // 'ies'  
+            }
+            
+            
+            if ($depname) {
+                // $infotext.='<br />'. $depname;
+                $sql = "UPDATE clientdep SET 
+                depname='$depname' ,
+                isactivedep='$isactivedep' , 
+                deppassword='$deppassword' , 
+                deprequestor=(UPPER('$deprequestor')) , 
+                depemail='$depemail' , 
+                depphone='$depphone' , 
+                depservice='$depservice' , 
+                depcomment='$depcomment' , 
+                depdeffromft=(UPPER('$depdeffromft')) ,
+                depdeftoft=(UPPER('$depdeftoft')) , 
+                depaddone='$depaddone' , 
+                depaddtwo='$depaddtwo' , 
+                depaddthree='$depaddthree' , 
+                depaddfour='$depaddfour' , 
+                depaddfive='$depaddfive' , 
+                depaddsix=(UPPER('$depaddsix')) ,
+                depjoom='$depjoom'
+                WHERE depnumber='$i' 
+                AND associatedclient='$clientid'
+                LIMIT 1"; 
+                
+                
+                
+                
+                
+                
+                
+                
 
-$i=1;
-
-while ($i<1000) {
-
-if (isset($_POST["depname$i"])) { $depname=trim($_POST["depname$i"]); } else { $depname=''; }
-if (isset($_POST["deprequestor$i"])) { $deprequestor=trim($_POST["deprequestor$i"]); } else { $deprequestor=''; }
-if (isset($_POST["deppassword$i"])) { $deppassword=trim($_POST["deppassword$i"]); } else { $deppassword=''; }
-if (isset($_POST["depemail$i"])) { $depemail=trim($_POST["depemail$i"]); } else { $depemail=''; }
-if (isset($_POST["depaddone$i"])) { $depaddone=trim($_POST["depaddone$i"]); } else { $depaddone=''; }
-if (isset($_POST["depaddtwo$i"])) { $depaddtwo=trim($_POST["depaddtwo$i"]); } else { $depaddtwo=''; }
-if (isset($_POST["depaddthree$i"])) { $depaddthree=trim($_POST["depaddthree$i"]); } else { $depaddthree=''; }
-if (isset($_POST["depaddfour$i"])) { $depaddfour=trim($_POST["depaddfour$i"]); } else { $depaddfour=''; }
-if (isset($_POST["depaddfive$i"])) { $depaddfive=trim($_POST["depaddfive$i"]); } else { $depaddfive=''; }
-if (isset($_POST["depaddsix$i"])) { $depaddsix=trim($_POST["depaddsix$i"]); } else { $depaddsix=''; }
-if (isset($_POST["depdeffromft$i"])) { $depdeffromft=trim($_POST["depdeffromft$i"]); } else { $depdeffromft=''; }
-if (isset($_POST["depdeftoft$i"])) { $depdeftoft=trim($_POST["depdeftoft$i"]); } else { $depdeftoft=''; }
-if (isset($_POST["depcomment$i"])) { $depcomment=trim($_POST["depcomment$i"]); } else { $depcomment=''; }
-if (isset($_POST["isactivedep$i"])) { $isactivedep=trim($_POST["isactivedep$i"]); } else { $isactivedep=''; }
-if (isset($_POST["depphone$i"])) { $depphone=trim($_POST["depphone$i"]); } else { $depphone=''; }
-if (isset($_POST["depservice$i"])) { $depservice=trim($_POST["depservice$i"]); } else { $sepservice=''; }
-if (isset($_POST["depjoom$i"])) { $depjoom=trim($_POST["depjoom$i"]); } else { $depjoom=''; }
-
-
-
-$sPattern = ' /\s*/m'; 
-$sReplace = '';
-$depaddsix=preg_replace( $sPattern, $sReplace, $depaddsix );
-
-if (($globalprefrow['inaccuratepostcode'])==0) {
-
-
-$start=substr($depaddsix, 0, -3);  $depaddsix=trim($start.' '.substr($depaddsix, -3)); // 'ies'  
-
-}
-
-
-if ($depname) {
-
-// $infotext.='<br />'. $depname;
-
-$sql = "UPDATE clientdep SET 
-depname='$depname' ,
-isactivedep='$isactivedep' , 
-deppassword='$deppassword' , 
-deprequestor=(UPPER('$deprequestor')) , 
-depemail='$depemail' , 
-depphone='$depphone' , 
-depservice='$depservice' , 
-depcomment='$depcomment' , 
-depdeffromft=(UPPER('$depdeffromft')) ,
-depdeftoft=(UPPER('$depdeftoft')) , 
-depaddone='$depaddone' , 
-depaddtwo='$depaddtwo' , 
-depaddthree='$depaddthree' , 
-depaddfour='$depaddfour' , 
-depaddfive='$depaddfive' , 
-depaddsix=(UPPER('$depaddsix')) ,
-depjoom='$depjoom'
-WHERE depnumber='$i' 
-AND associatedclient='$clientid'
- LIMIT 1"; 
-
-
- $result = mysql_query($sql, $conn_id);
- if ($result){ $infotext.="<br />Updated ".$depname; } else { 
- $infotext.=mysql_error()." An error occured during updating department!<br>"; 
- $alerttext.=" <p>An error occured during updating department ".$i.' '.$depname."!</p>"; 
- } 
-
-}
-$i++;
-} // ends $i loop
-
-
-$pagetext.='<p>All departments for this client updated.</p>';
-
-} // ends page = edit department
+                $result = mysql_query($sql, $conn_id);
+                if ($result){
+                    $infotext.="<br />Updated ".$depname;
+                } else { 
+                    $infotext.=" An error occured during updating department!<br>"; 
+                    $alerttext.=" <p>An error occured during updating department ".$i.' '.$depname."!</p>"; 
+                } 
+                
+            }
+            $i++;
+        } // ends $i loop
+        
+        
+        $pagetext.='<p>All departments for this client updated.</p>';
+        
+    } // ends page = edit department
 
 
 
     if ( $page=='createnewdep') {
+        $clientid=trim($_POST['clientid']);
+        $newdepname=trim($_POST['newdepname']);
+        $infotext.='<br />ClientID : '.$clientid.'<br /> newdepname : '.$newdepname;
+        
+        
+        
+        
+        if (($clientid) and ($newdepname)) {
+        
+            $sql = "SELECT * FROM Clients WHERE CustomerID = ? ";
+            $statement = $dbh->prepare($sql)->execute([$clientid]);
+            $clrow = $statement->fetch(PDO::FETCH_ASSOC);
 
-$clientid=trim($_POST['clientid']);
-$newdepname=trim($_POST['newdepname']);
-
-$infotext.='<br />ClientID : '.$clientid.'<br /> newdepname : '.$newdepname;
-
-
-
-
-if (($clientid) and ($newdepname)) {
-
-$sql = "SELECT * FROM Clients WHERE CustomerID = '$clientid' ";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-$clrow=mysql_fetch_array($sql_result);
-
-$infotext.='<br />'. $clrow['Address'].', '. $clrow['Address2'].'. '. $clrow['City'].', 
-'. $clrow['County'].', '. $clrow['CountryOrRegion'].'. '. $clrow['Postcode']; 
-
-
-$depaddone=trim($clrow['Address']);
-$depaddtwo=trim($clrow['Address2']);
-$depaddthree=trim($clrow['City']);
-$depaddfour=trim($clrow['County']);
-$depaddfive=trim($clrow['CountryOrRegion']);
-$depaddsix=trim($clrow['Postcode']);
-
-
- $latestdepno = mysql_result(mysql_query("
- SELECT depnumber 
- from clientdep
-ORDER BY depnumber DESC
- LIMIT 1 ", $conn_id), 0);
- if ($latestdepno) { //
- $infotext.= 'Latest dep number is : '.$latestdepno;
-}
-$latestdepno++;
-   mysql_query("LOCK TABLES clientdep WRITE", $conn_id);
-   mysql_query("INSERT INTO clientdep 
-   (depnumber,
-   associatedclient,
-   isactivedep ,
-   depaddone ,
-   depaddtwo ,
-   depaddthree ,
-   depaddfour ,
-   depaddfive ,
-   depaddsix ,
-   depname) 
-   VALUES
-   ('$latestdepno',
-   '$clientid',
-   '1',
-   '$depaddone' ,
-   '$depaddtwo' ,
-   '$depaddthree' ,
-   '$depaddfour' ,
-   '$depaddfive' ,
-   '$depaddsix' ,
-   '$newdepname' ) ", $conn_id )  or die(mysql_error()); 
-   $newdepid=mysql_insert_id();  
-   mysql_query("UNLOCK TABLES", $conn_id);   
-$infotext.= ' <br />Created new department '.$newdepid;
-
-$pagetext.='<p>Created new Department </p>';
-
-
-
-} // ends check for clientid and dep name
-} // ends page=new department
+            $infotext.='<br />'. $clrow['Address'].', '. $clrow['Address2'].'. '. $clrow['City'].', 
+            '. $clrow['County'].', '. $clrow['CountryOrRegion'].'. '. $clrow['Postcode']; 
+            
+            $depaddone=trim($clrow['Address']);
+            $depaddtwo=trim($clrow['Address2']);
+            $depaddthree=trim($clrow['City']);
+            $depaddfour=trim($clrow['County']);
+            $depaddfive=trim($clrow['CountryOrRegion']);
+            $depaddsix=trim($clrow['Postcode']);
+            
+            
+            
+            mysql_query("INSERT INTO clientdep 
+            ( associatedclient,
+            isactivedep ,
+            depaddone ,
+            depaddtwo ,
+            depaddthree ,
+            depaddfour ,
+            depaddfive ,
+            depaddsix ,
+            depname) 
+            VALUES
+            ('$clientid',
+            '1',
+            '$depaddone' ,
+            '$depaddtwo' ,
+            '$depaddthree' ,
+            '$depaddfour' ,
+            '$depaddfive' ,
+            '$depaddsix' ,
+            '$newdepname' ) ", $conn_id ); 
+            
+            $newdepid=mysql_insert_id();  
+            
+            $infotext.= ' <br />Created new department '.$newdepid;
+            
+            $pagetext.='<p>Created new Department </p>';
+            
+        
+        
+        } // ends check for clientid and dep name
+    } // ends page=new department
 
 
 
@@ -1358,7 +1301,7 @@ $pagetext.='<p>Created new Department </p>';
                     $infotext.="<br />Success!"; 
                     $pagetext.="<p>Details updated for ".$favadrft." - Job Details Unchanged.</p>"; 
                 } else {
-                    $infotext.=mysql_error()." An error occured during update!<br>"; 
+                    $infotext.=" An error occured during update!<br>"; 
                     $alerttext.="<p>An error occured during update!</p>"; 
                 } // ends check for result / alert txt
         
@@ -1404,7 +1347,7 @@ $pagetext.='<p>Created new Department </p>';
                     $infotext.="<br />Success!"; 
                     $pagetext.="<p>Details updated for ".$favadrft.".</p>"; 
                 } else { 
-                    $infotext.=mysql_error()." An error occured during update!<br>"; 
+                    $infotext.=" An error occured during update!<br>"; 
                     $alerttext.="<p>An error occured during update!</p>"; 
                 } // ends check for result or error
                 
@@ -1422,7 +1365,8 @@ $pagetext.='<p>Created new Department </p>';
             $sql = "SELECT ID FROM Orders WHERE status < '86' 
             AND enrpc0 = '".$oldfavadrpc."' 
             AND enrft0 = '".$oldfavadrft."' ";
-            $sql_result = mysql_query($sql,$conn_id); $sumtot=mysql_affected_rows(); 
+            $sql_result = mysql_query($sql,$conn_id);
+            $sumtot=mysql_affected_rows(); 
             // $infotext.='<br /> 1574 '.$sumtot.' row found '.$sql;
             if ($sumtot>'0')  {
                 while ($chngrow = mysql_fetch_array($sql_result)) {
@@ -1461,7 +1405,8 @@ $pagetext.='<p>Created new Department </p>';
                     $sql = "UPDATE Orders SET 
                     enrft21=(UPPER('$favadrft')), 
                     enrpc21=(UPPER('$favadrpc')) 
-                    WHERE ID='$chngid' LIMIT 1"; $result = mysql_query($sql, $conn_id);
+                    WHERE ID='$chngid' LIMIT 1";
+                    $result = mysql_query($sql, $conn_id);
                     if ($result){ // $infotext.="<br />1616 updated"; 
                     } else { // starts error check
                         $infotext.="<br /><strong>1609 An error occured during updating postcodes!</strong>"; 
@@ -1535,7 +1480,7 @@ $pagetext.='<p>Created new Department </p>';
             '1',
             (UPPER('$favadrcomments'))   )
             ", $conn_id
-            )  or die(mysql_error()); 
+            ); 
             $insertid=mysql_insert_id();  
             mysql_query("UNLOCK TABLES", $conn_id);   
 
@@ -1548,9 +1493,7 @@ $pagetext.='<p>Created new Department </p>';
 
 
         if ( $page=='addaftercheckasnewfav') {
-
             $infotext.='New Favourite 1665'; 
-
         }
 
 
@@ -1591,7 +1534,7 @@ $pagetext.='<p>Created new Department </p>';
         AND cojm_favadr.favadrclient = Clients.CustomerID 
         "; 
         
-        $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+        $sql_result = mysql_query($sql,$conn_id); 
         $num_rows = mysql_num_rows($sql_result);
         
         if ($num_rows>'0') { 
@@ -1602,7 +1545,7 @@ $pagetext.='<p>Created new Department </p>';
             AND cojm_favadr.favadrisactive='1' 
             AND cojm_favadr.favadrclient = Clients.CustomerID 
             ";
-            $sql_result2 = mysql_query($sql,$conn_id)  or mysql_error(); 
+            $sql_result2 = mysql_query($sql,$conn_id); 
             $num_rows = mysql_num_rows($sql_result2);
             
             $companyname='';
@@ -1667,7 +1610,7 @@ $pagetext.='<p>Created new Department </p>';
         } else {
 
             // echo '<br />New Favourite'; 
-            mysql_query("LOCK TABLES cojm_favadr WRITE", $conn_id);
+
             mysql_query("INSERT INTO cojm_favadr 
             (favadrclient, 
             favadrft, 
@@ -1681,8 +1624,9 @@ $pagetext.='<p>Created new Department </p>';
             '1',
             (UPPER('$favadrcomments'))   )
             ", $conn_id
-            )  or die(mysql_error()); $newfavid=mysql_insert_id();  
-            mysql_query("UNLOCK TABLES", $conn_id);   
+            ); 
+            $newfavid=mysql_insert_id();  
+ 
             
             
             $pagetext.="<p>Favourite added.</p>"; 
@@ -1700,79 +1644,75 @@ $pagetext.='<p>Created new Department </p>';
 
 
     if ($page=='editcorepricing') {
-$infotext.='<br/>Editing distance pricing';
+        $infotext.='<br/>Editing distance pricing';
+        
+        $i='21'; while ($i>0)  {
+        
+            if (isset($_POST["chargedbybuildid$i"])) {
+                $cbbname=trim($_POST["cbbname$i"]);
+                $cbbcost=trim($_POST["cbbcost$i"]);
+                $cbborder=trim($_POST["cbborder$i"]);
+                $cbbcomment=trim($_POST["cbbcomment$i"]);
+                $cbbmod=trim($_POST["cbbmod$i"]);
+                if (isset($_POST["cbbasap$i"])) { $cbbasap=trim($_POST["cbbasap$i"]); } else { $cbbasap="0"; }                
+                if (isset($_POST["cbbcargo$i"])) { $cbbcargo=trim($_POST["cbbcargo$i"]); } else { $cbbcargo="0"; }
+                if (isset($_POST["new$i"])) { $_POST["new$i"]=trim($_POST["new$i"]); } else { $_POST["new$i"]=''; }
 
-$i='21'; while ($i>0)  {
-
-if (isset($_POST["chargedbybuildid$i"])) { 
-
-
-$cbbname=trim($_POST["cbbname$i"]);
-$cbbcost=trim($_POST["cbbcost$i"]);
-$cbborder=trim($_POST["cbborder$i"]);
-$cbbcomment=trim($_POST["cbbcomment$i"]);
-$cbbmod=trim($_POST["cbbmod$i"]);
-
-
-if (isset($_POST["cbbasap$i"])) { $cbbasap=trim($_POST["cbbasap$i"]); } else { $cbbasap="0"; }
-
-if (isset($_POST["cbbcargo$i"])) { $cbbcargo=trim($_POST["cbbcargo$i"]); } else { $cbbcargo="0"; }
-
-
-
-// $infotext.='<br />Found '.$i.' name : '.$cbbname.' order : '.$cbborder.' cost : '.$cbbcost.' mod : '.$cbbmod.' comment : '.$cbbcomment;  
-
-
-if (isset($_POST["new$i"])) { $_POST["new$i"]=trim($_POST["new$i"]); } else { $_POST["new$i"]=''; }
-
-
-
-if (trim($_POST["new$i"])=='') {
-
-
-
-
- $sql = "UPDATE chargedbybuild SET 
- cbbname='$cbbname', 
- cbbasap='$cbbasap', 
- cbbcargo='$cbbcargo' , 
- cbbmod='$cbbmod', 
- cbbcost='$cbbcost', 
- cbborder='$cbborder'
- WHERE chargedbybuildid = $i LIMIT 1"; 
- $result = mysql_query($sql, $conn_id);
- if ($result){ 
-// $infotext.="<br>Updated individ cost "; 
-} else { 
- $infotext.=mysql_error()."<br> <strong>An error occured during updating Core Pricing</strong>"; 
- $alerttext.="<p>Error occured during updating Core Pricing name ".$cbbname.'</p>'; 
-}
-} 
-
-
-
-if ((trim($_POST["new$i"]))=='yes') { if ($cbbname) {
-
- $sql = "INSERT INTO chargedbybuild SET cbbname='$cbbname', cbbasap='$cbbasap', cbbcargo='$cbbcargo' , cbbmod='$cbbmod', cbbcost='$cbbcost', cbborder='$cbborder', cbbcomment='$cbbcomment', chargedbybuildid = '$i'"; 
- $result = mysql_query($sql, $conn_id);
- if ($result){ 
-// $infotext.="<br>Updated individ cost "; 
- } else { 
- $infotext.=mysql_error()."<br> <strong>An error occured during updating Core Pricing</strong>"; 
- $alerttext.="<p>Error occured during updating Distance Pricing</p>"; 
- }
-} 
-}
-
-
-}
-$i=$i-1;
-}
-
-$infotext.= '<br />Updated Pricing'.$sql;;
-$pagetext.= '<p>Updated Pricing</p>';
-
-} // ends page=editcorepricing
+                if (trim($_POST["new$i"])=='') {
+    
+                    $sql = "UPDATE chargedbybuild SET 
+                    cbbname='$cbbname', 
+                    cbbasap='$cbbasap', 
+                    cbbcargo='$cbbcargo' , 
+                    cbbmod='$cbbmod', 
+                    cbbcost='$cbbcost', 
+                    cbborder='$cbborder'
+                    WHERE chargedbybuildid = $i LIMIT 1"; 
+                    $result = mysql_query($sql, $conn_id);
+                    if ($result){ 
+                        // $infotext.="<br>Updated individ cost "; 
+                    } else {
+                        $infotext.="<br> <strong>An error occured during updating Core Pricing</strong>"; 
+                        $alerttext.="<p>Error occured during updating Core Pricing name ".$cbbname.'</p>'; 
+                    }
+                } 
+                
+                
+                
+                if ((trim($_POST["new$i"]))=='yes') {
+                    if ($cbbname) {
+                
+                        $sql = "INSERT INTO chargedbybuild 
+                        SET 
+                        cbbname='$cbbname', 
+                        cbbasap='$cbbasap', 
+                        cbbcargo='$cbbcargo' , 
+                        cbbmod='$cbbmod', 
+                        cbbcost='$cbbcost', 
+                        cbborder='$cbborder', 
+                        cbbcomment='$cbbcomment', 
+                        chargedbybuildid = '$i'"; 
+                        
+                        $result = mysql_query($sql, $conn_id);
+                        
+                        if ($result){ 
+                            // $infotext.="<br>Updated individ cost "; 
+                        } else { 
+                            $infotext.="<br> <strong>An error occured during updating Core Pricing</strong>"; 
+                            $alerttext.="<p>Error occured during updating Distance Pricing</p>"; 
+                        }
+                    } 
+                }
+            
+            
+            }
+            $i=$i-1;
+        }
+        
+        $infotext.= '<br />Updated Pricing'.$sql;;
+        $pagetext.= '<p>Updated Pricing</p>';
+        
+    } // ends page=editcorepricing
 
 
 
@@ -1781,29 +1721,29 @@ $pagetext.= '<p>Updated Pricing</p>';
     // EDITS INVOICE COMMENT
 
     if ($page=='editinvcomment') {
-
-
-if (isset( $_POST['ref'])) { $invoiceref=$_POST['ref']; } else { $invoiceref=''; }
-if (isset($_POST['invcomments'])) { $invcomments=$_POST['invcomments']; } else { $invcomments=''; }
-
-if ($invoiceref) {
-
-$sql = " UPDATE `invoicing` SET `invcomments` = '$invcomments' WHERE ref='$invoiceref'";	
-
-$result = mysql_query($sql, $conn_id);
-	
-if ($result) {		
-$pagetext.='<p>Updated comments for invoice ref '.$invoiceref.'</p>';
-$infotext.='<br /> Invoice '.$invoiceref.' comment edited to '.$invcomments;
-
-} else { 
-$alerttext.='<br />Unable to edit invoice comment<br />'; 
-$infotext.='<br />Unable to edit invoice comment<br />'.$sql;
-} // ends invoice dtabase changed
-
-} // checks for invoice ref
- 
-} // finishes page= editinv comment
+        if (isset( $_POST['ref'])) { $invoiceref=$_POST['ref']; } else { $invoiceref=''; }
+        if (isset($_POST['invcomments'])) { $invcomments=$_POST['invcomments']; } else { $invcomments=''; }
+        
+        if ($invoiceref) {
+        
+            $sql = " UPDATE `invoicing` SET `invcomments` = '$invcomments' WHERE ref='$invoiceref'";	
+            
+            $result = mysql_query($sql, $conn_id);
+                
+            if ($result) {
+                $pagetext.='<p>Updated comments for invoice ref '.$invoiceref.'</p>';
+                $infotext.='<br /> Invoice '.$invoiceref.' comment edited to '.$invcomments;
+            
+            } else { 
+            
+                $alerttext.='<br />Unable to edit invoice comment<br />'; 
+                $infotext.='<br />Unable to edit invoice comment<br />'.$sql;
+            
+            } // ends invoice dtabase changed
+            
+        } // checks for invoice ref
+        
+    } // finishes page= editinv comment
 
 
 
@@ -1838,7 +1778,7 @@ $infotext.='<br />Unable to edit invoice comment<br />'.$sql;
         // echo "<h4>Invoice method field found</h4>" . $invmethod . " " . $datepassed . " " . $invoiceref ;
             if ($invoiceref) {
                 $sql = "SELECT cost from invoicing WHERE ref=$invoiceref ";
-                $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+                $sql_result = mysql_query($sql,$conn_id); 
             
                 $temp=mysql_affected_rows();
             
@@ -1891,64 +1831,64 @@ $infotext.='<br />Unable to edit invoice comment<br />'.$sql;
 
 
     if ($page=="editinvchase") {
-
-$infotext.=' <br />Editing invoice chase ';
-
-
-$ref=trim($_POST['ref']);
-
-$dateshift=trim($_POST['chasedate']);
-$duedate= date("Y-m-d H:i:s" );
-$temp_ar=explode("-",$duedate); $spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
-if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { 
-$temptime_ar[0] = 0; $temptime_ar[1] = 0; $temptime_ar[2] = 0; }
-$day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
-$second='00';
-$duedate= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year));
-$chasetype=$_POST['invchasetype'];
-
-
-if ($dateshift==69) { $duedate=''; $infotext.='<br />Date cleared'; $pagetext.='<p>Date cleared, chase removed</p>';}
-
-
-if ($chasetype=='1') {
-$infotext.= "<br />First time chased";
-$sql="UPDATE `invoicing` SET `chasedate` = '$duedate' WHERE CONCAT( `invoicing`.`ref` ) =$ref ";
-$result = mysql_query($sql, $conn_id);
-$infotext.="<br />". mysql_affected_rows().' invoice affected.<br>';
-
-if ($result) {
-$pagetext.='<p>First Time Invoice Chased</p>';
-}
-}
-
-if ($chasetype=='2') {
-$infotext.= "<br />Second time chased";
-$sql="UPDATE `invoicing` SET `chasedate2` = '$duedate' WHERE CONCAT( `invoicing`.`ref` ) =$ref";
-$result = mysql_query($sql, $conn_id);
-$infotext.="<br />". mysql_affected_rows().' invoice affected.<br>';
-
-if ($result) {
-$pagetext.='<p>Second Time Invoice Chased</p>';
-}
-
-}
-
-if ($chasetype=='3') {
-$infotext.= "<br />Third time chased<br>";
-$sql="UPDATE `invoicing` SET `chasedate3` = '$duedate' WHERE CONCAT( `invoicing`.`ref` ) =$ref";
-$result = mysql_query($sql, $conn_id);
-$infotext.="<br />". mysql_affected_rows().' invoice affected.<br>';
-
-
-if ($result) {
-$pagetext.='<p>Third Chased Changed</p>';
-}
-
-}
-
-
-} // ends page = edit chase invoice
+        
+        $infotext.=' <br />Editing invoice chase ';
+        
+        
+        $ref=trim($_POST['ref']);
+        
+        $dateshift=trim($_POST['chasedate']);
+        $duedate= date("Y-m-d H:i:s" );
+        $temp_ar=explode("-",$duedate); $spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
+        if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { 
+        $temptime_ar[0] = 0; $temptime_ar[1] = 0; $temptime_ar[2] = 0; }
+        $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; 
+        $second='00';
+        $duedate= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year));
+        $chasetype=$_POST['invchasetype'];
+        
+        
+        if ($dateshift==69) { $duedate=''; $infotext.='<br />Date cleared'; $pagetext.='<p>Date cleared, chase removed</p>';}
+        
+        
+        if ($chasetype=='1') {
+            $infotext.= "<br />First time chased";
+            $sql="UPDATE `invoicing` SET `chasedate` = '$duedate' WHERE CONCAT( `invoicing`.`ref` ) =$ref ";
+            $result = mysql_query($sql, $conn_id);
+            $infotext.="<br />". mysql_affected_rows().' invoice affected.<br>';
+            
+            if ($result) {
+                $pagetext.='<p>First Time Invoice Chased</p>';
+            }
+        }
+        
+        if ($chasetype=='2') {
+            $infotext.= "<br />Second time chased";
+            $sql="UPDATE `invoicing` SET `chasedate2` = '$duedate' WHERE CONCAT( `invoicing`.`ref` ) =$ref";
+            $result = mysql_query($sql, $conn_id);
+            $infotext.="<br />". mysql_affected_rows().' invoice affected.<br>';
+            
+            if ($result) {
+                $pagetext.='<p>Second Time Invoice Chased</p>';
+            }
+            
+        }
+        
+        if ($chasetype=='3') {
+            $infotext.= "<br />Third time chased<br>";
+            $sql="UPDATE `invoicing` SET `chasedate3` = '$duedate' WHERE CONCAT( `invoicing`.`ref` ) =$ref";
+            $result = mysql_query($sql, $conn_id);
+            $infotext.="<br />". mysql_affected_rows().' invoice affected.<br>';
+            
+            
+            if ($result) {
+                $pagetext.='<p>Third Chased Changed</p>';
+            }
+            
+        }
+        
+        
+    } // ends page = edit chase invoice
 
 
 
@@ -1958,12 +1898,8 @@ $pagetext.='<p>Third Chased Changed</p>';
 
         if ($invoiceref) {
 
-
-            // echo $datepassed.' '. $invmethod . ' ' . $cost . ' ' . $invoiceref; 
-
             $sql = "DELETE from invoicing WHERE ref='$invoiceref'";	
 
-            // $sql="UPDATE `invoicing` SET `paydate` = '$invoicedate', `$invmethod` = '$cost' WHERE CONCAT( `invoicing`.`ref` ) =$invoiceref ";
             $result = mysql_query($sql, $conn_id);
 
             $temp=mysql_affected_rows();
@@ -1979,7 +1915,7 @@ $pagetext.='<p>Third Chased Changed</p>';
 
 
             $dtsql = "SELECT ID FROM Orders WHERE (`Orders`.`invoiceref` ='$invoiceref' )  ";
-            $dtsql_result = mysql_query($dtsql,$conn_id)  or mysql_error(); 
+            $dtsql_result = mysql_query($dtsql,$conn_id); 
             while ($dtrow = mysql_fetch_array($dtsql_result)) {
                 extract($dtrow);
                 $dtid=$dtrow['ID'];
@@ -1989,12 +1925,16 @@ $pagetext.='<p>Third Chased Changed</p>';
                 $temp=mysql_affected_rows();
                 
                 if ($result){
+                    
                     $newpoint="INSERT INTO cojm_audit (auditid,audituser,auditorderid,auditpage,auditfilename,auditmobdevice,
                     auditbrowser,audittext,auditcjtime,auditpagetime,auditmidtime,auditinfotext)   
                     VALUES ('','$cyclistid','$dtid','$page','view_all_invoices.php','$mobdevice',
                     '$browser','Invoice ref $invoiceref removed','','','','Invoice removed from job')";
+                    
                     mysql_query($newpoint, $conn_id) or mysql_error();
+                    
                     $newauditid=mysql_insert_id();
+                    
                     if (mysql_error()) {
                         $alerttext.= '<div class="moreinfotext"><h1> Problem saving audit log </h1></div>';
                         $infotext.= '<br />Problem saving audit log on remove invoice details'.$newpoint;
@@ -2055,7 +1995,7 @@ $pagetext.='<p>Third Chased Changed</p>';
         
         } // ends check for invoice ref
 
-} // ends page = invnotpaid
+    } // ends page = invnotpaid
 
 
 
@@ -2150,7 +2090,7 @@ if ($page=='addtodb') { // new invoice
     $existinginvref='';
 
     $dtsql = "SELECT * FROM invoicing WHERE (`invoicing`.`ref` ='$newinvoiceref' )  ";
-    $dtsql_result = mysql_query($dtsql,$conn_id)  or mysql_error(); 
+    $dtsql_result = mysql_query($dtsql,$conn_id); 
     while ($dtrow = mysql_fetch_array($dtsql_result)) {
         extract($dtrow);
         if ($dtrow['ref']>0) {
@@ -2170,7 +2110,7 @@ if ($page=='addtodb') { // new invoice
         
         
             $updatequery = "UPDATE Orders SET status ='110', invoiceref =$newinvoiceref WHERE ID=$value";
-            mysql_query($updatequery,$conn_id) or die(mysql_error());
+            mysql_query($updatequery,$conn_id);
             $orderupdate++;
             
             $audituser=' COJM ';
@@ -2234,7 +2174,7 @@ if ($page=='addtodb') { // new invoice
             
             // get last invoiced date
             $sql = "SELECT lastinvoicedate from Clients WHERE CustomerID=$clientid";
-            $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+            $sql_result = mysql_query($sql,$conn_id); 
             if ($sql_result){
                 // $pdfheaderstring=$pdfheaderstring . "<h3>Found last invoice date</h3>"; 
             } else {
@@ -2280,13 +2220,19 @@ if ($page == "createnewfromexisting" ) {
 
         
         $query="SELECT * FROM Orders where ID = '$id' LIMIT 1";
-        $result=mysql_query($query, $conn_id); $row=mysql_fetch_array($result);
-        $status=$row['status']; $serviceid=$row['ServiceID']; $cost=$row['FreightCharge']; $vatcharge=$row['vatcharge']; 
-        $timerequested=$row['jobrequestedtime']; $targetcollectiondate = $row['targetcollectiondate'];
+        $result=mysql_query($query, $conn_id);
+        $row=mysql_fetch_array($result);
+        $status=$row['status']; 
+        $serviceid=$row['ServiceID']; 
+        $cost=$row['FreightCharge']; 
+        $vatcharge=$row['vatcharge']; 
+        $timerequested=$row['jobrequestedtime']; 
+        $targetcollectiondate = $row['targetcollectiondate'];
         
         // echo "target collection date from row : "; echo $targetcollectiondate;
         // $targetcollectiondate=date("Y-m-d H:i:s");
-        $temp_ar=explode("-",$targetcollectiondate); $spltime_ar=explode(" ",$temp_ar[2]); 
+        $temp_ar=explode("-",$targetcollectiondate);
+        $spltime_ar=explode(" ",$temp_ar[2]); 
         $temptime_ar=explode(":",$spltime_ar[1]); 
         if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; 
         $temptime_ar[1] = 0; $temptime_ar[2] = 0; }
@@ -2787,7 +2733,7 @@ if ($page == "createnewfromexisting" ) {
             }
 
         } // ends check for duplicate job 
-    } // ends page=createnewfrom existing
+} // ends page=createnewfrom existing
 
 
 
@@ -3141,7 +3087,7 @@ if (($page=="newjobfromajax" ) and (trim($_POST['serviceID'])) and (trim($_POST[
         $sql = "UPDATE `Clients` SET `isactiveclient`='1' WHERE `CustomerID`='$CustomerID'; ";
         $result = mysql_query($sql, $conn_id);
         if ($result){
-            $infotext.="<br />3658 CLIENT Updated as active";
+            $infotext.="<br />3144 CLIENT Updated as active";
             $pagetext.="<p>Client made active </p>";
         }
         else {
@@ -3333,7 +3279,7 @@ if (($page=="newjobfromajax" ) and (trim($_POST['serviceID'])) and (trim($_POST[
     )
     ";
     
-    mysql_query($sql, $conn_id) or die(mysql_error()); 
+    mysql_query($sql, $conn_id); 
     $id=mysql_insert_id();  
     
     mysql_query("UNLOCK TABLES", $conn_id);   
@@ -3354,7 +3300,8 @@ if (($page=="newjobfromajax" ) and (trim($_POST['serviceID'])) and (trim($_POST[
 
 
 $sql = "SELECT * FROM Orders WHERE (`Orders`.`ID` = '$id' ) LIMIT 0,1 ";
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); $sumtot=mysql_affected_rows(); 
+$sql_result = mysql_query($sql,$conn_id);
+$sumtot=mysql_affected_rows(); 
 
     
 if ($sumtot>0)  { // individ job id found
@@ -3403,428 +3350,357 @@ if ($sumtot>0)  { // individ job id found
                 // CONFIRMING DELETE OPTION
                 if ($page == "confirmdelete" ) {
                     $infotext.="<br /><strong>Delete option, job ref ".$id." deleted.</strong>";
-                    $query = "DELETE from Orders WHERE ID='$id'";	mysql_query($query, $conn_id);
-                    $alerttext.="<p><strong>Delete option confirmed, job ref ".$id." deleted.</strong></p>";	
+                    $query = "DELETE from Orders WHERE ID='$id'";
+                    mysql_query($query, $conn_id);
+                    
+                    
+                    
+                    
+                    $alerttext.="<p><strong>Delete option confirmed, job ref ".$id." deleted. mobdevice is ".$mobdevice."</strong></p>";	
                     // $infotext.="<br /><strong>Delete option confirmed,<br> ID Deleted.</strong>";	
                 }
         
 
                 // END OF DELETION CONFIRM
         
-        
-        
-        
+    
 
+
+            
+                if (($page=="editstatus")) {
+                
+                    // $infotext.=' form birthday is '.$formbirthday. ' timestamp is '.strtotime($editedtime);
+                    
+                    $newcyclist=trim($_POST['newcyclist']);
+                    $oldcyclist=trim($_POST['oldcyclist']);
+                    $newstatus=$_POST['newstatus'];
+                    $oldstatus=$_POST['oldstatus'];
+                    
+                    if ($newcyclist<>$oldcyclist) {
+                    
+                        // $infotext.='<br/>Cyclist different, setting jov to unviewed';
+                        
+                        $sql = "UPDATE Orders SET lookedatbycyclisttime='0', CyclistID=$newcyclist WHERE ID = $id LIMIT 1"; 
+                        $result = mysql_query($sql, $conn_id);
+                        if ($result){ 
+                            $pagetext.="<p>".$globalprefrow['glob5']." Updated </p>"; 
+                            $infotext.="<br />Updated ".$globalprefrow['glob5']." from ".$oldcyclist.' to '.$newcyclist; 
+                        } 
+                        else { 
+                            $alerttext.="<p>Error occured during updating ".$globalprefrow['glob5']."</p>"; 
+                            $infotext.="<br> <strong>An error occured during updating cyclist</strong>".$sql; 
+                        }
+                    } // ends check for change in cyclist
+                    
+                    
+                    
+                    if (($newstatus)and ($newstatus<>$oldstatus)) {
+                        
+                        $oldstatustext = mysql_result(mysql_query("SELECT statusname FROM status WHERE status='$oldstatus' LIMIT 0,1", $conn_id), 0);
+                        $newstatustext = mysql_result(mysql_query("SELECT statusname FROM status WHERE status='$newstatus' LIMIT 0,1", $conn_id), 0);
+                        
+                        $docalc = mysql_result(mysql_query("
+                        SELECT lookedatbycyclisttime
+                        from Orders 
+                        WHERE `Orders`.`ID`=$id
+                        LIMIT 1
+                        ", $conn_id), 0);
+                        
+                        if  ($docalc=='0000-00-00 00:00:00') {
+                        
+                            // $infotext.='docalc is '.$docalc;
+                            $sql = "UPDATE Orders SET lookedatbycyclisttime=NOW() WHERE ID = $id LIMIT 1"; 
+                            $result = mysql_query($sql, $conn_id);
+                            if ($result){ $infotext.="<br>Job Viewed 1st time.";  
+                            } else { 
+                                $infotext.="<br> <strong>An error occured during updating Databse to mark viewed</strong>"; 
+                                $alerttext.="<p>Error occured during updating Databse to mark viewed</p>"; 
+                            
+                            } // ends result check
+                        } // ends check for docalc
+                        
+                        
+                        
+                        $sql = "UPDATE Orders SET status='$newstatus' WHERE ID='$id' LIMIT 1";
+                        $result = mysql_query($sql, $conn_id);
+                        if ($result){ 
+                            $pagetext.='<p>Status changed from '.$oldstatustext.' to '.$newstatustext.'</p>'; 
+                            $infotext.='<br />Status updated from '.$oldstatustext.' to '.$newstatustext;
+                        
+                        } else { 
+                            $infotext.="<br /> cj 4501 <strong>Error occured in status Update</strong>"; 
+                            $alerttext.="<p>Error cj 4501 occured in status Update</p>"; 
+                        } 
+                        
+                        
+                    
+                        // $Changing waiting time to current time
+                        if ($newstatus =='50') {
+                            $sql = "UPDATE Orders SET waitingstarttime=now() WHERE ID='$id' LIMIT 1";
+                            $result2 = mysql_query($sql, $conn_id);
+                            if ($result2){ 
+                                $pagetext.="<p>".$globalprefrow['glob5']." at collection point.</p>";
+                                $infotext.="<p>On-Site time updated.</p>";
+                            } else { 
+                                $infotext.="<br /><strong>An error occured during update!</strong>".$sql; 
+                                $alerttext.="<p>Error occured during update!</p>"; 
+                            }
+                        }
+                        
+                        
+                        // item has been collected
+                        if (($oldstatus <'60' ) and ($newstatus >'59')) {
+                        $sql = "UPDATE Orders SET collectiondate=now() WHERE ID='$id' LIMIT 1";
+                        $result2 = mysql_query($sql, $conn_id);
+                        if ($result2){ 
+                        $infotext.="<br />Collection time updated ";
+                        $pagetext.="<p>Item Collected </p>";
+                        } else { 
+                        $infotext.="<br /><strong>An error occured during updating collection time !</strong>".$sql; 
+                        $alerttext.="<p>Error occured updating collection time </p>"; 
+                        }}
+                        
+                        
+                        // $infotext.="Pausing tracking";
+                        if ($newstatus =='60') {
+                        $sql = "UPDATE Orders SET starttrackpause=now() WHERE ID='$id' LIMIT 1";
+                        $result27 = mysql_query($sql, $conn_id);
+                        if ($result27){ 
+                        $infotext.="<br />Paused time auto updated";
+                        $pagetext.="<p> Job Paused</p>";
+                        } else { 
+                        $infotext.="<br /><strong>An error occured during updating pause tracking time !</strong>".$sql; 
+                        $alerttext.="<p>Error occured during updating pause tracking time !</p>"; 
+                        }}
+                        
+                        
+                        
+                        if (($oldstatus =='60') and ($newstatus >'60')) {
+                        // $infotext.="Resuming tracking";
+                        $sql = "UPDATE Orders SET finishtrackpause=now() WHERE ID='$id' LIMIT 1";
+                        $result27 = mysql_query($sql, $conn_id);
+                        if ($result27){ 
+                        $infotext.="<br />Resume time updated index";
+                        $pagetext.="<p>Job Resumed</p>";
+                        } else { 
+                        $infotext.="<br /><strong>An error occured during updating resuming tracking time !</strong>".$sql; 
+                        $alerttext.="<p>Error occured during updating resuming tracking time</p>"; 
+                        }}
+                        
+                        
+                        
+                        if (($oldstatus <'70' ) and ($newstatus>'70')) {
+                        $sql = "UPDATE Orders SET ShipDate=now() WHERE ID='$id' LIMIT 1";
+                        $result3 = mysql_query($sql, $conn_id);
+                        if ($result3){ 
+                        $infotext.="<br />Delivery time updated";
+                        $pagetext.="<p>Delivered  </p>";
+                        } else { 
+                        $infotext.="<br /><strong>An error occured during updating delivery time!</strong>".$sql; 
+                        $alerttext.="<p>Error during updating delivery time</p>"; 
+                        }}
+                        
+                        
+                        
+                        if ($newstatus =='40') {
+                        $sql = "UPDATE Orders SET starttravelcollectiontime=now() WHERE ID='$id' LIMIT 1"; 
+                        $result4 = mysql_query($sql, $conn_id); if ($result4){ 
+                        $infotext.="<br /> en route time updated. ";
+                        $pagetext.="<p> On way to collection. </p>";
+                        } else { 
+                        $infotext.="<br /><strong>An error occured during updating start travel to collection time!</strong>".$sql; 
+                        $alerttext.="<p>Error during updating start travel to collection time</p>"; 
+                        }}
+                        
+                        
+                        
+                        if ($newstatus<$oldstatus) {
+                        
+                        
+                        $pagetext.="<p> Status reduced from ".$oldstatustext." to ".$newstatustext.'</p>';
+                        
+                        $infotext.='<br />Status gone down.';
+                        // check for times higher than job status
+                        if ($newstatus =='30') {
+                        $sql = "UPDATE Orders SET 
+                        starttravelcollectiontime='0000-00-00 00:00:00', 
+                        waitingstarttime ='0000-00-00 00:00:00',
+                        collectiondate='0000-00-00 00:00:00',
+                        starttrackpause = '0000-00-00 00:00:00',
+                        finishtrackpause ='0000-00-00 00:00:00',
+                        ShipDate ='0000-00-00 00:00:00'
+                        WHERE ID='$id' LIMIT 1"; 
+                        $result5 = mysql_query($sql, $conn_id); if ($result5){ 
+                        $infotext.="<br /> Times reduced OK. ";
+                        // $pagetext.="<p> Status reduced to Scheduled </p>";
+                        } else { 
+                        $infotext.="<br /><strong>An error occured ref cj4614 !</strong>".$sql; 
+                        $alerttext.="<p>Error ref cj4614 !</p>"; 
+                        }}
+                        
+                        if ($newstatus =='40') {
+                        $sql = "UPDATE Orders SET 
+                        waitingstarttime ='0000-00-00 00:00:00',
+                        collectiondate='0000-00-00 00:00:00',
+                        starttrackpause = '0000-00-00 00:00:00',
+                        finishtrackpause ='0000-00-00 00:00:00',
+                        ShipDate ='0000-00-00 00:00:00'
+                        WHERE ID='$id' LIMIT 1"; 
+                        $result5 = mysql_query($sql, $conn_id); if ($result5){ 
+                        $infotext.="<br /> Times cleared from job cj 4649. ";
+                        // $pagetext.="<p> On way to collection. </p>";
+                        } else { 
+                        $infotext.="<br /><strong>An error occured cd 4652!</strong>".$sql; 
+                        $alerttext.="<p>Error on cj 4652</p>"; 
+                        }}
+                        
+                        if ($newstatus =='50') {
+                        $sql = "UPDATE Orders SET 
+                        collectiondate='0000-00-00 00:00:00',
+                        starttrackpause = '0000-00-00 00:00:00',
+                        finishtrackpause ='0000-00-00 00:00:00',
+                        ShipDate ='0000-00-00 00:00:00'
+                        WHERE ID='$id' LIMIT 1"; 
+                        $result5 = mysql_query($sql, $conn_id); if ($result5){ 
+                        $infotext.="<br /> Times cleared from job cj 4666. ";
+                        // $pagetext.="<p> On way to collection. </p>";
+                        } else { 
+                        $infotext.="<br /><strong>An error occured cd 4666!</strong>".$sql; 
+                        $alerttext.="<p>Error on cj 4666</p>"; 
+                        }}
+                        
+                        
+                        if ($newstatus =='60') {
+                        $sql = "UPDATE Orders SET 
+                        finishtrackpause ='0000-00-00 00:00:00',
+                        ShipDate ='0000-00-00 00:00:00'
+                        WHERE ID='$id' LIMIT 1"; 
+                        $result5 = mysql_query($sql, $conn_id); if ($result5){ 
+                        $infotext.="<br /> Times cleared from job cj 4682. ";
+                        // $pagetext.="<p> On way to collection. </p>";
+                        } else { 
+                        $infotext.="<br /><strong>An error occured cd 4682!</strong>".$sql; 
+                        $alerttext.="<p>Error on cj 4682</p>"; 
+                        }}
+                        
+                        
+                        if ($newstatus =='65') {
+                        $sql = "UPDATE Orders SET 
+                        ShipDate ='0000-00-00 00:00:00'
+                        WHERE ID='$id' LIMIT 1"; 
+                        $result5 = mysql_query($sql, $conn_id); if ($result5){ 
+                        $infotext.="<br /> Times cleared from job cj 4694. ";
+                        // $pagetext.="<p> On way to collection. </p>";
+                        } else { 
+                        $infotext.="<br /><strong>An error occured cd 4694!</strong>".$sql; 
+                        $alerttext.="<p>Error on cj 4694</p>"; 
+                        }}
+                        
+                        
+                        
+                        } // ends status gone down
+                        
+                        
+                        
+                        // see if need to send email
+                        if (($oldstatus<$newstatus) and ($newstatus==='100')) {
+                            
+                            
+                            $infotext.='<br /> starts check to see if completed email needed';
+                            $qem1 = mysql_result(mysql_query("
+                            SELECT cemail1 FROM Clients 
+                            INNER JOIN Orders
+                            ON Clients.CustomerID = Orders.CustomerID
+                            WHERE Orders.ID = $ID LIMIT 0,1", $conn_id), 0);
+                            
+                            if ($qem1=='1') { 
+                            $infotext.='<br /> Will auto send completed email when code written!';
+                            }
+                            if ($qem1=='0') { 
+                            // $infotext.='<br /> Is Zero, does not send completed email';
+                            }
+                            
+                            
+                            
+                            
+                            
+                            $infotext.='<br /> starts check to see if tracking admin needed';
+                            
+                            
+                            $query="SELECT ID, status, trackerid, ShipDate, collectiondate, starttrackpause, finishtrackpause FROM Orders, Cyclist
+                            WHERE Orders.CyclistID = Cyclist.CyclistID
+                            AND Orders.ID = '$ID' LIMIT 1";
+                            $result=mysql_query($query, $conn_id);
+                            $row=mysql_fetch_array($result);
+                            
+                            
+                            
+                            $thistrackerid=$row['trackerid'];
+                            
+                            $startpause=strtotime($row['starttrackpause']); 
+                            $finishpause=strtotime($row['finishtrackpause']);
+                            $collecttime=strtotime($row['collectiondate']); 
+                            $delivertime=strtotime($row['ShipDate']); 
+                            if (($startpause > '10') and ( $finishpause < '10')) { $delivertime=$startpause; } 
+                            if ($startpause <'10') { $startpause='9999999999'; }
+                    
+                    
+                            $findlast="SELECT timestamp FROM `instamapper` 
+                            WHERE `device_key` = '$thistrackerid' 
+                            AND `timestamp` > '$collecttime' 
+                            AND `timestamp` NOT BETWEEN '$startpause' 
+                            AND '$finishpause' 
+                            AND `timestamp` < '$delivertime' 
+                            ORDER BY `timestamp` ASC 
+                            LIMIT 1"; 
+                            
+                            $sql_result2 = mysql_query($findlast,$conn_id); 
+                            
+                            
+                            while ($res2 = mysql_fetch_assoc($sql_result2)) {
+                                
+                                
+                                $infotext.='<br /> res is '.$res2['timestamp'].' timestamp found';
+                                
+                                $sql="INSERT INTO cojm_admin 
+                                (cojm_admin_stillneeded, cojm_admin_job_ref, cojmadmin_tracking) 
+                                    VALUES ('1', '$ID', '1' )   ";
+                                
+                                
+                                    $result = mysql_query($sql, $conn_id);
+                                if ($result){
+                                    $infotext.="<br />5220 Success adding admin job";
+                                    // $pagetext.='<p>'.$globalprefrow['glob5'].' details updated</p>';
+                                    
+                                    
+                                    $thiscyclist=mysql_insert_id(); 
+                                    //  $newcyclistid=$thiscyclist;
+                                    //     $pagetext.='<p>New '.$globalprefrow['glob5'].' '.$thiscyclist.' '.$cojmname.' created.</p>';
+                                    $infotext.='<p>Admin Task '.$thiscyclist.' created.</p>'; 
+                                
+                                
+                                } else {
+                                    $infotext.=" An error occured during setting admin q <br>".$sql;  
+                                    $alerttext.=" <p>Error CJ5232 occured during update!</p>";
+                                } // ends 
+                                
+                            
+                            }
+                            
+                            
+                            $infotext.='<br /> finishes check to see if tracking admin needed';
+                            
+                            } // ends check raised to 100
+                        
+                        
+                    } // ends new and old status difference AND ends new status
+                } // ends page=editui or editstatus 
+                
         
-    
-    
-    if (($page=="editstatus")) {
-    
-    // $infotext.=' form birthday is '.$formbirthday. ' timestamp is '.strtotime($editedtime);
-    
-    $newcyclist=trim($_POST['newcyclist']);
-    $oldcyclist=trim($_POST['oldcyclist']);
-    $newstatus=$_POST['newstatus'];
-    $oldstatus=$_POST['oldstatus'];
-    
-    if ($newcyclist<>$oldcyclist) {
-    
-    // $infotext.='<br/>Cyclist different, setting jov to unviewed';
-    
-    $sql = "UPDATE Orders SET lookedatbycyclisttime='0', CyclistID=$newcyclist WHERE ID = $id LIMIT 1"; 
-    $result = mysql_query($sql, $conn_id);
-    if ($result){ 
-    $pagetext.="<p>".$globalprefrow['glob5']." Updated </p>"; 
-    $infotext.="<br />Updated ".$globalprefrow['glob5']." from ".$oldcyclist.' to '.$newcyclist; 
-    } 
-    else { 
-    $alerttext.="<p>Error occured during updating ".$globalprefrow['glob5']."</p>"; 
-    $infotext.=mysql_error()."<br> <strong>An error occured during updating cyclist</strong>".$sql; 
-    } 
-    } // ends check for change in cyclist
-    
-    
-    
-    if (($newstatus)and ($newstatus<>$oldstatus)) {
-    
-    $oldstatustext = mysql_result(mysql_query("SELECT statusname FROM status WHERE status='$oldstatus' LIMIT 0,1", $conn_id), 0);
-    $newstatustext = mysql_result(mysql_query("SELECT statusname FROM status WHERE status='$newstatus' LIMIT 0,1", $conn_id), 0);
-    
-    $docalc = mysql_result(mysql_query("
-    SELECT lookedatbycyclisttime
-    from Orders 
-    WHERE `Orders`.`ID`=$id
-    LIMIT 1
-    ", $conn_id), 0);
-    
-    if  ($docalc=='0000-00-00 00:00:00') {
-    
-    // $infotext.='docalc is '.$docalc;
-    $sql = "UPDATE Orders SET lookedatbycyclisttime=NOW() WHERE ID = $id LIMIT 1"; 
-    $result = mysql_query($sql, $conn_id);
-    if ($result){ $infotext.="<br>Job Viewed 1st time.";  
-    } else { 
-    $infotext.=mysql_error()."<br> <strong>An error occured during updating Databse to mark viewed</strong>"; 
-    $alerttext.="<p>Error occured during updating Databse to mark viewed</p>"; 
-    
-    } // ends result check
-    } // ends check for docalc
-    
-    
-    
-    $sql = "UPDATE Orders SET status='$newstatus' WHERE ID='$id' LIMIT 1"; $result = mysql_query($sql, $conn_id);
-    if ($result){ 
-    $pagetext.='<p>Status changed from '.$oldstatustext.' to '.$newstatustext.'</p>'; 
-    $infotext.='<br />Status updated from '.$oldstatustext.' to '.$newstatustext;
-    
-    } else { 
-    $infotext.="<br /> cj 4501 <strong>Error occured in status Update</strong>"; 
-    $alerttext.="<p>Error cj 4501 occured in status Update</p>"; 
-    } 
-    
-    
-    // <option value="30">Collection Scheduled</option>
-    // <option value="40">En-route to Collection</option>
-    // <option value="50">Onsite at Collection</option>
-    // <option value="60">Scheduled</option>
-    // 62 Mail Batch in progress
-    // <option value="65">En-route with delivery</option>
-    // <option value="86">Completed needs admin</option>
-    // <option value="100">Complete</option>
-    // <option value="102">Reqs Invoicing</option>
-    // <option value="110">Complete Invoice Sent</option>
-    // <option value="120">Complete Invoice Paid</option>
-    // <option value="122">Reqs Receipt</option> 
-    
-    
-    
-    
-    // $Changing waiting time to current time
-    if ($newstatus =='50') {
-    $sql = "UPDATE Orders SET waitingstarttime=now() WHERE ID='$id' LIMIT 1"; $result2 = mysql_query($sql, $conn_id);
-    if ($result2){ 
-    $pagetext.="<p>".$globalprefrow['glob5']." at collection point.</p>";
-    $infotext.="<p>On-Site time updated.</p>";
-    } else { 
-    $infotext.="<br /><strong>An error occured during update!</strong>".$sql; 
-    $alerttext.="<p>Error occured during update!</p>"; 
-    }}
-    
-    
-    // item has been collected
-    if (($oldstatus <'60' ) and ($newstatus >'59')) { 
-    $sql = "UPDATE Orders SET collectiondate=now() WHERE ID='$id' LIMIT 1"; $result2 = mysql_query($sql, $conn_id);
-    if ($result2){ 
-    $infotext.="<br />Collection time updated ";
-    $pagetext.="<p>Item Collected </p>";
-    } else { 
-    $infotext.="<br /><strong>An error occured during updating collection time !</strong>".$sql; 
-    $alerttext.="<p>Error occured updating collection time </p>"; 
-    }}
-    
-    
-    // $infotext.="Pausing tracking";
-    if ($newstatus =='60') {
-    $sql = "UPDATE Orders SET starttrackpause=now() WHERE ID='$id' LIMIT 1"; $result27 = mysql_query($sql, $conn_id);
-    if ($result27){ 
-    $infotext.="<br />Paused time auto updated";
-    $pagetext.="<p> Job Paused</p>";
-    } else { 
-    $infotext.="<br /><strong>An error occured during updating pause tracking time !</strong>".$sql; 
-    $alerttext.="<p>Error occured during updating pause tracking time !</p>"; 
-    }}
-    
-    
-    
-    if (($oldstatus =='60') and ($newstatus >'60')) {
-    // $infotext.="Resuming tracking";
-    $sql = "UPDATE Orders SET finishtrackpause=now() WHERE ID='$id' LIMIT 1"; $result27 = mysql_query($sql, $conn_id);
-    if ($result27){ 
-    $infotext.="<br />Resume time updated index";
-    $pagetext.="<p>Job Resumed</p>";
-    } else { 
-    $infotext.="<br /><strong>An error occured during updating resuming tracking time !</strong>".$sql; 
-    $alerttext.="<p>Error occured during updating resuming tracking time</p>"; 
-    }}
-    
-    
-    
-    if (($oldstatus <'70' ) and ($newstatus>'70')) {
-    $sql = "UPDATE Orders SET ShipDate=now() WHERE ID='$id' LIMIT 1"; $result3 = mysql_query($sql, $conn_id);
-    if ($result3){ 
-    $infotext.="<br />Delivery time updated";
-    $pagetext.="<p>Delivered  </p>";
-    } else { 
-    $infotext.="<br /><strong>An error occured during updating delivery time!</strong>".$sql; 
-    $alerttext.="<p>Error during updating delivery time</p>"; 
-    }}
-    
-    
-    
-    if ($newstatus =='40') {
-    $sql = "UPDATE Orders SET starttravelcollectiontime=now() WHERE ID='$id' LIMIT 1"; 
-    $result4 = mysql_query($sql, $conn_id); if ($result4){ 
-    $infotext.="<br /> en route time updated. ";
-    $pagetext.="<p> On way to collection. </p>";
-    } else { 
-    $infotext.="<br /><strong>An error occured during updating start travel to collection time!</strong>".$sql; 
-    $alerttext.="<p>Error during updating start travel to collection time</p>"; 
-    }}
-    
-    
-    // <option value="30">Collection Scheduled</option>
-    // <option value="40">En-route to Collection</option>
-    // <option value="50">Onsite at Collection</option>
-    // <option value="60">Scheduled</option>
-    // 62 Mail Batch in progress
-    // <option value="65">En-route with delivery</option>
-    // <option value="86">Completed needs admin</option>
-    // <option value="100">Complete</option>
-    // <option value="102">Reqs Invoicing</option>
-    // <option value="110">Complete Invoice Sent</option>
-    // <option value="120">Complete Invoice Paid</option>
-    // <option value="122">Reqs Receipt</option> 
-    
-    
-    if ($newstatus<$oldstatus) {
-    
-    
-    $pagetext.="<p> Status reduced from ".$oldstatustext." to ".$newstatustext.'</p>';
-    
-    $infotext.='<br />Status gone down.';
-    // check for times higher than job status
-    if ($newstatus =='30') {
-    $sql = "UPDATE Orders SET 
-    starttravelcollectiontime='0000-00-00 00:00:00', 
-    waitingstarttime ='0000-00-00 00:00:00',
-    collectiondate='0000-00-00 00:00:00',
-    starttrackpause = '0000-00-00 00:00:00',
-    finishtrackpause ='0000-00-00 00:00:00',
-    ShipDate ='0000-00-00 00:00:00'
-    WHERE ID='$id' LIMIT 1"; 
-    $result5 = mysql_query($sql, $conn_id); if ($result5){ 
-    $infotext.="<br /> Times reduced OK. ";
-    // $pagetext.="<p> Status reduced to Scheduled </p>";
-    } else { 
-    $infotext.="<br /><strong>An error occured ref cj4614 !</strong>".$sql; 
-    $alerttext.="<p>Error ref cj4614 !</p>"; 
-    }}
-    
-    if ($newstatus =='40') {
-    $sql = "UPDATE Orders SET 
-    waitingstarttime ='0000-00-00 00:00:00',
-    collectiondate='0000-00-00 00:00:00',
-    starttrackpause = '0000-00-00 00:00:00',
-    finishtrackpause ='0000-00-00 00:00:00',
-    ShipDate ='0000-00-00 00:00:00'
-    WHERE ID='$id' LIMIT 1"; 
-    $result5 = mysql_query($sql, $conn_id); if ($result5){ 
-    $infotext.="<br /> Times cleared from job cj 4649. ";
-    // $pagetext.="<p> On way to collection. </p>";
-    } else { 
-    $infotext.="<br /><strong>An error occured cd 4652!</strong>".$sql; 
-    $alerttext.="<p>Error on cj 4652</p>"; 
-    }}
-    
-    if ($newstatus =='50') {
-    $sql = "UPDATE Orders SET 
-    collectiondate='0000-00-00 00:00:00',
-    starttrackpause = '0000-00-00 00:00:00',
-    finishtrackpause ='0000-00-00 00:00:00',
-    ShipDate ='0000-00-00 00:00:00'
-    WHERE ID='$id' LIMIT 1"; 
-    $result5 = mysql_query($sql, $conn_id); if ($result5){ 
-    $infotext.="<br /> Times cleared from job cj 4666. ";
-    // $pagetext.="<p> On way to collection. </p>";
-    } else { 
-    $infotext.="<br /><strong>An error occured cd 4666!</strong>".$sql; 
-    $alerttext.="<p>Error on cj 4666</p>"; 
-    }}
-    
-    
-    if ($newstatus =='60') {
-    $sql = "UPDATE Orders SET 
-    finishtrackpause ='0000-00-00 00:00:00',
-    ShipDate ='0000-00-00 00:00:00'
-    WHERE ID='$id' LIMIT 1"; 
-    $result5 = mysql_query($sql, $conn_id); if ($result5){ 
-    $infotext.="<br /> Times cleared from job cj 4682. ";
-    // $pagetext.="<p> On way to collection. </p>";
-    } else { 
-    $infotext.="<br /><strong>An error occured cd 4682!</strong>".$sql; 
-    $alerttext.="<p>Error on cj 4682</p>"; 
-    }}
-    
-    
-    if ($newstatus =='65') {
-    $sql = "UPDATE Orders SET 
-    ShipDate ='0000-00-00 00:00:00'
-    WHERE ID='$id' LIMIT 1"; 
-    $result5 = mysql_query($sql, $conn_id); if ($result5){ 
-    $infotext.="<br /> Times cleared from job cj 4694. ";
-    // $pagetext.="<p> On way to collection. </p>";
-    } else { 
-    $infotext.="<br /><strong>An error occured cd 4694!</strong>".$sql; 
-    $alerttext.="<p>Error on cj 4694</p>"; 
-    }}
-    
-    
-    
-    } // ends status gone down
-    
-    
-    
-    // see if need to send email
-    if (($oldstatus<$newstatus) and ($newstatus==='100')) {
-    $infotext.='<br /> starts check to see if completed email needed';
-    $qem1 = mysql_result(mysql_query("
-    SELECT cemail1 FROM Clients 
-    INNER JOIN Orders
-    ON Clients.CustomerID = Orders.CustomerID
-    WHERE Orders.ID = $ID LIMIT 0,1", $conn_id), 0);
-    
-    if ($qem1=='1') { 
-    $infotext.='<br /> Will auto send completed email when code written!';
-    }
-    if ($qem1=='0') { 
-    // $infotext.='<br /> Is Zero, does not send completed email';
-    }
-    
-    
-    
-    
-    
-    $infotext.='<br /> starts check to see if tracking admin needed';
-    
-    
-    $query="SELECT ID, status, trackerid, ShipDate, collectiondate, starttrackpause, finishtrackpause FROM Orders, Cyclist
-    WHERE Orders.CyclistID = Cyclist.CyclistID
-    AND Orders.ID = '$ID' LIMIT 1"; $result=mysql_query($query, $conn_id); $row=mysql_fetch_array($result);
-    
-    
-    
-    $thistrackerid=$row['trackerid'];
-    
-    $startpause=strtotime($row['starttrackpause']); 
-    $finishpause=strtotime($row['finishtrackpause']); $collecttime=strtotime($row['collectiondate']); 
-    $delivertime=strtotime($row['ShipDate']); if (($startpause > '10') and ( $finishpause < '10')) { $delivertime=$startpause; } 
-    if ($startpause <'10') { $startpause='9999999999'; } if (($row['status']<'86') and ($delivertime < '200')) { $delivertime='9999999999'; } 
-    if ($row['status']<'50') { $delivertime='0'; } if ($collecttime < '10') { $collecttime='9999999999'; } 
-    
-    
-    
-    
-    
-    
-    $findlast="SELECT timestamp FROM `instamapper` 
-    WHERE `device_key` = '$thistrackerid' 
-    AND `timestamp` > '$collecttime' 
-    AND `timestamp` NOT BETWEEN '$startpause' 
-    AND '$finishpause' 
-    AND `timestamp` < '$delivertime' 
-    ORDER BY `timestamp` ASC 
-    LIMIT 1"; 
-    
-    $sql_result2 = mysql_query($findlast,$conn_id)  or mysql_error(); 
-    
-    
-    while ($res2 = mysql_fetch_assoc($sql_result2)) {
-    
-    
-    $infotext.='<br /> res is '.$res2['timestamp'].' timestamp found';
-    
-    
-    
-    
-    
-    $sql="INSERT INTO cojm_admin 
-    (cojm_admin_stillneeded, cojm_admin_job_ref, cojmadmin_tracking) 
-        VALUES ('1', '$ID', '1' )   ";
-    
-    
-        $result = mysql_query($sql, $conn_id);
-    if ($result){
-    $infotext.="<br />5220 Success adding admin job";
-    // $pagetext.='<p>'.$globalprefrow['glob5'].' details updated</p>';
-    
-    
-    $thiscyclist=mysql_insert_id(); 
-    //  $newcyclistid=$thiscyclist;
-    //     $pagetext.='<p>New '.$globalprefrow['glob5'].' '.$thiscyclist.' '.$cojmname.' created.</p>';
-    $infotext.='<p>Admin Task '.$thiscyclist.' created.</p>'; 
-    
-    
-    } else {
-    $infotext.=mysql_error()." An error occured during setting admin q <br>".$sql;  
-    $alerttext.=mysql_error()." <p>Error CJ5232 occured during update!</p>";
-    } // ends 
-    
-    
-    
-    
-    
-    
-    
-    
-    }
-    
-    
-    $infotext.='<br /> finishes check to see if tracking admin needed';
-    
-    } // ends check raised to 100
-    
-    
-    } // ends new and old status difference AND ends new status
-    } // ends page=editui or editstatus 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    if ($page == "editcost" ) {
-    
-    $newcost=trim($_POST['newcost']);
-    $vatband=trim($_POST['vatband']);
-    
-    
-    // get vatbad from vatband in Services
-    
-    $infotext.="<br><b>Updating Job Cost</b><br>New Cost : ". $newcost;
-    // $infotext.=$vatband.'<br /> and in globals '.
-    // $infotext.=$globalprefrow['vatband'.$vatband];
-    
-    
-    if (isset ($globalprefrow['vatband'.$vatband])) {
-    
-    $newvatcost=($newcost)*(($globalprefrow['vatband'.$vatband])/100);
-    
-    } else { $newvatcost='0.000';}
-    
-    //  $infotext.=$newvatcost;
-    
-    $sql = "UPDATE Orders SET FreightCharge='$newcost', vatcharge='$newvatcost', iscustomprice='1', clientdiscount='0.00' WHERE ID='$id' LIMIT 1"; 
-    $result = mysql_query($sql, $conn_id);
-    if ($result){ 
-    $infotext.="<br />Cost Updated and locked to ".$newcost;
-    $pagetext.="<p>Cost Updated and locked to ".$newcost.'</p>';
-    } else { 
-    
-    $alerttext.="<p>An error occured during updating cost and VAT!</p>"; 
-    $infotext.="<br />An error occured during updating cost and VAT!<br />".$sql; 
-    
-    }
-    
-    }// ends page=editcost
-    
-    
-    
-    } // these 2
-    } // ends check to make sure job not modified by someone else at a time after the form was created
+                
+        
+            } // these 2
+        } // ends check to make sure job not modified by someone else at a time after the form was created
     
     
     } // ends time within global seconds check
@@ -3841,52 +3717,45 @@ if ($sumtot>0)  { // individ job id found
     $result=mysql_query($query, $conn_id);
     $row=mysql_fetch_array($result);
     
-    if ($row['status'] <49  ){ $nextactiondate = $row['targetcollectiondate']; } else {$nextactiondate = $row['duedate']; }
+    if ($row['status'] <49  ){
+        $nextactiondate = $row['targetcollectiondate'];
+    } else {
+        $nextactiondate = $row['duedate'];
+    }
     $sql = "UPDATE Orders SET nextactiondate='$nextactiondate' WHERE ID='$id' LIMIT 1";
     $result = mysql_query($sql, $conn_id); 
-    if ($result){ 
-    // $infotext.="<br />next action time updated"; 
+    if ($result){
+        // $infotext.="<br />next action time updated"; 
     
     } else {
-    $infotext.="<br />error occured during updating next action time ! ".$nextactiondate."</strong>"; 
-    $alerttext.="<p>Error occured during updating next action time </p>"; 
+        $infotext.="<br />error occured during updating next action time ! ".$nextactiondate."</strong>"; 
+        $alerttext.="<p>Error occured during updating next action time </p>"; 
     
     }
     
     
     if ($row['publictrackingref'] =='' ) {
-    
-    
-    $length = 6;
-    $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        $chars_length = (strlen($chars) - 1);  // Length of character list
-        $string = $chars{rand(0, $chars_length)}; // Start our string  
-        for ($i = 1; $i < $length; $i = strlen($string)) // Generate random string
-        {
-            $r = $chars{rand(0, $chars_length)};  // Grab a random character from our list
-            if ($r != $string{$i - 1}) $string .=  $r;  // Make sure the same two characters don't appear next to each other
-        }
-    
-    $newsecurity_code=$id.$string; 
-    // echo 'security code : '.$string.'<br>New Security code :'.$newsecurity_code.'<br>';
-    // $infotext.="Generated tracking reference ".$newsecurity_code;
-    
-    $sql = "UPDATE Orders SET publictrackingref='$newsecurity_code' WHERE ID='$id' LIMIT 1";
-    $result = mysql_query($sql, $conn_id); 
-    if ($result){ 
-    // $infotext.="<br >And added to database."; 
-    } else { $infotext.="An error occured during adding the public tracking ref !<br>"; }
-    
+        $length = 6;
+        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            $chars_length = (strlen($chars) - 1);  // Length of character list
+            $string = $chars{rand(0, $chars_length)}; // Start our string  
+            for ($i = 1; $i < $length; $i = strlen($string)) // Generate random string
+            {
+                $r = $chars{rand(0, $chars_length)};  // Grab a random character from our list
+                if ($r != $string{$i - 1}) $string .=  $r;  // Make sure the same two characters don't appear next to each other
+            }
+        
+        $newsecurity_code=$id.$string; 
+        // echo 'security code : '.$string.'<br>New Security code :'.$newsecurity_code.'<br>';
+        // $infotext.="Generated tracking reference ".$newsecurity_code;
+        
+        $sql = "UPDATE Orders SET publictrackingref='$newsecurity_code' WHERE ID='$id' LIMIT 1";
+        $result = mysql_query($sql, $conn_id); 
+        if ($result){ 
+        // $infotext.="<br >And added to database."; 
+        } else { $infotext.="An error occured during adding the public tracking ref !<br>"; }
+        
     } // ENDS CHECK FOR TRACKING REF
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     
@@ -4038,8 +3907,8 @@ if ($result){
 }
 else { 
 
-    $infotext.=mysql_error()."<br> <strong>An error occured during updating distance</strong>"; 
-    $alerttext.="<p> <strong>An error occured during updating distance</strong><br />".mysql_error()."</p>"; 
+    $infotext.="<br> <strong>An error occured during updating distance</strong>"; 
+    $alerttext.="<p> <strong>An error occured during updating distance</strong></p>"; 
 
 }
 
@@ -4109,7 +3978,7 @@ $money=number_format(($money), 2, '.', ',');
 
 }
 
-return $money; } 
+return $money; }
 
 
 
@@ -4528,24 +4397,17 @@ $caudtext='<hr><b>'. $cyclistid.' : '.$today.'</b>'. $infotext;
 
 // $infotext.='<br />ID found : '.$id;
  
- $orderauditid=$id;
+$orderauditid=$id;
  
-// if ($page) { $infotext.='<br /> page is '.$page; }
-
-// $infotext.='<br /> 4351 Collect : '.$enrpc0.' Deliver : '.$deliverpc;
 
 
+// A SCRIPT TIMER
+$now_time = microtime(TRUE);
+$cj_lapse_time = $now_time - $cj_time;
+$cj_msec = $cj_lapse_time * 1000.0;
+$cj_echo = number_format($cj_msec, 1);
 
-  // A SCRIPT TIMER
-    $now_time = microtime(TRUE);
-    $cj_lapse_time = $now_time - $cj_time;
-    $cj_msec = $cj_lapse_time * 1000.0;
-    $cj_echo = number_format($cj_msec, 1);
-	
-//    $infotext.= "<br />Changed job in $ch_echo ms.";
-	
-	$infotext.="";
-	
+
 function time2str($ts) { //Relative Date Function  // used in order.php and ajaxordermap
 	if(!ctype_digit($ts)) {
            $ts = strtotime($ts); 

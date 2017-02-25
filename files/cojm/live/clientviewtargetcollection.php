@@ -178,7 +178,7 @@ echo '</select>		';
 	
 
 $query = "SELECT depnumber, depname FROM clientdep WHERE associatedclient = '$clientid' ORDER BY depname"; 
-$result_id = mysql_query ($query, $conn_id) or mysql_error();  
+$result_id = mysql_query ($query, $conn_id);  
 
 $sumtot=mysql_affected_rows();
 
@@ -474,7 +474,7 @@ if ($globalprefrow['showdebug']>0) {
 }
 
 
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error();
+$sql_result = mysql_query($sql,$conn_id);
 $num_rows = mysql_num_rows($sql_result);
 $firstrun='1';
 $today = date(" H:i A, D j M");
@@ -627,7 +627,8 @@ AND `timestamp` < '$delivertime'
 ORDER BY `timestamp` ASC 
 LIMIT 1"; 
 $sql_result2 = mysql_query($findlast,$conn_id)  or mysql_error(); 
-while ($foundlast = mysql_fetch_array($sql_result2)) { extract($foundlast); $englishlast= date('H:i A D jS ', $foundlast['timestamp']); 
+while ($foundlast = mysql_fetch_array($sql_result2)) {
+    extract($foundlast); $englishlast= date('H:i A D jS ', $foundlast['timestamp']); 
 $trackingtext= 'Tracking started ' . $englishlast . ', '; }
 
 $findlast="SELECT timestamp FROM `instamapper` 
@@ -638,7 +639,7 @@ AND '$finishpause'
 AND `timestamp` < '$delivertime' 
 ORDER BY `timestamp` DESC 
 LIMIT 1"; 
-$sql_result2 = mysql_query($findlast,$conn_id)  or mysql_error(); 
+$sql_result2 = mysql_query($findlast,$conn_id); 
 while ($foundlast = mysql_fetch_array($sql_result2)) { extract($foundlast); $englishlast= date('H:i A D jS', $foundlast['timestamp']); 
 $trackingtext= $trackingtext.' Last updated ' . $englishlast . '.'; }
 
@@ -687,7 +688,7 @@ $depsql="SELECT * from clientdep
 INNER JOIN Orders
 On Orders.orderdep=clientdep.depnumber 
 WHERE Orders.orderdep='$tempdep' LIMIT 0,1";
-$dsql_result = mysql_query($depsql,$conn_id)  or mysql_error();
+$dsql_result = mysql_query($depsql,$conn_id);
 
 while ($drow = mysql_fetch_array($dsql_result)) {
      extract($drow);
@@ -716,7 +717,7 @@ $depsql="SELECT depname from clientdep
 INNER JOIN Orders
 On Orders.orderdep=clientdep.depnumber 
 WHERE Orders.orderdep='$tempdep' LIMIT 0,1";
-$dsql_result = mysql_query($depsql,$conn_id)  or mysql_error();
+$dsql_result = mysql_query($depsql,$conn_id);
 
 while ($drow = mysql_fetch_array($dsql_result)) {
     extract($drow);

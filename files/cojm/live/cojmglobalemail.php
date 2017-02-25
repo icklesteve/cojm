@@ -52,7 +52,9 @@ include "changejob.php";
 
 
 
-$sql = "SELECT * FROM globalprefs"; $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); $globalprefrow=mysql_fetch_array($sql_result);
+$sql = "SELECT * FROM globalprefs"; 
+$sql_result = mysql_query($sql,$conn_id);
+$globalprefrow=mysql_fetch_array($sql_result);
 
 
 // $infotext=$infotext.'<p><strong>Variables you can use</strong></p>
@@ -205,5 +207,5 @@ $(document).ready(function() {
 
 include 'footer.php';
 
-mysql_close(); ?>
+ ?>
 </body></html>

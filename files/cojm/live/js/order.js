@@ -2221,9 +2221,9 @@ $(function () { // Document is ready
                 $('#emissionsaving').append(data);
             },
             complete: function () {
-            resizenewcost();
-            showmessage();
-            $("#toploader").fadeOut();
+                resizenewcost();
+                showmessage();
+                $("#toploader").fadeOut();
             }
         });
     }

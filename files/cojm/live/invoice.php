@@ -167,7 +167,7 @@ $invoicedate= date("l jS F Y", mktime(01, 01, 01, $month, $day, $year));
 
 $invduedate = date("l jS F Y", mktime(01, 01, 01, $month, ($day+$clientrow['invoiceterms']), $year));
 
-$invoicemysqldate= date ("Y-m-d H:i:s", mktime(01, 01, 01, $month, $day, $year));
+$invoicesqldate= date ("Y-m-d H:i:s", mktime(01, 01, 01, $month, $day, $year));
 
 $invoiceduemysqldate= date ("Y-m-d H:i:s", mktime(01, 01, 01, $month, ($day+$clientrow['invoiceterms']), $year));
 
@@ -1215,7 +1215,6 @@ if ($page=='createpdf') {
 }
 else {
     
-    include "changejob.php";
    
     echo '<!DOCTYPE html> 
         <html lang="en"> 
@@ -1236,6 +1235,11 @@ else {
         </style>
         </head>
         <body style="margin:0px;">';
+        
+        
+    include "changejob.php";
+        
+    
 
     if ($pagetext) { echo $pagetext; }
     
@@ -1263,7 +1267,3 @@ else {
     </html>';
 
 }
-
- 
- mysql_close();
-

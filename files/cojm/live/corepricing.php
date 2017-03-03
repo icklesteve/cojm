@@ -92,7 +92,7 @@ $query = "SELECT * FROM chargedbybuild ORDER BY cbborder ASC";
 
 
 $idmax=1;
-$sql_result = mysql_query($query,$conn_id)  or mysql_error(); 
+$sql_result = mysql_query($query,$conn_id); 
 while ($row = mysql_fetch_array($sql_result)) {
     extract($row);
 

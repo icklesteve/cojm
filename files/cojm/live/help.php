@@ -800,15 +800,7 @@ although there may be an small chance it's something to do with us if there's a 
 </ul>
 
 
-<div class="line"> </div>
-<li>Cannot connect to server: Can't connect to local MySQL server through socket '/var/lib/mysql/mysql.sock' (2) (2002) </li>
 
-<ul class="helpsub">
-
-<li>Socket error messages are problem for your webhosting company. </li>
-<li> if persists for more than 5 mins email them, and also include us.</li>
-<li>  If persists for more than 15 mins with no email reply, phone the webhosts.</li>
-</ul>
 <div class="line"> </div>
 <li>Error 324 (net::ERR_EMPTY_RESPONSE): The server closed the connection without sending any data.</li>
 

@@ -469,7 +469,7 @@ echo '</div> <br />';
 // echo '<br>From : '.$collectionsfromdate.' To : '.$collectionsuntildate;
 
 $sql = "SELECT expensedate, expensecost, expensecode, expensevat, paid FROM expenses WHERE expensedate >= '$collectionsfromdate' AND expensedate <= '$collectionsuntildate' ";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+$sql_result = mysql_query($sql,$conn_id); 
 
 // Loop through the data set and extract each row in to it's own variable set
 while ($row = mysql_fetch_array($sql_result)) {
@@ -522,7 +522,7 @@ $evattot=$evatjan+$evatfeb+$evatmar+$evatapr+$evatmay+$evatjun+$evatjul+$evataug
  $orderssql = "SELECT targetcollectiondate, vatcharge, FreightCharge, LicensedCount, UnlicensedCount, hourlyothercount FROM Orders INNER JOIN Services ON Orders.ServiceID = Services.ServiceID WHERE targetcollectiondate >= '$collectionsfromdate' AND targetcollectiondate <= '$collectionsuntildate' AND status>59 ";
 
 
-$sql_result = mysql_query($orderssql,$conn_id)  or mysql_error(); 
+$sql_result = mysql_query($orderssql,$conn_id); 
 while ($row = mysql_fetch_array($sql_result)) {
 extract($row); 
 $tablecost = $tablecost + $row["FreightCharge"];
@@ -547,7 +547,7 @@ if ($m=='12') { $vatdec=$vatdec+$row['vatcharge']; $indec=$indec + $row['Freight
 
  
 $orderssql = "SELECT targetcollectiondate, vatcharge, FreightCharge, LicensedCount, UnlicensedCount, hourlyothercount FROM Orders INNER JOIN Services ON Orders.ServiceID = Services.ServiceID WHERE targetcollectiondate >= '$collectionsfromdate' AND targetcollectiondate <= '$collectionsuntildate' AND status<60 ";
-$sql_result = mysql_query($orderssql,$conn_id)  or mysql_error(); 
+$sql_result = mysql_query($orderssql,$conn_id); 
 while ($row = mysql_fetch_array($sql_result)) {
 extract($row); 
 $tablecost = $tablecost + $row["FreightCharge"];
@@ -658,7 +658,7 @@ $ftotlicost=$fjanlicost+$ffeblicost+$fmarlicost+$faprlicost+$fmaylicost+$fjunlic
 if ($incomeselect=='invoicein') {
  
 $sql = "SELECT * FROM invoicing WHERE paydate >= '$collectionsfromdate' AND paydate <= '$collectionsuntildate' ";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+$sql_result = mysql_query($sql,$conn_id); 
 
 // echo '<p>'.$sql.'</p>';
 // Loop through the data set and extract each row in to it's own variable set
@@ -1510,4 +1510,4 @@ $gptot= number_format(((($injan+$infeb+$inmar+$inapr+$inmay+$injun+$injul+$inaug
 
 include 'footer.php';
 
- mysql_close(); ?></body>
+ ?></body>

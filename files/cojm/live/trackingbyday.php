@@ -178,7 +178,7 @@ WHERE `device_key` = '$trackerid'
 AND `timestamp` >= '$dinterim' 
 AND `timestamp` <= '$dinterif' 
 ORDER BY `timestamp` ASC "; 
-$sql_resulth = mysql_query($sql,$conn_id)  or mysql_error();
+$sql_resulth = mysql_query($sql,$conn_id);
 $num_rows = mysql_num_rows($sql_resulth);
 if ($num_rows>'0') {
 $prevts='';

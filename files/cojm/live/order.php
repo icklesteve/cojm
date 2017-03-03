@@ -59,9 +59,9 @@ AND Orders.status = status.status
 AND Orders.ID = ? LIMIT 0,1";
 
 
-$parameters = array($id);
+
 $statement = $dbh->prepare($query);
-$statement->execute($parameters);
+$statement->execute([$id]);
 $row = $statement->fetch(PDO::FETCH_ASSOC);
 
 $cojmid=$id;

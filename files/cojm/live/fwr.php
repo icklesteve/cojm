@@ -367,7 +367,7 @@ $sql = "SELECT ServiceID, Service FROM Services
     AND ( `Services`.`activeservice`='1' )
     ";
 
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
+$sql_result = mysql_query($sql,$conn_id); 
 $sumtot=mysql_affected_rows();
 while ($row = mysql_fetch_array($sql_result)) {
     extract($row);
@@ -379,7 +379,7 @@ while ($row = mysql_fetch_array($sql_result)) {
     (`Orders`.`serviceID` ='$ServiceID' ) 
 	ORDER BY `Orders`.`targetcollectiondate` ";
 
-	$newsql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+	$newsql_result = mysql_query($sql,$conn_id);
     $ordersumtot=mysql_affected_rows();	
 	if ($ordersumtot<10) {
         $flag='1';
@@ -440,7 +440,7 @@ if ($globalprefrow['showdebug']>0) {
     AND (`Orders`.`podsurname` ='' )
     ORDER BY `Orders`.`ID` ";
     
-    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+    $sql_result = mysql_query($sql,$conn_id);
     $sumtot=mysql_affected_rows();
     if ($sumtot>0)  {
         echo '<h4>'. $sumtot.' Jobs with POD, no Surname</h4>
@@ -561,7 +561,7 @@ if ($globalprefrow['showdebug']>0) {
     $sql = "SELECT expenseref FROM expenses WHERE (`expenses`.`expensedate` ='0000-00-00 00:00:00' ) 
         or (`expenses`.`expensecost` ='0' )
         ";
-    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
+    $sql_result = mysql_query($sql,$conn_id); 
     $sumtot=mysql_affected_rows();
     if ($sumtot>0) {
     //	 echo '<h4>Either no date or no cost on :</h4>
@@ -588,7 +588,7 @@ if ($globalprefrow['showdebug']>0) {
     
     // jobs with customer id at 0
     $sql = "SELECT * FROM Orders WHERE `Orders`.`CustomerID`=0 ";
-    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+    $sql_result = mysql_query($sql,$conn_id);
     $sumtot=mysql_affected_rows();
     if ($sumtot>0)  { 
         echo '<div class="vpad"> </div>
@@ -651,7 +651,7 @@ if ($globalprefrow['showdebug']>0) {
         AND
         (`Orders`.`enrpc21` <> `Orders`.`enrpc0` )
         ORDER BY `Orders`.`ID` ";
-        $newsql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
+        $newsql_result = mysql_query($sql,$conn_id); 
         $ordersumtot=mysql_affected_rows();
     
     if ($ordersumtot>0) {
@@ -694,7 +694,7 @@ if ($globalprefrow['showdebug']>0) {
     AND `Orders`.`status` <>'110'
     AND `Orders`.`status` <>'120' 
     ORDER BY `Orders`.`ID` ";
-    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+    $sql_result = mysql_query($sql,$conn_id);
     $sumtot=mysql_affected_rows();
     if ($sumtot>0)  { 
         echo '<h4>'. $sumtot.' Jobs with wrong status</h4>
@@ -732,7 +732,7 @@ if ($globalprefrow['showdebug']>0) {
     
     // jobs with service type at 0
     $sql = "SELECT * FROM Orders WHERE `Orders`.`ServiceID`=0 ";
-    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+    $sql_result = mysql_query($sql,$conn_id);
     $sumtot=mysql_affected_rows();
     if ($sumtot>'0')  {
         echo '<br />
@@ -768,7 +768,9 @@ if ($globalprefrow['showdebug']>0) {
     AND `Orders`.`FreightCharge`>'0' 
     AND `Orders`.`ShipDate` >= date_sub(now(), interval 1 year)
     ORDER BY `Orders`.`FreightCharge` DESC ";
-    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); $sumtot=mysql_affected_rows(); if ($sumtot>'0')  { 
+    $sql_result = mysql_query($sql,$conn_id);
+    $sumtot=mysql_affected_rows(); 
+    if ($sumtot>'0')  { 
     echo '<br />
     <div class="ui-widget">
                 <div class="ui-state-error ui-corner-all" style="padding: 1em;"> 
@@ -798,7 +800,7 @@ if ($globalprefrow['showdebug']>0) {
     
     
     
-    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+    $sql_result = mysql_query($sql,$conn_id);
     $sumtot=mysql_affected_rows();
     if ($sumtot>'0') {
         while ($row = mysql_fetch_array($sql_result)) {
@@ -859,7 +861,7 @@ try {
             
             echo '<p> Oldest >5mins ago, resetting cron.';
             $sql = "UPDATE cojm_cron SET currently_running=0 WHERE id=".$row['id'];
-            $sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+            $sql_result = mysql_query($sql,$conn_id);
     
             $plainbodytext .= ' Cron check failed as already running.  
             If oldest was more than 5 mins ago this was reset, 
@@ -974,6 +976,5 @@ else window.onload = downloadJSAtOnload;
 
 include "footer.php";
 
-mysql_close();
-$dbh=null;
+
 ?></body></html>

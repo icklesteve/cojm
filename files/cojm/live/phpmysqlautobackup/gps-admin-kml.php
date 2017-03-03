@@ -43,7 +43,9 @@ $query="SELECT cojmname FROM Cyclist WHERE trackerid = '$cojmadmin_rider_id' LIM
  
  
  
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); $sumtot=mysql_affected_rows(); if ($sumtot>'0.5') { 
+$sql_result = mysql_query($sql,$conn_id); 
+$sumtot=mysql_affected_rows();
+ if ($sumtot>'0.5') { 
 
  $linecoords='';
  $prevts='';
@@ -66,7 +68,8 @@ $min_lon =  '99999';
  $markerout[]=' var markers'.$ID.' = [';
 
  
-while ($map = mysql_fetch_array($sql_result)) {      extract($map); 
+while ($map = mysql_fetch_array($sql_result)) {
+    extract($map); 
 
 $linecount++;
 $map['latitude']=round($map['latitude'],5);

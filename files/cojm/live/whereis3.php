@@ -98,12 +98,12 @@ $lattot='0'; $lontot='0';
    { // echo $CyclistID;
 
 $sql = "SELECT cojmname,trackerid FROM Cyclist WHERE CyclistID = '$CyclistID' LIMIT 1";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+$sql_result = mysql_query($sql,$conn_id); 
 $row=mysql_fetch_array($sql_result);
 $thisonetracker=$row['trackerid'];
 $tUnixTime = time();
 $nsql = "SELECT * FROM `instamapper` WHERE `device_key` = '$thisonetracker' ORDER BY `timestamp` DESC LIMIT 0,1";
-$sql_result = mysql_query($nsql,$conn_id)  or mysql_error();
+$sql_result = mysql_query($nsql,$conn_id);
 $sumtot=mysql_affected_rows();
 
 if ($sumtot>0.5) {
@@ -160,7 +160,7 @@ AND `Orders`.`nextactiondate` < '$todayend 23:59:59'
 ORDER BY `Orders`.`nextactiondate` 
 
 ";
- $outssql_result = mysql_query($seeifsched,$conn_id)  or mysql_error();
+ $outssql_result = mysql_query($seeifsched,$conn_id);
  $toutstanding=mysql_affected_rows();
  while ($outsrow = mysql_fetch_array($outssql_result)) {
      extract($outsrow);
@@ -200,7 +200,7 @@ ORDER BY `Orders`.`nextactiondate`
 
 // echo $seeifunsched;
 
- $unssql_result = mysql_query($seeifunsched,$conn_id)  or mysql_error();
+ $unssql_result = mysql_query($seeifunsched,$conn_id);
  $totunsched=mysql_affected_rows();
  while ($unsrow = mysql_fetch_array($unssql_result)) {
      extract($unsrow);
@@ -232,7 +232,7 @@ ORDER BY `Orders`.`nextactiondate`
 
 
 
- $uncsql_result = mysql_query($seeifucdel,$conn_id)  or mysql_error();
+ $uncsql_result = mysql_query($seeifucdel,$conn_id);
  $totuncel=mysql_affected_rows();
  while ($uncrow = mysql_fetch_array($uncsql_result)) {
      extract($uncrow);
@@ -319,7 +319,7 @@ ORDER BY `Orders`.`nextactiondate` ";
 
 // echo $seeifunsched;
 
- $undsql_result = mysql_query($seeifundel,$conn_id)  or mysql_error();
+ $undsql_result = mysql_query($seeifundel,$conn_id);
  $totundel=mysql_affected_rows();
  while ($undrow = mysql_fetch_array($undsql_result)) {
      extract($undrow);
@@ -408,6 +408,5 @@ if ($numcyclists>1) { echo 's'; } ?>, updated<br /><?php echo $uptodate; ?></td>
 
  include 'footer.php';
  
-mysql_close(); 
 
 echo '</body></html>';

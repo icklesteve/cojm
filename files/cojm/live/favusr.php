@@ -1,5 +1,32 @@
 <?php 
 
+
+/*
+    COJM Courier Online Operations Management
+	favusr.php
+    Copyright (C) 2017 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+
+
+
+
+
 $alpha_time = microtime(TRUE);
 if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) ob_start("ob_gzhandler"); else ob_start();
 
@@ -199,7 +226,9 @@ if ($showinactive=='1') {
 if ($clientid=='all') { if($showinactive<>'') { $query = "SELECT * FROM cojm_favadr INNER JOIN Clients ON cojm_favadr.favadrclient = Clients.CustomerID ";
 }else{ $query = "SELECT * FROM cojm_favadr INNER JOIN Clients ON cojm_favadr.favadrclient = Clients.CustomerID WHERE cojm_favadr.favadrisactive = '1' "; }}
 // echo $query;
-$sql_result = mysql_query($query,$conn_id)  or mysql_error(); while ($row = mysql_fetch_array($sql_result)) { extract($row);
+$sql_result = mysql_query($query,$conn_id);
+while ($row = mysql_fetch_array($sql_result)) {
+    extract($row);
 
 $i=$i+'1';
 

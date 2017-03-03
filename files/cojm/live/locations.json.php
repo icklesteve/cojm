@@ -178,7 +178,7 @@ AND `Orders`.`nextactiondate` < '$todayend 23:59:59'
 ORDER BY `Orders`.`nextactiondate` 
 ";
 
- $uncsql_result = mysql_query($seeifucdel,$conn_id)  or mysql_error();
+ $uncsql_result = mysql_query($seeifucdel,$conn_id);
  $totuncel=mysql_affected_rows();
  while ($uncrow = mysql_fetch_array($uncsql_result)) {
      extract($uncrow);
@@ -252,12 +252,15 @@ AND `Orders`.`status` <77
 AND `Orders`.`nextactiondate` < '$todayend 23:59:59'
 ORDER BY `Orders`.`nextactiondate` ";
 
-$undsql_result = mysql_query($seeifundel,$conn_id)  or mysql_error();
-$totundel=mysql_affected_rows(); while ($undrow = mysql_fetch_array($undsql_result)) { extract($undrow);
+$undsql_result = mysql_query($seeifundel,$conn_id);
+$totundel=mysql_affected_rows();
+while ($undrow = mysql_fetch_array($undsql_result)) {
+    extract($undrow);
 
 if ((trim($undrow['enrpc21'])) and (trim($undrow['enrpc0']))) { $pc1 = str_replace (" ", "", $undrow['enrpc21']);
 $query="SELECT * FROM  `postcodeuk` WHERE  `PZ_Postcode` =  '$pc1' LIMIT 1"; 
-$result=mysql_query($query, $conn_id); $pcrow=mysql_fetch_array($result); 
+$result=mysql_query($query, $conn_id);
+$pcrow=mysql_fetch_array($result); 
 $undid=$undrow['ID']; $pclon=$pcrow['PZ_easting']; $pclat=$pcrow['PZ_northing'];
 $collecttime= date('H:i', strtotime($undrow['duedate'])); 
 if ((date('A', strtotime($undrow['duedate']))==date('A', strtotime($undrow['deliveryworkingwindow']))) 

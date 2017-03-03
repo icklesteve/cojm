@@ -137,7 +137,7 @@ echo '
 
 if ($clientid) {
 $sql = "SELECT * FROM Clients WHERE CustomerID = '$clientid' ";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+$sql_result = mysql_query($sql,$conn_id); 
 $clrow=mysql_fetch_array($sql_result);
 
 
@@ -171,7 +171,7 @@ $sql = "SELECT * FROM clientdep WHERE associatedclient = '$clientid' ORDER BY is
 
 // echo '<br />'.$sql;
 
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+$sql_result = mysql_query($sql,$conn_id); 
 $sumtot=mysql_affected_rows();
 
 

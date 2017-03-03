@@ -146,7 +146,7 @@ echo '
 if ($thiscyclist<>'1') {
 
 $sql = "SELECT * FROM Cyclist WHERE CyclistID = '$thiscyclist' LIMIT 1";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+$sql_result = mysql_query($sql,$conn_id); 
 $row=mysql_fetch_array($sql_result);
 
 

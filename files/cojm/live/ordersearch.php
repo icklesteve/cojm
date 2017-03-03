@@ -28,7 +28,7 @@ WHERE Orders.jobcomments LIKE '%".$searchid."%'
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
 
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error();
+$sql_result = mysql_query($sql,$conn_id);
 $num_rows = mysql_num_rows($sql_result);
 if ($num_rows>'0') {
  echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
@@ -49,7 +49,7 @@ WHERE Orders.privatejobcomments LIKE '%".$searchid."%'
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
 
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error();
+$sql_result = mysql_query($sql,$conn_id);
 $num_rows = mysql_num_rows($sql_result);
 
 if ($num_rows>'0') {
@@ -75,7 +75,7 @@ $sql="SELECT * FROM Orders
 WHERE Orders.clientjobreference LIKE '%".$searchid."%' 
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error();
+$sql_result = mysql_query($sql,$conn_id);
 $num_rows = mysql_num_rows($sql_result);
 if ($num_rows>'0') {
  echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
@@ -98,7 +98,7 @@ WHERE Orders.enrft0 LIKE '%".$searchid."%'
 OR Orders.enrpc0 LIKE '%".$searchid."%' 
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error();
+$sql_result = mysql_query($sql,$conn_id);
 $num_rows = mysql_num_rows($sql_result);
 if ($num_rows>'0') {
  echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
@@ -125,7 +125,7 @@ WHERE Orders.enrft21 LIKE '%".$searchid."%'
 OR Orders.enrpc21 LIKE '%".$searchid."%' 
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error();
+$sql_result = mysql_query($sql,$conn_id);
 $num_rows = mysql_num_rows($sql_result);
 if ($num_rows>'0') {
  echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
@@ -143,7 +143,7 @@ $sql="SELECT * FROM Orders
 WHERE Orders.requestor LIKE '%".$searchid."%' 
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error();
+$sql_result = mysql_query($sql,$conn_id);
 $num_rows = mysql_num_rows($sql_result);
 if ($num_rows>'0') {
  echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
@@ -169,7 +169,7 @@ $sql="SELECT * FROM Orders
 WHERE Orders.invoiceref LIKE '%".$searchid."%' 
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error();
+$sql_result = mysql_query($sql,$conn_id);
 $num_rows = mysql_num_rows($sql_result);
 if ($num_rows>'0') {
  echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
@@ -190,7 +190,7 @@ $found='1';
 $sql="SELECT * FROM expenses
 WHERE expenses.description LIKE '%".$searchid."%' 
 LIMIT 0,50";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error();
+$sql_result = mysql_query($sql,$conn_id);
 $num_rows = mysql_num_rows($sql_result);
 if ($num_rows>'0') {
  echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';

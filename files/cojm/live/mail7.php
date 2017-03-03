@@ -695,7 +695,4 @@ $(document).ready(function() {
 
 echo '</body></html>';
 
-mysql_close();
-$dbh=null;
-
 ?>

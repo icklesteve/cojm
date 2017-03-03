@@ -62,7 +62,7 @@ echo '
 
 
 $sql = "SELECT * FROM Clients WHERE CustomerID = '$clientid' LIMIT 0,1";
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+$sql_result = mysql_query($sql,$conn_id); 
 $row=mysql_fetch_array($sql_result);
 
 if ($row['isdepartments']=='1') {
@@ -773,7 +773,7 @@ $date180agou=  date ("U", strtotime ($date180ago));
  FROM Orders WHERE Orders.CustomerID = '$clientid' ";
 
 
- $sql_result = mysql_query($newsql,$conn_id) or die(mysql_error()); 
+ $sql_result = mysql_query($newsql,$conn_id); 
 	 $bigtot=mysql_affected_rows();
  if ($bigtot>"0") { 
  
@@ -1133,7 +1133,7 @@ LIMIT 0 , 10";
 
 
 // execute SQL query and get result
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error());
+$sql_result = mysql_query($sql,$conn_id);
 
 
 

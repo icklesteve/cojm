@@ -43,6 +43,5 @@ echo '<br />';
 
 // echo $query;
 
-mysql_close(); 
 ?>
 </body>

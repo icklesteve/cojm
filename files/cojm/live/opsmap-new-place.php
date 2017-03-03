@@ -24,7 +24,7 @@ if (isset($_POST['opsmapid'])) { $opsmapid=trim($_POST['opsmapid']);} else {$ops
 <?php
 
 $query = "SELECT * FROM opsmap WHERE opsmapid=".$opsmapid ; 
-$sql_result = mysql_query ($query, $conn_id) or mysql_error();  
+$sql_result = mysql_query ($query, $conn_id);  
 $sumtot=mysql_affected_rows();
 if ($sumtot>'0') {
     while ($row = mysql_fetch_array($sql_result)) {

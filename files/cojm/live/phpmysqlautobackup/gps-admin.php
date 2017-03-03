@@ -26,7 +26,7 @@ SELECT cojmadmin_id, cojm_admin_job_ref FROM cojm_admin
 WHERE cojm_admin_stillneeded='1' AND cojmadmin_tracking='1' 
 ORDER BY cojm_admin_job_ref DESC
 LIMIT 1 
-") or die(mysql_error());
+");
 
 $gpsadminrow = mysql_fetch_array($gpsadmin); 
 

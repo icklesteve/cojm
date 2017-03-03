@@ -17,7 +17,8 @@ $checkdate=date('Y-m-d', $collecttime);
 
  $sql = "SELECT DISTINCT device_key FROM `instamapper`  WHERE `timestamp` >= '$collecttime' AND `timestamp` <= '$delivertime' ORDER BY `device_key` ASC"; 
  $infotext.= '<br /> '.$tcollecttime. ' '. $tdelivertime;
- $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); $sumtot=mysql_affected_rows(); if ($sumtot>'0.5') {
+ $sql_result = mysql_query($sql,$conn_id);
+ $sumtot=mysql_affected_rows(); if ($sumtot>'0.5') {
  while ($row = mysql_fetch_array($sql_result)) {      extract($row); 
  $infotext.=' device key is '.$row['device_key'];
  $dev_key=$row['device_key'];
@@ -25,7 +26,7 @@ $checkdate=date('Y-m-d', $collecttime);
 SELECT cojmadmin_id FROM cojm_admin 
 WHERE  cojm_admin_stillneeded='1' AND cojmadmin_rider_gps='1' AND cojmadmin_rider_id='$dev_key' AND cojm_admin_rider_date='$checkdate'
 ORDER BY cojmadmin_id ASC LIMIT 1 
-") or die(mysql_error());
+");
 $gpsadminrow = mysql_fetch_array($gpsadmin); 
 if($gpsadminrow) {
  $infotext.=''.' job already outstanding on system ';
@@ -48,10 +49,10 @@ else {
     $result = mysql_query($sql, $conn_id);
  if ($result){
  $infotext=$infotext."<br />39 Success adding admin job";
- $thiscyclist=mysql_insert_id(); 
-   $infotext=$infotext.'<p>Admin Task '.$thiscyclist.' created.</p>'; 
+
+   $infotext=$infotext.'<p>Admin Task created.</p>'; 
  } else {
- $infotext=$infotext.mysql_error()." An error occured during setting admin q <br>".$sql;  
+ $infotext.=" An error occured during setting admin q <br>".$sql;  
  } // ends sql
 } // not found in cache
  } // ends no existing job in q

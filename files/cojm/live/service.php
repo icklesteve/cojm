@@ -337,8 +337,9 @@ $rpttext=$rpttext.'</tr>';
 $i='0';
 $query = "SELECT * FROM Services ORDER BY activeservice DESC, serviceorder DESC, ServiceID ASC"; 
 
-$sql_result = mysql_query($query,$conn_id)  or mysql_error(); 
-while ($row = mysql_fetch_array($sql_result)) { extract($row);
+$sql_result = mysql_query($query,$conn_id); 
+while ($row = mysql_fetch_array($sql_result)) {
+    extract($row);
 
 $i=$i+'1';
 
@@ -452,5 +453,3 @@ $(document).ready(function() {
 include "footer.php";
 
 echo '</body></html>';
-
-mysql_close(); 

@@ -65,13 +65,14 @@ $dateamonthago = date('Y-m-d H:i:s', $dateOneMonthAdded);
 // echo "After adding one month: ".date('l dS \o\f F Y', $dateOneMonthAdded)."<br>After taking away a month : ". $dateamonthago."<br><br>";
 
 $sql = "SELECT * FROM Clients ORDER BY lastinvoicedate";
-$sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
+$sql_result = mysql_query($sql,$conn_id); 
 
 while ($row = mysql_fetch_array($sql_result)) { extract($row);
 $lastdate = "SELECT collectiondate FROM Orders WHERE CustomerID=$CustomerID ORDER BY collectiondate DESC LIMIT 0 , 1";
-$sql_result_last = mysql_query($lastdate,$conn_id) or die(mysql_error()); 
+$sql_result_last = mysql_query($lastdate,$conn_id); 
 
-while ($lastrow = mysql_fetch_array($sql_result_last)) { extract($lastrow); 
+while ($lastrow = mysql_fetch_array($sql_result_last)) {
+    extract($lastrow); 
 
 
 
@@ -83,7 +84,7 @@ AND status < '108'
 AND collectiondate <= '$tempdate'
 And FreightCharge <> '0.00'
  ";
-$sql_resultcost = mysql_query($sqlcostage,$conn_id)  or mysql_error(); 
+$sql_resultcost = mysql_query($sqlcostage,$conn_id); 
 while ($costrow = mysql_fetch_array($sql_resultcost)) { extract($costrow); $temptwo=$temptwo+$costrow['FreightCharge']; } 
 
 $tempthree=$tempthree+$temptwo;
@@ -101,7 +102,8 @@ $tarow=$tarow. '<tr><td><a href="new_cojm_client.php?clientid='.$CustomerID.'">'
 
 
 $firstdate = "SELECT * FROM Orders WHERE CustomerID=$CustomerID AND status < '108' AND status > '98' ORDER BY collectiondate ASC LIMIT 0 , 1";
-$sql_result_first = mysql_query($firstdate,$conn_id) or die(mysql_error()); while ($firstrow = mysql_fetch_array($sql_result_first)) { extract($firstrow); 
+$sql_result_first = mysql_query($firstdate,$conn_id);
+while ($firstrow = mysql_fetch_array($sql_result_first)) { extract($firstrow); 
 $tarow=$tarow.date('D j M Y', strtotime($firstrow['collectiondate']));
 }
 
@@ -194,7 +196,7 @@ $temp=$row['orderdep'];
  AND clientdep.isactivedep='1' 
  ORDER BY Clients.CompanyName, clientdep.depname"; 
 
-$result_id = mysql_query ($query, $conn_id) or mysql_error();  
+$result_id = mysql_query ($query, $conn_id);  
 $sumtot=mysql_affected_rows();
 
 // echo $sumtot.' Department(s) : ';	
@@ -212,8 +214,10 @@ $temptwod='0.00';
 $sqlcostaged = "SELECT * FROM Orders WHERE orderdep = '$CustomerIDlist' 
 AND status > '98' 
 AND status < '108' ";
-$sql_resultcostd = mysql_query($sqlcostaged,$conn_id)  or mysql_error(); 
-while ($costrowd = mysql_fetch_array($sql_resultcostd)) { extract($costrowd); $temptwod=floatval($temptwod+$costrowd['FreightCharge']); } 
+$sql_resultcostd = mysql_query($sqlcostaged,$conn_id); 
+while ($costrowd = mysql_fetch_array($sql_resultcostd)) {
+    extract($costrowd); 
+    $temptwod=floatval($temptwod+$costrowd['FreightCharge']); } 
 
 $depcharge= number_format(floatval($temptwod), 2, '.', '');
 

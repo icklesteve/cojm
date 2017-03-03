@@ -27,7 +27,7 @@ SELECT cojmadmin_id, cojmadmin_rider_id, cojm_admin_rider_date FROM cojm_admin
 WHERE cojm_admin_stillneeded='1' AND cojmadmin_rider_gps='1' 
 ORDER BY cojm_admin_rider_date DESC
 LIMIT 1 
-") or die(mysql_error());
+");
 
 $gpsadminrow = mysql_fetch_array($gpsadmin); 
 
@@ -61,7 +61,7 @@ $query="SELECT cojmname FROM Cyclist WHERE trackerid = '$cojmadmin_rider_id' LIM
  
  
  
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+$sql_result = mysql_query($sql,$conn_id); 
 
 $sumtot=mysql_affected_rows(); 
 
@@ -88,7 +88,8 @@ $min_lon =  '99999';
  $markerout[]=' var markers'.$ID.' = [';
 
  
-while ($map = mysql_fetch_array($sql_result)) {      extract($map); 
+while ($map = mysql_fetch_array($sql_result)) {
+    extract($map); 
 
 $linecount++;
 $map['latitude']=round($map['latitude'],5);

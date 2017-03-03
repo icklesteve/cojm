@@ -1130,43 +1130,36 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
             if ($depname) {
                 // $infotext.='<br />'. $depname;
                 $sql = "UPDATE clientdep SET 
-                depname='$depname' ,
-                isactivedep='$isactivedep' , 
-                deppassword='$deppassword' , 
-                deprequestor=(UPPER('$deprequestor')) , 
-                depemail='$depemail' , 
-                depphone='$depphone' , 
-                depservice='$depservice' , 
-                depcomment='$depcomment' , 
-                depdeffromft=(UPPER('$depdeffromft')) ,
-                depdeftoft=(UPPER('$depdeftoft')) , 
-                depaddone='$depaddone' , 
-                depaddtwo='$depaddtwo' , 
-                depaddthree='$depaddthree' , 
-                depaddfour='$depaddfour' , 
-                depaddfive='$depaddfive' , 
-                depaddsix=(UPPER('$depaddsix')) ,
-                depjoom='$depjoom'
-                WHERE depnumber='$i' 
-                AND associatedclient='$clientid'
+                depname=? ,
+                isactivedep=? , 
+                deppassword=? , 
+                deprequestor=(UPPER(?)) , 
+                depemail=? , 
+                depphone=? , 
+                depservice=? , 
+                depcomment=? , 
+                depdeffromft=(UPPER(?)) ,
+                depdeftoft=(UPPER(?)) , 
+                depaddone=? , 
+                depaddtwo=? , 
+                depaddthree=? , 
+                depaddfour=? , 
+                depaddfive=? , 
+                depaddsix=(UPPER(?)) ,
+                depjoom=?
+                WHERE depnumber=? 
+                AND associatedclient=?
                 LIMIT 1"; 
-                
-                
-                
-                
-                
-                
-                
-                
-
-                $result = mysql_query($sql, $conn_id);
-                if ($result){
+                try {
+                    $dbh->prepare($sql)->execute([$depname, $isactivedep, $deppassword,$deprequestor,$depemail,$depphone,$depservice,$depcomment,$depdeffromft,$depdeftoft,$depaddone,$depaddtwo,$depaddthree,$depaddfour,$depaddfive,$depaddsix,$depjoom,$i,$clientid]);
                     $infotext.="<br />Updated ".$depname;
-                } else { 
-                    $infotext.=" An error occured during updating department!<br>"; 
+                }
+                catch(PDOException $e) {
+                    $alerttext.= $e->getMessage();
+                    $infotext.= $e->getMessage();
+                    $infotext.=" An error occured during update!<br>".$sql;  
                     $alerttext.=" <p>An error occured during updating department ".$i.' '.$depname."!</p>"; 
-                } 
-                
+                }
             }
             $i++;
         } // ends $i loop
@@ -1183,15 +1176,13 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
         $newdepname=trim($_POST['newdepname']);
         $infotext.='<br />ClientID : '.$clientid.'<br /> newdepname : '.$newdepname;
         
-        
-        
-        
         if (($clientid) and ($newdepname)) {
         
             $sql = "SELECT * FROM Clients WHERE CustomerID = ? ";
-            $statement = $dbh->prepare($sql)->execute([$clientid]);
+            $statement = $dbh->prepare($sql);
+            $statement->execute([$clientid]);
             $clrow = $statement->fetch(PDO::FETCH_ASSOC);
-
+            
             $infotext.='<br />'. $clrow['Address'].', '. $clrow['Address2'].'. '. $clrow['City'].', 
             '. $clrow['County'].', '. $clrow['CountryOrRegion'].'. '. $clrow['Postcode']; 
             
@@ -1203,8 +1194,7 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
             $depaddsix=trim($clrow['Postcode']);
             
             
-            
-            mysql_query("INSERT INTO clientdep 
+            $sql="INSERT INTO clientdep 
             ( associatedclient,
             isactivedep ,
             depaddone ,
@@ -1215,18 +1205,30 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
             depaddsix ,
             depname) 
             VALUES
-            ('$clientid',
+            (?,
             '1',
-            '$depaddone' ,
-            '$depaddtwo' ,
-            '$depaddthree' ,
-            '$depaddfour' ,
-            '$depaddfive' ,
-            '$depaddsix' ,
-            '$newdepname' ) ", $conn_id ); 
+            ? ,
+            ? ,
+            ? ,
+            ?,
+            ? ,
+            ? ,
+            ? ) ";             
             
-            $newdepid=mysql_insert_id();  
-            
+        
+            try {
+                $dbh->prepare($sql)->execute([$clientid,$depaddone,$depaddtwo,$depaddthree,$depaddfour,$depaddfive,$depaddsix,$newdepname]);
+                $newdepid = $dbh->lastInsertId();
+                $infotext.=" New Dep!<br>".$newdepid;
+                $pagetext.=" <p>New Dep</p>".$newdepid;                
+            }
+            catch(PDOException $e) {
+                $alerttext.= $e->getMessage();
+                $infotext.= $e->getMessage();
+                $infotext.=" An error occured New Department!<br>".$sql;  
+                $alerttext." <p>An error occured during New Department!</p>";
+            }            
+        
             $infotext.= ' <br />Created new department '.$newdepid;
             
             $pagetext.='<p>Created new Department </p>';
@@ -1288,27 +1290,28 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
         
         
         if ($page=='aftercheckaseditfav') {
-        
             // $infotext.='<br />1495';
             if (($favadrclient) and ($thisfavadrid<>'')) {
+                
                 $sql = "UPDATE cojm_favadr SET 
-                favadrft=(UPPER('$favadrft')) , 
-                favadrpc=(UPPER('$favadrpc')) ,
-                favadrcomments=(UPPER('$favadrcomments'))
-                WHERE favadrid='$thisfavadrid' LIMIT 1"; 
-                $result = mysql_query($sql, $conn_id);
-                if ($result) { 
+                favadrft=(UPPER(?)) , 
+                favadrpc=(UPPER(?)) ,
+                favadrcomments=(UPPER(?))
+                WHERE favadrid=? LIMIT 1";
+                
+                try {
+                    $dbh->prepare($sql)->execute([$favadrft, $favadrpc, $favadrcomments,$thisfavadrid]);
                     $infotext.="<br />Success!"; 
                     $pagetext.="<p>Details updated for ".$favadrft." - Job Details Unchanged.</p>"; 
-                } else {
+                }
+                catch(PDOException $e) {
+                    $alerttext.= $e->getMessage();
+                    $infotext.= $e->getMessage();
                     $infotext.=" An error occured during update!<br>"; 
                     $alerttext.="<p>An error occured during update!</p>"; 
-                } // ends check for result / alert txt
-        
+                }
             } // ends quick edit from order via redir.php
-
         }  // ends if ($page=='aftercheckaseditfav') 
-
 
 
         if ($page=='editthisfavadr') {
@@ -1316,40 +1319,45 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
             $infotext.='<br />Editing Favourite details';
             if (($favadrclient) and ($thisfavadrid<>'')) {
                 $sql = "UPDATE cojm_favadr SET 
-                favadrft=(UPPER('$favadrft')) , 
-                favadrpc=(UPPER('$favadrpc')) ,
-                favadrclient='$favadrclient' ,
-                favadrisactive='$favadrisactive' ,
-                favadrcomments=(UPPER('$favadrcomments')),
-                favusr1='$favusr1' , 
-                favusr2='$favusr2' , 
-                favusr3='$favusr3' , 
-                favusr4='$favusr4' , 
-                favusr5='$favusr5' , 
-                favusr6='$favusr6' , 
-                favusr7='$favusr7' , 
-                favusr8='$favusr8' , 
-                favusr9='$favusr9' , 
-                favusr10='$favusr10' , 
-                favusr11='$favusr11' , 
-                favusr12='$favusr12' , 
-                favusr13='$favusr13' , 
-                favusr14='$favusr14' , 
-                favusr15='$favusr15' , 
-                favusr16='$favusr16' , 
-                favusr17='$favusr17' , 
-                favusr18='$favusr18' , 
-                favusr19='$favusr19' , 
-                favusr20='$favusr20'  
-                WHERE favadrid='$thisfavadrid' LIMIT 1"; 
-                $result = mysql_query($sql, $conn_id);
-                if ($result){ 
+                favadrft=(UPPER(?)) , 
+                favadrpc=(UPPER(?)) ,
+                favadrclient=? ,
+                favadrisactive=? ,
+                favadrcomments=(UPPER(?)),
+                favusr1=? , 
+                favusr2=? , 
+                favusr3=? , 
+                favusr4=? , 
+                favusr5=? , 
+                favusr6=? , 
+                favusr7=? , 
+                favusr8=? , 
+                favusr9=? , 
+                favusr10=? , 
+                favusr11=? , 
+                favusr12=? , 
+                favusr13=? , 
+                favusr14=? , 
+                favusr15=? , 
+                favusr16=? , 
+                favusr17=? , 
+                favusr18=? , 
+                favusr19=? , 
+                favusr20=?  
+                WHERE favadrid=? LIMIT 1";
+                
+                try {
+                    $dbh->prepare($sql)->execute([$favadrft,$favadrpc,$favadrclient,$favadrisactive,$favadrcomments,$favusr1,$favusr2,$favusr3,$favusr4,$favusr5,$favusr6,$favusr7,$favusr8,$favusr9,$favusr10,$favusr11,$favusr12,$favusr13,$favusr14,$favusr15,$favusr16,$favusr17,$favusr18,$favusr19,$favusr20,$thisfavadrid]);
                     $infotext.="<br />Success!"; 
                     $pagetext.="<p>Details updated for ".$favadrft.".</p>"; 
-                } else { 
+                }
+                catch(PDOException $e) {
+                    $alerttext.= $e->getMessage();
+                    $infotext.= $e->getMessage();
                     $infotext.=" An error occured during update!<br>"; 
                     $alerttext.="<p>An error occured during update!</p>"; 
-                } // ends check for result or error
+                }                
+                
                 
             } // ends check for client AND favadrid
  
@@ -1357,402 +1365,110 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
 
 
 
-
-
-        // CHECK FOR COLLECT ADDRESS
-
         if (($oldfavadrft) and ($oldfavadrpc)) {
-            $sql = "SELECT ID FROM Orders WHERE status < '86' 
-            AND enrpc0 = '".$oldfavadrpc."' 
-            AND enrft0 = '".$oldfavadrft."' ";
-            $sql_result = mysql_query($sql,$conn_id);
-            $sumtot=mysql_affected_rows(); 
-            // $infotext.='<br /> 1574 '.$sumtot.' row found '.$sql;
-            if ($sumtot>'0')  {
-                while ($chngrow = mysql_fetch_array($sql_result)) {
-                    extract($chngrow); 
-                    $chngid=$chngrow['ID'];
-                    $sql = "UPDATE Orders SET 
-                    enrft0=(UPPER('$favadrft')), 
-                    enrpc0=(UPPER('$favadrpc')) 
-                    WHERE ID='$chngid' LIMIT 1";
-                    $result = mysql_query($sql, $conn_id);
-                    if ($result){ // $infotext.="<br />1616 updated"; 
-                    } else { // starts error check
-                        $infotext.="<br /><strong>1619 An error occured during updating postcodes!</strong>"; 
-                        $alerttext.="<p>Error 1620 occured during updating ".$sql."</p>"; 
-                    } // ends error check
-                } // ends loop for jobs matching ft, pc and status
-                $pagetext.='<p>'.$sumtot.' Future Collection Adresses Changed </p>';
-            } // total is more than 0 for matching addresses
-        } // ends check to see if (($oldfavadrft) and ($oldfavadrpc)) {
-
-
-
-        // CHECK FOR DELIVERY ADDRESS
-
-        if (($oldfavadrft) and ($oldfavadrpc)) {
-            $sql = "SELECT ID FROM Orders WHERE status < '86' 
-            AND enrpc21 = '".$oldfavadrpc."' 
-            AND enrft21 = '".$oldfavadrft."' ";
-            $sql_result = mysql_query($sql,$conn_id);
-            $sumtot=mysql_affected_rows(); 
-            // $infotext.='<br /> 1600 '.$sumtot.' row found '.$sql;
-            if ($sumtot>'0')  {
-                while ($chngrow = mysql_fetch_array($sql_result)) {
-                    extract($chngrow); 
-                    $chngid=$chngrow['ID'];
-                    $sql = "UPDATE Orders SET 
-                    enrft21=(UPPER('$favadrft')), 
-                    enrpc21=(UPPER('$favadrpc')) 
-                    WHERE ID='$chngid' LIMIT 1";
-                    $result = mysql_query($sql, $conn_id);
-                    if ($result){ // $infotext.="<br />1616 updated"; 
-                    } else { // starts error check
-                        $infotext.="<br /><strong>1609 An error occured during updating postcodes!</strong>"; 
-                        $alerttext.="<p>Error 1610 occured during updating ".$sql."</p>"; 
-                    } // ends error check
-                
-                } // ends loop for jobs matching ft, pc and status
-                $pagetext.='<p>'.$sumtot.' Future Delivery Adresses Changed </p>';
-            } // total is more than 0 for matching addresses
-        } // ends check to see if (($oldfavadrft) and ($oldfavadrpc)) {
-
-
-
-
-
-        // CHECK FOR enrpc's
-
-        if (($oldfavadrft) and ($oldfavadrpc)) {
-            $i='1';
-            while ($i<'21') {
+            $i=0;
+            $sumtot=0;
+            while ($i<22) {
                 $sql = "SELECT ID FROM Orders WHERE status < '86' 
-                AND enrpc".$i." = '".$oldfavadrpc."' 
-                AND enrft".$i." = '".$oldfavadrft."' ";
-                $sql_result = mysql_query($sql,$conn_id); $sumtot=mysql_affected_rows(); 
-                // $infotext.='<br /> 1628 '.$sumtot.' row found '.$sql;
-                if ($sumtot>'0')  {
-                    while ($chngrow = mysql_fetch_array($sql_result)) {
-                        extract($chngrow); 
-                        $chngid=$chngrow['ID'];
+                AND enrpc".$i." = :pc AND enrft".$i." = :ft ";
+                
+                $prep = $dbh->prepare($sql);
+                $prep->bindParam(':pc', $oldfavadrpc, PDO::PARAM_INT);
+                $prep->bindParam(':ft', $oldfavadrft, PDO::PARAM_INT);            
+                $prep->execute();
+                $stmt = $prep->fetchAll();
+                
+                if ($stmt)  {
+                    foreach ($stmt as $chngrow) {
+                        
                         $sql = "UPDATE Orders SET 
-                        enrft".$i."=(UPPER('$favadrft')), 
-                        enrpc".$i."=(UPPER('$favadrpc')) 
-                        WHERE ID='$chngid' LIMIT 1"; $result = mysql_query($sql, $conn_id);
-                        if ($result){ // $infotext.="<br />1616 updated"; 
-                        } else { // starts error check
+                        enrft".$i."=(UPPER(?)), 
+                        enrpc".$i."=(UPPER(?)) 
+                        WHERE ID=? LIMIT 1";
+
+                        try {
+                            $dbh->prepare($sql)->execute([$favadrft, $favadrpc, $chngrow['ID']]);
+                            $sumtot++;
+                        }
+                        catch(PDOException $e) {
+                            $alerttext.= $e->getMessage();
+                            $infotext.= $e->getMessage();
                             $infotext.="<br /><strong>1641 An error occured during updating postcodes!</strong>"; 
-                            $alerttext.="<p>Error 1642 occured during updating ".$sql."</p>"; 
-                        } // ends error check
+                            $alerttext.="<p>Error 1642 occured during updating ".$sql."</p>";
+                        }
                     } // ends loop for jobs matching ft, pc and status
-                $pagetext.='<p>'.$sumtot.' Future enroute address changed </p>';
+                $pagetext.='<p>'.$sumtot.' Future address changed </p>';
                 } // total is more than 0 for matching addresses
             $i++;
             } // ends $i loop
         } // ends check to see if (($oldfavadrft) and ($oldfavadrpc)) {
 
 
-
-
-
-
-
-
-
-
- 
-
-
         if (($thisfavadrid=='') and ($favadrft)) {
-            $infotext.='New Favourite'; 
-            mysql_query("LOCK TABLES cojm_favadr WRITE", $conn_id);
-            mysql_query("INSERT INTO cojm_favadr 
+            $infotext.='New Favourite';
+            
+            $sql="INSERT INTO cojm_favadr 
             (favadrclient, 
             favadrft, 
             favadrpc, 
             favadrisactive,
             favadrcomments
             ) VALUES (
-            '$favadrclient',
-            (UPPER('$favadrft')),
-            (UPPER('$favadrpc')),
+            ?,
+            (UPPER(?)),
+            (UPPER(?)),
             '1',
-            (UPPER('$favadrcomments'))   )
-            ", $conn_id
-            ); 
-            $insertid=mysql_insert_id();  
-            mysql_query("UNLOCK TABLES", $conn_id);   
-
-
-            $infotext.="<br />New fav id ".$insertid.' '.$favadrft; 
-            $pagetext.="<p>New favourite added ".$favadrft.".</p>"; 
-
+            (UPPER(?))   )
+            ";
+            
+            try {
+                $dbh->prepare($sql)->execute([$CompanyName]);
+                $insertid = $dbh->lastInsertId();
+                $infotext.="<br />New fav id ".$insertid.' '.$favadrft; 
+                $pagetext.="<p>New favourite added ".$favadrft.".</p>";                
+            }
+            catch(PDOException $e) {
+                $alerttext.= $e->getMessage();
+                $infotext.= $e->getMessage();
+                $infotext.=" An error occured New Favourite!<br>".$sql;  
+                $alerttext." <p>An error occured during update!</p>";
+            }
         } // end new client and check companyname>0 
-
-
 
         if ( $page=='addaftercheckasnewfav') {
             $infotext.='New Favourite 1665'; 
         }
 
-
-
-
-
     } // ends page=newfav(?) or page=quickeditfrom  or page=addaftercheckasnewfav
 
 
-
-    // $infotext.='<br />1692 ';
-
-
-    if ($page=='editnewfav') {
-
-        // $infotext.='<br />1698 ';
-
-        if (isset($_POST['enrft0'])) { $enrft0=(trim($_POST['enrft0'])); } else {  $enrft0=''; }
-        if (isset($_POST['enrpc0'])) { $enrpc0=(trim($_POST['enrpc0'])); } else {  $enrpc0=''; }
-        if (isset($_POST['clientorder'])) { $clientorder=(trim($_POST['clientorder'])); } else {  $clientorder=''; }
-        if (isset($_POST['id'])) { $id=(trim($_POST['id'])); } else {  $id=''; }
-        
-        $enrft0=strtoupper ($enrft0);
-        $enrpc0=strtoupper ($enrpc0);
-        
-        // $filename="order.php";
-        // $adminmenu='1';
-        // echo $clientorder;
-        // echo $enrft0;
-        // echo $enrpc0;
-        // echo $id;
-        $favadrcomments='';
-        
-        $sql = "SELECT * FROM cojm_favadr, Clients 
-        WHERE cojm_favadr.favadrclient= '$clientorder'
-        AND (( cojm_favadr.favadrpc LIKE '%$enrpc0%' ) OR ( cojm_favadr.favadrft LIKE '%$enrft0%'))
-        AND cojm_favadr.favadrisactive='1' 
-        AND cojm_favadr.favadrclient = Clients.CustomerID 
-        "; 
-        
-        $sql_result = mysql_query($sql,$conn_id); 
-        $num_rows = mysql_num_rows($sql_result);
-        
-        if ($num_rows>'0') { 
-        
-            $sql = "SELECT * FROM cojm_favadr, Clients 
-            WHERE cojm_favadr.favadrclient= '$clientorder'
-            AND (( cojm_favadr.favadrpc LIKE '$enrpc0' ) OR ( cojm_favadr.favadrft LIKE '$enrft0'))
-            AND cojm_favadr.favadrisactive='1' 
-            AND cojm_favadr.favadrclient = Clients.CustomerID 
-            ";
-            $sql_result2 = mysql_query($sql,$conn_id); 
-            $num_rows = mysql_num_rows($sql_result2);
-            
-            $companyname='';
-            while ($avadrrow = mysql_fetch_array($sql_result2)) {
-                extract($avadrrow);
-                $companyname=$avadrrow['CompanyName'];
-            }
-            
-            
-            $alerttext.= ' <h3>There ';
-            if ($num_rows>'1') {
-                $alerttext.= 'are';
-            } else {
-                $alerttext.= 'is';
-            }
-            $alerttext.= ' already '.$num_rows.' favourite';
-            if ($num_rows>'1') { $alerttext.= 's'; }
-            
-            $alerttext.= ' for '.$companyname.' with similar details</h3><br />';
-            
-            
-            
-            $alerttext.= '
-            <table class="acc"><tr>
-            <th>Address</th>
-            <th>Postcode</th>
-            <th></th>
-            </tr><tr><td>'.$enrft0.'</td>
-            <td>'.$enrpc0.'</td><td>
-            <form action="order.php?id='.$id.'" method="post"> 
-            <input type="hidden" name="formbirthday" value="'. date("U") .'">
-            <input type="hidden" name="page" value="addaftercheckasnewfav" >
-            <input type="hidden" name="favadrclient" value="'.$clientorder.'" />
-            <input type="hidden" name="favadrft" value="'.$enrft0.'" />
-            <input type="hidden" name="favadrpc" value="'.$enrpc0.'" />
-            <input type="hidden" name="cojmid" value="'.$id.'" />
-            <input type="hidden" name="id" value="'.$id.'" />
-            <button type="submit" >Add as new favourite</button></form>
-            </td></tr>';
-            
-            
-            while ($favadrrow = mysql_fetch_array($sql_result)) {
-                extract($favadrrow);
-                $alerttext.= '<tr><td>'.$favadrrow['favadrft'].'</td><td>'.$favadrrow['favadrpc'].'</td><td>
-                <form action="order.php?id='.$id.'" method="post" >
-                <input type="hidden" name="formbirthday" value="'. date("U") .'">
-                <input type="hidden" name="page" value="aftercheckaseditfav" >
-                <input type="hidden" name="favadrft" value="'.$enrft0.'" />
-                <input type="hidden" name="oldfavadrft" value="'.$favadrrow['favadrft'].'" />
-                <input type="hidden" name="oldfavadrpc" value="'.$favadrrow['favadrpc'].'" />
-                <input type="hidden" name="favadrpc" value="'.$enrpc0.'" />
-                <input type="hidden" name="favadrclient" value="'.$clientorder.'" />
-                <input type="hidden" name="cojmid" value="'.$id.'" />
-                <input type="hidden" name="thisfavadrid" value="'.$favadrrow['favadrid'].'" />
-                <button type="submit" >Add new details to this existing location</button></form>
-                </td></tr>';
-            }
-            
-            $alerttext.= '</table><br />';
-            // echo '</div></body></html>';
-        
-        } else {
-
-            // echo '<br />New Favourite'; 
-
-            mysql_query("INSERT INTO cojm_favadr 
-            (favadrclient, 
-            favadrft, 
-            favadrpc, 
-            favadrisactive,
-            favadrcomments
-            ) VALUES (
-            '$clientorder',
-            (UPPER('$enrft0')),
-            (UPPER('$enrpc0')),
-            '1',
-            (UPPER('$favadrcomments'))   )
-            ", $conn_id
-            ); 
-            $newfavid=mysql_insert_id();  
- 
-            
-            
-            $pagetext.="<p>Favourite added.</p>"; 
-
-
-            // echo '<br /> New fav added with id '.$newfavid;
-
-            // header('Location: '.$globalprefrow['httproots'].'/cojm/live/order.php?id='.$id); exit();
-
-        } // ends add new
-
-    } // ends $page==editnewfav
-
-
-
-
-    if ($page=='editcorepricing') {
-        $infotext.='<br/>Editing distance pricing';
-        
-        $i='21'; while ($i>0)  {
-        
-            if (isset($_POST["chargedbybuildid$i"])) {
-                $cbbname=trim($_POST["cbbname$i"]);
-                $cbbcost=trim($_POST["cbbcost$i"]);
-                $cbborder=trim($_POST["cbborder$i"]);
-                $cbbcomment=trim($_POST["cbbcomment$i"]);
-                $cbbmod=trim($_POST["cbbmod$i"]);
-                if (isset($_POST["cbbasap$i"])) { $cbbasap=trim($_POST["cbbasap$i"]); } else { $cbbasap="0"; }                
-                if (isset($_POST["cbbcargo$i"])) { $cbbcargo=trim($_POST["cbbcargo$i"]); } else { $cbbcargo="0"; }
-                if (isset($_POST["new$i"])) { $_POST["new$i"]=trim($_POST["new$i"]); } else { $_POST["new$i"]=''; }
-
-                if (trim($_POST["new$i"])=='') {
-    
-                    $sql = "UPDATE chargedbybuild SET 
-                    cbbname='$cbbname', 
-                    cbbasap='$cbbasap', 
-                    cbbcargo='$cbbcargo' , 
-                    cbbmod='$cbbmod', 
-                    cbbcost='$cbbcost', 
-                    cbborder='$cbborder'
-                    WHERE chargedbybuildid = $i LIMIT 1"; 
-                    $result = mysql_query($sql, $conn_id);
-                    if ($result){ 
-                        // $infotext.="<br>Updated individ cost "; 
-                    } else {
-                        $infotext.="<br> <strong>An error occured during updating Core Pricing</strong>"; 
-                        $alerttext.="<p>Error occured during updating Core Pricing name ".$cbbname.'</p>'; 
-                    }
-                } 
-                
-                
-                
-                if ((trim($_POST["new$i"]))=='yes') {
-                    if ($cbbname) {
-                
-                        $sql = "INSERT INTO chargedbybuild 
-                        SET 
-                        cbbname='$cbbname', 
-                        cbbasap='$cbbasap', 
-                        cbbcargo='$cbbcargo' , 
-                        cbbmod='$cbbmod', 
-                        cbbcost='$cbbcost', 
-                        cbborder='$cbborder', 
-                        cbbcomment='$cbbcomment', 
-                        chargedbybuildid = '$i'"; 
-                        
-                        $result = mysql_query($sql, $conn_id);
-                        
-                        if ($result){ 
-                            // $infotext.="<br>Updated individ cost "; 
-                        } else { 
-                            $infotext.="<br> <strong>An error occured during updating Core Pricing</strong>"; 
-                            $alerttext.="<p>Error occured during updating Distance Pricing</p>"; 
-                        }
-                    } 
-                }
-            
-            
-            }
-            $i=$i-1;
-        }
-        
-        $infotext.= '<br />Updated Pricing'.$sql;;
-        $pagetext.= '<p>Updated Pricing</p>';
-        
-    } // ends page=editcorepricing
-
-
-
-
-
-    // EDITS INVOICE COMMENT
-
-    if ($page=='editinvcomment') {
+    if ($page=='editinvcomment') { // EDITS INVOICE COMMENT
         if (isset( $_POST['ref'])) { $invoiceref=$_POST['ref']; } else { $invoiceref=''; }
         if (isset($_POST['invcomments'])) { $invcomments=$_POST['invcomments']; } else { $invcomments=''; }
         
         if ($invoiceref) {
         
-            $sql = " UPDATE `invoicing` SET `invcomments` = '$invcomments' WHERE ref='$invoiceref'";	
-            
-            $result = mysql_query($sql, $conn_id);
-                
-            if ($result) {
+            $sql = " UPDATE `invoicing` SET `invcomments` = ? WHERE ref=? ";	
+
+            try {
+                $dbh->prepare($sql)->execute([$invcomments, $invoiceref]);
                 $pagetext.='<p>Updated comments for invoice ref '.$invoiceref.'</p>';
                 $infotext.='<br /> Invoice '.$invoiceref.' comment edited to '.$invcomments;
-            
-            } else { 
-            
+            }
+            catch(PDOException $e) {
+                $alerttext.= $e->getMessage();
+                $infotext.= $e->getMessage();
                 $alerttext.='<br />Unable to edit invoice comment<br />'; 
                 $infotext.='<br />Unable to edit invoice comment<br />'.$sql;
-            
-            } // ends invoice dtabase changed
-            
+            }
         } // checks for invoice ref
-        
     } // finishes page= editinv comment
 
 
 
 
     if ($page=='markinvpaid') {
-
-
         // sets vars
-
         if (isset( $_POST['ref'])) { $invoiceref=$_POST['ref']; } else { $invoiceref=''; }
         if (isset($_POST['invoicedate'])) { 
             
@@ -1773,59 +1489,42 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
             
             
             
-            // changes invoice after a couple of checks
+        // changes invoice after a couple of checks
             
         // echo "<h4>Invoice method field found</h4>" . $invmethod . " " . $datepassed . " " . $invoiceref ;
-            if ($invoiceref) {
-                $sql = "SELECT cost from invoicing WHERE ref=$invoiceref ";
-                $sql_result = mysql_query($sql,$conn_id); 
+        if ($invoiceref) {
+            $sql="UPDATE `invoicing` SET `paydate` = ? WHERE CONCAT( `invoicing`.`ref` ) =? ";
             
-                $temp=mysql_affected_rows();
-            
-                // $infotext.='<br />'.$temp.' cost selected with sql : '.$sql.' with result '.$sql_result;
-            
-                while ($row = mysql_fetch_array($sql_result)) {
-                    extract($row);
-                }
-            
-                // echo $datepassed.' '. $invmethod . ' ' . $cost . ' ' . $invoiceref; 
-            
-                $sql="UPDATE `invoicing` SET `paydate` = '$invoicedate' WHERE CONCAT( `invoicing`.`ref` ) =$invoiceref ";
-                $result = mysql_query($sql, $conn_id);
-            
-                $temp=mysql_affected_rows();
-            
-            
-            if ($temp>0){ 
-            
+            try {
+                $dbh->prepare($sql)->execute([$invoicedate, $invoiceref]);
                 $pagetext.='<p><strong> Reconciled invoice ref '.$invoiceref.'</strong></p>';
-            } else { 
+                $infotext.='<p><strong> Reconciled invoice ref '.$invoiceref.'</strong></p>';
+            }
+            catch(PDOException $e) {
+                $alerttext.= $e->getMessage();
+                $infotext.= $e->getMessage();
                 $alerttext.='<br />Unable to change invoice<br />'; 
                 $infotext.='<br />Unable to change invoice<br />'.$sql;
-            
             }
-            
-            
-                $sql = "UPDATE Orders SET status='120' WHERE invoiceref='$invoiceref'"; 
-                $result = mysql_query($sql, $conn_id);
-                $temp=mysql_affected_rows();
-                if ($result){
-                    $pagetext.= '<p><strong> Updated '.$temp.'</strong> jobs<p>';
-                    $auditsql='';		
-                } else { 
-            
-                    $alerttext.= '
-                    <br /><strong>An error occured during updating individual jobs,</strong>
-                    <br />Please contact COJM ASAP with the details of what you were attempting to do.'; 
-            
-                    $infotext.='<br /><strong>An error occured during updating individual jobs,</strong>';
-            
-                } // ends updating individ jobs
-            
-            } // checks for invoice ref
-            
-            
 
+
+            $sql = "UPDATE Orders SET status='120' WHERE invoiceref= :invoiceref"; 
+
+            try {
+                $prep = $dbh->prepare($sql);
+                $prep->bindParam(':invoiceref', $invoiceref, PDO::PARAM_INT);
+                $prep->execute();
+                $num_rows = $prep->rowCount();
+                $pagetext.= '<p>Updated '.$num_rows.' jobs</p>';
+                $infotext.= '<p> Updated '.$num_rows.' jobs</p>';
+            }
+            catch(PDOException $e) {
+                $alerttext.= $e->getMessage();
+                $infotext.= $e->getMessage();
+                $alerttext.= '<br /><strong>An error occured during updating individual jobs, 1530 </strong>';
+                $infotext.='<br /><strong>An error occured during updating individual jobs cj 1530</strong>';
+            }
+        } // checks for invoice ref
     } // finishes page= invoice paid
 
 
@@ -1852,37 +1551,52 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
         
         
         if ($chasetype=='1') {
-            $infotext.= "<br />First time chased";
-            $sql="UPDATE `invoicing` SET `chasedate` = '$duedate' WHERE CONCAT( `invoicing`.`ref` ) =$ref ";
-            $result = mysql_query($sql, $conn_id);
-            $infotext.="<br />". mysql_affected_rows().' invoice affected.<br>';
             
-            if ($result) {
+            $sql="UPDATE `invoicing` SET `chasedate` = ? WHERE CONCAT( `invoicing`.`ref` ) = ? ";
+            
+            try {
+                $dbh->prepare($sql)->execute([$duedate, $ref]);
                 $pagetext.='<p>First Time Invoice Chased</p>';
+                $infotext.= "<br />First time chased".$duedate;
+            }
+            catch(PDOException $e) {
+                $alerttext.= $e->getMessage();
+                $infotext.= $e->getMessage();
+                $alerttext.='<br />Fail 1569 <br />'; 
+                $infotext.='<br />Fail<br />'.$sql;
             }
         }
         
         if ($chasetype=='2') {
-            $infotext.= "<br />Second time chased";
-            $sql="UPDATE `invoicing` SET `chasedate2` = '$duedate' WHERE CONCAT( `invoicing`.`ref` ) =$ref";
-            $result = mysql_query($sql, $conn_id);
-            $infotext.="<br />". mysql_affected_rows().' invoice affected.<br>';
+            $sql="UPDATE `invoicing` SET `chasedate2` = ? WHERE CONCAT( `invoicing`.`ref` ) = ? ";
             
-            if ($result) {
-                $pagetext.='<p>Second Time Invoice Chased</p>';
+            try {
+                $dbh->prepare($sql)->execute([$duedate, $ref]);
+                $pagetext.='<p>2nd Time Invoice Chased</p>';
+                $infotext.= "<br />2nd time chased".$duedate;
+            }
+            catch(PDOException $e) {
+                $alerttext.= $e->getMessage();
+                $infotext.= $e->getMessage();
+                $alerttext.='<br />Fail 1581 <br />'; 
+                $infotext.='<br />Fail<br />'.$sql;
             }
             
         }
         
         if ($chasetype=='3') {
-            $infotext.= "<br />Third time chased<br>";
-            $sql="UPDATE `invoicing` SET `chasedate3` = '$duedate' WHERE CONCAT( `invoicing`.`ref` ) =$ref";
-            $result = mysql_query($sql, $conn_id);
-            $infotext.="<br />". mysql_affected_rows().' invoice affected.<br>';
+            $sql="UPDATE `invoicing` SET `chasedate3` = ? WHERE CONCAT( `invoicing`.`ref` ) = ? ";
             
-            
-            if ($result) {
-                $pagetext.='<p>Third Chased Changed</p>';
+            try {
+                $dbh->prepare($sql)->execute([$duedate, $ref]);
+                $pagetext.='<p>3rd Time Invoice Chased</p>';
+                $infotext.= "<br />3rd time chased".$duedate;
+            }
+            catch(PDOException $e) {
+                $alerttext.= $e->getMessage();
+                $infotext.= $e->getMessage();
+                $alerttext.='<br />Fail 1598 <br />'; 
+                $infotext.='<br />Fail<br />'.$sql;
             }
             
         }
@@ -1893,57 +1607,65 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
 
 
     if ($page=='deleteinv') {
-
         if (isset( $_POST['ref'])) { $invoiceref=$_POST['ref']; } else { $invoiceref=''; }
-
         if ($invoiceref) {
+            $sql = "DELETE from invoicing WHERE ref= :invoiceref ";	
+            try {
+                $prep = $dbh->prepare($sql);
+                $prep->bindParam(':invoiceref', $invoiceref, PDO::PARAM_INT);
+                $prep->execute();
 
-            $sql = "DELETE from invoicing WHERE ref='$invoiceref'";	
-
-            $result = mysql_query($sql, $conn_id);
-
-            $temp=mysql_affected_rows();
-
-
-            if ($temp>'0'){
-                $alerttext.='<p><strong> Deleted invoice ref '.$invoiceref.'</strong></p>'; 
-                $infotext.='<br /> Invoice Deleted ';
-            } else { 
-                $alerttext.='<br />Unable to delete invoice<br />'; 
-                $infotext.='<br />Unable to delete invoice<br />'.$sql;
-            } // ends invoice dtabase changed
-
-
-            $dtsql = "SELECT ID FROM Orders WHERE (`Orders`.`invoiceref` ='$invoiceref' )  ";
-            $dtsql_result = mysql_query($dtsql,$conn_id); 
-            while ($dtrow = mysql_fetch_array($dtsql_result)) {
-                extract($dtrow);
-                $dtid=$dtrow['ID'];
-                $browser=$_SERVER["HTTP_USER_AGENT"];
-                $sql = "UPDATE Orders SET status='100', invoiceref='' WHERE ID='$dtid'";
-                $result = mysql_query($sql, $conn_id);
-                $temp=mysql_affected_rows();
+                $pagetext.=' Invoice ref '.$invoiceref.' deleted';
+                $infotext.=' Invoice ref '.$invoiceref.' deleted';
                 
-                if ($result){
-                    
-                    $newpoint="INSERT INTO cojm_audit (auditid,audituser,auditorderid,auditpage,auditfilename,auditmobdevice,
-                    auditbrowser,audittext,auditcjtime,auditpagetime,auditmidtime,auditinfotext)   
-                    VALUES ('','$cyclistid','$dtid','$page','view_all_invoices.php','$mobdevice',
-                    '$browser','Invoice ref $invoiceref removed','','','','Invoice removed from job')";
-                    
-                    mysql_query($newpoint, $conn_id) or mysql_error();
-                    
-                    $newauditid=mysql_insert_id();
-                    
-                    if (mysql_error()) {
-                        $alerttext.= '<div class="moreinfotext"><h1> Problem saving audit log </h1></div>';
-                        $infotext.= '<br />Problem saving audit log on remove invoice details'.$newpoint;
-                    } // ends error
-                } else { // job update fail
-                    $alerttext.= '<br /><strong>An error occured during updating individual job, check audit log. </strong>'; 
-                    $infotext.='<br /><strong>An error occured during updating individual job '.$dtid.' '.$sql.' </strong>';
-                } // ends updating individ jobs
-            } // ends row extract for individual job
+                $sql = "SELECT ID FROM Orders WHERE (`Orders`.`invoiceref` = :invoiceref )  ";
+
+                $prep = $dbh->prepare($sql);
+                $prep->bindParam(':invoiceref', $invoiceref, PDO::PARAM_INT);
+                $prep->execute();
+                $stmt = $prep->fetchAll();
+
+                foreach ($stmt as $dtrow) {
+                    $dtid=$dtrow['ID'];
+                    try {
+                        $sql = "UPDATE Orders SET status='100', invoiceref='' WHERE ID = :id ";
+                        $prep = $dbh->prepare($sql);
+                        $prep->bindParam(':id', $dtid, PDO::PARAM_INT);
+                        $prep->execute();
+                        
+                        $browser=$_SERVER["HTTP_USER_AGENT"];
+                        $sql="INSERT INTO cojm_audit (auditid,audituser,auditorderid,auditpage,auditfilename,auditmobdevice,
+                        auditbrowser,audittext,auditcjtime,auditpagetime,auditmidtime,auditinfotext)   
+                        VALUES ('',?,?,?,'view_all_invoices.php',?,
+                        ?,'Invoice ref $invoiceref removed','','','','Invoice removed from job')";                
+                
+                
+                        try {
+                            $dbh->prepare($sql)->execute([$cyclistid, $dtid,$page,$mobdevice,$browser]);
+                        }
+                        catch(PDOException $e) {
+                            // $alerttext.= $e->getMessage();
+                            $infotext.= $e->getMessage();
+                            $alerttext.= '<div class="moreinfotext"><h1> Problem saving audit log </h1></div>';
+                            $infotext.= '<br />Problem saving audit log on remove invoice details';
+                        }
+                    }
+
+                    catch(PDOException $e) {
+                        // $alerttext.= $e->getMessage();
+                        $infotext.= $e->getMessage();
+                        $alerttext.= '<br /><strong>An error occured during updating individual job, check audit log. </strong>'; 
+                        $infotext.='<br /><strong>An error occured during updating individual job '.$dtid.' '.$sql.' </strong>';
+                    } 
+            
+                } // ends row extract for individual job
+            }
+            catch(PDOException $e) {
+                $alerttext.= $e->getMessage();
+                $infotext.= $e->getMessage();
+                $alerttext.= '<br /><strong>An error occured during updating deleting invoice, 1629 </strong>';
+                $infotext.='<br /><strong>An error occured during deleting invoice cj 1629 </strong>';
+            }        
         } // checks for invoice ref
     } // ends page=deleteinv
 
@@ -1958,18 +1680,11 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
             $invoiceref='';
         }
         
-        
         if ($invoiceref) {
-        
-        
-            $sql="UPDATE `invoicing` SET `paydate` = '', `cash` = '', `cheque` = '', `bacs` = '', `paypal` = '' WHERE CONCAT( `invoicing`.`ref` ) =$invoiceref";
-            $result = mysql_query($sql, $conn_id);
-            
-            
-            if ($result) {
-            
+            $sql="UPDATE `invoicing` SET `paydate` = '', `cash` = '', `cheque` = '', `bacs` = '', `paypal` = '' WHERE CONCAT( `invoicing`.`ref` ) =? ";
+            try {
+                $dbh->prepare($sql)->execute([$invoiceref]);
                 $infotext.= "<br />Removed Reconciliation  details<br>";
-                $infotext.="<br />". mysql_affected_rows().' invoice affected.<br>';
                 $pagetext.='<p>Reconciliation removed on Invoice '.$invoiceref.'</p>';
             
             
@@ -1981,20 +1696,14 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
                 $total = $stmt->rowCount();
                 $infotext.=$total.' jobs updated to status 110 ';
                 $pagetext.=$total.' jobs updated to awaiting reconciliation ';
-            
-            
-            } else {
-            
-                $infotext.= "<br />Unable to Remove invoice Reconciliation details<br>";
-                $infotext.="<br />". mysql_affected_rows().' invoice affected, ref '.$invoiceref.'<br>';
-                $alerttext.='<p>Reconciliation NOT removed on Invoice ref '.$invoiceref.'</p>';
-            
-            
-            
-            } // ends check for type of result
-        
-        } // ends check for invoice ref
 
+            }
+            catch(PDOException $e) {
+                $infotext.= $e->getMessage();
+                $infotext.= "<br />Unable to Remove invoice Reconciliation details<br>";
+                $alerttext.='<p>Reconciliation NOT removed on Invoice ref '.$invoiceref.'</p>';
+            }
+        } // ends check for invoice ref
     } // ends page = invnotpaid
 
 
@@ -2019,19 +1728,23 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
                 $startdate=strtotime($startdate); 
                 $infotext.='<br /> Start date : '.$startdate; 
         
-        
                 $finishdate=$_POST['gpsdeletedate'];
                 $finishdate=$finishdate.' 23:59:59';
                 $infotext.='<br /> Posted finish date : '.$finishdate; 
                 $finishdate=strtotime($finishdate); 
                 $infotext.='<br /> Finish date : '.$finishdate; 
         
-                $sql="DELETE FROM instamapper WHERE device_key=".$device_key." AND timestamp > ".$startdate." AND timestamp < ".$finishdate;
-                $result = mysql_query($sql, $conn_id);
-        
-                if (mysql_affected_rows()>'0') {
-                    $alerttext.="". mysql_affected_rows().' tracking positions deleted.<br>';
-                    $infotext.="". mysql_affected_rows().' tracking positions deleted.<br>';
+
+                $sql="DELETE FROM instamapper WHERE device_key=? AND timestamp > ? AND timestamp < ? ";
+                
+                $stmt = $dbh->prepare($sql);
+                $stmt->execute([$device_key,$startdate,$finishdate]);
+                $total = $stmt->rowCount();
+                    
+                if ($total>0) {
+                    $alerttext.="". $total.' tracking positions deleted.<br> 
+                    There may still be cached GPS for individual jobs on that day.';
+                    $infotext.=$total.' tracking positions deleted.<br>';
         
                     $testfile="cache/jstrack/".date('Y/m', $startdate).'/'.date('Y_m_d', $startdate).'_'.$device_key.'.js';
                     $infotext.=" 2343 test file : ". $testfile.' <br />';
@@ -2044,7 +1757,6 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
                             $infotext.=  ' not deleted ';
                         }
                     }
-        
                 } else {
                     $pagetext.='Tracking data unchanged.';
                     $infotext.=' Tracking data unchanged.';
@@ -2060,106 +1772,119 @@ catch(PDOException $e) { $alerttext.= $e->getMessage(); $infotext.= $e->getMessa
 }
 
 
-if ($page=='addtodb') { // new invoice
-
-    $clientname = mysql_result(mysql_query("SELECT CompanyName from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
-
-    $clientemailinv = mysql_result(mysql_query("SELECT invoiceEmailAddress from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
-    $clientemail = mysql_result(mysql_query("SELECT EmailAddress from Clients WHERE CustomerID='$clientid' LIMIT 1", $conn_id), 0);
-    
-    
-    if ($clientemailinv) {
-        $pagetext.= '<a href="../live/new_cojm_client.php?clientid='.$clientid.'">'.$clientname.'</a> Invoice Email : '.$clientemailinv;
-    }
 
 
 
-    if ($clientemail) {
-        $pagetext.= '<br /><a href="../live/new_cojm_client.php?clientid='.$clientid.'">'.$clientname.'</a> General Email : '.$clientemail;
-    }
+if ($page=='addtodb') { // save invoice to db
 
 
-    if ($invoiceselectdep) {
-        $depname = mysql_result(mysql_query("SELECT depname from clientdep WHERE depnumber='$invoiceselectdep' LIMIT 1", $conn_id), 0);
-        $depemail = mysql_result(mysql_query("SELECT depemail from clientdep WHERE depnumber='$invoiceselectdep' LIMIT 1", $conn_id), 0);
-        if ($clientemail) {
-            $pagetext.= '<br /><a href="../live/new_cojm_department.php?depid='.$invoiceselectdep.'">'.$depname.'</a> Department Email : '.$depemail;
-        }
-    }
 
     $existinginvref='';
 
-    $dtsql = "SELECT * FROM invoicing WHERE (`invoicing`.`ref` ='$newinvoiceref' )  ";
-    $dtsql_result = mysql_query($dtsql,$conn_id); 
-    while ($dtrow = mysql_fetch_array($dtsql_result)) {
-        extract($dtrow);
-        if ($dtrow['ref']>0) {
-            $existinginvref='1';
-        }
-    }
-
-
-
-    if ($existinginvref) {
+    $sql = "SELECT ref FROM invoicing WHERE (`invoicing`.`ref` =? )  ";
+    
+    $prep = $dbh->prepare($sql);
+    $prep->execute([$newinvoiceref]);
+    $stmt = $prep->fetchAll();
+    
+    if ($stmt) {
         $pagetext.= '<h3>Not changing Invoice as existing invoice with same ref.';
     }
     else {
         
+        $query = "SELECT CompanyName, invoiceEmailAddress, EmailAddress
+        FROM  Clients WHERE Clients.CustomerID = ? LIMIT 0,1";
+        $statement = $dbh->prepare($query);
+        $statement->execute([$clientid]);
+        $clrow = $statement->fetch(PDO::FETCH_ASSOC);
+    
+    
+    
+        $clientname = $clrow['CompanyName'];
+        $clientemailinv = $clrow['invoiceEmailAddress'];
+        $clientemail = $clrow['EmailAddress'];
         
-        foreach ($invoicejobarray as $value) {
         
-        
-            $updatequery = "UPDATE Orders SET status ='110', invoiceref =$newinvoiceref WHERE ID=$value";
-            mysql_query($updatequery,$conn_id);
-            $orderupdate++;
-            
-            $audituser=' COJM ';
-            $audittext='<strong>Added to Invoice Ref '.$newinvoiceref.'</strong>';
-            
-            try {
-                $statement = $dbh->prepare("INSERT INTO cojm_audit 
-                (auditorderid, audituser, auditpage, audittext, auditinfotext, auditdatetime, auditfilename)
-                values 
-                (:orderid, :audituser, :page, :audittext, :auditinfotext, now(), :auditfilename) ");
-
-                $statement->bindParam(':orderid', $value, PDO::PARAM_STR);
-                $statement->bindParam(':audituser', $audituser, PDO::PARAM_STR);
-                $statement->bindParam(':page', $page, PDO::PARAM_STR);
-                $statement->bindParam(':audittext', $audittext, PDO::PARAM_STR);
-                $statement->bindParam(':auditinfotext', $infotext, PDO::PARAM_STR);
-                $statement->bindParam(':auditfilename', $filename, PDO::PARAM_STR);
-                $statement->execute();
-            }
-            
-            
-            catch(PDOException $e) {
-
-                $allok=0;
-                $message.=" Issue saving Audit Log <br /> ";
-                $message.=$e->getMessage();
-            }
-            
-        } // ends individ job row extraction
-        
-        if ($orderupdate<'1') {
-            $pagetext.= '<h1>No invoice details added to database as no jobs changed.</h1>';
+        if ($clientemailinv) {
+            $pagetext.= '<a href="../live/new_cojm_client.php?clientid='.$clientid.'">'.$clientname.'</a> Invoice Email : '.$clientemailinv;
         }
+    
+    
+    
+        if ($clientemail) {
+            $pagetext.= '<br /><a href="../live/new_cojm_client.php?clientid='.$clientid.'">'.$clientname.'</a> General Email : '.$clientemail;
+        }
+    
+    
+        if ($invoiceselectdep) {
+            $query = "SELECT depname, depemail
+            FROM  clientdep WHERE depnumber = ? LIMIT 0,1";
+            $statement = $dbh->prepare($query);
+            $statement->execute([$invoiceselectdep]);
+            $deprow = $statement->fetch(PDO::FETCH_ASSOC);
+            
+            $depname = $deprow['depname'];
+            $depemail = $deprow['depemail'];
+    
+            if ($clientemail) {
+                $pagetext.= '<br /><a href="../live/new_cojm_department.php?depid='.$invoiceselectdep.'">'.$depname.'</a> Department Email : '.$depemail;
+            }
+        }
+
+
+
         
-        $sql = "INSERT INTO invoicing ( ref, invdate1, created, client, cost, invvatcost,invdue, invoicedept, invcomments, invoicetopmiddlehtml, showdelivery ) 
-         VALUES ( '$newinvoiceref', '$invoicemysqldate' , now() , '$clientid' , '$tablecost', '$tablevatcost' , '$invoiceduemysqldate' , '$invoiceselectdep', '$invcomments', '$topmiddlehtml', '$showdelivery' ) ";
-        $result = mysql_query($sql, $conn_id);
-        // $infotext= '<br />'.$sql;
+
+        try {
+            $sql = "INSERT INTO invoicing ( ref, invdate1, created, client, cost, invvatcost,invdue, invoicedept, invcomments, invoicetopmiddlehtml, showdelivery ) 
+            VALUES ( ?, ? , now() , ? , ?, ? , ? , ?, ?, ?, ? ) ";
+         
+            $dbh->prepare($sql)->execute([$newinvoiceref,$invoicesqldate,$clientid,$tablecost,$tablevatcost,$invoiceduemysqldate,$invoiceselectdep,$invcomments,$topmiddlehtml,$showdelivery]);
         
-        if ($result){
-            $pagetext.= '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 1em;">
-            <p>
-            <form action="../live/view_all_invoices.php" method="post">
-            New Invoice Ref : <button type="submit" >'.$newinvoiceref.'</button>
-            <input type="hidden" name="viewtype" value="individualinvoice" >
-            <input type="hidden" name="formbirthday" value="'. date("U") .'">
-            <input type="hidden" name="page" value="" >
-            <input type="hidden" name="ref" value="'.$newinvoiceref.'">
-            </form>';
+            $infotext.= "<br />New invoice ref '.$invoiceref.'<br>";
+            $pagetext.= ' New Invoice Ref <a href="view_all_invoices.php?viewtype=individualinvoice&ref='.$newinvoiceref.'">'.$newinvoiceref.'</a>';
+            
+            
+            $audittext='<strong>Added to Invoice Ref '.$newinvoiceref.'</strong>';
+                
+                
+            foreach ($invoicejobarray as $value) {
+                
+                
+                  try {
+                    $sql = "UPDATE Orders SET status ='110', invoiceref =? WHERE ID=? LIMIT 1";
+                      
+                    $dbh->prepare($sql)->execute([$newinvoiceref,$value]);
+                    
+                    $orderupdate++;
+                    $statement = $dbh->prepare("INSERT INTO cojm_audit 
+                    (auditorderid, audituser, auditpage, audittext, auditinfotext, auditdatetime, auditfilename)
+                    values 
+                    (:orderid, :audituser, :page, :audittext, :auditinfotext, now(), :auditfilename) ");
+    
+                    $statement->bindParam(':orderid', $value, PDO::PARAM_STR);
+                    $statement->bindParam(':audituser', $cyclistid, PDO::PARAM_STR);
+                    $statement->bindParam(':page', $page, PDO::PARAM_STR);
+                    $statement->bindParam(':audittext', $audittext, PDO::PARAM_STR);
+                    $statement->bindParam(':auditinfotext', $infotext, PDO::PARAM_STR);
+                    $statement->bindParam(':auditfilename', $filename, PDO::PARAM_STR);
+                    $statement->execute();
+                }
+                
+                
+                catch(PDOException $e) {
+                    $allok=0;
+                    $message.=" Issue saving Invoice on Individual job update<br /> ";
+                    $message.=$e->getMessage();
+                    $infotext.=" Issue saving Invoice on Individual job update<br /> ";
+                    $infotext.=$e->getMessage();
+                }
+                
+            } // ends individ job row extraction
+            
+            if ($orderupdate<'1') {
+                $pagetext.= '<h1>No  jobs changed.</h1>';
+            }
             
             if ($orderupdate)  {
                 $pagetext.=' Updated status to invoiced in '.$orderupdate.' job';
@@ -2168,37 +1893,22 @@ if ($page=='addtodb') { // new invoice
                 }
             }
 
-            $pagetext.='</p></div></div><br />'; 
-            } else { 
-            $pagetext.= '<h1>An error occured during invoice database update <br />'.mysql_error().'</h1>'.$sql; }
-            
-            // get last invoiced date
-            $sql = "SELECT lastinvoicedate from Clients WHERE CustomerID=$clientid";
-            $sql_result = mysql_query($sql,$conn_id); 
-            if ($sql_result){
-                // $pdfheaderstring=$pdfheaderstring . "<h3>Found last invoice date</h3>"; 
-            } else {
-                $pagetext.= "<h1>An error occured during selecting last client invoice date</h1>".$pdfheaderstring;
-            }
 
-        while ($row = mysql_fetch_array($sql_result)) { extract($row); }
-        $date4 = strtotime($lastinvoicedate);
-        $date2 = strtotime($collectionsuntildate);
-        $diffdate= ($date4 - $date2 );
-
-        if ( $diffdate < '0' ) {
-
-            $sql="UPDATE `Clients` SET `lastinvoicedate` = '$collectionsuntildate' WHERE CONCAT( `Clients`.`CustomerID` ) =$clientid";
-            $result = mysql_query($sql, $conn_id);
-            if ($result){ 
-                // $pdfheaderstring=$pdfheaderstring . "<h1>Updated last invoice date</h1>"; 
-            } else { 
-                $pagetext.= "<h1>An error occured during client database update</h1>";
-            }
-    
-        } // end of making sure client database latest invoice time is latest
-    
-    
+        }
+        
+        catch(PDOException $e) {
+            $infotext.= $e->getMessage();
+            $infotext.= "<br />Unable to Create invoice<br>";
+            $alerttext.='<p><strong>Unable to create Invoice Ref '.$newinvoiceref.'</strong></p>';
+        }
+        
+        
+        $sql="update Clients SET lastinvoicedate = GREATEST(lastinvoicedate, ?) where CustomerID = ?  ";
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute([$collectionsuntildate,$clientid]);
+        $total = $stmt->rowCount();
+        $infotext.='<br /> client invoice until date '.$collectionsuntildate.' changed : '.$total;
+        
     } // ends check for existing invoice ref
 
 } // ends page='addtodb' ( new invoice )
@@ -2222,6 +1932,7 @@ if ($page == "createnewfromexisting" ) {
         $query="SELECT * FROM Orders where ID = '$id' LIMIT 1";
         $result=mysql_query($query, $conn_id);
         $row=mysql_fetch_array($result);
+        
         $status=$row['status']; 
         $serviceid=$row['ServiceID']; 
         $cost=$row['FreightCharge']; 
@@ -2256,10 +1967,13 @@ if ($page == "createnewfromexisting" ) {
             $duedate= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year));
         }
         
-        if ($row['ShipDate']>20) { $deliverydate=$row['ShipDate'];
+        if ($row['ShipDate']>20) {
+            $deliverydate=$row['ShipDate'];
         $temp_ar=explode("-",$deliverydate); $spltime_ar=explode(" ",$temp_ar[2]); $temptime_ar=explode(":",$spltime_ar[1]); 
-        if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) { $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
-        $temptime_ar[2] = 0; }
+        if (($temptime_ar[0] == '') || ($temptime_ar[1] == '') || ($temptime_ar[2] == '')) {
+            $temptime_ar[0] = 0; $temptime_ar[1] = 0; 
+            $temptime_ar[2] = 0; 
+            }
         $day=$spltime_ar[0]; $month=$temp_ar[1]; $year=$temp_ar[0]; $hour=$temptime_ar[0]; $minutes=$temptime_ar[1]; $second = 00; 
         $deliverydate= date("Y-m-d H:i:s", mktime($hour + $dateshift, $minutes, $second, $month, $day, $year)); }
         
@@ -2400,14 +2114,15 @@ if ($page == "createnewfromexisting" ) {
         $enrft19=$row['enrft19'];
         $enrft20=$row['enrft20'];
         $iscustomprice=$row['iscustomprice'];
+        $handoverpostcode=$row['handoverpostcode'];
+        $handoverCyclistID=$row['handoverCyclistID'];        
         
-        if ($iscustomprice=='1') {
+        if ($row['iscustomprice']=='1') {
         
             $pagetext.='<p> New job is pricelocked</p>';
         }
         
-        $handoverpostcode=$row['handoverpostcode'];
-        $handoverCyclistID=$row['handoverCyclistID'];
+
         
 
 
@@ -2442,8 +2157,7 @@ if ($page == "createnewfromexisting" ) {
 
         
         
-        $infotext.='<br />2469 Client Discount : '.$clientdiscount;
-        
+        // $infotext.='<br />2469 Client Discount : '.$clientdiscount;
         // $infotext.=' <br>Currorsched='.$currorsched;
         
         if ($currorsched=='unsched') {
@@ -2463,7 +2177,6 @@ if ($page == "createnewfromexisting" ) {
         
         if ($id) {
 
-            mysql_query("LOCK TABLES Orders WRITE", $conn_id);
             mysql_query("INSERT INTO Orders 
             (ID,
             ts,
@@ -2710,10 +2423,9 @@ if ($page == "createnewfromexisting" ) {
             '$co2saving',
             '$pm10saving'
             ) ", $conn_id
-            )  or die(mysql_error()); 
+            ); 
             
-            $newjobid=mysql_insert_id();  
-            mysql_query("UNLOCK TABLES", $conn_id);   
+            $newjobid=mysql_insert_id();
             // $ID=$id;
             
                         
@@ -2726,10 +2438,6 @@ if ($page == "createnewfromexisting" ) {
             
             
             // $infotext.='new id is'.$ID;
-
-
-
-
             }
 
         } // ends check for duplicate job 
@@ -3768,7 +3476,7 @@ if ($sumtot>0)  { // individ job id found
 
 /////////////////////////    FUNCTIONS    //////////////////////////////
 
-Function calcmileage($ID, $distunit, $co2perdist, $pm10perdist)
+function calcmileage($ID, $distunit, $co2perdist, $pm10perdist)
 {
 GLOBAL $infotext; 
 GLOBAL $globalprefrow;

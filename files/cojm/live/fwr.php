@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	fwr.php - Further Work Required Admin Queue - also does some admin checks
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -361,48 +361,48 @@ if ($inactivestmt) {
 // recurring services
 $rhtml='';
 $flag='';
-
 $sql = "SELECT ServiceID, Service FROM Services  
     WHERE ( `Services`.`isregular`='1' ) 
-    AND ( `Services`.`activeservice`='1' )
-    ";
+    AND ( `Services`.`activeservice`='1' ) ";
 
-$sql_result = mysql_query($sql,$conn_id); 
-$sumtot=mysql_affected_rows();
-while ($row = mysql_fetch_array($sql_result)) {
-    extract($row);
-
+$prep = $dbh->query($sql);
+$stmt = $prep->fetchAll();    
+    
+foreach ($stmt as $row) {
+   
     $sql = "SELECT ID FROM Orders
 	WHERE 
 	(`Orders`.`status` <50 ) 
 	AND
-    (`Orders`.`serviceID` ='$ServiceID' ) 
+    (`Orders`.`serviceID` =? ) 
 	ORDER BY `Orders`.`targetcollectiondate` ";
 
-	$newsql_result = mysql_query($sql,$conn_id);
-    $ordersumtot=mysql_affected_rows();	
-	if ($ordersumtot<10) {
+    $prep = $dbh->prepare($sql);
+    $prep->execute([$row['ServiceID']]);
+    $istmt = $prep->fetchAll();  
+    
+    $lastid='';
+    $count=0;
+    $previd='';
+    foreach ($istmt as $irow) {
+        //    extract('$orderrow'); 
+        $lastid=$irow['ID'];
+        $count++;
+    }
+    
+    if ($count<10) {
         $flag='1';
-        $lastid='';
-        while ($row = mysql_fetch_array($newsql_result)) {
-            //    extract('$orderrow'); 
-            $lastid=$row['ID'];
-        }
-        
-        $rhtml=$rhtml. ' <p>Only '.$ordersumtot.' '.$Service .' remaining. ';
-	 
-	 
-        if ($lastid<>'') {
-            $rhtml=$rhtml. ' Last one is <a href="order.php?id='. $lastid.'">'. $lastid.'</a>';
-        }
-        
-        $rhtml=$rhtml. ' </p>'; 
+        $rhtml.= ' <p>Only '.$count.' '.$row['Service'] .' remaining. ';
 
-	} // ends loop less than ten
+        if ($lastid<>'') {
+            $rhtml.= ' Last one is <a href="order.php?id='. $lastid.'">'. $lastid.'</a>';
+        }
+        
+        $rhtml.= ' </p>';             
+
+    }
 } // ends loop containing a regular service
 
-
-	 
 if ($flag==1) {
     echo '    <div class="ui-state-highlight ui-corner-all p15 undersearch"> ';
     echo '<h4>Recurring Jobs</h4>'.$rhtml;
@@ -432,23 +432,22 @@ if ($globalprefrow['showdebug']>0) {
  
    
     
-        // jobs with pod but no surname
-        // should be stopped by javascript before entry
+    // jobs with pod but no surname
+    // should be stopped by javascript before entry
     $sql = "SELECT * FROM Orders
     INNER JOIN cojm_pod ON `Orders`.`publictrackingref` = `cojm_pod`.`id`
     WHERE (`cojm_pod`.`id` >'1' )
     AND (`Orders`.`podsurname` ='' )
     ORDER BY `Orders`.`ID` ";
     
-    $sql_result = mysql_query($sql,$conn_id);
-    $sumtot=mysql_affected_rows();
-    if ($sumtot>0)  {
-        echo '<h4>'. $sumtot.' Jobs with POD, no Surname</h4>
+    $prep = $dbh->query($sql);
+    $stmt = $prep->fetchAll();
+    if ($stmt)  {
+        echo '<h4> Jobs with POD, no Surname</h4>
         <table cellspacing="0" class="acc"><tbody>
         <tr><th scope="col ">ID</th>
         <th scope="col"> </th></tr>';
-        while ($row = mysql_fetch_array($sql_result)) {
-            extract($row); 
+        foreach ($stmt as $row) {
             echo '<tr><td><a target="_blank" href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a></td><td>'.$row['podname'].'</td></tr>';
         } 
         echo '</tbody></table><div class="line"></div><br />';
@@ -472,31 +471,21 @@ if ($globalprefrow['showdebug']>0) {
    
    
     // $infotext.= ' checking if gps-admin task needed ';
-        
-    $gpsadmin = mysql_query("SELECT COUNT(*) FROM cojm_admin WHERE cojm_admin_stillneeded='1' AND cojmadmin_tracking='1' ") or die(mysql_error());
-    $gpsadminrow = mysql_fetch_row($gpsadmin); if($gpsadminrow) { $gpsadmintotal= $gpsadminrow[0]; }
-    
-    if ($gpsadmintotal>0) {
-    
-    echo '<br /> '.$gpsadmintotal.' Job(s) in individ job GPS Admin Q ';
-        
+    $sql = "SELECT COUNT(*) FROM cojm_admin WHERE cojm_admin_stillneeded='1' AND cojmadmin_tracking='1' ";
+    $gpsadmintotal = $dbh->query($sql)->fetchColumn();
+    if ($gpsadmintotal) {
+        echo '<br /> '.$gpsadmintotal.' Job(s) in individ job GPS Admin Q ';
     }
     
     
     
     
-    // $infotext.= ' checking if rider-gps-admin task needed ';
-        
-    $gpsrideradmin = mysql_query("SELECT COUNT(*) FROM cojm_admin WHERE cojm_admin_stillneeded='1' AND cojmadmin_rider_gps='1' ") or die(mysql_error());
-    $gpsriderrow = mysql_fetch_row($gpsrideradmin); if($gpsriderrow) { $gpsrideradmintotal= $gpsriderrow[0]; }
-    
-    if ($gpsrideradmintotal>0) {
-    echo '<br /> '.$gpsrideradmintotal.' Job(s) in Rider GPS Admin Q ';
-    
+    // $infotext.= ' checking if gps-admin task needed ';
+    $sql = "SELECT COUNT(*) FROM cojm_admin WHERE cojm_admin_stillneeded='1' AND cojmadmin_rider_gps='1' ";
+    $gpsadmintotal = $dbh->query($sql)->fetchColumn();
+    if ($gpsadmintotal) {
+        echo '<br /> '.$gpsadmintotal.' Job(s) in Rider GPS Admin Q ';
     }
-    
-    
-    
     
     
 
@@ -530,14 +519,13 @@ if ($globalprefrow['showdebug']>0) {
         ((`Orders`.`status` >99 ) AND (`Orders`.`ShipDate` <110 )))
         ORDER BY `Orders`.`ID` ";
     
-    $sql_result = mysql_query($sql,$conn_id) or die(mysql_error()); 
-        $sumtot=mysql_affected_rows();
+        $prep = $dbh->query($sql);
+        $stmt = $prep->fetchAll();
         
-    if ($sumtot>0) {
+    if ($stmt) {
         $tablecost=0; 
-        while ($row = mysql_fetch_array($sql_result)) {
-            extract($row);
-            echo '<h4><a target="_blank" href="order.php?id='. $ID. '">'. $ID .'</a> missing collection or delivery date</h4>';
+        foreach ($stmt as $row) {
+            echo '<h4><a target="_blank" href="order.php?id='. $row['ID']. '">'. $row['ID'] .'</a> missing collection or delivery date</h4>';
         }
     }
     
@@ -561,25 +549,19 @@ if ($globalprefrow['showdebug']>0) {
     $sql = "SELECT expenseref FROM expenses WHERE (`expenses`.`expensedate` ='0000-00-00 00:00:00' ) 
         or (`expenses`.`expensecost` ='0' )
         ";
-    $sql_result = mysql_query($sql,$conn_id); 
-    $sumtot=mysql_affected_rows();
-    if ($sumtot>0) {
-    //	 echo '<h4>Either no date or no cost on :</h4>
-        
+    $prep = $dbh->query($sql);
+    $stmt = $prep->fetchAll();
+    if ($stmt) {
+        //	 echo '<h4>Either no date or no cost on :</h4>
         echo '<div class="vpad"> </div>
             <div class="ui-widget">
             <div class="ui-state-highlight ui-corner-all" style="padding: 1em;"> 
             <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
             <strong> Either no date or no cost on </strong> ';
-        
-        
-        
-        
-        while ($row = mysql_fetch_array($sql_result)) {
-            extract($row);
+
+        foreach ($stmt as $row ) {
             echo '<br />Expense ref '.$row['expenseref'];
         }
-        
         echo '</p></div></div><div class="vpad line"></div>';
     }
     
@@ -588,19 +570,16 @@ if ($globalprefrow['showdebug']>0) {
     
     // jobs with customer id at 0
     $sql = "SELECT * FROM Orders WHERE `Orders`.`CustomerID`=0 ";
-    $sql_result = mysql_query($sql,$conn_id);
-    $sumtot=mysql_affected_rows();
-    if ($sumtot>0)  { 
+        $prep = $dbh->query($sql);
+        $stmt = $prep->fetchAll();
+    if ($stmt)  {
         echo '<div class="vpad"> </div>
             <div class="ui-widget">
             <div class="ui-state-error ui-corner-all" style="padding: 0.5em;"> 
             <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-            <strong> '.$sumtot.' Job(s) with Customer ID at 0 </strong> 
-        ';
-            
-        while ($row = mysql_fetch_array($sql_result)) {
-            extract($row);
-            echo '<div class="vpad"> </div>'. $ID.'';
+            <strong>  Job(s) with Customer ID at 0 </strong> ';
+        foreach ($stmt as $row) {
+            echo '<div class="vpad"> </div>'. $row['ID'].'';
         }
         echo '</p></div></div>';
     }
@@ -651,12 +630,15 @@ if ($globalprefrow['showdebug']>0) {
         AND
         (`Orders`.`enrpc21` <> `Orders`.`enrpc0` )
         ORDER BY `Orders`.`ID` ";
-        $newsql_result = mysql_query($sql,$conn_id); 
-        $ordersumtot=mysql_affected_rows();
+        
+        
+    $prep = $dbh->query($sql);
+    $stmt = $prep->fetchAll();
     
-    if ($ordersumtot>0) {
+    
+    if ($stmt) {
         echo '<div class="line"></div>
-            <h4>'. $ordersumtot.' Unlicensed Jobs with no individual carbon savings with both postcodes, and no CO2 in service field</h4>
+            <h4> Unlicensed Jobs with no individual carbon savings with both postcodes, and no CO2 in service field</h4>
             <table cellspacing="0" class="acc"><tbody>
             <tr>
             <th scope="col">Job Ref</th>
@@ -664,7 +646,7 @@ if ($globalprefrow['showdebug']>0) {
             <th scope="col">From</th>
             <th scope="col">To</th>
             </tr>';
-        while ($row = mysql_fetch_array($newsql_result)) {
+        foreach ($stmt as $row) {
             echo '<tr><td><a target="_blank" href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a></td><td> '.$row['Service'] .' </td>
                 <td><a target="_blank" href="http://maps.google.com/maps?q='. $row['enrpc0'].'">'. $row['enrpc0'].'</a></td> 
                 <td><a target="_blank" href="http://maps.google.com/maps?q='. $row['enrpc21'].'">'. $row['enrpc21'].'</a></td>
@@ -694,16 +676,16 @@ if ($globalprefrow['showdebug']>0) {
     AND `Orders`.`status` <>'110'
     AND `Orders`.`status` <>'120' 
     ORDER BY `Orders`.`ID` ";
-    $sql_result = mysql_query($sql,$conn_id);
-    $sumtot=mysql_affected_rows();
-    if ($sumtot>0)  { 
-        echo '<h4>'. $sumtot.' Jobs with wrong status</h4>
+    $prep = $dbh->query($sql);
+    $stmt = $prep->fetchAll();
+    
+    if ($stmt)  { 
+        echo '<h4> Jobs with wrong status</h4>
         <table cellspacing="0" class="acc" ><tbody>
         <tr><th scope="col ">ID</th>
         <th scope="col">Status</th>';
-        while ($row = mysql_fetch_array($sql_result)) {
-            extract($row);
-            echo '<tr><td><a target="_blank" href="order.php?id='.$ID.'">'. $ID.'</a></td><td>'.$status.'</td></tr>';
+        foreach ($stmt as $row) {
+            echo '<tr><td><a target="_blank" href="order.php?id='.$row['ID'].'">'. $row['ID'].'</a></td><td>'.$row['status'].'</td></tr>';
         } 
         echo '</tbody></table><div class="line"></div>';
     }
@@ -732,17 +714,16 @@ if ($globalprefrow['showdebug']>0) {
     
     // jobs with service type at 0
     $sql = "SELECT * FROM Orders WHERE `Orders`.`ServiceID`=0 ";
-    $sql_result = mysql_query($sql,$conn_id);
-    $sumtot=mysql_affected_rows();
-    if ($sumtot>'0')  {
+    $prep = $dbh->prepare($sql);
+    $stmt = $prep->fetchAll();
+    if ($stmt)  {
         echo '<br />
         <div class="ui-widget">
         <div class="ui-state-error ui-corner-all" style="padding: 1em;">
         <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>
-        <strong> '.$sumtot.' Job(s) with Service at 0 </strong> ';
-        while ($row = mysql_fetch_array($sql_result)) {
-            extract($row);
-            echo '<br /><a target="_blank" href="order.php?id='. $ID.'">'. $ID.'</a>';
+        <strong>  Job(s) with Service at 0 </strong> ';
+        foreach ($stmt as $row) {
+            echo '<br /><a target="_blank" href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a>';
         }
         echo '</p></div></div>';
     }
@@ -768,18 +749,19 @@ if ($globalprefrow['showdebug']>0) {
     AND `Orders`.`FreightCharge`>'0' 
     AND `Orders`.`ShipDate` >= date_sub(now(), interval 1 year)
     ORDER BY `Orders`.`FreightCharge` DESC ";
-    $sql_result = mysql_query($sql,$conn_id);
-    $sumtot=mysql_affected_rows(); 
-    if ($sumtot>'0')  { 
-    echo '<br />
-    <div class="ui-widget">
-                <div class="ui-state-error ui-corner-all" style="padding: 1em;"> 
-                    <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-                    <strong> '.$sumtot.' Job(s) with status > 100 and invoice ref = 0 for the last year</strong> ';
-    while ($row = mysql_fetch_array($sql_result)) { extract($row); 
-    echo '<br /><a target="_blank" href="order.php?id='. $ID.'">'. $ID.'</a> '.$FreightCharge .' ' .$collectiondate;
-    } 
-    echo '</p></div></div>';
+    $prep = $dbh->prepare($sql);
+    $stmt = $prep->fetchAll();
+    
+    if ($stmt)  {
+        echo '<br />
+        <div class="ui-widget">
+                    <div class="ui-state-error ui-corner-all" style="padding: 1em;"> 
+                        <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+                        <strong> Job(s) with status > 100 and invoice ref = 0 for the last year</strong> ';
+        foreach ($stmt as $row) {
+            echo '<br /><a target="_blank" href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> '.$row['FreightCharge'] .' ' .$row['collectiondate'];
+        } 
+        echo '</p></div></div>';
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
@@ -794,20 +776,17 @@ if ($globalprefrow['showdebug']>0) {
     
     // JOBS WITH DODGY DEPARTMENT
     
-    $sql="SELECT * FROM `Orders` INNER JOIN `clientdep` WHERE `Orders`.`orderdep` = `clientdep`.`depnumber` ";
+    $sql="SELECT * FROM `Orders` 
+    LEFT JOIN `clientdep` ON `Orders`.`orderdep` = `clientdep`.`depnumber` ";
     
     // $sql="SELECT * FROM `Orders` ";
     
     
-    
-    $sql_result = mysql_query($sql,$conn_id);
-    $sumtot=mysql_affected_rows();
-    if ($sumtot>'0') {
-        while ($row = mysql_fetch_array($sql_result)) {
-            extract($row);
+    $prep = $dbh->prepare($sql);
+    $stmt = $prep->fetchAll();
+    if ($stmt) {
+        foreach ($stmt as $row) {
             if ($row['orderdep']>'0') {
-        
-        
                 if ($row['CustomerID']<>$row['associatedclient']) { 
                     echo '
                     <br />
@@ -845,10 +824,10 @@ try {
     $plainbodytext='';
     // echo ' 964 new :  '. $total;
     while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $infotext.=' CRON Currently running with ID '.$row['id'].'.  Last fired : '. $row['time_last_fired'];
+        $plainbodytext.=' CRON Currently running with ID '.$row['id'].'.  Last fired : '. $row['time_last_fired'].'<br />';
         $oldtime=$row['time_last_fired'];
     
-        $plainbodytext.=' row id : '.$row['id'].' last fired '. $row['time_last_fired'].' total rows found : '.$total.' ' ;
+        $plainbodytext.=' row id : '.$row['id'].' row time_last_fired '. $row['time_last_fired'].' total rows found : '.$total.' ' ;
         // echo date('U', strtotime($oldtime));
         // echo ' '.date("U");
 
@@ -861,7 +840,7 @@ try {
             
             echo '<p> Oldest >5mins ago, resetting cron.';
             $sql = "UPDATE cojm_cron SET currently_running=0 WHERE id=".$row['id'];
-            $sql_result = mysql_query($sql,$conn_id);
+            $prep = $dbh->query($sql);
     
             $plainbodytext .= ' Cron check failed as already running.  
             If oldest was more than 5 mins ago this was reset, 

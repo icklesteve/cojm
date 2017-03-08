@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	pdfview.php.php - Create a PDF invoice
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -67,76 +67,79 @@ $dateamonthago = date('Y-m-d H:i:s', $dateOneMonthAdded);
 $sql = "SELECT * FROM Clients ORDER BY lastinvoicedate";
 $sql_result = mysql_query($sql,$conn_id); 
 
-while ($row = mysql_fetch_array($sql_result)) { extract($row);
-$lastdate = "SELECT collectiondate FROM Orders WHERE CustomerID=$CustomerID ORDER BY collectiondate DESC LIMIT 0 , 1";
-$sql_result_last = mysql_query($lastdate,$conn_id); 
+while ($row = mysql_fetch_array($sql_result)) {
+    extract($row);
+    $lastdate = "SELECT collectiondate FROM Orders WHERE CustomerID=$CustomerID ORDER BY collectiondate DESC LIMIT 0 , 1";
+    $sql_result_last = mysql_query($lastdate,$conn_id); 
 
-while ($lastrow = mysql_fetch_array($sql_result_last)) {
-    extract($lastrow); 
+    while ($lastrow = mysql_fetch_array($sql_result_last)) {
+        extract($lastrow); 
 
+        $temptwo=''; 
 
+        $tempdate=$lastrow['collectiondate']; 
+        
+        
+        $sqlcostage = "SELECT * FROM Orders WHERE CustomerID = '$CustomerID' 
+        AND status > '98' 
+        AND status < '108' 
+        AND collectiondate <= '$tempdate'
+        And FreightCharge <> '0.00' ";
+        
+        $sql_resultcost = mysql_query($sqlcostage,$conn_id); 
+        
+        while ($costrow = mysql_fetch_array($sql_resultcost)) {
+            extract($costrow);
+            
+            $temptwo=$temptwo+$costrow['FreightCharge'];
+        } 
+        
+        $tempthree=$tempthree+$temptwo;
+        
+        
+        if (($temptwo<>'0.00') and ($temptwo)) {
+            array_push($clientids, "$CustomerID");
+            
+            $tarow= ' ';
+            
+            $tarow.= '<tr><td><a href="new_cojm_client.php?clientid='.$CustomerID.'">'. $CompanyName.'</a></td><td>';
+            
+            
+            
+            $firstdate = "SELECT * FROM Orders WHERE CustomerID=$CustomerID 
+            AND status < '108' 
+            AND status > '98' 
+            ORDER BY collectiondate ASC 
+            LIMIT 0 , 1";
+            
+            $sql_result_first = mysql_query($firstdate,$conn_id);
+            
+            while ($firstrow = mysql_fetch_array($sql_result_first)) {
+                extract($firstrow); 
+                $tarow=$tarow.date('D j M Y', strtotime($firstrow['collectiondate']));
+            }
+            
+            
+            
+            
+            $tarow.='</td><td>'. date('D j M Y', strtotime($lastrow['collectiondate']));
+            
+            $temptwo= number_format($temptwo, 2, '.', '');
+            
+            $tarow.='</td><td class="rh">  &'. $globalprefrow['currencysymbol']; 
+            $tarow.= $temptwo; 
+            $tarow.= '</td></tr>';
+            
+            
+            
+            $trow.=$tarow;
+            
+            
+                
 
+        } // ends loop for uninvoiced jobs > 0.00
 
-$temptwo=''; $tempdate=$lastrow['collectiondate']; 
-$sqlcostage = "SELECT * FROM Orders WHERE CustomerID = '$CustomerID' 
-AND status > '98' 
-AND status < '108' 
-AND collectiondate <= '$tempdate'
-And FreightCharge <> '0.00'
- ";
-$sql_resultcost = mysql_query($sqlcostage,$conn_id); 
-while ($costrow = mysql_fetch_array($sql_resultcost)) { extract($costrow); $temptwo=$temptwo+$costrow['FreightCharge']; } 
-
-$tempthree=$tempthree+$temptwo;
-
-
-if (($temptwo<>'0.00') and ($temptwo))
-{
-array_push($clientids, "$CustomerID");
-
-$tarow= ' ';
-
-// $tarow= ' <tr><td> </td><td> </td><td> </td><td> </td></tr>';
-$tarow=$tarow. '<tr><td><a href="new_cojm_client.php?clientid='.$CustomerID.'">'. $CompanyName.'</a></td><td>';
-
-
-
-$firstdate = "SELECT * FROM Orders WHERE CustomerID=$CustomerID AND status < '108' AND status > '98' ORDER BY collectiondate ASC LIMIT 0 , 1";
-$sql_result_first = mysql_query($firstdate,$conn_id);
-while ($firstrow = mysql_fetch_array($sql_result_first)) { extract($firstrow); 
-$tarow=$tarow.date('D j M Y', strtotime($firstrow['collectiondate']));
-}
-
-
-
-
-$tarow=$tarow.'</td><td>'. date('D j M Y', strtotime($lastrow['collectiondate']));
-
-$temptwo= number_format($temptwo, 2, '.', '');
-
-$tarow=$tarow.'</td><td class="rh">  &'. $globalprefrow['currencysymbol']; 
-$tarow=$tarow. $temptwo; 
-$tarow=$tarow. '</td></tr>';
-
-
-
-$trow=$trow.$tarow;
-
-
-
-
-
-
-
-
-
-
-
-
-
-} // ends loop for uninvoiced jobs > 0.00
-
-} // end check for last collection date order loop
+    } // end check for last collection date order loop
 
 } // ends loop clients last databased invoice date
 
@@ -197,14 +200,12 @@ $temp=$row['orderdep'];
  ORDER BY Clients.CompanyName, clientdep.depname"; 
 
 $result_id = mysql_query ($query, $conn_id);  
-$sumtot=mysql_affected_rows();
-
-// echo $sumtot.' Department(s) : ';	
 
 echo '<select class="ui-state-default ui-corner-left" id="invoiceselectdep" name="invoiceselectdep" >
 <option value="">All Departments</option>';
  while (list ($CustomerIDlist, $CompanyName, $clientname) = mysql_fetch_row ($result_id)) { 
-$CustomerID = htmlspecialchars ($CustomerID); 
+
+ $CustomerID = htmlspecialchars ($CustomerID); 
 $CompanyName = htmlspecialchars($CompanyName); 
 
 
@@ -214,10 +215,13 @@ $temptwod='0.00';
 $sqlcostaged = "SELECT * FROM Orders WHERE orderdep = '$CustomerIDlist' 
 AND status > '98' 
 AND status < '108' ";
+
 $sql_resultcostd = mysql_query($sqlcostaged,$conn_id); 
+
 while ($costrowd = mysql_fetch_array($sql_resultcostd)) {
     extract($costrowd); 
-    $temptwod=floatval($temptwod+$costrowd['FreightCharge']); } 
+    $temptwod=floatval($temptwod+$costrowd['FreightCharge']);
+}
 
 $depcharge= number_format(floatval($temptwod), 2, '.', '');
 

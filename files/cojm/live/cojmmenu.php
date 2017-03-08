@@ -244,8 +244,8 @@ echo '<form action="order.php" method="post" id="newjob_form" accept-charset="ut
 
 $query = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName"; 
 
-$data = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
-foreach($data as $CustomerIDlist => $CompanyName) {
+$currentclientdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
+foreach ($currentclientdata as $CustomerIDlist => $CompanyName) {
     print'<option value="'.$CustomerIDlist.'">'.htmlspecialchars ($CompanyName).'</option>';
 }
 echo '</select> </div>  

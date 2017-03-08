@@ -1660,7 +1660,6 @@ $(document).ready(function() {
         });
     });
 
-
     $(".hidepaymentdetails").bind("click", function (e) {
         var paymentid = e.target.id;
         paymentid = parseInt(paymentid.match(/(\d+)$/)[0], 10);
@@ -1668,13 +1667,6 @@ $(document).ready(function() {
         $("#hidepaymentdetails"+paymentid).hide();
         $("#stats"+paymentid).remove();
     });
-
-
-
-
-
-
-
 
     $(".hideinvoicedetails").bind("click", function (e) {
         var invoiceid = e.target.id;
@@ -1696,8 +1688,6 @@ $(document).ready(function() {
             $("#toploader").fadeOut();
         });
     });
-
-
 
     $(".reconcileinvoicebutton").bind("click", function (e) {
         var invoiceid = e.target.id;
@@ -1770,13 +1760,13 @@ $(document).ready(function() {
 	$( "#toggle" ).click(function() {
 		$( "#combobox" ).toggle();
 	});
+    
 	$("#rangeBa, #rangeBb").daterangepicker();  
-	$(function(){ $(".normal").autosize();	});  
-			 
+	$(function(){ $(".normal").autosize();	});
     
     $("#createpdfreceipt").click(function () {
-    $("#invpage").val("createreceipt");
-    $("#f1").submit();       
+        $("#invpage").val("createreceipt");
+        $("#f1").submit();       
     });
             
     $("#previewpdfreceipt").click(function () {

@@ -22,70 +22,91 @@
 
 $found='';
 
+$pdosearch= "%$searchid%";
+
+
 // jobcomments
-$sql="SELECT * FROM Orders
-WHERE Orders.jobcomments LIKE '%".$searchid."%' 
+$sql="SELECT ID, jobcomments, FreightCharge FROM Orders
+WHERE Orders.jobcomments LIKE ?
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
-
-$sql_result = mysql_query($sql,$conn_id);
-$num_rows = mysql_num_rows($sql_result);
-if ($num_rows>'0') {
- echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
- if ($num_rows>'49') { echo 'At least '; } echo $num_rows.' Job';
- if ($num_rows<>'1') { echo 's'; } echo ' found with '.$searchid.' in comments </h3>';
- while ($row = mysql_fetch_array($sql_result)) { extract($row);
- echo '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['jobcomments'].') ( &'. $globalprefrow["currencysymbol"] .$row['FreightCharge'].' )</p>'; }
-echo '</div></div><br /><div class="line"></div><br />';
-$found='1';
-} // ends rum_rows loop
+$prep = $dbh->prepare($sql);
+$prep->execute([$pdosearch]);
+$stmt = $prep->fetchAll();
+if ($stmt) {
+    $num_rows=0;
+    $txt='';
+    foreach($stmt as $row) {
+        $txt.= '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['jobcomments'].') ( &'. $globalprefrow["currencysymbol"] .$row['FreightCharge'].' )</p>';
+        $num_rows++;
+    }
+    echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
+    if ($num_rows>49) { echo 'At least '; }
+    echo $num_rows.' Job';
+    if ($num_rows<>1) { echo 's'; }
+    echo ' found with '.$searchid.' in comments </h3>'.$txt;
+    echo '</div></div><br /><div class="line"></div><br />';
+    $found='1';
+}
 
 
 
 
 // privatejobcomments
-$sql="SELECT * FROM Orders
-WHERE Orders.privatejobcomments LIKE '%".$searchid."%' 
+$sql="SELECT ID, privatejobcomments, FreightCharge FROM Orders
+WHERE Orders.privatejobcomments LIKE ?
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
-
-$sql_result = mysql_query($sql,$conn_id);
-$num_rows = mysql_num_rows($sql_result);
-
-if ($num_rows>'0') {
- echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
- if ($num_rows>'49') { echo 'At least '; } echo $num_rows.' Job';
- if ($num_rows<>'1') { echo 's'; } echo ' found with '.$searchid.' in private comments </h3>';
- while ($row = mysql_fetch_array($sql_result)) { extract($row);
- echo '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['privatejobcomments'].') </p>'; }
-echo '</div></div><br /><div class="line"></div><br />';
-$found='1';
-} // ends rum_rows loop
-
-
-
-
-
-
-
+$prep = $dbh->prepare($sql);
+$prep->execute([$pdosearch]);
+$stmt = $prep->fetchAll();
+if ($stmt) {
+    $num_rows=0;
+    $txt='';
+    foreach($stmt as $row) {
+        $txt.= '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['privatejobcomments'].') ( &'. $globalprefrow["currencysymbol"] .$row['FreightCharge'].' )</p>';
+        $num_rows++;
+    }
+    echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
+    if ($num_rows>49) { echo 'At least '; }
+    echo $num_rows.' Job';
+    if ($num_rows<>1) { echo 's'; }
+    echo ' found with '.$searchid.' in Private Job Comments </h3>'.$txt;
+    echo '</div></div><br /><div class="line"></div><br />';
+    $found='1';
+}
 
 
-// client ref
-$sql="SELECT * FROM Orders
-WHERE Orders.clientjobreference LIKE '%".$searchid."%' 
+
+
+
+
+
+
+
+// clientjobreference
+$sql="SELECT ID, clientjobreference, FreightCharge FROM Orders
+WHERE Orders.clientjobreference LIKE ?
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
-$sql_result = mysql_query($sql,$conn_id);
-$num_rows = mysql_num_rows($sql_result);
-if ($num_rows>'0') {
- echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
- if ($num_rows>'49') { echo 'At least '; } echo $num_rows.' Job';
- if ($num_rows<>'1') { echo 's'; } echo ' found with '.$searchid.' as client reference </h3>';
- while ($row = mysql_fetch_array($sql_result)) { extract($row);
- echo '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['clientjobreference'].') </p>'; }
-echo '</div></div><br /><div class="line"></div><br />';
-$found='1';
-} // ends rum_rows loop
+$prep = $dbh->prepare($sql);
+$prep->execute([$pdosearch]);
+$stmt = $prep->fetchAll();
+if ($stmt) {
+    $num_rows=0;
+    $txt='';
+    foreach($stmt as $row) {
+        $txt.= '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['clientjobreference'].') ( &'. $globalprefrow["currencysymbol"] .$row['FreightCharge'].' )</p>';
+        $num_rows++;
+    }
+    echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
+    if ($num_rows>49) { echo 'At least '; }
+    echo $num_rows.' Job';
+    if ($num_rows<>1) { echo 's'; }
+    echo ' found with '.$searchid.' in Client Reference </h3>'.$txt;
+    echo '</div></div><br /><div class="line"></div><br />';
+    $found='1';
+}
 
 
 
@@ -94,24 +115,29 @@ $found='1';
 
 // fromfreeaddress
 $sql="SELECT * FROM Orders
-WHERE Orders.enrft0 LIKE '%".$searchid."%' 
-OR Orders.enrpc0 LIKE '%".$searchid."%' 
+WHERE Orders.enrft0 LIKE ?
+OR Orders.enrpc0 LIKE ?
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
-$sql_result = mysql_query($sql,$conn_id);
-$num_rows = mysql_num_rows($sql_result);
-if ($num_rows>'0') {
- echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
- if ($num_rows>'49') { echo 'At least '; } echo $num_rows.' Job';
- if ($num_rows<>'1') { echo 's'; } echo ' found with '.$searchid.' as collection address </h3>';
- while ($row = mysql_fetch_array($sql_result)) { extract($row);
- echo '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['enrft0'].' , '.$row['enrpc0'].') </p>'; }
-echo '</div></div><br /><div class="line"></div><br />';
-$found='1';
-} // ends rum_rows loop
 
-
-
+$prep = $dbh->prepare($sql);
+$prep->execute([$pdosearch,$pdosearch]);
+$stmt = $prep->fetchAll();
+if ($stmt) {
+    $num_rows=0;
+    $txt='';
+    foreach($stmt as $row) {
+        $txt.= '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['enrft0'].' , '.$row['enrpc0'].') ( &'. $globalprefrow["currencysymbol"] .$row['FreightCharge'].' )</p>';
+        $num_rows++;
+    }
+    echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
+    if ($num_rows>49) { echo 'At least '; }
+    echo $num_rows.' Job';
+    if ($num_rows<>1) { echo 's'; }
+    echo ' found with '.$searchid.' in Collection Address </h3>'.$txt;
+    echo '</div></div><br /><div class="line"></div><br />';
+    $found='1';
+}
 
 
 
@@ -121,39 +147,61 @@ $found='1';
 
 // enrft21
 $sql="SELECT * FROM Orders
-WHERE Orders.enrft21 LIKE '%".$searchid."%' 
-OR Orders.enrpc21 LIKE '%".$searchid."%' 
+WHERE Orders.enrft21 LIKE ?
+OR Orders.enrpc21 LIKE ?
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
-$sql_result = mysql_query($sql,$conn_id);
-$num_rows = mysql_num_rows($sql_result);
-if ($num_rows>'0') {
- echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
- if ($num_rows>'49') { echo 'At least '; } echo $num_rows.' Job';
- if ($num_rows<>'1') { echo 's'; } echo ' found with '.$searchid.' as delivery address</h3>';
- while ($row = mysql_fetch_array($sql_result)) { extract($row);
- echo '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['enrft21'].' , '.$row['enrpc21'].') </p>'; }
-echo '</div></div><br /><div class="line"></div><br />';
-$found='1';
-} // ends rum_rows loop
+
+$prep = $dbh->prepare($sql);
+$prep->execute([$pdosearch,$pdosearch]);
+$stmt = $prep->fetchAll();
+if ($stmt) {
+    $num_rows=0;
+    $txt='';
+    foreach($stmt as $row) {
+        $txt.= '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['enrft21'].' , '.$row['enrpc21'].') ( &'. $globalprefrow["currencysymbol"] .$row['FreightCharge'].' )</p>';
+        $num_rows++;
+    }
+    echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
+    if ($num_rows>49) { echo 'At least '; }
+    echo $num_rows.' Job';
+    if ($num_rows<>1) { echo 's'; }
+    echo ' found with '.$searchid.' in Delivery Address </h3>'.$txt;
+    echo '</div></div><br /><div class="line"></div><br />';
+    $found='1';
+}
 
 
 // requestor
 $sql="SELECT * FROM Orders
-WHERE Orders.requestor LIKE '%".$searchid."%' 
+WHERE Orders.requestor LIKE ?
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
-$sql_result = mysql_query($sql,$conn_id);
-$num_rows = mysql_num_rows($sql_result);
-if ($num_rows>'0') {
- echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
- if ($num_rows>'49') { echo 'At least '; } echo $num_rows.' Job';
- if ($num_rows<>'1') { echo 's'; } echo ' found with '.$searchid.' as requesting service.</h3>';
- while ($row = mysql_fetch_array($sql_result)) { extract($row);
- echo '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['requestor'].') </p>'; }
-echo '</div></div><br /><div class="line"></div><br />';
-$found='1';
-} // ends rum_rows loop
+
+
+$prep = $dbh->prepare($sql);
+$prep->execute([$pdosearch]);
+$stmt = $prep->fetchAll();
+if ($stmt) {
+    $num_rows=0;
+    $txt='';
+    foreach($stmt as $row) {
+        $txt.= '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['requestor'].') ( &'. $globalprefrow["currencysymbol"] .$row['FreightCharge'].' )</p>';
+        $num_rows++;
+    }
+    echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
+    if ($num_rows>49) { echo 'At least '; }
+    echo $num_rows.' Job';
+    if ($num_rows<>1) { echo 's'; }
+    echo ' found with '.$searchid.' as requesting service </h3>'.$txt;
+    echo '</div></div><br /><div class="line"></div><br />';
+    $found='1';
+}
+
+
+
+
+
 
 
 
@@ -169,61 +217,56 @@ $sql="SELECT * FROM Orders
 WHERE Orders.invoiceref LIKE '%".$searchid."%' 
 ORDER BY `Orders`.`nextactiondate` DESC
 LIMIT 0,50";
-$sql_result = mysql_query($sql,$conn_id);
-$num_rows = mysql_num_rows($sql_result);
-if ($num_rows>'0') {
- echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
- if ($num_rows>'49') { echo 'At least '; } echo $num_rows.' Job';
- if ($num_rows<>'1') { echo 's'; } echo ' found with '.$searchid.' as invoice reference.</h3>';
- while ($row = mysql_fetch_array($sql_result)) { extract($row);
- echo '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['requestor'].') </p>'; }
-echo '</div></div><br /><div class="line"></div><br />';
-$found='1';
-} // ends rum_rows loop
+
+
+$prep = $dbh->prepare($sql);
+$prep->execute([$pdosearch]);
+$stmt = $prep->fetchAll();
+if ($stmt) {
+    $num_rows=0;
+    $txt='';
+    foreach($stmt as $row) {
+        $txt.= '<p><a href="order.php?id='.$row['ID'].'">'.$row['ID'].'</a> ('.$row['invoiceref'].') ( &'. $globalprefrow["currencysymbol"] .$row['FreightCharge'].' )</p>';
+        $num_rows++;
+    }
+    echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
+    if ($num_rows>49) { echo 'At least '; }
+    echo $num_rows.' Job';
+    if ($num_rows<>1) { echo 's'; }
+    echo ' found with '.$searchid.' as Invoice Reference </h3>'.$txt;
+    echo '</div></div><br /><div class="line"></div><br />';
+    $found='1';
+}
 
 
 
 
 
 
-// expense descrip
+
+// expenses.description
 $sql="SELECT * FROM expenses
-WHERE expenses.description LIKE '%".$searchid."%' 
+WHERE expenses.description LIKE ?
 LIMIT 0,50";
-$sql_result = mysql_query($sql,$conn_id);
-$num_rows = mysql_num_rows($sql_result);
-if ($num_rows>'0') {
- echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
- if ($num_rows>'49') { echo 'At least '; } echo $num_rows.' Job';
- if ($num_rows<>'1') { echo 's'; } echo ' found with '.$searchid.' in expense description.</h3>';
- while ($row = mysql_fetch_array($sql_result)) { extract($row);
- echo '<p><a href="singleexpense.php?expenseref='.$row['expenseref'].'">'.$row['expenseref'].'</a> 
 
-'.$row['description'].'
-
- </p>'; }
-echo '</div></div><br /><div class="line"></div><br />';
-$found='1';
-} // ends rum_rows loop
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+$prep = $dbh->prepare($sql);
+$prep->execute([$pdosearch]);
+$stmt = $prep->fetchAll();
+if ($stmt) {
+    $num_rows=0;
+    $txt='';
+    foreach($stmt as $row) {
+        $txt.= '<p><a href="singleexpense.php?expenseref='.$row['expenseref'].'">'.$row['expenseref'].'</a> '.$row['description'].'</p>';
+        $num_rows++;
+    }
+    echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
+    if ($num_rows>49) { echo 'At least '; }
+    echo $num_rows.' Job';
+    if ($num_rows<>1) { echo 's'; }
+    echo ' found with '.$searchid.' in Expense Description </h3>'.$txt;
+    echo '</div></div><br /><div class="line"></div><br />';
+    $found='1';
+}
 
 
 

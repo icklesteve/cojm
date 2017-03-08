@@ -41,7 +41,9 @@ mysql_query($query, $conn_id);
 
 $query="SELECT trackerid, publictrackingref, poshname, ShipDate, collectiondate, starttrackpause, finishtrackpause FROM Orders, Cyclist
 WHERE Orders.CyclistID = Cyclist.CyclistID
-AND Orders.ID = '$ID' LIMIT 1"; $result=mysql_query($query, $conn_id); $orow=mysql_fetch_array($result);
+AND Orders.ID = '$ID' LIMIT 1"; 
+$result=mysql_query($query, $conn_id); 
+$orow=mysql_fetch_array($result);
 
 
 $thistrackerid=$orow['trackerid'];
@@ -57,7 +59,9 @@ if ($startpause <'10') { $startpause='9999999999'; }
 
  $sql = "SELECT latitude, longitude, speed, timestamp FROM `instamapper`  WHERE `device_key` = '$thistrackerid' AND `timestamp` > '$collecttime' AND `timestamp` 
 NOT BETWEEN '$startpause' AND '$finishpause' AND `timestamp` < '$delivertime' ORDER BY `timestamp` ASC"; 
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); $sumtot=mysql_affected_rows(); if ($sumtot>'0.5') {
+$sql_result = mysql_query($sql,$conn_id); 
+$sumtot=mysql_affected_rows(); 
+if ($sumtot>'0.5') {
 
  $linecoords='';
  $prevts='';

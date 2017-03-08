@@ -49,7 +49,9 @@ $infotext.= '<br /> rider  '.$cojmadmin_rider_id.' to be done '.$riderdate.' adm
 $query =  " update cojm_admin set cojmadminstart = now() where cojmadmin_id ='$cojm_admin_ref'";	
 mysql_query($query, $conn_id);
 
-$query="SELECT cojmname FROM Cyclist WHERE trackerid = '$cojmadmin_rider_id' LIMIT 1"; $result=mysql_query($query, $conn_id); $orow=mysql_fetch_array($result);
+$query="SELECT cojmname FROM Cyclist WHERE trackerid = '$cojmadmin_rider_id' LIMIT 1"; 
+$result=mysql_query($query, $conn_id); 
+$orow=mysql_fetch_array($result);
 
 
  $sql = "SELECT latitude, longitude, speed, timestamp FROM `instamapper`  

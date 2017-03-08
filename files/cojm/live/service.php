@@ -39,7 +39,11 @@ include "cojmmenu.php";
 <select class="ui-state-highlight ui-corner-left" name="serviceid"><?php 
 $query = "SELECT ServiceID, Service FROM Services 
 ORDER BY activeservice DESC, serviceorder DESC, ServiceID ASC";
-$result_id = mysql_query ($query, $conn_id); while (list ($ServiceID, $Service) = mysql_fetch_row ($result_id)) { 
+
+$result_id = mysql_query ($query, $conn_id); 
+
+while (list ($ServiceID, $Service) = mysql_fetch_row ($result_id)) { 
+
 $ServiceID = htmlspecialchars ($ServiceID); $Service = htmlspecialchars ($Service); print"<option "; 
 if ($ServiceID == $thisserviceid) {echo "SELECTED "; } ; print ("value=\"$ServiceID\">$Service</option>\n");} ?></select>
 
@@ -66,7 +70,8 @@ if ($page=='createnew') {
 $thisserviceid='';
 }
 
-$sql = "SELECT * FROM Services WHERE ServiceID = '$thisserviceid' LIMIT 1"; $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
+$sql = "SELECT * FROM Services WHERE ServiceID = '$thisserviceid' LIMIT 1";
+$sql_result = mysql_query($sql,$conn_id); 
 $row=mysql_fetch_array($sql_result);
 
 

@@ -169,7 +169,7 @@ $invduedate = date("l jS F Y", mktime(01, 01, 01, $month, ($day+$clientrow['invo
 
 $invoicesqldate= date ("Y-m-d H:i:s", mktime(01, 01, 01, $month, $day, $year));
 
-$invoiceduemysqldate= date ("Y-m-d H:i:s", mktime(01, 01, 01, $month, ($day+$clientrow['invoiceterms']), $year));
+$invoiceduesqldate= date ("Y-m-d H:i:s", mktime(01, 01, 01, $month, ($day+$clientrow['invoiceterms']), $year));
 
 $invoiceref=date("Ymd", mktime(01, 01, 01, $month, $day, $year)). $clientid ;
 
@@ -196,30 +196,52 @@ $to = date('l jS F Y', strtotime($collectionsfromdate));
 $from = date('l jS F Y', strtotime($collectionsuntildate)); 
 
 
+$conditions = array();
+$parameters = array();
+$where = "";
 
 
+$conditions[] = " `Orders`.`CustomerID` = :clientid ";
+$parameters[":clientid"] = $clientid;
 
-    $sql = "SELECT collectiondate FROM Orders 
-    WHERE `Orders`.`CustomerID` = '$clientid' ";
-    if ($invoiceselectdep>'0') { 
-    $sql.=" AND `Orders`.`orderdep` = '$invoiceselectdep' "; 
-    }
-    $sql.=" 
-    AND `Orders`.`collectiondate` >= '$fromdate' 
-    AND `Orders`.`collectiondate` <= '$collectionsuntildate'
-    AND `Orders`.`status` < 110
-    AND `Orders`.`status` > 99
-    ORDER BY `Orders`.`collectiondate` ASC LIMIT 0,1";
-
- 
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-while ($row = mysql_fetch_array($sql_result)) {
-    extract($row);
-    if ($todate) {} else { $todate=$row[collectiondate]; }
+if ($invoiceselectdep>'0') {
+    $conditions[] = " `Orders`.`orderdep` = :invoiceselectdep ";
+    $parameters[":invoiceselectdep"] = $invoiceselectdep;
 }
 
+$conditions[] = " `Orders`.`collectiondate` >= :fromdate ";
+$parameters[":fromdate"] = $fromdate;
+
+$conditions[] = " `Orders`.`collectiondate` <= :collectionsuntildate ";
+$parameters[":collectionsuntildate"] = $collectionsuntildate;
+
+
+$conditions[] = " `Orders`.`status` < 110 ";
+$conditions[] = " `Orders`.`status` > 99 ";    
+
+
+if (count($conditions) > 0) {
+    $where = implode(' AND ', $conditions);
+}
+
+
+
+
+
+$sql = "SELECT collectiondate FROM Orders ". ($where != "" ? " WHERE $where" : "");
+
+$sql.=" ORDER BY `Orders`.`collectiondate` ASC LIMIT 0,1";
+
+
+$statement = $dbh->prepare($sql);
+$statement->execute($parameters);
+if (!$statement) throw new Exception("Query execution error.");
+$todate = $statement->fetchColumn();
+
+
+
 $to = date('l jS F Y', strtotime($todate)); 
-$html = $html. '<table id="invoiceaddresses" border="0" cellspacing="2" cellpadding="1">
+$html.= '<table id="invoiceaddresses" border="0" cellspacing="2" cellpadding="1">
 <tr>
 <th><strong>To :</strong></th>
 <th><strong>From :</strong></th>
@@ -231,13 +253,14 @@ $html = $html. '<table id="invoiceaddresses" border="0" cellspacing="2" cellpadd
 
 if ($invoiceselectdep<>'')  {
     $orderdep=$row['orderdep'];
-    $depquery="SELECT * FROM clientdep WHERE depnumber = '$invoiceselectdep' LIMIT 1";
-    $result=mysql_query($depquery);
-    $drow=mysql_fetch_array($result);
+    $sql="SELECT * FROM clientdep WHERE depnumber = ? LIMIT 1";
+    
+    $statement = $dbh->prepare($sql);
+    $statement->execute([$invoiceselectdep]);
+    $drow = $statement->fetch(PDO::FETCH_ASSOC);
+    
     $html.=' ('.$drow['depname'].') ';
     $depnm=$drow['depname'];
-
-   
 }  
 
 
@@ -359,39 +382,52 @@ $html.='<th ><strong>Service</strong></th>
 
 
 // main job loop
+$conditions = array();
+$parameters = array();
+$where = "";
 
-    $sql = "SELECT * FROM 
-    Orders, 
+
+$conditions[] = " Orders.ServiceID = Services.ServiceID ";
+$conditions[] = " Orders.CyclistID = Cyclist.CyclistID ";
+$conditions[] = " `Orders`.`CustomerID` = :clientid ";
+$parameters[":clientid"] = $clientid;
+if ($invoiceselectdep>'0') {
+    $conditions[] = " `Orders`.`orderdep` = :invoiceselectdep ";
+    $parameters[":invoiceselectdep"] = $invoiceselectdep;
+}
+$conditions[] = " `Orders`.`collectiondate` >= :fromdate ";
+$parameters[":fromdate"] = $fromdate;
+
+$conditions[] = " `Orders`.`collectiondate` <= :collectionsuntildate ";
+$parameters[":collectionsuntildate"] = $collectionsuntildate;
+
+
+$conditions[] = " `Orders`.`status` < 110 ";
+$conditions[] = " `Orders`.`status` > 99 ";    
+
+
+$where = implode(' AND ', $conditions);
+
+
+$sql = "SELECT  * FROM   Orders, 
     Services,
-    Cyclist
-    WHERE  Orders.ServiceID = Services.ServiceID ";
-    if ($invoiceselectdep) {
-        $sql.="AND `Orders`.`orderdep` = '$invoiceselectdep' ";
-    }
-    $sql.="
-    AND Orders.CustomerID = '$clientid' 
-    AND Orders.CyclistID = Cyclist.CyclistID 
-    AND `Orders`.`collectiondate` >= '$fromdate' 
-    AND `Orders`.`collectiondate` <= '$collectionsuntildate'
-    AND `Orders`.`status` < 110
-    AND `Orders`.`status` > 90
-    ORDER BY `Orders`.`collectiondate` ASC";
+    Cyclist ". ($where != "" ? " WHERE $where" : "");
+
+$sql.=" ORDER BY `Orders`.`collectiondate` ASC";
 
 
+$statement = $dbh->prepare($sql);
+$statement->execute($parameters);
+$stmt = $statement->fetchAll();
+if (!$statement) throw new Exception("Query execution error.");
 
-
-// $html=$html.'<tr><td>'.$sql.'</td></tr>';
-
-
-$sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
 
 $i='0'; 
 
 $invoicejobarray=array();
 
 // table loop
-while ($row = mysql_fetch_array($sql_result)) {
-    extract($row);
+foreach ($stmt as $row) {
     
     
     array_push($invoicejobarray,$row['ID']);
@@ -440,11 +476,11 @@ while ($row = mysql_fetch_array($sql_result)) {
     if ($showdelivery=="1") {
         $html.='<td>'.$to.'</td>';
     }
-    $numberitems= trim(strrev(ltrim(strrev($numberitems), '0')),'.');
+    $numberitems= trim(strrev(ltrim(strrev($row['numberitems']), '0')),'.');
 
     $tempvatcost= number_format($row['vatcharge'], 2, '.', ''); 
 
-    $html.='<td>'.$numberitems.' x '.$Service.'</td>
+    $html.='<td>'.$numberitems.' x '.$row['Service'].'</td>
     <td>&'.$globalprefrow["currencysymbol"].$tempvatcost.'</td>
     <td>&'.$globalprefrow["currencysymbol"].$row["FreightCharge"].'</td>
     </tr>';
@@ -476,13 +512,13 @@ while ($row = mysql_fetch_array($sql_result)) {
 
     if (($row['orderdep']) and ($invoiceselectdep==''))  {
         // $infotext=$infotext.'Is Department';  
-        $orderdep=$row['orderdep'];
-        $depquery="SELECT * FROM clientdep WHERE depnumber = '$orderdep' LIMIT 1";
-        $result=mysql_query($depquery);
-        $drow=mysql_fetch_array($result);
-        // $infotext=$infotext.'<br />Dep is '.$drow['depname'];
 
-        $htmlb.='Department : '.$drow['depname'].'. ';
+        $sql="SELECT depname FROM clientdep WHERE depnumber = ? LIMIT 1";
+        $statement = $dbh->prepare($sql);
+        $statement->execute([$row['orderdep']]);
+        if (!$statement) throw new Exception("Query execution error.");
+        $depname = $statement->fetchColumn();
+        $htmlb.=' Department : '.$depname.'. ';
     }
 
 
@@ -521,14 +557,14 @@ while ($row = mysql_fetch_array($sql_result)) {
 
     if ($showdeliveryaddress=='1') {
 
-        if ((trim($row['enrpc21'])) or (trim($enrft21))) {
+        if ((trim($row['enrpc21'])) or (trim($row['enrft21']))) {
 
             if ($addresstype=='postcode') { // display just postcode
                 $htmlb.='To <a target="_blank" href="http://maps.google.com/maps?q='.$enrft21pc.'%20'.$enrpc212.'">'.$row["enrpc21"].'</a>. ';
             }
 
             if ($addresstype=='full') { // display full
-                $htmlb.='To <a target="_blank" href="http://maps.google.com/maps?q='.$enrft21pc.'%20'.$enrpc212.'">'.$enrft21.' '.$row["enrpc21"].'</a>. <br />';
+                $htmlb.='To <a target="_blank" href="http://maps.google.com/maps?q='.$enrft21pc.'%20'.$enrpc212.'">'.$row['enrft21'].' '.$row["enrpc21"].'</a>. <br />';
             }
 
         } // ends check for having text AND postcode
@@ -558,17 +594,19 @@ while ($row = mysql_fetch_array($sql_result)) {
     if ($row['status']<'50') { $delivertime='0'; } 
     if ($collecttime < '10') { $collecttime='9999999999';} 
     // $html=$html.' Start pause : '.$startpause.' collect : '.$collecttime.' trackerid : '.$thistrackerid.' delivertime : '.$delivertime.'';
-    $trasql = "SELECT * FROM `instamapper` 
-    WHERE `device_key` = '".$row['trackerid']."' 
-    AND `timestamp` > '$collecttime' 
-    AND `timestamp` NOT BETWEEN '$startpause' AND '$finishpause' 
-    AND `timestamp` < '$delivertime' LIMIT 0,2"; 
+    $sql = "SELECT * FROM `instamapper` 
+    WHERE `device_key` = ?
+    AND `timestamp` > ?
+    AND `timestamp` NOT BETWEEN ? AND ?
+    AND `timestamp` < ? LIMIT 0,2"; 
     
     // echo $trasql;
     
-    $trasql_result = mysql_query($trasql,$conn_id)  or mysql_error(); 
-    $trsumtot=mysql_affected_rows();   
-    if ($trsumtot>'1.5') {
+    $prep = $dbh->prepare($sql);
+    $prep->execute([$row['trackerid'],$collecttime,$startpause,$finishpause,$delivertime]);
+    $stmt = $prep->fetchAll();
+  
+    if ($stmt) {
         $htmlb.=' <a href="'.$globalprefrow['httproots'].'/cojm/createkml.php?id='.$row['publictrackingref'].'">Tracking</a> ';
     }
 
@@ -652,9 +690,11 @@ while ($row = mysql_fetch_array($sql_result)) {
 
             $htmlb=$htmlb.'<br />';
 
-            $nquery = "SELECT * FROM chargedbybuild ORDER BY cbborder ASC"; 
-            $cbsql_result = mysql_query($nquery,$conn_id)  or mysql_error(); 
-            while ($cbrow = mysql_fetch_array($cbsql_result)) {
+            $sql = "SELECT * FROM chargedbybuild ORDER BY cbborder ASC";
+            $prep = $dbh->query($sql);
+            $stmt = $prep->fetchAll();            
+            
+            foreach ($stmt as $cbrow) {
                 extract($cbrow);
                 $cbr=$cbrow['chargedbybuildid'];
 
@@ -857,16 +897,18 @@ $html.='<td colspan="5"></td></tr>
 
 
 
-$totco2sql="SELECT co2saving, numberitems, CO2Saved, pm10saving, PM10Saved FROM Orders, Services 
+$sql="SELECT co2saving, numberitems, CO2Saved, pm10saving, PM10Saved FROM Orders, Services 
 WHERE Orders.ServiceID = Services.ServiceID 
 AND Orders.status >= 90 
-AND Orders.CustomerID='$CustomerID'";
+AND Orders.CustomerID= ? ";
 
 
+        $prep = $dbh->prepare($sql);
+        $prep->execute([$clientid]);
+        $stmt = $prep->fetchAll();
 
-$totco2sql_result = mysql_query($totco2sql,$conn_id);
-while ($totco2row = mysql_fetch_array($totco2sql_result)) {
-     extract($totco2row);
+
+foreach ($stmt as $totco2row) {
 	 if ($totco2row['co2saving']>'0.001') { $ttableco2=$ttableco2+$totco2row["co2saving"]; }
 	 else { $ttableco2 = $ttableco2 + (($totco2row['numberitems'])*($totco2row["CO2Saved"])); }
 	 

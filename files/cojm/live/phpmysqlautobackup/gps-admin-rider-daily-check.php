@@ -18,7 +18,8 @@ $checkdate=date('Y-m-d', $collecttime);
  $sql = "SELECT DISTINCT device_key FROM `instamapper`  WHERE `timestamp` >= '$collecttime' AND `timestamp` <= '$delivertime' ORDER BY `device_key` ASC"; 
  $infotext.= '<br /> '.$tcollecttime. ' '. $tdelivertime;
  $sql_result = mysql_query($sql,$conn_id);
- $sumtot=mysql_affected_rows(); if ($sumtot>'0.5') {
+ $sumtot=mysql_affected_rows(); 
+ if ($sumtot>'0.5') {
  while ($row = mysql_fetch_array($sql_result)) {      extract($row); 
  $infotext.=' device key is '.$row['device_key'];
  $dev_key=$row['device_key'];

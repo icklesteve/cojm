@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	singleexpense.php - Display & Edit an expense
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as

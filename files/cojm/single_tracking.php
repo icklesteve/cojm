@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	single_tracking.php - Shows 1 job, to be used as a php include on a page on your website
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,6 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 */
 
 echo '<div id="cojmsingletrackdiv" class="cojm">';

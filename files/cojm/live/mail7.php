@@ -97,27 +97,30 @@ $from= $globalprefrow['emailfrom'];
 $today = date("H:i a,  l jS F Y.");
 
 $id="$mailid1";
+ 
+$query = "SELECT *
+FROM Orders
+INNER JOIN Clients 
+INNER JOIN Services 
+INNER JOIN status 
+left join clientdep ON Orders.orderdep = clientdep.depnumber
+left JOIN Cyclist ON Orders.CyclistID = Cyclist.CyclistID
+WHERE Orders.CustomerID = Clients.CustomerID 
+AND Orders.ServiceID = Services.ServiceID
+AND Orders.status = status.status
+AND Orders.ID = ? LIMIT 0,1";
+ 
+$statement = $dbh->prepare($query);
+$statement->execute([$id]);
+$row = $statement->fetch(PDO::FETCH_ASSOC);
+ 
 
-$query="SELECT * FROM Orders, Clients, Services, status 
- WHERE Orders.CustomerID = Clients.CustomerID 
- AND Orders.ServiceID = Services.ServiceID 
- AND Orders.status = status.status 
- AND Orders.ID = '$id' LIMIT 1";
-$result=mysql_query($query);
-$row=mysql_fetch_array($result);
  
 $clientemail = $row['EmailAddress']; 
  
-if ($row['orderdep'])  {
-    // $infotext=$infotext.'Is Department';  
-    $orderdep=$row['orderdep']; $depquery="SELECT * FROM clientdep WHERE depnumber = '$orderdep' LIMIT 1";
-    $result=mysql_query($depquery); $drow=mysql_fetch_array($result);
-    // $infotext=$infotext.'<br />Dep is '.$drow['depname'];
-    
-    if ($drow['depemail']) { $clientemail=$drow['depemail']; }
-    if ($drow['deprequestor'])  { $custforename = $drow['deprequestor'];} 
+if ($row['depemail']) { $clientemail=$row['depemail']; }
+if ($row['deprequestor'])  { $custforename = $row['deprequestor']; } 
  
- }  
  $cost = $row['FreightCharge'];
  $collectiondate = $row['collectiondate'];
  $carbonsavingthis = $row['CO2Saved'];
@@ -306,16 +309,17 @@ $emailtext12=$globalprefrow['emailfooter'];
 
 
 
-$totco2sql="SELECT co2saving, numberitems, CO2Saved, pm10saving, PM10Saved FROM Orders, Services 
+$sql="SELECT co2saving, numberitems, CO2Saved, pm10saving, PM10Saved FROM Orders, Services 
 WHERE Orders.ServiceID = Services.ServiceID 
 AND Orders.status >= 77 
-AND Orders.CustomerID='$CustomerID'";
+AND Orders.CustomerID= ? ";
 
 
-
-$totco2sql_result = mysql_query($totco2sql,$conn_id);
-while ($totco2row = mysql_fetch_array($totco2sql_result)) {
-     extract($totco2row);
+$prep = $dbh->prepare($sql);
+$prep->execute([$row['CustomerID']]);
+$stmt = $prep->fetchAll();
+    
+foreach ($stmt as $totco2row) {
 	 if ($totco2row['co2saving']>'0.1') { $ttableco2=$ttableco2+$totco2row["co2saving"]; }
 	 else { $ttableco2 = $ttableco2 + (($totco2row['numberitems'])*($totco2row["CO2Saved"])); }
 	 if ($totco2row['pm10saving']>'0.1') {$ttablepm10=$ttablepm10+$totco2row["pm10saving"]; }

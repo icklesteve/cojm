@@ -1,5 +1,25 @@
 <?php 
 
+/*
+    COJM Courier Online Operations Management
+	expenseview.php - P+L Search
+    Copyright (C) 2017 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 $alpha_time = microtime(TRUE);
 
 include "C4uconnect.php";
@@ -242,16 +262,18 @@ Expense Category
 <option value="all">All Expense Departments</option>        
 <?php 
 
-$query = "SELECT expensecode, smallexpensename, expensedescription FROM expensecodes ORDER BY expensecode";
-$result_id = mysql_query ($query, $conn_id); 
-
-while (list ($expensecode, $smallexpensename, $expensedescription) = mysql_fetch_row ($result_id)) {
-    $expensedescription = htmlspecialchars ($expensedescription);
-    $expensecode = htmlspecialchars ($expensecode); 
-    $smallexpensename = htmlspecialchars ($smallexpensename); 
+$sql = "SELECT expensecode, smallexpensename, expensedescription FROM expensecodes ORDER BY expensecode";
+    $prep = $dbh->query($sql);
+    $stmt = $prep->fetchAll();
+        
+    foreach ( $stmt as $row) {
+    
+    $expensedescription = htmlspecialchars ($row['expensedescription']);
+    $expensecode = htmlspecialchars ($row['expensecode']); 
+    $smallexpensename = htmlspecialchars ($row['smallexpensename']); 
     print" <option ";
     if ($expensecode == $searchexpensecode) {echo "SELECTED "; }
-    print ("value=\"$expensecode\">$smallexpensename</option>\n");
+    print ' value="'.$expensecode.'">'.$smallexpensename.'</option>';
 } ?>
         </select>
         
@@ -280,22 +302,25 @@ Expense Method
 <?php
 
 
-    $query = "SELECT CyclistID, cojmname FROM Cyclist WHERE isactive='1' ORDER BY CyclistID"; 
-    $result_id = mysql_query ($query, $conn_id); 
+
     echo '<select class="ui-state-highlight ui-corner-left';
     if ($searchexpensecode<>6) {
         echo ' hideuntilneeded';
     }
-    echo '" name="thiscyclist" id="thiscyclist"> ' ; 
- 
+    echo '" name="thiscyclist" id="thiscyclist"> ' ;
     echo '<option value="All" >All '. $globalprefrow['glob5']  .'s </option>';
  
-    while (list ($CyclistID, $cojmname) = mysql_fetch_row ($result_id)) {
+    $sql = "SELECT CyclistID, cojmname FROM Cyclist WHERE isactive='1' ORDER BY CyclistID"; 
+    
+    $prep = $dbh->query($sql);
+    $stmt = $prep->fetchAll();
+        
+    foreach ( $stmt as $row) {
         print ("<option ");
-        if ($CyclistID == $thiscyclist) {
+        if ($row['CyclistID'] == $thiscyclist) {
             echo " SELECTED ";
         }
-        print ("value=\"$CyclistID\">$cojmname</option>\n");
+        print 'value="'.$row['CyclistID'].'">'.$row['cojmname'].'</option>';
     }
     print ("</select>"); 
 

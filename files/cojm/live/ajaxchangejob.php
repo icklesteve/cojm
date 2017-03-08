@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	ajaxchangejob.php - Handles Ajax Requests made from various pages ( the controller in MVC language :-), also see changejob.php
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -19,18 +19,22 @@
 
 */
 
-
-include "C4uconnect.php";
+if (!isset($dbh)) { include "C4uconnect.php"; }
 
 if (isset($_POST['page'])) { $page=trim($_POST['page']); } else { exit();  }
 if (isset($_POST['id'])) { $id = trim($_POST['id']); }
 if (isset($_POST['formbirthday'])) { $formbirthday = trim($_POST['formbirthday']); }
 if (isset($_POST['publicid'])) { $publicid = trim($_POST['publicid']); }
+if (!isset($infotext)) { $infotext=''; }
+
+if (!isset($calcmileage)) { $calcmileage=0; }
+if (!isset($cojmaction)) { $cojmaction=''; }
+if (preg_match('/iPhone|Android|Blackberry/i', $_SERVER['HTTP_USER_AGENT'])) { $mobdevice='1'; } else { $mobdevice=''; }
 
 $newformbirthday=$formbirthday; // re-outputs original in case of error
-$cojmaction='';
-$calcmileage=0;
-$infotext=' ajaxchangejob.php '.$page;
+
+
+$infotext.=' ajaxchangejob.php '.$page;
 $allok=0;
 $nextactiondatecheck='';
 $script=" var message=''; ";
@@ -806,9 +810,15 @@ if ($hasid) {
                             $script.=' 
                             $("#showriderlink").removeClass("hidden").attr("href", "cyclist.php?thiscyclist='.$newrider.'").attr("title", "'.$cojmname.' details"); 
                             $("select#newrider").removeClass("red");
+                            $("select#cyc'.$id.'").removeClass("red");
+                            
+                            
                             ';
                         } else { 
-                            $script.=' $("#showriderlink").addClass("hidden"); $("select#newrider").addClass("red"); ';
+                            $script.=' $("#showriderlink").addClass("hidden");
+                            $("select#newrider").addClass("red"); 
+                            $("select#cyc'.$id.'").addClass("red");
+                            ';
                         }
                     } // ends total changed ==1 check
                 } // ends try
@@ -2736,7 +2746,7 @@ if ($hasid) {
 
 
             if ($nextactiondatecheck==1) { 
-
+                $infotext.=' nextactiondatecheck ';
 
                 $query = "
                 SELECT 
@@ -2796,6 +2806,8 @@ if ($hasid) {
             ///////////////////////////////////   RECALC PRICE ///////////////////
 
             if ($cojmaction=='recalcprice') {
+                
+                $infotext.=' Recalc Price ajaxcj 2799 ';
                 $buildloopcharge='';
                 // $script.=" alert('recalc');  ";
 

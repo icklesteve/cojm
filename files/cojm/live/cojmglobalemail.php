@@ -52,11 +52,6 @@ include "changejob.php";
 
 
 
-$sql = "SELECT * FROM globalprefs"; 
-$sql_result = mysql_query($sql,$conn_id);
-$globalprefrow=mysql_fetch_array($sql_result);
-
-
 // $infotext=$infotext.'<p><strong>Variables you can use</strong></p>
 // $id : shows the cojm reference
 // <br>$c02text : estimated CO<sub>2</sub> saving.

@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	order.php - Update single job
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -40,25 +40,29 @@ $topdescrip='';
 $subareacomments='';
 
 
+?><!doctype html><html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="HandheldFriendly" content="true" >
+<meta name="viewport" content="width=device-width, height=device-height" >
+<meta name="generator" content="COJM www.cojm.co.uk">
+<link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
+<link id="pagestyle" rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
+<script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
+<?php 
+
 include "changejob.php";
-
-
-
 
 $query = "SELECT *
 FROM Orders
 INNER JOIN Clients 
 INNER JOIN Services 
-INNER JOIN Cyclist 
 INNER JOIN status 
 left join clientdep ON Orders.orderdep = clientdep.depnumber
+left JOIN Cyclist ON Orders.CyclistID = Cyclist.CyclistID
 WHERE Orders.CustomerID = Clients.CustomerID 
 AND Orders.ServiceID = Services.ServiceID
-AND Orders.CyclistID = Cyclist.CyclistID
 AND Orders.status = status.status
 AND Orders.ID = ? LIMIT 0,1";
-
-
 
 $statement = $dbh->prepare($query);
 $statement->execute([$id]);
@@ -68,16 +72,6 @@ $cojmid=$id;
 
 
 
-?><!doctype html><html lang="en"><head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-<meta name="HandheldFriendly" content="true" >
-<meta name="viewport" content="width=device-width, height=device-height" >
-<meta name="generator" content="COJM www.cojm.co.uk">
-<title><?php echo $id; ?> COJM</title>
-<link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
-<link id="pagestyle" rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
-<script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
-<?php 
 if ($row['ID']) {
     
     $query = "SELECT * FROM cojm_pod WHERE id = :getid LIMIT 0,1";
@@ -137,7 +131,7 @@ function downloadJSAtOnload() {
  element.src = "js/order.js";
  document.body.appendChild(element);
  }
- 
+
  if (window.addEventListener)
  window.addEventListener("load", downloadJSAtOnload, false);
  else if (window.attachEvent)
@@ -145,6 +139,7 @@ function downloadJSAtOnload() {
  else window.onload = downloadJSAtOnload;
 
 </script>
+<title><?php echo $id; ?> COJM</title>
 <style>
 /* starts spinner on page load, only for ajax pages  */
 #toploader { display:block; }
@@ -581,23 +576,23 @@ if ($showsubarea<>'1') {
     $data = $dbh->query($cyclistquery)->fetchAll();
     
     foreach ($data as $riderrow ) {
-        print ("<option ");
+        echo " <option ";
         if ($row['CyclistID'] == $riderrow['CyclistID']) {
             echo ' selected="selected" ';
         }
-        echo 'value="'.$riderrow['CyclistID'].'" ';
+        echo ' value="'.$riderrow['CyclistID'].'" ';
         
-        if (($CyclistID=='1') or ($riderrow['isactive']<>'1')) {
+        if (($riderrow['CyclistID']=='1') or ($riderrow['isactive']<>'1')) {
             echo ' class="unalo" ';
         }
-        echo '>';
+        echo ' > ';
 
         if ($riderrow['isactive']<>'1') {
             echo ' INACTIVE ';
         }
 
         echo $riderrow['cojmname'];
-        echo '</option>';
+        echo ' </option> ';
     }
     print ("</select>");
     
@@ -1379,12 +1374,9 @@ if ($showsubarea<>'1') {
     </form> ';
     
     echo '<button id="orderaudit"> Audit Trail </button> ';
-    if (!$mobdevice) {
-        echo ' <button class="deleteord" id="deleteord"> Delete Job </button> ';
-    }
-    else {
-        echo '<button class="deleteord" id="deleteordmob"> Delete Job </button>';
-    }
+
+    echo ' <button class="deleteord" id="deleteord"> Delete Job </button> ';
+
 
 
 
@@ -1399,21 +1391,13 @@ if ($showsubarea<>'1') {
 
 
 
-    if (!$mobdevice) {
         echo '<form action="index.php#" method="post" id="frmdel">
         <input type="hidden" name="formbirthday" value="'.date("U").'">
         <input type="hidden" name="id" value="'.$row['ID'].'">
         <input type="hidden" name="page" value="confirmdelete">
         </form>';
 
-    }
-    else {  // ends check for mobile device
-        echo '<form action="index.php#" method="post" id="frmdelmob">
-        <input type="hidden" name="formbirthday" value="'.date("U").'">
-        <input type="hidden" name="id" value="'.$row['ID'].'">
-        <input type="hidden" name="page" value="confirmdeletemobile">
-        </form>';
-    } // ends mobile delete 
+
 
 
     echo '</div>

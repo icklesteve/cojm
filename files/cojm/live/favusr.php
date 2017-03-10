@@ -91,15 +91,29 @@ echo '<div class="Post">
 ';
 
 
-$query = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName"; 
-$result_id = mysql_query ($query, $conn_id); echo '<input type="hidden" name="page" value="selectclient">
-<select class="ui-state-default ui-corner-all pad"  id="combobox" name="clientid" ><option value="">Select one...</option>
-<option '; if ($clientid=='all') { echo ' SELECTED '; }   echo 'value="all">All</option>';
- while (list ($CustomerIDlist, $CompanyName) = mysql_fetch_row ($result_id)) { $CustomerID = htmlspecialchars ($CustomerID); 
-$CompanyName = htmlspecialchars ($CompanyName); print"<option "; if ($CustomerIDlist == $clientid) {echo "SELECTED "; } ; 
-echo ' value="'.$CustomerIDlist.'">'.$CompanyName.'</option>';} echo '</select> 
 
-<button type="submit"> Select Client </button> 
+
+
+echo '<input type="hidden" name="page" value="selectclient">
+<select class="ui-state-default ui-corner-all pad"  id="combobox" name="clientid" ><option value="">Select one...</option>
+<option '; 
+if ($clientid=='all') { echo ' SELECTED '; } echo 'value="all">All</option>';
+
+
+$sql = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName"; 
+$prep = $dbh->query($sql);
+$stmt = $prep->fetchAll();
+    
+foreach ( $stmt as $row) {
+    $CustomerID = htmlspecialchars ($row['CustomerID']); 
+    $CompanyName = htmlspecialchars ($row['CompanyName']);
+    print"<option "; 
+    if ($CustomerID == $clientid) {echo "SELECTED "; } ; 
+    echo ' value="'.$CustomerID.'">'.$CompanyName.'</option>';
+}
+echo '</select> ';
+
+echo ' <button type="submit"> Select Client </button> 
  Show Inactive addresses ? <input type="checkbox" name="showinactive" value="1" ';  if ($showinactive>0) { echo 'checked';} echo ' />
 
 </form></p>
@@ -122,8 +136,11 @@ if ($page=='newfavourite') {
 $thisfavadrid='-1';
 }
 
-$sql = "SELECT * FROM cojm_favadr WHERE favadrid = '$thisfavadrid' LIMIT 1"; $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-$row=mysql_fetch_array($sql_result);
+$sql = "SELECT * FROM cojm_favadr WHERE favadrid = ? LIMIT 1";
+
+$statement = $dbh->prepare($sql);
+$statement->execute([$thisfavadrid]);
+$row = $statement->fetch(PDO::FETCH_ASSOC);
 
 
 echo '<input type="hidden" name="thisfavadrid" value="'. $thisfavadrid.'"> <input type="hidden" name="oldfavadrpc" value="'. $row['favadrpc'].'" >
@@ -147,16 +164,28 @@ echo '<input type="hidden" name="thisfavadrid" value="'. $thisfavadrid.'"> <inpu
 
 <select class="ui-state-default ui-corner-left pad" name="favadrclient" > ';
 
-$query = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName"; 
-$result_id = mysql_query ($query, $conn_id); 
+$sql = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient>0 ORDER BY CompanyName"; 
+$prep = $dbh->query($sql);
+$stmt = $prep->fetchAll();
+    
+foreach ( $stmt as $crow) {
+    $CustomerID = htmlspecialchars ($crow['CustomerID']); 
+    $CompanyName = htmlspecialchars ($crow['CompanyName']);
+    print"<option "; 
+    if ($CustomerID == $row['favadrclient']) {echo "SELECTED "; } ; 
+    echo ' value="'.$CustomerID.'">'.$CompanyName.'</option>';
+}
+echo '</select> ';
 
 
- while (list ($CustomerIDlist, $CompanyName) = mysql_fetch_row ($result_id)) { $CustomerID = htmlspecialchars ($CustomerID); 
-$CompanyName = htmlspecialchars ($CompanyName); print"<option "; if ($CustomerIDlist == $row['favadrclient']) { 
-$thiscompanyname=$CompanyName; echo "SELECTED "; } ; 
-echo ' value="'.$CustomerIDlist.'">'.$CompanyName.'</option>';} 
 
-echo '</select> 
+
+
+
+
+
+
+echo '
 <div class="vpad"> </div>
 </div>';
 
@@ -213,58 +242,70 @@ $rpttext='<tr>
 
 
 if ($clientid) {
-if ($showinactive=='1') { 
-  $query = "SELECT * FROM cojm_favadr  INNER JOIN Clients 
-  ON cojm_favadr.favadrclient = Clients.CustomerID WHERE  cojm_favadr.favadrclient = $clientid ";  
- } else {
- $query = "SELECT * FROM cojm_favadr  INNER JOIN Clients 
-  ON cojm_favadr.favadrclient = Clients.CustomerID WHERE  cojm_favadr.favadrclient = $clientid AND cojm_favadr.favadrisactive ='1'"; 
-}
+    if ($showinactive=='1') { 
+        $sql = "SELECT * FROM cojm_favadr  INNER JOIN Clients 
+        ON cojm_favadr.favadrclient = Clients.CustomerID WHERE  cojm_favadr.favadrclient = ? ";  
+    } else {
+        $sql = "SELECT * FROM cojm_favadr  INNER JOIN Clients 
+        ON cojm_favadr.favadrclient = Clients.CustomerID WHERE  cojm_favadr.favadrclient = ? AND cojm_favadr.favadrisactive ='1'"; 
+    }
+    $prep = $dbh->prepare($sql);
+    $prep->execute([$clientid]);
+    $stmt = $prep->fetchAll();
 } 
 
 
-if ($clientid=='all') { if($showinactive<>'') { $query = "SELECT * FROM cojm_favadr INNER JOIN Clients ON cojm_favadr.favadrclient = Clients.CustomerID ";
-}else{ $query = "SELECT * FROM cojm_favadr INNER JOIN Clients ON cojm_favadr.favadrclient = Clients.CustomerID WHERE cojm_favadr.favadrisactive = '1' "; }}
-// echo $query;
-$sql_result = mysql_query($query,$conn_id);
-while ($row = mysql_fetch_array($sql_result)) {
-    extract($row);
+if ($clientid=='all') {
+    if($showinactive<>'') {
+        $sql = "SELECT * FROM cojm_favadr INNER JOIN Clients ON cojm_favadr.favadrclient = Clients.CustomerID ";
+    } else {
+        $sql = "SELECT * FROM cojm_favadr INNER JOIN Clients ON cojm_favadr.favadrclient = Clients.CustomerID WHERE cojm_favadr.favadrisactive = '1' ";
+    }
+    $prep = $dbh->query($sql);
+    $stmt = $prep->fetchAll();
+}
 
-$i=$i+'1';
 
-if (($i=='1') or ($i=='11') or ($i=='21')or ($i=='31') or ($i=='41') or ($i=='51') or ($i=='61') or ($i=='71') or ($i=='81')) { echo $rpttext; }
+foreach ($stmt as $row) {
+    
+    
+    
 
-echo '<tr';if ($row['favadrid']==$thisfavadrid){ echo ' style="background-color:#'.$globalprefrow['highlightcolour'].'; " '; } echo '>
-
-<td> 
-<form action="favusr.php" method="post"><input type="hidden" name="page" value="selectfavadr" />
-<input type="hidden" name="clientid" value="'.$clientid.'" /><input type="hidden" name="thisfavadrid" value="'.$row['favadrid'].'" />';
- if ($showinactive>'0') { echo '<input type="hidden"  name="showinactive" value="1" />'; }
-
-echo '<button style="" type="submit">Select</button></form>
-</td><td>
-'.$row['CompanyName'].'
-</td><td>
-'.$row['favadrft'].' <a target="_blank" href="http://maps.google.co.uk/maps?q='.$row['favadrpc'].'">'. $row['favadrpc'].'</a> 
-</td><td>'
-.$row['favadrcomments']. '
-</td><td>';
-if (date('U', strtotime($row['favadrlastvisit']))>'10') { echo date(' H:i D j M Y', strtotime($row['favadrlastvisit'])); }
-echo '</td><td>';
-
-if ($row['favadrisactive']<'1') { echo ' INACTIVE ';}
-
-if ($row['favusr1']=='1') { echo $globalprefrow['favusrn1'].' '; } if ($row['favusr2']=='1') { echo $globalprefrow['favusrn2'].' '; }
-if ($row['favusr3']=='1') { echo $globalprefrow['favusrn3'].' '; } if ($row['favusr4']=='1') { echo $globalprefrow['favusrn4'].' '; }
-if ($row['favusr5']=='1') { echo $globalprefrow['favusrn5'].' '; } if ($row['favusr6']=='1') { echo $globalprefrow['favusrn6'].' '; }
-if ($row['favusr7']=='1') { echo $globalprefrow['favusrn7'].' '; } if ($row['favusr8']=='1') { echo $globalprefrow['favusrn8'].' '; }
-if ($row['favusr9']=='1') { echo $globalprefrow['favusrn9'].' '; } if ($row['favusr10']=='1') { echo $globalprefrow['favusrn10'].' '; }
-if ($row['favusr11']=='1') { echo $globalprefrow['favusrn11'].' '; } if ($row['favusr12']=='1') { echo $globalprefrow['favusrn12'].' '; }
-if ($row['favusr13']=='1') { echo $globalprefrow['favusrn13'].' '; } if ($row['favusr14']=='1') { echo $globalprefrow['favusrn14'].' '; }
-if ($row['favusr15']=='1') { echo $globalprefrow['favusrn15'].' '; } if ($row['favusr16']=='1') { echo $globalprefrow['favusrn16'].' '; }
-if ($row['favusr17']=='1') { echo $globalprefrow['favusrn17'].' '; } if ($row['favusr18']=='1') { echo $globalprefrow['favusrn18'].' '; }
-if ($row['favusr19']=='1') { echo $globalprefrow['favusrn19'].' '; } if ($row['favusr20']=='1') { echo $globalprefrow['favusrn20'].' '; }
-echo '</td></tr>';
+    $i=$i+'1';
+    
+    if (($i=='1') or ($i=='11') or ($i=='21')or ($i=='31') or ($i=='41') or ($i=='51') or ($i=='61') or ($i=='71') or ($i=='81')) { echo $rpttext; }
+    
+    echo '<tr';if ($row['favadrid']==$thisfavadrid){ echo ' style="background-color:#'.$globalprefrow['highlightcolour'].'; " '; } echo '>
+    
+    <td> 
+    <form action="favusr.php" method="post"><input type="hidden" name="page" value="selectfavadr" />
+    <input type="hidden" name="clientid" value="'.$clientid.'" /><input type="hidden" name="thisfavadrid" value="'.$row['favadrid'].'" />';
+    if ($showinactive>'0') { echo '<input type="hidden"  name="showinactive" value="1" />'; }
+    
+    echo '<button style="" type="submit">Select</button></form>
+    </td><td>
+    '.$row['CompanyName'].'
+    </td><td>
+    '.$row['favadrft'].' <a target="_blank" href="http://maps.google.co.uk/maps?q='.$row['favadrpc'].'">'. $row['favadrpc'].'</a> 
+    </td><td>'
+    .$row['favadrcomments']. '
+    </td><td>';
+    if (date('U', strtotime($row['favadrlastvisit']))>'10') { echo date(' H:i D j M Y', strtotime($row['favadrlastvisit'])); }
+    echo '</td><td>';
+    
+    if ($row['favadrisactive']<'1') { echo ' INACTIVE ';}
+    
+    if ($row['favusr1']=='1') { echo $globalprefrow['favusrn1'].' '; } if ($row['favusr2']=='1') { echo $globalprefrow['favusrn2'].' '; }
+    if ($row['favusr3']=='1') { echo $globalprefrow['favusrn3'].' '; } if ($row['favusr4']=='1') { echo $globalprefrow['favusrn4'].' '; }
+    if ($row['favusr5']=='1') { echo $globalprefrow['favusrn5'].' '; } if ($row['favusr6']=='1') { echo $globalprefrow['favusrn6'].' '; }
+    if ($row['favusr7']=='1') { echo $globalprefrow['favusrn7'].' '; } if ($row['favusr8']=='1') { echo $globalprefrow['favusrn8'].' '; }
+    if ($row['favusr9']=='1') { echo $globalprefrow['favusrn9'].' '; } if ($row['favusr10']=='1') { echo $globalprefrow['favusrn10'].' '; }
+    if ($row['favusr11']=='1') { echo $globalprefrow['favusrn11'].' '; } if ($row['favusr12']=='1') { echo $globalprefrow['favusrn12'].' '; }
+    if ($row['favusr13']=='1') { echo $globalprefrow['favusrn13'].' '; } if ($row['favusr14']=='1') { echo $globalprefrow['favusrn14'].' '; }
+    if ($row['favusr15']=='1') { echo $globalprefrow['favusrn15'].' '; } if ($row['favusr16']=='1') { echo $globalprefrow['favusrn16'].' '; }
+    if ($row['favusr17']=='1') { echo $globalprefrow['favusrn17'].' '; } if ($row['favusr18']=='1') { echo $globalprefrow['favusrn18'].' '; }
+    if ($row['favusr19']=='1') { echo $globalprefrow['favusrn19'].' '; } if ($row['favusr20']=='1') { echo $globalprefrow['favusrn20'].' '; }
+    echo '</td></tr>';
 } // ends extract row loop
 
 echo '</table>
@@ -290,6 +331,3 @@ function comboboxchanged() {};
 include "footer.php";
 
 echo '</body></html>';
-
-mysql_close(); 
-$dbh=null;

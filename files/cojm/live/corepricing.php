@@ -88,13 +88,12 @@ include "cojmmenu.php";
 <tbody>
 <?php
 
-$query = "SELECT * FROM chargedbybuild ORDER BY cbborder ASC";
+$sql = "SELECT * FROM chargedbybuild ORDER BY cbborder ASC";
 
 
 $idmax=1;
-$sql_result = mysql_query($query,$conn_id); 
-while ($row = mysql_fetch_array($sql_result)) {
-    extract($row);
+$prep = $dbh->query($sql);
+foreach ($prep as $row) {
 
 ?>
 <tr id="<?php echo $row['chargedbybuildid']; ?>">

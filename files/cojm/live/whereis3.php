@@ -93,9 +93,9 @@ $lattot='0'; $lontot='0';
  $query = "SELECT CyclistID, cojmname FROM Cyclist 
  WHERE isactive='1' 
  AND CyclistID > '1'
- ORDER BY CyclistID"; $result_id = mysql_query ($query, $conn_id); 
-  while (list ($CyclistID, $cojmname) = mysql_fetch_row ($result_id))
-   { // echo $CyclistID;
+ ORDER BY CyclistID"; 
+ $result_id = mysql_query ($query, $conn_id); 
+  while (list ($CyclistID, $cojmname) = mysql_fetch_row ($result_id)) {
 
 $sql = "SELECT cojmname,trackerid FROM Cyclist WHERE CyclistID = '$CyclistID' LIMIT 1";
 $sql_result = mysql_query($sql,$conn_id); 
@@ -110,7 +110,7 @@ if ($sumtot>0.5) {
 while ($map = mysql_fetch_array($sql_result)) {
      extract($map); 
 $sGMTMySqlString = gmdate("d-m-Y", $tUnixTime);
-// echo $sGMTMySqlString;	
+
 
 // declare some start variables 
 $ThisYear = (date("Y")); $MarStartDate = ($ThisYear."-03-25"); $OctStartDate = ($ThisYear."-10-25"); $MarEndDate = ($ThisYear."-03-31"); 
@@ -330,8 +330,11 @@ $query="SELECT *
 FROM  `postcodeuk` 
 WHERE  `PZ_Postcode` =  '$pc1'
 LIMIT 1"; 
-$result=mysql_query($query, $conn_id); $pcrow=mysql_fetch_array($result); 
-$undid=$undrow['ID']; $pclon=$pcrow['PZ_easting']; $pclat=$pcrow['PZ_northing'];
+$result=mysql_query($query, $conn_id); 
+$pcrow=mysql_fetch_array($result); 
+$undid=$undrow['ID']; 
+$pclon=$pcrow['PZ_easting']; 
+$pclat=$pcrow['PZ_northing'];
 
 $temptitle='';
 $tempcontent='';

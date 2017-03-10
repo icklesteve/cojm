@@ -468,12 +468,14 @@ echo '</div> <br />';
 
 // echo '<br>From : '.$collectionsfromdate.' To : '.$collectionsuntildate;
 
-$sql = "SELECT expensedate, expensecost, expensecode, expensevat, paid FROM expenses WHERE expensedate >= '$collectionsfromdate' AND expensedate <= '$collectionsuntildate' ";
-$sql_result = mysql_query($sql,$conn_id); 
+$sql = "SELECT expensedate, expensecost, expensecode, expensevat, paid FROM expenses WHERE expensedate >= ? AND expensedate <= ? ";
 
-// Loop through the data set and extract each row in to it's own variable set
-while ($row = mysql_fetch_array($sql_result)) {
-     extract($row);
+$prep = $dbh->prepare($sql);
+$prep->execute([$collectionsfromdate,$collectionsuntildate]);
+$stmt = $prep->fetchAll();
+foreach ($stmt as $row)  {
+    
+
 	 $m=date('m', strtotime($row['expensedate']));
 	 if ($row['paid']<1) {
 	 //  Total expense = total, vat element phrased as "of which VAT "
@@ -517,14 +519,16 @@ $evattot=$evatjan+$evatfeb+$evatmar+$evatapr+$evatmay+$evatjun+$evatjul+$evataug
 
 	 
 // completeish jobs
-	 
-// $orderssql = "SELECT * FROM Orders INNER JOIN Services ON Orders.ServiceID = Services.ServiceID WHERE collectiondate >= '$collectionsfromdate' AND collectiondate <= '$collectionsuntildate' AND status>76 ORDER BY `Orders`.`collectiondate` ASC";
- $orderssql = "SELECT targetcollectiondate, vatcharge, FreightCharge, LicensedCount, UnlicensedCount, hourlyothercount FROM Orders INNER JOIN Services ON Orders.ServiceID = Services.ServiceID WHERE targetcollectiondate >= '$collectionsfromdate' AND targetcollectiondate <= '$collectionsuntildate' AND status>59 ";
+
+ $sql = "SELECT targetcollectiondate, vatcharge, FreightCharge, LicensedCount, UnlicensedCount, hourlyothercount FROM Orders 
+ INNER JOIN Services ON Orders.ServiceID = Services.ServiceID 
+ WHERE targetcollectiondate >= ? AND targetcollectiondate <= ? AND status > 59 ";
 
 
-$sql_result = mysql_query($orderssql,$conn_id); 
-while ($row = mysql_fetch_array($sql_result)) {
-extract($row); 
+$prep = $dbh->prepare($sql);
+$prep->execute([$collectionsfromdate,$collectionsuntildate]);
+$stmt = $prep->fetchAll();
+foreach ($stmt as $row)  {
 $tablecost = $tablecost + $row["FreightCharge"];
 $m='';
 $m=date('m', strtotime($row['targetcollectiondate']));
@@ -546,10 +550,15 @@ if ($m=='12') { $vatdec=$vatdec+$row['vatcharge']; $indec=$indec + $row['Freight
  
 
  
-$orderssql = "SELECT targetcollectiondate, vatcharge, FreightCharge, LicensedCount, UnlicensedCount, hourlyothercount FROM Orders INNER JOIN Services ON Orders.ServiceID = Services.ServiceID WHERE targetcollectiondate >= '$collectionsfromdate' AND targetcollectiondate <= '$collectionsuntildate' AND status<60 ";
-$sql_result = mysql_query($orderssql,$conn_id); 
-while ($row = mysql_fetch_array($sql_result)) {
-extract($row); 
+$sql = "SELECT targetcollectiondate, vatcharge, FreightCharge, LicensedCount, UnlicensedCount, hourlyothercount FROM Orders 
+INNER JOIN Services ON Orders.ServiceID = Services.ServiceID 
+WHERE targetcollectiondate >= ? AND targetcollectiondate <= ? AND status < 60 ";
+
+$prep = $dbh->prepare($sql);
+$prep->execute([$collectionsfromdate,$collectionsuntildate]);
+$stmt = $prep->fetchAll();
+foreach ($stmt as $row)  {
+    
 $tablecost = $tablecost + $row["FreightCharge"];
 $m=date('m', strtotime($row['targetcollectiondate']));
 
@@ -657,12 +666,11 @@ $ftotlicost=$fjanlicost+$ffeblicost+$fmarlicost+$faprlicost+$fmaylicost+$fjunlic
 
 if ($incomeselect=='invoicein') {
  
-$sql = "SELECT * FROM invoicing WHERE paydate >= '$collectionsfromdate' AND paydate <= '$collectionsuntildate' ";
-$sql_result = mysql_query($sql,$conn_id); 
-
-// echo '<p>'.$sql.'</p>';
-// Loop through the data set and extract each row in to it's own variable set
-while ($row = mysql_fetch_array($sql_result)) { extract($row);
+$sql = "SELECT * FROM invoicing WHERE paydate >= ? AND paydate <= ? ";
+$prep = $dbh->prepare($sql);
+$prep->execute([$collectionsfromdate,$collectionsuntildate]);
+$stmt = $prep->fetchAll();
+foreach ($stmt as $row)  {
 
 $m=date('m', strtotime($row['paydate'])); // echo $m;
  

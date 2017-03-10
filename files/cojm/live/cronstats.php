@@ -23,12 +23,12 @@
 
 $df='H:i d M Y';
 
-$nowsecs=date("U");
-$nowday=date("j");
-$nowmonth=date("n");
-$nowyear=date("Y");
-$nowhour=date("G");
-$nowminute=date("i");
+$nowsecs=date(U);
+$nowday=date(j);
+$nowmonth=date(n);
+$nowyear=date(Y);
+$nowhour=date(G);
+$nowminute=date(i);
 
 $sumtot='0';
 $totalbytes='0';
@@ -211,14 +211,15 @@ if ($hidelastfiredstats<1) {
     
     
     
-    $sql="SELECT * FROM `phpmysqlautobackup_log` WHERE `date`> ".$statdatestart." ORDER BY `date` DESC ";
-    $sql_result = mysql_query($sql,$conn_id);
-    while ($cojmbackups = mysql_fetch_array($sql_result)) {
-        extract($cojmbackups);
+    $sql="SELECT * FROM `phpmysqlautobackup_log` WHERE `date`> ? ORDER BY `date` DESC ";
+    
+    
+    $prep = $dbh->prepare($sql);
+    $prep->execute([$statdatestart]);
+    $stmt = $prep->fetchAll();
+    
+    foreach ( $stmt as $cojmbackups) {
 
-        
-        
-        
         $totalbackups++;
         $totalbytes=$totalbytes+$cojmbackups['bytes'];
         $totalrows=$totalrows+$cojmbackups['lines'];

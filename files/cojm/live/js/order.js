@@ -2234,7 +2234,6 @@ $(function () { // Document is ready
     });
 
 
-
     $('#deleteord').bind('click', function (e) {
         
         e.preventDefault();
@@ -2254,21 +2253,6 @@ $(function () { // Document is ready
 
 
 
-    $("#deleteordmob").bind("click", function (e) {
-        e.preventDefault();
-        $.Zebra_Dialog("<strong>Are you sure ?</strong><br />This Job will be deleted. <br />This action CANNOT be undone.", {
-            "type": "warning",
-            "title": "Delete Job ?",
-            "buttons": [
-                {caption: "Delete", callback: function () {
-                    $("#frmdelmob").submit();
-                }},
-                {caption: "Do NOT Delete", callback: function () {
-                    // empty callback does nothing
-                }}
-            ]
-        });
-    });
 
 
     

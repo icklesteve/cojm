@@ -39,24 +39,17 @@ if (isset($newcyclistid)) { $thiscyclist=$newcyclistid; }
 // if ($mobdevice) {} else {}
 
 
-$tempwaitingcheck = mysql_result(mysql_query(" SELECT isactive FROM Cyclist WHERE CyclistID=$thiscyclist  LIMIT 1 ", $conn_id), 0);
+$stmt = $dbh->prepare("SELECT isactive FROM Cyclist WHERE CyclistID=?  LIMIT 1");
+$stmt->execute([$thiscyclist]);
+$tempwaitingcheck = $stmt->fetchColumn();
+
 
 if ($tempwaitingcheck<>'1') {
     $showinactive='1';
 }
 
-if ($thiscyclist=='1') { $title="COJM : Select ".$globalprefrow['glob5'];} else { 
 
-
-$query = "SELECT cojmname FROM Cyclist WHERE CyclistID=$thiscyclist  LIMIT 1";
-$result_id = mysql_query ($query, $conn_id); 
-
-
-
-while (list ($cojmname) = mysql_fetch_row ($result_id)) { 
-$title=$globalprefrow['glob5'].' : '.$cojmname; } 
-
-}
+    $title="COJM : Select ".$globalprefrow['glob5'];
 
 // $title="COJM : ".$globalprefrow['glob5'].' ';
 
@@ -90,23 +83,32 @@ echo '<div class="Post Spaceout">
 
 
  if ($showinactive<>'1') {
- $query = "SELECT CyclistID, cojmname, isactive FROM Cyclist WHERE isactive='1' AND CyclistID >'1' ORDER BY CyclistID"; 
- $result_id = mysql_query ($query, $conn_id); 
+ $sql = "SELECT CyclistID, cojmname, isactive FROM Cyclist WHERE isactive='1' AND CyclistID >'1' ORDER BY CyclistID"; 
+
 } else { 
-$query = "SELECT CyclistID, cojmname, isactive FROM Cyclist WHERE CyclistID >'1' ORDER BY CyclistID";
-$result_id = mysql_query ($query, $conn_id); 
+$sql = "SELECT CyclistID, cojmname, isactive FROM Cyclist WHERE CyclistID >'1' ORDER BY CyclistID";
+
 }
- print ("<select class=\"ui-state-highlight ui-corner-left\" id=\"combobox\" name=\"thiscyclist\">\n"); 
+
+$prep = $dbh->query($sql);
+$stmt = $prep->fetchAll();
+
+
+print ("<select class=\"ui-state-highlight ui-corner-left\" id=\"combobox\" name=\"thiscyclist\">\n"); 
+
+echo ' <option value="">Select one...</option>';
  
- echo ' <option value="">Select one...</option>';
- 
- while (list ($CyclistID, $cojmname, $isactive) = mysql_fetch_row ($result_id))
- { print ("<option "); if ($CyclistID == $thiscyclist) {echo " SELECTED ";  }
- print ("value=\"$CyclistID\">$cojmname");
- 
- if ($isactive>0) { echo ' ACTIVE'; } 
- 
-echo ("</option>\n"); } print '</select><button type="submit"> Select '.$globalprefrow['glob5'].' </button> ';
+
+    
+foreach ($stmt as $crow) {
+    print ("<option "); 
+    if ($crow['CyclistID'] == $thiscyclist) { echo " SELECTED ";  }
+    echo 'value="'.$crow['CyclistID'].'">'.$crow['cojmname'];
+    if ($crow['isactive']>0) { echo ' ACTIVE'; } 
+    echo ("</option>\n"); 
+}
+
+print '</select><button type="submit"> Select '.$globalprefrow['glob5'].' </button> ';
 
 echo ' Show Inactive? <input type="checkbox" name="showinactive" value="1" '; 
  if ($showinactive>0) { echo 'checked';} 
@@ -145,11 +147,10 @@ echo '
 
 if ($thiscyclist<>'1') {
 
-$sql = "SELECT * FROM Cyclist WHERE CyclistID = '$thiscyclist' LIMIT 1";
-$sql_result = mysql_query($sql,$conn_id); 
-$row=mysql_fetch_array($sql_result);
-
-
+$sql = "SELECT * FROM Cyclist WHERE CyclistID = ? LIMIT 1";
+$statement = $dbh->prepare($sql);
+$statement->execute([$thiscyclist]);
+$row = $statement->fetch(PDO::FETCH_ASSOC);
 echo '
 
 <form action="#" method="post">
@@ -341,7 +342,11 @@ echo '
 
 
 
-echo '<input type="hidden" name="trackerid" value="';if(trim($row['trackerid'])){echo $row['trackerid'];} else {echo $row['CyclistID'];} echo '" />';
+echo '<input type="hidden" name="trackerid" value="';
+if(trim($row['trackerid'])){
+    echo $row['trackerid'];
+    } else {
+        echo $row['CyclistID'];} echo '" />';
 
 
 
@@ -419,9 +424,11 @@ echo '<br /></div>';
  $(document).ready(function() {
  ';
  
-  if ($thiscyclist=='1') {
- 
-echo '  setTimeout( function() { $("#comboboxbutton").click() }, 100 ); '; }
+if ($thiscyclist=='1') {
+    echo '  setTimeout( function() { $("#comboboxbutton").click() }, 100 ); ';
+} else {
+    echo ' $(document).prop("title", "'.$row['cojmname'].' : COJM"); ';
+}
  
  echo '
  

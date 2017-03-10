@@ -158,6 +158,7 @@ if ($sumtot) {
     }
     else {
         $infotext.="<br /> No Scheduled jobs to run, checking admin queues";
+        
         $gpsrideradmintotal = $dbh->query("SELECT COUNT(*) FROM cojm_admin WHERE cojm_admin_stillneeded='1' AND cojmadmin_rider_gps='1'")->fetchColumn();        
         $gpsadmintotal = $dbh->query("SELECT COUNT(*) FROM cojm_admin WHERE cojm_admin_stillneeded='1' AND cojmadmin_tracking='1'")->fetchColumn();
         $infotext.= '<br /> '.$gpsrideradmintotal.' Job(s) in Rider GPS Admin Q ';
@@ -220,10 +221,5 @@ if ($ranacron==1)	{
 }
 
 if ($globalprefrow['showdebug']>0) { echo $backupdescription.'<hr />' . $infotext; }
-
-
-$dbh=null;
-
-
 
 ?>

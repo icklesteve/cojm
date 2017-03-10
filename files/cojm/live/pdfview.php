@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	pdfview.php.php - Create a PDF invoice
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -65,79 +65,72 @@ $dateamonthago = date('Y-m-d H:i:s', $dateOneMonthAdded);
 // echo "After adding one month: ".date('l dS \o\f F Y', $dateOneMonthAdded)."<br>After taking away a month : ". $dateamonthago."<br><br>";
 
 $sql = "SELECT * FROM Clients ORDER BY lastinvoicedate";
-$sql_result = mysql_query($sql,$conn_id); 
+$prep = $dbh->query($sql);
+$stmt = $prep->fetchAll();
+    
+foreach ($stmt as $row) {
+    $sql = "SELECT collectiondate FROM Orders WHERE CustomerID=? ORDER BY collectiondate DESC LIMIT 0 , 1";
+    
+    $prep = $dbh->prepare($sql);
+    $prep->execute([$row['CustomerID']]);
+    $stmt = $prep->fetchAll();
+    foreach ($stmt as $lastrow) {
 
-while ($row = mysql_fetch_array($sql_result)) { extract($row);
-$lastdate = "SELECT collectiondate FROM Orders WHERE CustomerID=$CustomerID ORDER BY collectiondate DESC LIMIT 0 , 1";
-$sql_result_last = mysql_query($lastdate,$conn_id); 
+        $temptwo=''; 
 
-while ($lastrow = mysql_fetch_array($sql_result_last)) {
-    extract($lastrow); 
+        $tempdate=$lastrow['collectiondate']; 
+        
+        
+        $sql = "SELECT * FROM Orders WHERE CustomerID = ?
+        AND status > '98' 
+        AND status < '108' 
+        AND collectiondate <= ?
+        And FreightCharge <> '0.00' ";
+        
+        $prep = $dbh->prepare($sql);
+        $prep->execute([$row['CustomerID'],$lastrow['collectiondate']]);
+        $stmt = $prep->fetchAll();
+        foreach ($stmt as $costrow) {
+            $temptwo=$temptwo+$costrow['FreightCharge'];
+        } 
+        
+        $tempthree=$tempthree+$temptwo;
+        
+        
+        if (($temptwo<>'0.00') and ($temptwo)) {
+            array_push($clientids, $row['CustomerID']);
+            
+            $tarow= ' ';
+            
+            $tarow.= '<tr><td><a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'. $row['CompanyName'].'</a></td><td>';
+            
 
+            $sql = "SELECT * FROM Orders WHERE CustomerID=?
+            AND status < '108' 
+            AND status > '98' 
+            ORDER BY collectiondate ASC 
+            LIMIT 0 , 1";
+            
+            $prep = $dbh->prepare($sql);
+            $prep->execute([$row['CustomerID']]);
+            $stmt = $prep->fetchAll();
+            foreach ($stmt as $firstrow) {
+                $tarow.= date('D j M Y', strtotime($firstrow['collectiondate']));
+            }
+            $tarow.='</td><td>'. date('D j M Y', strtotime($lastrow['collectiondate']));
+            
+            $temptwo= number_format($temptwo, 2, '.', '');
+            
+            $tarow.='</td><td class="rh">  &'. $globalprefrow['currencysymbol']; 
+            $tarow.= $temptwo; 
+            $tarow.= '</td></tr>';
+            
 
+            $trow.=$tarow;
+            
 
-
-$temptwo=''; $tempdate=$lastrow['collectiondate']; 
-$sqlcostage = "SELECT * FROM Orders WHERE CustomerID = '$CustomerID' 
-AND status > '98' 
-AND status < '108' 
-AND collectiondate <= '$tempdate'
-And FreightCharge <> '0.00'
- ";
-$sql_resultcost = mysql_query($sqlcostage,$conn_id); 
-while ($costrow = mysql_fetch_array($sql_resultcost)) { extract($costrow); $temptwo=$temptwo+$costrow['FreightCharge']; } 
-
-$tempthree=$tempthree+$temptwo;
-
-
-if (($temptwo<>'0.00') and ($temptwo))
-{
-array_push($clientids, "$CustomerID");
-
-$tarow= ' ';
-
-// $tarow= ' <tr><td> </td><td> </td><td> </td><td> </td></tr>';
-$tarow=$tarow. '<tr><td><a href="new_cojm_client.php?clientid='.$CustomerID.'">'. $CompanyName.'</a></td><td>';
-
-
-
-$firstdate = "SELECT * FROM Orders WHERE CustomerID=$CustomerID AND status < '108' AND status > '98' ORDER BY collectiondate ASC LIMIT 0 , 1";
-$sql_result_first = mysql_query($firstdate,$conn_id);
-while ($firstrow = mysql_fetch_array($sql_result_first)) { extract($firstrow); 
-$tarow=$tarow.date('D j M Y', strtotime($firstrow['collectiondate']));
-}
-
-
-
-
-$tarow=$tarow.'</td><td>'. date('D j M Y', strtotime($lastrow['collectiondate']));
-
-$temptwo= number_format($temptwo, 2, '.', '');
-
-$tarow=$tarow.'</td><td class="rh">  &'. $globalprefrow['currencysymbol']; 
-$tarow=$tarow. $temptwo; 
-$tarow=$tarow. '</td></tr>';
-
-
-
-$trow=$trow.$tarow;
-
-
-
-
-
-
-
-
-
-
-
-
-
-} // ends loop for uninvoiced jobs > 0.00
-
-} // end check for last collection date order loop
-
+        } // ends loop for uninvoiced jobs > 0.00
+    } // end check for last collection date order loop
 } // ends loop clients last databased invoice date
 
 
@@ -159,23 +152,23 @@ echo '<div class="Post clearfix">
 
 
 
-$query = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient=1 ORDER BY CompanyName";
-$result_id = mysql_query ($query, $conn_id);
-while (list ($CustomerID, $CompanyName) = mysql_fetch_row ($result_id))
-{
+$sql = "SELECT CustomerID, CompanyName FROM Clients WHERE isactiveclient=1 ORDER BY CompanyName";
 
-if(in_array($CustomerID, $clientids))
-	{
-	$CustomerID = htmlspecialchars ($CustomerID);
-	$CompanyName = htmlspecialchars ($CompanyName);
-		print"<option "; print ("value=\"$CustomerID\">$CompanyName</option>\n");
-}}
+
+$prep = $dbh->query($sql);
+$stmt = $prep->fetchAll();
+    
+foreach ($stmt as $crow) {
+    if (in_array($crow['CustomerID'], $clientids)) {
+        $CompanyName = htmlspecialchars ($crow['CompanyName']);
+        print"<option ";
+        echo ' value="'.$crow['CustomerID'].'">'.$CompanyName.'</option>';
+    }
+}
+
+echo ' </select>';
 
 echo '
-</select>';
-
-echo '
-
 <a id="clientlink" class="showclient" title="Client Details" target="_blank" href="new_cojm_client.php"> </a>
 </fieldset>
 <fieldset><label for="invoiceselectdep" class="fieldLabel"> Department : </label>';
@@ -189,57 +182,52 @@ echo '
 $newjobclientid=$row['CustomerID'];
 $temp=$row['orderdep'];
 
- $query = "
+    echo '<select class="ui-state-default ui-corner-left" id="invoiceselectdep" name="invoiceselectdep" >
+    <option value="">All Departments</option>';
+
+
+
+$sql = "
  SELECT depnumber, depname, CompanyName, CustomerID 
  FROM clientdep, Clients
  WHERE clientdep.associatedclient = Clients.CustomerID 
  AND clientdep.isactivedep='1' 
  ORDER BY Clients.CompanyName, clientdep.depname"; 
 
-$result_id = mysql_query ($query, $conn_id);  
-$sumtot=mysql_affected_rows();
-
-// echo $sumtot.' Department(s) : ';	
-
-echo '<select class="ui-state-default ui-corner-left" id="invoiceselectdep" name="invoiceselectdep" >
-<option value="">All Departments</option>';
- while (list ($CustomerIDlist, $CompanyName, $clientname) = mysql_fetch_row ($result_id)) { 
-$CustomerID = htmlspecialchars ($CustomerID); 
-$CompanyName = htmlspecialchars($CompanyName); 
-
-
-
-$temptwod='0.00';
-
-$sqlcostaged = "SELECT * FROM Orders WHERE orderdep = '$CustomerIDlist' 
-AND status > '98' 
-AND status < '108' ";
-$sql_resultcostd = mysql_query($sqlcostaged,$conn_id); 
-while ($costrowd = mysql_fetch_array($sql_resultcostd)) {
-    extract($costrowd); 
-    $temptwod=floatval($temptwod+$costrowd['FreightCharge']); } 
-
-$depcharge= number_format(floatval($temptwod), 2, '.', '');
+$prep = $dbh->query($sql);
+$stmt = $prep->fetchAll();
+foreach ($stmt as $drow) {
+    
+    $temptwod='0.00';
+    
+    $sql = "SELECT * FROM Orders WHERE orderdep = ?
+    AND status > '98' 
+    AND status < '108' ";
+    
+    
+    $prep = $dbh->prepare($sql);
+    $prep->execute([$drow['depnumber']]);
+    $stmt = $prep->fetchAll();
+    foreach ($stmt as $costrowd) {
+        $temptwod=floatval($temptwod+$costrowd['FreightCharge']);
+    }
+    
+    $depcharge= number_format(floatval($temptwod), 2, '.', '');
+    
 
 
-
- if ($depcharge<>0.00) {
-
-print'<option ';
-
-if ($CustomerIDlist==$row['orderdep']) { echo ' SELECTED '; }
-
-
-
-echo 'value="'.$CustomerIDlist.'">&'.$globalprefrow['currencysymbol'].' '.$depcharge.' '.$clientname.' -- '.$CompanyName.'</option>';
-
-$depselectjs.='  
-
-if ( newdep=='.$CustomerIDlist.') { $("#pageclientid").val("'.$CustomerID.'"); } 
-';
-
-
- } // ends check for charge>0
+    if ($depcharge<>0.00) {
+    
+        print'<option ';
+        echo 'value="'.$drow['depnumber'].'">&'.$globalprefrow['currencysymbol'].' '.$depcharge.' '.$drow['CompanyName'].' -- '.$drow['depname'].'</option>';
+        
+        $depselectjs.='  
+        
+        if ( newdep=='.$drow['depnumber'].') { $("#pageclientid").val("'.$drow['CustomerID'].'"); } 
+        ';
+        
+    
+    } // ends check for charge>0
 
 } // ends list of departments 
 

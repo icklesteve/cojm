@@ -31,17 +31,26 @@ include "cojmmenu.php";
 
 
 ?><div class="Post">
-	<div class="ui-widget">	<div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto; ">
+<div class="ui-widget">	<div class="ui-state-highlight ui-corner-all" style="padding: 0.5em; width:auto; ">
 
 <form action="#" method="post" >
 <input type="hidden" name="page" value="selectservice">
 
-<select class="ui-state-highlight ui-corner-left" name="serviceid"><?php 
-$query = "SELECT ServiceID, Service FROM Services 
+<select class="ui-state-highlight ui-corner-left" name="serviceid"><?php
+
+$sql = "SELECT * FROM Services 
 ORDER BY activeservice DESC, serviceorder DESC, ServiceID ASC";
-$result_id = mysql_query ($query, $conn_id); while (list ($ServiceID, $Service) = mysql_fetch_row ($result_id)) { 
-$ServiceID = htmlspecialchars ($ServiceID); $Service = htmlspecialchars ($Service); print"<option "; 
-if ($ServiceID == $thisserviceid) {echo "SELECTED "; } ; print ("value=\"$ServiceID\">$Service</option>\n");} ?></select>
+
+$stmt = $dbh->query($sql);
+$data = $stmt->fetchAll();
+foreach ($data as $s) {
+    $Service = htmlspecialchars ($s['Service']);
+    print"<option "; 
+    if ($s['ServiceID'] == $thisserviceid) { echo "SELECTED "; }
+    echo 'value="'.$s['ServiceID'].'">'.$Service.'</option>';
+}
+
+?></select>
 
 <button type="submit"> Select Service </button>
 </form>
@@ -63,12 +72,14 @@ if ($ServiceID == $thisserviceid) {echo "SELECTED "; } ; print ("value=\"$Servic
 <input type="hidden" name="formbirthday" value="<?php echo date("U");  ?>">
 <?php
 if ($page=='createnew') {
-$thisserviceid='';
+    $thisserviceid='';
 }
 
-$sql = "SELECT * FROM Services WHERE ServiceID = '$thisserviceid' LIMIT 1"; $sql_result = mysql_query($sql,$conn_id)  or mysql_error(); 
-$row=mysql_fetch_array($sql_result);
+$sql = "SELECT * FROM Services WHERE ServiceID = ? LIMIT 1";
 
+$statement = $dbh->prepare($sql);
+$statement->execute([$thisserviceid]);
+$row = $statement->fetch(PDO::FETCH_ASSOC);
 
 // batchdropcount now used to not display service in main index screen
 
@@ -93,13 +104,7 @@ Which order displayed in service dropdowns
 
 <fieldset><label for="name" class="fieldLabel"> Price Ex VAT </label>
  &<?php echo $globalprefrow["currencysymbol"];?> <input type="text"  size="6" class="caps ui-state-default ui-corner-all" 
- name="Price" value="<?php 
-
-// echo number_format($row['Price'], 4, '.', '');
-
-echo(float)$row['Price'];
-
- ?>">
+ name="Price" value="<?php echo(float)$row['Price']; ?>">
 
  
 <select class="ui-state-default ui-corner-left" name="vatband"> 
@@ -135,17 +140,9 @@ echo '<option ';  if ($thisslatime=='00:00:17') { echo 'SELECTED'; } echo ' valu
 echo '<option ';  if ($thisslatime=='00:00:18') { echo 'SELECTED'; } echo ' value="00:00:18">Next 6PM </option>';
 echo '</select>';
 
-
-
-
-
-// echo '<input type="text" class="caps ui-state-default ui-corner-all" name="slatime" size="8" value="'. $row['slatime'].'"> HH:mm:ss From job creation to target PU';
-
 echo '</fieldset>
 
-
 <div class="vpad"> </div>
-
 <fieldset><label for="name" class="fieldLabel"> Delivery SLA </label>';
 
 $thissldtime=$row['sldtime'];
@@ -198,7 +195,7 @@ echo '</select>';
 
 <div style="position:relative; float:left; padding-left:50px;">
  
- <table style="">
+ <table>
  <tbody>
 <tr><td>  Active Service </td> <td>
 <input type="checkbox" name="activeservice" value="1" <?php if ($row['activeservice']>0) { echo 'checked';} ?> > 
@@ -282,13 +279,6 @@ echo '</select>';
 }
 
 
-
-
-
-
-
-
-
 echo '<div class=" vpad"></div><table class="acc" ><tbody>';
 
 $rpttext='<tr>
@@ -335,106 +325,103 @@ $rpttext=$rpttext.'</tr>';
 // WHERE `Services`.`activeservice` = '1' 
 
 $i='0';
-$query = "SELECT * FROM Services ORDER BY activeservice DESC, serviceorder DESC, ServiceID ASC"; 
-
-$sql_result = mysql_query($query,$conn_id); 
-while ($row = mysql_fetch_array($sql_result)) {
-    extract($row);
-
-$i=$i+'1';
-
-if (($i=='1') or ($i=='11') or ($i=='21')or ($i=='31') or ($i=='41') or ($i=='51') or ($i=='61') or ($i=='71') or ($i=='81')) { echo $rpttext; }
-
-echo '<tr';
- if ($ServiceID == $thisserviceid) { echo ' style="background-color:#'.$globalprefrow['highlightcolour'].'; " '; }
-
-echo '>
-
-<td> 
-
-<form action="#" method="post" >
-<input type="hidden" name="page" value="selectservice" />
-<input type="hidden" name="serviceid" value="'.$ServiceID.'" />
-<button style="width:100%;" type="submit">'.$Service.'</button>
-</form>
-</td>
-<td>'.$serviceorder.'</td>
-
-<td>'.'&'. $globalprefrow["currencysymbol"].$Price.'</td>
-<td>'; 
-if ($vatband=='0') { echo 'Zero'; } 
-if ($vatband=='a') { echo  $globalprefrow['vatbanda'].'%'; }
-if ($vatband=='b') { echo  $globalprefrow['vatbandb'].'%'; }
-
-echo'</td>
-<td>';
-
-if ($activeservice=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
 
 
-echo '</td><td>';
-if ($UnlicensedCount=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
-
-// if (($globalprefrow['inaccuratepostcode'])==0) { 
-echo '</td><td>';
-if ($chargedbybuild=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
-// }
-
-
-echo '</td><td>';
-if ($chargedbycheck=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
-
-
-echo '</td><td>';
-if ($row['canhavemap']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
-
-
-
-
-echo '</td><td>';
-if ($hourlyothercount=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
-
-
-echo '</td><td>';
-if ($asapservice=='1') { echo '<img class="px16" alt="Yes" src="'.$globalprefrow['image5'].'">'; }
-else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
-
-echo '</td><td>';
-if ($cargoservice=='1') { echo '<img class="px16" alt="ASAP" src="'.$globalprefrow['image6'].'">'; }
-else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
-
-
-echo '</td><td>';
-if ($isregular=='1') { echo '<img class="px16" alt="Cargo" src="images/icon_accept.gif">'; }
-else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
-
-if ($globalprefrow['showpostcomm']>'0') {
-echo '</td><td>';
-if ($LicensedCount=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
-
-
-echo '</td><td>';
-
-if ($RMcount=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
-
-}
-
-echo '</td>';
-// <td>'.$slatime.'</td>
-// <td>'.$sldtime.'</td>
-echo '<td>'.$CO2Saved.' </td>
-<td>'.$PM10Saved.' </td>
-<td>'.$servicecomments.' </td> </tr> ';
-
-
+foreach ($data as $s) {    
+    
+        
+    $i=$i+'1';
+    
+    if (($i=='1') or ($i=='11') or ($i=='21')or ($i=='31') or ($i=='41') or ($i=='51') or ($i=='61') or ($i=='71') or ($i=='81')) { echo $rpttext; }
+    
+    echo '<tr';
+    if ($s['ServiceID'] == $thisserviceid) { echo ' style="background-color:#'.$globalprefrow['highlightcolour'].'; " '; }
+    
+    echo '>
+    
+    <td> 
+    
+    <form action="#" method="post" >
+    <input type="hidden" name="page" value="selectservice" />
+    <input type="hidden" name="serviceid" value="'.$s['ServiceID'].'" />
+    <button style="width:100%;" type="submit">'.htmlspecialchars($s['Service']).'</button>
+    </form>
+    </td>
+    <td>'.$s['serviceorder'].'</td>
+    
+    <td>'.'&'. $globalprefrow["currencysymbol"].$s['Price'].'</td>
+    <td>'; 
+    if ($s['vatband']=='0') { echo 'Zero'; } 
+    if ($s['vatband']=='a') { echo  $globalprefrow['vatbanda'].'%'; }
+    if ($s['vatband']=='b') { echo  $globalprefrow['vatbandb'].'%'; }
+    
+    echo'</td>
+    <td>';
+    
+    if ($s['activeservice']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    
+    
+    echo '</td><td>';
+    if ($s['UnlicensedCount']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    
+    // if (($globalprefrow['inaccuratepostcode'])==0) { 
+    echo '</td><td>';
+    if ($s['chargedbybuild']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    // }
+    
+    
+    echo '</td><td>';
+    if ($s['chargedbycheck']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    
+    
+    echo '</td><td>';
+    if ($row['canhavemap']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    
+    
+    
+    
+    echo '</td><td>';
+    if ($s['hourlyothercount']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    
+    
+    echo '</td><td>';
+    if ($s['asapservice']=='1') { echo '<img class="px16" alt="Yes" src="'.$globalprefrow['image5'].'">'; }
+    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    
+    echo '</td><td>';
+    if ($s['cargoservice']=='1') { echo '<img class="px16" alt="ASAP" src="'.$globalprefrow['image6'].'">'; }
+    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    
+    
+    echo '</td><td>';
+    if ($s['isregular']=='1') { echo '<img class="px16" alt="Cargo" src="images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    
+    if ($globalprefrow['showpostcomm']>'0') {
+    echo '</td><td>';
+    if ($s['LicensedCount']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    
+    
+    echo '</td><td>';
+    
+    if ($s['RMcount']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    
+    }
+    
+    echo '</td>';
+    // <td>'.$slatime.'</td>
+    // <td>'.$sldtime.'</td>
+    echo '<td>'.$s['CO2Saved'].' </td>
+    <td>'.$s['PM10Saved'].' </td>
+    <td>'.$s['servicecomments'].' </td> </tr> ';
 
 } 
 

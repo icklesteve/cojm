@@ -1,6 +1,6 @@
 //     COJM Courier Online Operations Management
 //     cojm1.3.js - Main Javascript File
-//     Copyright (C) 2016 S.Young cojm.co.uk
+//     Copyright (C) 2017 S.Young cojm.co.uk
 //
 //    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU Affero General Public License as
@@ -4053,10 +4053,6 @@ var Plugins;
 
 
 
-
-
-
-
     $.fn.setCursorPosition = function (pos) {
         this.each(function (index, elem) {
             if (elem.setSelectionRange) {
@@ -4071,15 +4067,6 @@ var Plugins;
         });
         return this;
     };
-
-
-
-
-
-
-
-
-
 
 
     // Returns a function, that, as long as it continues to be invoked, will not
@@ -4218,7 +4205,7 @@ var Plugins;
     
 
     
-    
+   
     
     
     

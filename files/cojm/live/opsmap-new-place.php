@@ -23,12 +23,11 @@ if (isset($_POST['opsmapid'])) { $opsmapid=trim($_POST['opsmapid']);} else {$ops
 
 <?php
 
-$query = "SELECT * FROM opsmap WHERE opsmapid=".$opsmapid ; 
-$sql_result = mysql_query ($query, $conn_id);  
-$sumtot=mysql_affected_rows();
-if ($sumtot>'0') {
-    while ($row = mysql_fetch_array($sql_result)) {
-        extract($row);
+$query = "SELECT * FROM opsmap WHERE opsmapid= ? ";
+$statement = $dbh->prepare($query);
+$statement->execute([$opsmapid]);
+$row = $statement->fetch(PDO::FETCH_ASSOC);
+        
         $type=$row['type'];
         $opsname=$row['opsname'];
         $opsmapid=$row['opsmapid'];
@@ -38,8 +37,7 @@ if ($sumtot>'0') {
         $inarchive=$row['inarchive'];
         $initiallat=$row['lat'];
         $initiallon=$row['lng'];
-    }
-}
+
 
 if (!$initiallat) {  $initiallat=$globalprefrow['glob1']; }
 if (!$initiallon) {  $initiallon=$globalprefrow['glob2']; }
@@ -188,6 +186,7 @@ function initialize() {
         $('#gmap_wrapper').css('height', (h - offsetTop));
     }).resize();
 
+    
 }
 
 google.maps.event.addDomListener(window, 'load', initialize); 

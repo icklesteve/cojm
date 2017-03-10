@@ -832,7 +832,7 @@ if ($result) {
 
 
     foreach ($result as $audrow) {
-        $rowbrowser = new Browser($agent_string=$audrow['auditbrowser']); 
+        $rowbrowser = new cBrowser($agent_string=$audrow['auditbrowser']); 
         $rowplatform=$rowbrowser->getPlatform();
         $rowversion=$rowbrowser->getVersion();
         $rowbrowsername=$rowbrowser->getBrowser();
@@ -2276,7 +2276,7 @@ return $money; }
      *
      */
  
-    class Browser {
+    class cBrowser {
         private $_agent = '';
         private $_browser_name = '';
         private $_version = '';

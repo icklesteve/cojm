@@ -38,7 +38,6 @@ $ftp_server=$globalprefrow['backupftpserver']; // eg. ftp.yourdomainname.com
 
 
 
-
 $ftp_path="/".date('Y').'-'.date('m')."/"; // can be just "/" or "/public_html/securefoldername/"
 
 // $ftp_path="/public_html/backups/".$nowyear."/"; // can be just "/" or "/public_html/securefoldername/"
@@ -46,7 +45,6 @@ $ftp_path="/".date('Y').'-'.date('m')."/"; // can be just "/" or "/public_html/s
 
 /****************************************************************************************
 The settings below are for the more the more advanced user  - in the majority of cases no changes will be required below. */
-define ('CHARSET',"utf8"); // sets the charset of your database for communication
 define('NEWLINE',"\n"); //email attachment - if backup file is included within email body then change this to "\r\n"
 define('LOG_REPORTS_MAX', 600);//the total number of reports to retain - set this to any number you wish (better to keep below 50 as all reports are included in the email)
 $save_backup_zip_file_to_server = 1; // if set to 1 then the backup files will be saved in the folder: /phpMySQLAutoBackup/backups/

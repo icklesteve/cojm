@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	phpmysqlautobackup_extras.php 
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -324,13 +324,13 @@ class dbc extends PDO
  protected static $instance;
 
  public function __construct()
- {   
+ {
    $options = array(PDO::ATTR_PERSISTENT => true,
    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES ".CHARSET // this command will be executed during every connection to server - suggested by: vit.bares@gmail.com
    );
    try {
-        $this->dbconn = new PDO(DBDRIVER.":host=".DBHOST.";port=".DBPORT.";dbname=".DBNAME,DBUSER,DBPASS,$options);
+        $this->dbconn = $GLOBALS['dbh'];
         return $this->dbconn;
        }
     catch (PDOException $e){ $this->reportDBError($e->getMessage()); }   

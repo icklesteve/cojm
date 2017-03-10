@@ -115,36 +115,40 @@ include "cojmmenu.php";
 
 $expensetext='';
 
-$query = "SELECT expensecode, smallexpensename FROM expensecodes ORDER BY expensecode"; 
-
-$result_id = mysql_query ($query, $conn_id);
-
+$sql = "SELECT expensecode, smallexpensename FROM expensecodes ORDER BY expensecode"; 
 
 echo ' <option value=""> Select Expense Code </option> ';
 
-while (list ($expensecode, $smallexpensename) = mysql_fetch_row ($result_id)) {  
-    $expensecode = htmlspecialchars ($expensecode);
-    $smallexpensename = htmlspecialchars ($smallexpensename); 
+
+$stmt = $dbh->query($sql);
+$data = $stmt->fetchAll();
+
+foreach ($data as $e) {
+    $smallexpensename = htmlspecialchars ($e['smallexpensename']); 
     if ($smallexpensename=='') { $smallexpensename=' &nbsp; '; }
     print"<option ";
-    print ("value=\"$expensecode\">$smallexpensename </option>\n");
+    print 'value="'.$e['expensecode'].'">'.$smallexpensename.' </option>';
 } ?>
 </select>
 <span id="expensedescription"> </span>
 </fieldset> 
- 
 
- 
+
+
 <fieldset id="riderselect" class="hideuntilneeded"><label class="fieldLabel">
 <?php echo $globalprefrow['glob5'].'</label>';
- 
-$query = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID"; 
-$result_id = mysql_query ($query, $conn_id); 
-print ("<select class=\"ui-state-default ui-corner-left\" name=\"cyclistref\" id=\"cyclistref\">\n"); 
-while (list ($CyclistID, $cojmname) = mysql_fetch_row ($result_id)) {
-    print ("<option value=\"$CyclistID\">$cojmname</option>\n");
-}
 
+print ("<select class=\"ui-state-default ui-corner-left\" name=\"cyclistref\" id=\"cyclistref\">\n");
+ 
+$sql = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID";
+
+
+$stmt = $dbh->query($sql);
+$data = $stmt->fetchAll();
+
+foreach ($data as $c) {
+    echo '<option value="'.$c['CyclistID'].'">'.htmlspecialchars($c['cojmname']).'</option>';
+}
 
 ?>
 </select>

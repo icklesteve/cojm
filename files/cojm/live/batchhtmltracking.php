@@ -25,7 +25,8 @@ if (!isset($_POST['gpxarray'])) {
 
     echo " <h1> No Job ID's passed, please go back to last screen and re-submit. </h1> ";
 
-} else {
+}
+else {
 
     include "C4uconnect.php";
     
@@ -81,8 +82,6 @@ if (!isset($_POST['gpxarray'])) {
     
     // $outputtype=$_POST['outputtype'];
     $projectname=trim($_POST['projectname']);
-    
-    
     
     
     // if ($projectname=='')  { $projectname==''; }
@@ -326,17 +325,22 @@ if (!isset($_POST['gpxarray'])) {
         
             $testfile="cache/jstrack/".date('Y', strtotime($orow['ShipDate']))."/".date('m', strtotime($orow['ShipDate']))."/".$orow['ID'].'tracks.js';
             
+            // $error.=' testfile :  '.$testfile;
+            
             if (!file_exists($testfile)) {
+                
+                // $error.=' NOT Found ';
+                
                 $errorjobs++;
                 // mkdir($mypath, 0777, true); 
                 // $output[] = $orow['ID'].' file not found in '.$testfile;
                 
                 $tempID=$orow['ID'];
                 
-                $query="SELECT cojmadmin_id FROM cojm_admin WHERE cojm_admin.cojm_admin_job_ref = ? AND cojm_admin_stillneeded = '1' AND cojmadmin_tracking = '1' LIMIT 0,1";
+                $sql="SELECT cojmadmin_id FROM cojm_admin WHERE cojm_admin.cojm_admin_job_ref = ? AND cojm_admin_stillneeded = '1' AND cojmadmin_tracking = '1' LIMIT 0,1";
 
-                $stmt = $pdo->prepare($query);
-                $stmt->execute([$name]);
+                $stmt = $dbh->prepare($sql);
+                $stmt->execute([$orow['ID']]);
                 $cojmadmin_id = $stmt->fetchColumn();
                 
                 if ($cojmadmin_id) { 
@@ -347,7 +351,8 @@ if (!isset($_POST['gpxarray'])) {
                         VALUES 
                     ('1', ?, '1' )   ";
                     
-                    $dbh->prepare($query)->execute([$tempID]);
+                    $stmt= $dbh->prepare($sql);
+                    $stmt->execute([$orow['ID']]);
                     $error.='<p class="error">'.$orow['ID'].' cache queued.</p>';
                 }
                 // $error.='<p>No html tracking cache for '.$orow['ID'].'</p>';
@@ -356,6 +361,7 @@ if (!isset($_POST['gpxarray'])) {
         }
         else {
         
+        // $error.=' Found ';
             $foundjobs++;
             
             // $output[] = ' var beer=" '.$orow['ID'].'  FOUND "; ';
@@ -448,11 +454,8 @@ if (!isset($_POST['gpxarray'])) {
             });
             ';
             
-            
-            
             $idsuccess[]=' <p title="'.$id.' '.date('jS M Y', strtotime($orow['collectiondate'])).'" id="'.$orow['ID'].'" class="markers">'.date('D jS', strtotime($orow['collectiondate'])).' '.$orow['ID'].'</p>';
-            
-            
+
         }
         
     
@@ -805,6 +808,7 @@ $output[] = '
 if ($error<>'') { $output[] = $error; }
 
  reset($areasuccess);
+ 
 while (list(, $ids) = each($areasuccess)) { 
 $output[] = ' '.$ids.' ';
   }

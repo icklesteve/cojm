@@ -822,7 +822,7 @@ if ($lookuppage) {
         
         
             foreach ($result as $audrow) {
-                $rowbrowser = new cBrowser($agent_string=$audrow['auditbrowser']); 
+                $rowbrowser = new Browser($agent_string=$audrow['auditbrowser']); 
                 $rowplatform=$rowbrowser->getPlatform();
                 $rowversion=$rowbrowser->getVersion();
                 $rowbrowsername=$rowbrowser->getBrowser();
@@ -846,11 +846,11 @@ if ($lookuppage) {
                 <td>'.$audrow['auditpage'].'</td>';
                 if ($showtimes) {
                     echo '<td>';
-                    if ($auditcjtime) { echo $auditcjtime; }
+                    if ($audrow['auditcjtime']) { echo $audrow['auditcjtime']; }
                     echo ' </td> <td>';
-                    if ($auditmidtime) { echo $auditmidtime; }
+                    if ($audrow['auditmidtime']) { echo $audrow['auditmidtime']; }
                     echo ' </td><td> ';
-                    if ($auditpagetime) { echo $auditpagetime; }
+                    if ($audrow['auditpagetime']) { echo $audrow['auditpagetime']; }
                     echo '</td> ';	
                 }
                 echo ' <td>';
@@ -2308,7 +2308,7 @@ return $money; }
      *
      */
  
-    class cBrowser {
+    class Browser {
         private $_agent = '';
         private $_browser_name = '';
         private $_version = '';

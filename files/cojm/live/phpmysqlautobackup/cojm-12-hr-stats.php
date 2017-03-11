@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	cojm-12-hr-stats.php - called by cron to generate stats / do database checks
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -24,7 +24,7 @@ if (isSet($infotext)) {} else {
 	$infotext='';
 	}
 
-
+$backupdescription=" Twice per day Stats ";
 $infotext.= ' <br /> In cojm-12-hr-stats.php ln 2 <br />';
 
 $error=0;

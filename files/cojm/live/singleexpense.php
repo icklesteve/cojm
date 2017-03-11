@@ -84,7 +84,7 @@ include "cojmmenu.php";
 <div id="expensedetails" class="hideuntilneeded ">
 
 <fieldset>
-<label class="fieldLabel"> Amount &<?php echo $globalprefrow['currencysymbol']; ?></label>
+<label class="fieldLabel"> Total Amount &<?php echo $globalprefrow['currencysymbol']; ?></label>
 <input class="caps ui-state-default ui-corner-all" type="text" name="amount" id="amount" size="6">
 </fieldset>
 
@@ -213,6 +213,7 @@ $(document).ready(function() {
         $("#expensecomment").autosize();
     });
     var formbirthday=<?php echo date("U"); ?>;
+    var calcvatpc=<?php echo $globalprefrow['vatbandexpense']; ?>;
     
 	$(function() { // expensedate datepicker
 		var dates = $( "#expensedate" ).datepicker({
@@ -275,10 +276,10 @@ $(document).ready(function() {
         
         // update VAT if set
         
-        var calcvatpc=<?php echo $globalprefrow['vatbandexpense']; ?>;
         if (calcvatpc) {
             
-            var newvat=($("#amount").val() * calcvatpc / 100).toFixed(2);
+            var newvat=(($("#amount").val())-($("#amount").val()/(1+(calcvatpc/100)))).toFixed(2);
+            
             // alert ("New VAT " + newvat);
             if (newvat =="NaN") {
                 alert ("Not a Number");

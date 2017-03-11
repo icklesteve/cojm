@@ -575,7 +575,7 @@ if ($lookuppage) {
 
 
 
-    if ($lookuppage=='newjobservice'){
+    if ($lookuppage=='newjobservice') {
         $serviceid =$_POST['serviceid'];
 
         $query = "SELECT slatime, sldtime, chargedbycheck
@@ -644,261 +644,246 @@ if ($lookuppage) {
     
         $script.='  $("#ajdelldue").removeAttr("selected");
         $("#ajdelldue option[value='."'".$value."'".']").attr("selected", "selected"); ';
-    
-        
     }
 
 
 
-
-
-
-
-
+    
     if ($lookuppage=='cojmaudit') {
-    if (isSet($_GET['auditpage'])) { $view=$_GET['auditpage']; } else { $view=$_POST['auditpage']; }
-    if (isSet($_GET['page'])) { $page=$_GET['page']; } elseif (isSet($_POST['page'])) { $page=$_POST['page']; }
-    if (isSet($_POST['showdebug'])) { $showdebug=$_POST['showdebug']; } else { $showdebug=''; }
-    if (isSet($_POST['showtimes'])) { $showtimes=$_POST['showtimes']; } else { $showtimes=''; }
-    if (isSet($_GET['orderid'])) { $orderid=$_GET['orderid'];   } else { $orderid=$_POST['orderid']; }
-    
-    if  (isset($_POST['clientid'])) { $clientid=trim($_POST['clientid']); } else { $clientid=''; }
-    if  (isset($_POST['clientview'])) { $clientview=trim($_POST['clientview']); } else { $clientview=''; }
-    if  (isset($_POST['newcyclistid'])) { $newcyclistid=trim($_POST['newcyclistid']); } else { $newcyclistid=''; }
-    if (isset($_POST['viewselectdep'])) { $viewselectdep=trim($_POST['viewselectdep']); } else { $viewselectdep=''; }
-    if (isSet($_POST['showpageviews'])) { $showpageviews=$_POST['showpageviews'];   } else { $showpageviews=''; }
-    if  (isset($_POST['from'])) {
-    
-    $start=trim($_POST['from']); 
-    
-    if ($start) {
-
-        if ($clientid=='') { $clientid='all'; }
-        $trackingtext='';
-        $tstart = str_replace("%2F", ":", "$start", $count);
-        $tstart = str_replace("/", ":", "$start", $count);
-        $tstart = str_replace(",", ":", "$tstart", $count);
-        $temp_ar=explode(":","$tstart"); 
-        $day=$temp_ar['0']; 
-        $month=$temp_ar['1']; 
-        $year=$temp_ar['2']; 
-        $hour='00';
-        $minutes='00';
-        $second='00';
-        $sqlstart= date("Y-m-d H:i:s", mktime($hour, $minutes, $second, $month, $day, $year));
-        $dstart= date("U", mktime($hour, $minutes, $second, $month, $day, $year));
-        if ($year) { $inputstart=$day.'/'.$month.'/'.$year; }
-    } else { $inputstart=''; $sqlstart=''; }
-
-} else { // nothing posted
-    $inputstart='';
-    $sqlstart='';
-}
-
-if (isset($_POST['to'])) {
-    $end=trim($_POST['to']);
-
-    if ($end) {
-
-        $tend = str_replace("%2F", ":", "$end", $count);
-        $tend = str_replace("/", ":", "$end", $count);
-        $tend = str_replace(",", ":", "$tend", $count);
-        $temp_ar=explode(":",$tend); 
-        $day=$temp_ar['0']; 
-        $month=$temp_ar['1']; 
-        $year=$temp_ar['2']; 
-        $hour='23';
-        $minutes= '59';
-        $second='59';
-        if ($year) { $inputend=$day.'/'.$month.'/'.$year; }
-        $sqlend= date("Y-m-d H:i:s", mktime(23, 59, 59, $month, $day, $year));
-        $dend=date("U", mktime(23, 59, 59, $month, $day, $year));
-    }
-    else {
-        $sqlend='3000-12-25 23:59:59'; $inputend='';
-    }
-} else { 
-    $inputend='';
-    $sqlend='';
-}
-
-
-$idlocated='';
-
-
-$conditions = array();
-$parameters = array();
-$where = "";
-
-$conditions[] = " `auditdatetime` <> '' ";
-
-if ($sqlstart) {
-    $conditions[] = " auditdatetime >= :sqlstart ";
-    $parameters[":sqlstart"] = $sqlstart;
-}
-if ($sqlend) {
-    $conditions[] = " auditdatetime <= :sqlend ";
-    $parameters[":sqlend"] = $sqlend;
-}
-
-if ($showpageviews<>1) {
-    $conditions[] = " (( `auditpage` <>'') OR  (`audittext` <>'' )) ";
-}
-
-if ($page) {
-    $conditions[] = " auditpage = :auditpage ";
-    $parameters[":auditpage"] = $page;
-}
-
-
-if ($orderid) {
-    $query="SELECT ID FROM Orders WHERE Orders.ID = :id LIMIT 1";
-    $prep = $dbh->prepare($query);
-    $prep->bindParam(':id', $orderid, PDO::PARAM_INT);
-    $prep->execute();
-    $stmt = $prep->fetchAll();    
-    if ($stmt) {
-        $conditions[] = " auditorderid = :auditorderid ";
-        $parameters[":auditorderid"] = $orderid;
-        $idlocated='1';
-    } // ends located
-} // ends orderid present
-
-
-    
-    if (count($conditions) > 0) {
-        $where = implode(' AND ', $conditions);
-    }
-
-    // check if $where is empty string or not
-    $query = "SELECT * FROM  `cojm_audit`
-    " . ($where != "" ? " WHERE $where" : "");
-
-
-$query.= " ORDER BY auditdatetime DESC ";
-
-    try {
-        if (empty($parameters)) {
-            $result = $dbh->query($query);
-        }
-        else {
-            $statement = $dbh->prepare($query);
-            $statement->execute($parameters);
-            if (!$statement) throw new Exception("Query execution error.");
-            $result = $statement->fetchAll();
-            $pdocount = $statement->rowCount();
-        }
-    }
-    catch(Exception $ex)
-    {
-        echo $ex->getMessage();
-    }
-   
-if ($result) {
-
-    echo '<div class="success"> '.$pdocount.' result';
-    if ($pdocount<>'1') { echo 's '; }
-    echo ' found ';
-    echo ' </div><br />'; 
-
-
-    echo ' <table class="orderaudit">
-    <thead>
-    <tr>
-    <th>Time</th>
-    <th>User</th>';
-
-    if ($idlocated=='') {
-        echo ' <th>Job Ref</th>';
-    }
-
-    echo ' <th>Text</th>';
-    if ($showdebug) {
-        echo ' <th>Debug Text</th>';
-    }
-    echo ' <th>Page</th>
-    <th>Action</th>';
-    if ($showtimes) {
-        echo '<th> CJ ms</th><th> MID ms</th><th> PAGE ms</th>';
-    }
-
-
-    echo ' <th colspan="2">Screen Size</th>
-    <th>OS</th>
-    <th>Browser</th>
-    </tr>
-    </thead>
-    <tbody>';
-
-
-    foreach ($result as $audrow) {
-        $rowbrowser = new cBrowser($agent_string=$audrow['auditbrowser']); 
-        $rowplatform=$rowbrowser->getPlatform();
-        $rowversion=$rowbrowser->getVersion();
-        $rowbrowsername=$rowbrowser->getBrowser();
+        if (isSet($_GET['auditpage'])) { $view=$_GET['auditpage']; } else { $view=$_POST['auditpage']; }
+        if (isSet($_GET['page'])) { $page=$_GET['page']; } elseif (isSet($_POST['page'])) { $page=$_POST['page']; }
+        if (isSet($_POST['showdebug'])) { $showdebug=$_POST['showdebug']; } else { $showdebug=''; }
+        if (isSet($_POST['showtimes'])) { $showtimes=$_POST['showtimes']; } else { $showtimes=''; }
+        if (isSet($_GET['orderid'])) { $orderid=$_GET['orderid'];   } else { $orderid=$_POST['orderid']; }
         
-        echo ' <tr>
-        <td>'.date('H:i D jS M Y', strtotime($audrow['auditdatetime'])).'</td>
-        <td>'.$audrow['audituser'].'</td>';
-        if ($idlocated=='') {
-            echo '<td>';
-            if ($audrow['auditorderid']<>'0') {
-                echo '<a target="_blank" class="newwin" href="order.php?id='. $audrow['auditorderid'].'">'. $audrow['auditorderid'].'</a>';
+        if  (isset($_POST['clientid'])) { $clientid=trim($_POST['clientid']); } else { $clientid=''; }
+        if  (isset($_POST['clientview'])) { $clientview=trim($_POST['clientview']); } else { $clientview=''; }
+        if  (isset($_POST['newcyclistid'])) { $newcyclistid=trim($_POST['newcyclistid']); } else { $newcyclistid=''; }
+        if (isset($_POST['viewselectdep'])) { $viewselectdep=trim($_POST['viewselectdep']); } else { $viewselectdep=''; }
+        if (isSet($_POST['showpageviews'])) { $showpageviews=$_POST['showpageviews'];   } else { $showpageviews=''; }
+        if  (isset($_POST['from'])) {
+            $start=trim($_POST['from']); 
+            if ($start) {
+                if ($clientid=='') { $clientid='all'; }
+                $trackingtext='';
+                $tstart = str_replace("%2F", ":", "$start", $count);
+                $tstart = str_replace("/", ":", "$start", $count);
+                $tstart = str_replace(",", ":", "$tstart", $count);
+                $temp_ar=explode(":","$tstart"); 
+                $day=$temp_ar['0']; 
+                $month=$temp_ar['1']; 
+                $year=$temp_ar['2']; 
+                $hour='00';
+                $minutes='00';
+                $second='00';
+                $sqlstart= date("Y-m-d H:i:s", mktime($hour, $minutes, $second, $month, $day, $year));
+                $dstart= date("U", mktime($hour, $minutes, $second, $month, $day, $year));
+                if ($year) { $inputstart=$day.'/'.$month.'/'.$year; }
+            } else { $inputstart=''; $sqlstart=''; }
+        
+        } else { // nothing posted
+            $inputstart='';
+            $sqlstart='';
+        }
+    
+        if (isset($_POST['to'])) {
+            $end=trim($_POST['to']);
+        
+            if ($end) {
+        
+                $tend = str_replace("%2F", ":", "$end", $count);
+                $tend = str_replace("/", ":", "$end", $count);
+                $tend = str_replace(",", ":", "$tend", $count);
+                $temp_ar=explode(":",$tend); 
+                $day=$temp_ar['0']; 
+                $month=$temp_ar['1']; 
+                $year=$temp_ar['2']; 
+                $hour='23';
+                $minutes= '59';
+                $second='59';
+                if ($year) { $inputend=$day.'/'.$month.'/'.$year; }
+                $sqlend= date("Y-m-d H:i:s", mktime(23, 59, 59, $month, $day, $year));
+                $dend=date("U", mktime(23, 59, 59, $month, $day, $year));
             }
-            echo '</td>';
+            else {
+                $sqlend='3000-12-25 23:59:59'; $inputend='';
+            }
+        } else { 
+            $inputend='';
+            $sqlend='';
         }
-        echo ' <td >'.$audrow['audittext'].'</td>';
-        if ($showdebug) {
-            echo '<td>'.$audrow['auditinfotext'].'</td>';
+        
+        
+        $idlocated='';
+    
+    
+        $conditions = array();
+        $parameters = array();
+        $where = "";
+        
+        $conditions[] = " `auditdatetime` <> '' ";
+        
+        if ($sqlstart) {
+            $conditions[] = " auditdatetime >= :sqlstart ";
+            $parameters[":sqlstart"] = $sqlstart;
         }
-        echo '
-        <td>'.$audrow['auditfilename'].'</td>
-        <td>'.$audrow['auditpage'].'</td>';
-        if ($showtimes) {
-            echo '<td>';
-            if ($auditcjtime) { echo $auditcjtime; }
-            echo ' </td> <td>';
-            if ($auditmidtime) { echo $auditmidtime; }
-            echo ' </td><td> ';
-            if ($auditpagetime) { echo $auditpagetime; }
-            echo '</td> ';	
+        if ($sqlend) {
+            $conditions[] = " auditdatetime <= :sqlend ";
+            $parameters[":sqlend"] = $sqlend;
         }
-        echo ' <td>';
-        if ($audrow['auditmobdevice']=='1') {
-            echo'<span class="mobileonline" title="Mobile Device" ></span>';
+        
+        if ($showpageviews<>1) {
+            $conditions[] = " (( `auditpage` <>'') OR  (`audittext` <>'' )) ";
+        }
+        
+        if ($page) {
+            $conditions[] = " auditpage = :auditpage ";
+            $parameters[":auditpage"] = $page;
+        }
+        
+        
+        if ($orderid) {
+            $query="SELECT ID FROM Orders WHERE Orders.ID = :id LIMIT 1";
+            $prep = $dbh->prepare($query);
+            $prep->bindParam(':id', $orderid, PDO::PARAM_INT);
+            $prep->execute();
+            $stmt = $prep->fetchAll();    
+            if ($stmt) {
+                $conditions[] = " auditorderid = :auditorderid ";
+                $parameters[":auditorderid"] = $orderid;
+                $idlocated='1';
+            } // ends located
+        } // ends orderid present
+    
+    
+        
+        if (count($conditions) > 0) {
+            $where = implode(' AND ', $conditions);
+        }
+    
+        // check if $where is empty string or not
+        $query = "SELECT * FROM  `cojm_audit`
+        " . ($where != "" ? " WHERE $where" : "");
+    
+    
+        $query.= " ORDER BY auditdatetime DESC ";
+    
+        try {
+            if (empty($parameters)) {
+                $result = $dbh->query($query);
+            }
+            else {
+                $statement = $dbh->prepare($query);
+                $statement->execute($parameters);
+                if (!$statement) throw new Exception("Query execution error.");
+                $result = $statement->fetchAll();
+                $pdocount = $statement->rowCount();
+            }
+        }
+        catch(Exception $ex)  {
+            echo $ex->getMessage();
+        }
+        
+        if ($result) {
+        
+            echo '<div class="success"> '.$pdocount.' result';
+            if ($pdocount<>'1') { echo 's '; }
+            echo ' found ';
+            echo ' </div><br />'; 
+        
+        
+            echo ' <table class="orderaudit">
+            <thead>
+            <tr>
+            <th>Time</th>
+            <th>User</th>';
+        
+            if ($idlocated=='') {
+                echo ' <th>Job Ref</th>';
+            }
+        
+            echo ' <th>Text</th>';
+            if ($showdebug) {
+                echo ' <th>Debug Text</th>';
+            }
+            echo ' <th>Page</th>
+            <th>Action</th>';
+            if ($showtimes) {
+                echo '<th> CJ ms</th><th> MID ms</th><th> PAGE ms</th>';
+            }
+        
+        
+            echo ' <th colspan="2">Screen Size</th>
+            <th>OS</th>
+            <th>Browser</th>
+            </tr>
+            </thead>
+            <tbody>';
+        
+        
+            foreach ($result as $audrow) {
+                $rowbrowser = new cBrowser($agent_string=$audrow['auditbrowser']); 
+                $rowplatform=$rowbrowser->getPlatform();
+                $rowversion=$rowbrowser->getVersion();
+                $rowbrowsername=$rowbrowser->getBrowser();
+                
+                echo ' <tr>
+                <td>'.date('H:i D jS M Y', strtotime($audrow['auditdatetime'])).'</td>
+                <td>'.$audrow['audituser'].'</td>';
+                if ($idlocated=='') {
+                    echo '<td>';
+                    if ($audrow['auditorderid']<>'0') {
+                        echo '<a target="_blank" class="newwin" href="order.php?id='. $audrow['auditorderid'].'">'. $audrow['auditorderid'].'</a>';
+                    }
+                    echo '</td>';
+                }
+                echo ' <td >'.$audrow['audittext'].'</td>';
+                if ($showdebug) {
+                    echo '<td>'.$audrow['auditinfotext'].'</td>';
+                }
+                echo '
+                <td>'.$audrow['auditfilename'].'</td>
+                <td>'.$audrow['auditpage'].'</td>';
+                if ($showtimes) {
+                    echo '<td>';
+                    if ($auditcjtime) { echo $auditcjtime; }
+                    echo ' </td> <td>';
+                    if ($auditmidtime) { echo $auditmidtime; }
+                    echo ' </td><td> ';
+                    if ($auditpagetime) { echo $auditpagetime; }
+                    echo '</td> ';	
+                }
+                echo ' <td>';
+                if ($audrow['auditmobdevice']=='1') {
+                    echo'<span class="mobileonline" title="Mobile Device" ></span>';
+                }
+                else {
+                    echo '<span class="desktoponline" title="Desktop" ></span>';
+                }
+                echo '</td>
+                <td>';
+                if (($audrow['auditscreenwidth']) or ($audrow['auditscreenheight'])) {
+                    echo $audrow['auditscreenwidth'].' x '.$audrow['auditscreenheight'];
+                }
+                echo '</td> ';
+                echo '<td>' . $rowplatform . ' </td> <td> '.$rowbrowsername;
+                if ($rowversion) { echo ' <br /> v '.$rowversion; }
+                echo '</td>';
+                echo ' </tr>';
+        
+            } // ends row extract
+        
+            echo '</tbody> </table>';
+            
+            
+        //    echo ' auditpage = '.$auditpage;
+            
         }
         else {
-            echo '<span class="desktoponline" title="Desktop" ></span>';
+            echo ' <div class="successinfo" >No Results Found. </div> ';
         }
-        echo '</td>
-        <td>';
-        if (($audrow['auditscreenwidth']) or ($audrow['auditscreenheight'])) {
-            echo $audrow['auditscreenwidth'].' x '.$audrow['auditscreenheight'];
-        }
-        echo '</td> ';
-        echo '<td>' . $rowplatform . ' </td> <td> '.$rowbrowsername;
-        if ($rowversion) { echo ' <br /> v '.$rowversion; }
-        echo '</td>';
-        echo ' </tr>';
-
-    } // ends row extract
-
-    echo '</tbody> </table>';
-    
-    
-//    echo ' auditpage = '.$auditpage;
-    
-}
-else {
-    echo ' <div class="successinfo" >No Results Found. </div> ';
-}
-
-
-
-        
-        
     }
-
+    
 
 
     if ($lookuppage=='invoiceorderlist'){
@@ -1025,11 +1010,7 @@ else {
             }
         
         } // ends rum rows loop
-        
-        
-        
-    
-}
+    }
 
     if (($lookuppage=='individexpense') and (isset($_POST['expenseid']))) {
         if ($globalprefrow['forcehttps']>'0') { if ($serversecure=='') {  exit(); } }
@@ -1081,6 +1062,7 @@ else {
                 $("select#expensecode").val("'.$row['expensecode'].'");
                 $("#expensedescription").html("'.$row['expensedescription'].'");
                 $("#explastupdated").html("'.date('H:i D jS M Y', strtotime($row['expts'])).'");
+                $("#expcr").html("'.date('H:i D jS M Y', strtotime($row['expcr'])).'");                
                 $("#whoto").val("'.$row['whoto'].'");              
                 $("select#cyclistref").val("'.$row['cyclistref'].'");
                 $("#expensedate").val("'. $displaydate.'");  
@@ -1112,6 +1094,7 @@ else {
                 $("select#cyclistref").val("");
                 $("#expensedate").val("");
                 $("#explastupdated").html("");
+                $("#expcr").html("");
                 $("select#paid").val("0");
                 $("#chequeref").val("");
                 $("select#paymentmethod").val("");
@@ -1431,7 +1414,61 @@ else {
 
     if ($lookuppage=='updateexptable') { // update expense tables
         // echo ' Updating Expense Tables ';
-        echo ' <script> $("#explastupdated").html("'.date("H:i ").'Today"); </script> ';
+
+        
+        
+        
+        $sql="
+        SELECT expenseref, expts, paid, expensecost, expensevat, expensedate, whoto, smallexpensename, CyclistID, cojmname, expc1, expc2, expc3, expc4, expc5, expc6, chequeref, description FROM expenses 
+        INNER JOIN Cyclist 
+        INNER JOIN expensecodes
+        ON expenses.cyclistref = Cyclist.CyclistID 
+        AND expenses.expensecode = expensecodes.expensecode 
+        ORDER BY expensedate DESC LIMIT 0,20
+        ";
+        
+        $stmt = $dbh->query($sql);
+        
+        
+        echo ' <table class="acc" id="lastedit" style="float:left;">
+        <caption>Last 20 Expenses by date</caption>
+        <tr>
+        <thead>
+        <th scope="col">Reference</th>
+        <th title="Incl. VAT" scope="col">Net Amount</th>
+        <th scope="col">VAT </th>
+        <th scope="col">Date</th>
+        <th scope="col">'. $globalprefrow['glob5'] .' </th>
+        <th scope="col">Paid to</th>
+        <th scope="col">Type</th>
+        <th scope="col">Method </th>
+        <th scope="col">Comments</th>
+        </tr>
+        </thead>
+        <tbody> ';
+        
+        $loop='';
+        foreach ($stmt as $row) {
+            $loop.= '<tr> <td> <a href="singleexpense.php?expenseref='.$row['expenseref']. '">'.$row['expenseref'].'</a>';     
+            if ($row['paid']<'1') { $loop.= ' UNPAID'; }
+            $loop.= '</td> <td class="rh"> &'. $globalprefrow['currencysymbol']. $row['expensecost']. '</td><td> ';
+            if ($row['expensevat']>'0') { $loop.=' &'.$globalprefrow['currencysymbol']. $row['expensevat']; }
+            $loop.= ' </td> <td class="rh">'. date('D jS M Y', strtotime($row['expensedate'])).'</td> <td>';
+            if ($row['CyclistID']<>'1') { $loop.= $row['cojmname']; }
+            $loop.= '</td> <td>'.$row['whoto'].'</td> <td>'.$row['smallexpensename'].'  </td> <td>';
+            if ($row['expc1']>0) { $loop.= $globalprefrow['gexpc1']; } 
+            if ($row['expc2']>0) { $loop.= $globalprefrow['gexpc2']; } 
+            if ($row['expc3']>0) { $loop.= $globalprefrow['gexpc3']; } 
+            if ($row['expc4']>0) { $loop.= $globalprefrow['gexpc4']; } 
+            if ($row['expc5']>0) { $loop.= $globalprefrow['gexpc5']; } 
+            if ($row['expc6']>0) { $loop.= $globalprefrow['gexpc6'].' '.$row['chequeref']; }
+            $loop.= '</td><td>'. $row['description'].'</td></tr>';
+        } // ends expense ref loop
+        
+        echo $loop;
+        echo ' </tbody> </table> ';        
+        
+        
         $sql="
         SELECT expenseref, expts, paid, expensecost, expensevat, expensedate, whoto, smallexpensename, CyclistID, cojmname, expc1, expc2, expc3, expc4, expc5, expc6, chequeref, description FROM expenses 
         INNER JOIN Cyclist 
@@ -1461,10 +1498,7 @@ else {
         </thead>
         <tbody> ';
         
-        
-        
-        
-        
+        $loop='';
         foreach ($stmt as $row) {
             $loop.= '<tr> <td> <a href="singleexpense.php?expenseref='.$row['expenseref']. '">'.$row['expenseref'].'</a>';     
             if ($row['paid']<'1') { $loop.= ' UNPAID'; }
@@ -1503,32 +1537,30 @@ else {
         <tbody> ';
 
         $sql="
-        SELECT expenseref, paid, expensecost, expensevat, expensedate, whoto, smallexpensename, CyclistID, cojmname, expc1, expc2, expc3, expc4, expc5, expc6, chequeref, description FROM expenses 
+        SELECT expenseref, paid, expensecost, expensevat, expensedate, whoto, smallexpensename, CyclistID, cojmname, expc1, expc2, expc3, expc4, expc5, expc6, chequeref, description, expts, expcr FROM expenses 
         left JOIN Cyclist ON expenses.cyclistref = Cyclist.CyclistID 
         left JOIN expensecodes ON expenses.expensecode = expensecodes.expensecode 
-        ORDER BY expenseref DESC LIMIT 0,10; ";
+        ORDER BY expcr DESC LIMIT 0,10; ";
        
         $stmt = $dbh->query($sql);
         foreach ($stmt as $row) {
             
             echo '
-            <tr> 
-            <td>
+            <tr> <td>
             <a href="singleexpense.php?expenseref='.$row['expenseref']. '">'.$row['expenseref'].'</a>'; 
             
+            if ($row['paid']<1) { echo ' UNPAID'; }
             
-            if ($row['paid']<'1') { echo ' UNPAID'; }
-            
-            echo '</td>
+            echo ' </td>
             <td class="rh"> &'. $globalprefrow['currencysymbol']. $row['expensecost'].
             '</td>
             <td> ';
             
-            if ($row['expensevat']>'0') { echo' &'.$globalprefrow['currencysymbol']. $row['expensevat']; }
+            if ($row['expensevat']>0) { echo' &'.$globalprefrow['currencysymbol']. $row['expensevat']; }
             
             echo '
             </td>
-            <td class="rh">'. date('H:i D jS M Y', strtotime($row['expensedate'])).'</td>
+            <td class="rh">'. date('H:i D jS M Y', strtotime($row['expcr'])).'</td>
             <td>';
             
             if ($row['CyclistID']<>'1') { echo $row['cojmname']; }   

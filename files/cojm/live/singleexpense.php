@@ -188,6 +188,10 @@ foreach ($data as $c) {
         ></textarea>
         </fieldset>
 
+        <fieldset><label class="fieldLabel">Created </label>
+        <span id="expcr"></span>
+        </fieldset>        
+        
         <fieldset><label class="fieldLabel">Last Updated </label>
         <span id="explastupdated"></span>
         </fieldset>
@@ -623,22 +627,19 @@ $(document).ready(function() {
         });
     });    
 
-function downloadJSAtOnload() {
+    function downloadJSAtOnload() {
+        var notblankcheck=$("#expenseid").val();
+        if (notblankcheck) {
+            $("#expensesearchbyid").click();
+        }
 
-    <?php if ($expenseref) {
-    echo ' $("#expensesearchbyid").click(); ';
-    
-} ?>
-
-    $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' }, function() {});
-
-}
-if (window.addEventListener)
-window.addEventListener("load", downloadJSAtOnload, false);
-else if (window.attachEvent)
-window.attachEvent("onload", downloadJSAtOnload);
-else window.onload = downloadJSAtOnload;
-
+        $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' }, function() {});
+    }
+    if (window.addEventListener)
+    window.addEventListener("load", downloadJSAtOnload, false);
+    else if (window.attachEvent)
+    window.attachEvent("onload", downloadJSAtOnload);
+    else window.onload = downloadJSAtOnload;
 });
 
 

@@ -818,46 +818,50 @@ $cronissue='0';
 $sql = "SELECT id, time_last_fired FROM cojm_cron WHERE `currently_running` = '1' ";
 
 try {        
-    $stmt = $dbh->prepare($sql);
-    $stmt->execute();
-    $total = $stmt->rowCount();
+    $stmt = $dbh->query($sql);
     $plainbodytext='';
     // echo ' 964 new :  '. $total;
     while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $plainbodytext.=' CRON Currently running with ID '.$row['id'].'.  Last fired : '. $row['time_last_fired'].'<br />';
+        $plainbodytext.=' CRON Currently running with ID '.$row['id'].'.  Last fired in unix : '. $row['time_last_fired'].'<br />';
         $oldtime=$row['time_last_fired'];
     
-        $plainbodytext.=' row id : '.$row['id'].' row time_last_fired '. $row['time_last_fired'].' total rows found : '.$total.' ' ;
+        $plainbodytext.=' row id : '.$row['id'].' row time_last_fired '. $row['time_last_fired'].'  ' ;
         // echo date('U', strtotime($oldtime));
         // echo ' '.date("U");
+        
+        
+        
+        $textoldtime=date('H:i D M Y', strtotime($oldtime));
 
-        $crondiff=((date("U")-date('U', strtotime($oldtime)))/60);
+        $crondiff=((date("U")-$oldtime)/60);
 
-        echo ' '. ($crondiff).'mins ago ';
+        $plainbodytext.=' oldtime: '.$oldtime.' textoldtime: '.$textoldtime.' was oldest time '. $crondiff.' mins ago.';
+
+
         if ($crondiff>5) {
             
-            $textoldtime=date('H:i D M Y', strtotime($oldtime));
             
             echo '<p> Oldest >5mins ago, resetting cron.';
             $sql = "UPDATE cojm_cron SET currently_running=0 WHERE id=".$row['id'];
             $prep = $dbh->query($sql);
     
-            $plainbodytext .= ' Cron check failed as already running.  
+            $plainbodytextnice = ' Cron check failed as already running.  
             If oldest was more than 5 mins ago this was reset, 
             however you need to contact your admin if you get this message too often.</p>';
 
-            $to = $globalprefrow['emailbcc'];
-            $from= $globalprefrow['emailfrom'];
-        
-            $subject = $globalprefrow['globalshortname']." possible Cron Issue";	
+	
         
         
         
-            $plainbodytext.=$oldtime.' '.$textoldtime.' was oldest time '. $crondiff.' mins ago.';
+
         
-            $plainbodytext.=' There may be an issue with COJMCron, which schedules background jobs.  
+            $plainbodytextnice=' There may be an issue with COJMCron, which schedules background jobs.  
             Further info is available in the main audit log.
             Cron checks failed as already running, cron reset. ';
+            
+            $to = $globalprefrow['emailbcc'];
+            $from= $globalprefrow['emailfrom'];
+            $subject = $globalprefrow['globalshortname']." possible Cron Issue";            
             $headers = 'From: '.$from. PHP_EOL;
             $headers =$headers. 'Return-path: '.$to. PHP_EOL; 
             $headers = $headers . 'Repy-To: '.$to . PHP_EOL.
@@ -926,18 +930,13 @@ catch(PDOException $e) {
 } 
 
 
-
-
 echo '<br /><br />
 </div>';
-
-
 
 ?>
 
 <script type="text/javascript">
 function downloadJSAtOnload() {
-
 var element = document.createElement("script");
 
 element.src = "js/<?php echo $globalprefrow['glob9']; ?>";

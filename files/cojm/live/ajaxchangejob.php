@@ -3494,7 +3494,9 @@ if ($page=='addnewexpense') { //
             $("#expensedate").val("'.date('d-m-Y').'");
             $("select#paid").val("0");
             $("#chequeref").val("");
+            $("#expensedescription").val("");
             $("#explastupdated").html("'.date('H:i D jS M Y').'");
+            $("#expcr").html("'.date('H:i D jS M Y').'");
             $("select#paymentmethod").val("");
             $("#expensecomment").val("");
             $("#expensedescription").val("");

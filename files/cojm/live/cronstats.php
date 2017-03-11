@@ -23,12 +23,12 @@
 
 $df='H:i d M Y';
 
-$nowsecs=date(U);
-$nowday=date(j);
-$nowmonth=date(n);
-$nowyear=date(Y);
-$nowhour=date(G);
-$nowminute=date(i);
+$nowsecs=date('U');
+$nowday=date('j');
+$nowmonth=date('n');
+$nowyear=date('Y');
+$nowhour=date('G');
+$nowminute=date('i');
 
 $sumtot='0';
 $totalbytes='0';

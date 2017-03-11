@@ -122,12 +122,7 @@ if (isset($ftp_username))
  if (!$save_backup_zip_file_to_server) write_backup($dump_buffer, $backup_file_name);
   $transfer_backup =  new transfer_backup();
 
-
-
- 
 // $data = transfer_backup();
-
-
 
 // $transfer_backup_infotext = $transfer_backup[0];
 // $bytes = $transfer_backup[1];
@@ -135,9 +130,6 @@ if (isset($ftp_username))
  $errors.= $transfer_backup->transfer_data($ftp_username,$ftp_password,$ftp_server,$ftp_path,$backup_file_name,$lines_exported,$backupdescription);
 
 
- 
- 
- 
 }
 
 
@@ -170,12 +162,10 @@ if ($send_email_backup) xmail($to_emailaddress,$from_emailaddress, "phpMySQLAuto
  $infotext.= '<p>'."\n\nERRORS: ".$errors.'<br />'.$backup_info.'<br />'.$msg_ftp_backup.'<br />'.$msg_local_backup.'</p>';
 
 
-
 // $infotext.= $transfer_backup_infotext;
 
 
 // echo ' try passwd zip ';
 unlink(BALOCATION."backups/".date("Y").'-'.date("m").'/'.$justgz_file_name);
-
 
 ?>

@@ -127,68 +127,62 @@ function delete_old_backups()
 }
 
 
-class transfer_backup
-{
-      public $error = "";
+class transfer_backup {
+    public $error = "";
 
-      public function transfer_data($ftp_username,$ftp_password,$ftp_server,$ftp_path,$passwdzip_file_name,$lines_exported, $backupdescription)
-      {
-		  global $transfer_backup_infotext;
-       if (function_exists('curl_exec'))
-       {
-
- $ch = curl_init();
+    public function transfer_data($ftp_username,$ftp_password,$ftp_server,$ftp_path,$passwdzip_file_name,$lines_exported, $backupdescription) {
+		 global $transfer_backup_infotext;
+        if (function_exists('curl_exec')) {
+            $ch = curl_init();
+            $ftp_password=REMOTEFTPPASSWD;
  
- $ftp_password=REMOTEFTPPASSWD;
- 
-		   
-        $file=BALOCATION."backups/".date("Y").'-'.date("m").'/'.$passwdzip_file_name;
-        $fp = fopen($file, "r");
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "ftp://$ftp_server/".$passwdzip_file_name);
-		curl_setopt($ch, CURLOPT_USERPWD, "$ftp_username:$ftp_password");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_UPLOAD, 1);
-        curl_setopt($ch, CURLOPT_INFILE, $fp);
-        curl_setopt($ch, CURLOPT_INFILESIZE, filesize($file));
-        curl_setopt($ch, CURLOPT_TRANSFERTEXT, 0);
-        curl_setopt($ch, CURLOPT_REFERER, $_SERVER['HTTP_HOST']." - via COJM");
-        $output = curl_exec($ch);
-        $info = curl_getinfo($ch);
+            $file=BALOCATION."backups/".date("Y").'-'.date("m").'/'.$passwdzip_file_name;
+            $fp = fopen($file, "r");
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "ftp://$ftp_server/".$passwdzip_file_name);
+            curl_setopt($ch, CURLOPT_USERPWD, "$ftp_username:$ftp_password");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_UPLOAD, 1);
+            curl_setopt($ch, CURLOPT_INFILE, $fp);
+            curl_setopt($ch, CURLOPT_INFILESIZE, filesize($file));
+            curl_setopt($ch, CURLOPT_TRANSFERTEXT, 0);
+            curl_setopt($ch, CURLOPT_REFERER, $_SERVER['HTTP_HOST']." - via COJM");
+            $output = curl_exec($ch);
+            $info = curl_getinfo($ch);
 
 		
-// $tempinfotext= '<br /> CURLINFO_PRIMARY_IP : '.$info['primary_ip'];
-// $tempinfotext.= '<br /> namelookup_time : '.$info['namelookup_time'];
-// $tempinfotext.= curl_error($ch);
-// $transfer_backup_infotext.= '<br /> CURLINFO_PRIMARY_IP : '.$info['primary_ip'];
- 
- $actualbytes=$info['size_upload'];
- 
- 
-if ($info['size_upload'] >= 1073741824)
-        {
-            $bytes = number_format($bytes / 1073741824, 2) . ' GB';
-        }
-        elseif ($info['size_upload'] >= 1048576)
-        {
-            $bytes = number_format(($info['size_upload']) / 1048576, 2) . ' MB';
-        }
-        elseif ($info['size_upload'] >= 1024)
-        {
-            $bytes = number_format(($info['size_upload']) / 1024, 2) . ' kB';
-        } 
-		elseif ($info['size_upload'] > 1)
-        {
-            $bytes = $info['size_upload'] . ' bytes';
-        }
-        elseif ($info['size_upload'] == 1)
-        {
-            $bytes = $info['size_upload'] . ' byte';
-        }
-        else
-        {
-            $bytes = '0 bytes';
-        }
+            // $tempinfotext= '<br /> CURLINFO_PRIMARY_IP : '.$info['primary_ip'];
+            // $tempinfotext.= '<br /> namelookup_time : '.$info['namelookup_time'];
+            // $tempinfotext.= curl_error($ch);
+            // $transfer_backup_infotext.= '<br /> CURLINFO_PRIMARY_IP : '.$info['primary_ip'];
+            
+            $actualbytes=$info['size_upload'];
+            
+            
+            if ($info['size_upload'] >= 1073741824)
+            {
+                $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+            }
+            elseif ($info['size_upload'] >= 1048576)
+            {
+                $bytes = number_format(($info['size_upload']) / 1048576, 2) . ' MB';
+            }
+            elseif ($info['size_upload'] >= 1024)
+            {
+                $bytes = number_format(($info['size_upload']) / 1024, 2) . ' kB';
+            } 
+            elseif ($info['size_upload'] > 1)
+            {
+                $bytes = $info['size_upload'] . ' bytes';
+            }
+            elseif ($info['size_upload'] == 1)
+            {
+                $bytes = $info['size_upload'] . ' byte';
+            }
+            else
+            {
+                $bytes = '0 bytes';
+            }
 		
 	 
 if ($info['speed_upload'] >= 1073741824)
@@ -221,7 +215,7 @@ if ($info['speed_upload'] >= 1073741824)
 		
 		
  
- $transfer_backup_infotext.=' <br /> FTPd '. $bytes.' in ' . $info['total_time'] . ' secs, avg '.$speed. '  / sec ';	
+ $transfer_backup_infotext.=' FTPd '. $bytes.' in ' . $info['total_time'] . ' secs, avg '.$speed. '  / sec. ';	
  
  
   // ends check for curl error message
@@ -238,7 +232,9 @@ if ($info['speed_upload'] >= 1073741824)
        $result = $dbc->execute($result);
 
 		
-        if (empty($info['http_code'])) { $this->error = NEWLINE."FTP ERROR - Failed to transfer backup file to remote ftp server ".curl_error($ch); 
+        if (empty($info['http_code'])) {
+            $this->error = NEWLINE."FTP ERROR - Failed to transfer backup file to remote ftp server ".curl_error($ch); 
+            $auditerror=1;
 		}
         else
         {

@@ -114,7 +114,6 @@ include "cojmmenu.php";
 <?php 
 
 $expensetext='';
-
 $sql = "SELECT expensecode, smallexpensename FROM expensecodes ORDER BY expensecode"; 
 
 echo ' <option value=""> Select Expense Code </option> ';
@@ -195,11 +194,8 @@ foreach ($data as $c) {
         <fieldset><label class="fieldLabel">Last Updated </label>
         <span id="explastupdated"></span>
         </fieldset>
-        
-        
-            <input type="hidden" id="newcomment" name="newcomment" value="">
-
-            <hr />
+        <input type="hidden" id="newcomment" name="newcomment" value="">
+        <hr />
         </div>
     </div>
 

@@ -69,11 +69,12 @@ if ($globalprefrow['showdebug']>0) { // error handler function
 GLOBAL $infotext;
 GLOBAL $backupinfotext;
 GLOBAL $backupruntype;
+GLOBAL $auditerror;
 
 $backupdescription='';
 $transfer_backup_infotext='';
 $totalorders='0';
-
+$auditerror=0;
 
 #cojmcron.php
 
@@ -92,10 +93,12 @@ require "cronstats.php";
 $ranacron=0;
 
 if ($sumtot) {
-    $infotext.=  ' already running '.$sumtot;
+    $ranacron=1;
+    $infotext.=  ' already running '.$sumtot.'  cronjob. ';
 	// adds comment to audit log to say tried & failed
 	$backupruntype="No Cron Ran";
 	$backupdescription="COJM Cron job already running ";
+    $auditerror=1;
 } else {
     $infotext.= ' nothing running at moment. ';
 
@@ -115,7 +118,17 @@ if ($sumtot) {
         $ranacron=1;
         $infotext.= ' Once per day after 6pm run.php included ';
         $stmt = $dbh->query("UPDATE cojm_cron SET currently_running=1 WHERE ID='1' LIMIT 1");
-        require  "phpmysqlautobackup/run.php";
+
+        try {
+            require  "phpmysqlautobackup/run.php";
+        }
+        
+        catch(Exception $e) {
+            $auditerror=1;
+            $infotext.= "Message : " . $e->getMessage();
+            $infotext.= "Code : " . $e->getCode();
+        }
+        
         $sql = "UPDATE cojm_cron SET currently_running=0 , time_last_fired=".date("U")." WHERE ID='1' LIMIT 1";	
         $stmt = $dbh->query($sql);
     }
@@ -198,19 +211,38 @@ $infotext.=  '<br /> finished cojmcron in '.$cj_echo.'ms. ';
 $backupdescription.= '<br />'.$transfer_backup_infotext;
 
 
-if ($ranacron==1)	{
+if ($ranacron==1) {
     try {
 
         $auditinfotext = str_replace("'", ":", "$infotext", $count);
         $auditinfotext = str_replace("'", ":", "$infotext", $count);
 
-        $query = " INSERT INTO cojm_audit (audituser,auditpage,auditfilename,audittext,auditpagetime,auditinfotext,auditorderid)
-    VALUES ('CojmCron','cojmcron.php', :backupruntype , :backupdescription , :cj_echo , :auditinfotext ,'0') ";
+        $query = " INSERT INTO cojm_audit 
+        (audituser,
+        auditpage,
+        auditfilename,
+        audittext,
+        auditpagetime,
+        auditinfotext,
+        auditorderid,
+        auditerror)
+    VALUES 
+    ('CojmCron',
+    'cojmcron.php',
+    :backupruntype ,
+    :backupdescription , 
+    :cj_msec ,
+    :auditinfotext ,
+    '0',
+    :auditerror
+    ) 
+    ";
         $stmt = $dbh->prepare($query);
         $stmt->bindParam(':backupruntype', $backupruntype, PDO::PARAM_INT);
         $stmt->bindParam(':backupdescription', $backupdescription, PDO::PARAM_INT);
-        $stmt->bindParam(':cj_echo', $cj_echo, PDO::PARAM_INT);
+        $stmt->bindParam(':cj_msec', $cj_msec, PDO::PARAM_INT);
         $stmt->bindParam(':auditinfotext', $auditinfotext, PDO::PARAM_INT);
+        $stmt->bindParam(':auditerror', $auditerror, PDO::PARAM_INT);
         $stmt->execute();
 
         $newauditid = $dbh->lastInsertId();

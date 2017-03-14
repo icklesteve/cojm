@@ -320,23 +320,25 @@ $(function () { // Document is ready
 
         
         
-        
         if (initialstatus > 99) {
+            
+            
+            $("#Post").addClass("complete"); 
             $(".chngfav").hide();
             $(".activewheneditable").hide();
-        } else {
-            $(".chngfav").show();
-            $(".activewheneditable").show();
-        }
-        
-        
-        
-
-
-        if (initialstatus > 99) {
             $(".deleteord").hide();
         } else {
+
+        $(".chngfav").show();
+            $(".activewheneditable").show();
+            $("#Post").removeClass("complete");
             $(".deleteord").show();
+        }
+        
+        if (initialstatus > 99) {
+            $("#buttoncancelpricelock").addClass("buttoncancelpricelocklocked");
+        } else {
+            $("#buttoncancelpricelock").removeClass("buttoncancelpricelocklocked");
         }
 
 
@@ -434,11 +436,7 @@ $(function () { // Document is ready
         }
 
 
-        if (initialstatus > 99) {
-            $("#buttoncancelpricelock").addClass("buttoncancelpricelocklocked");
-        } else {
-            $("#buttoncancelpricelock").removeClass("buttoncancelpricelocklocked");
-        }
+
 
 
 

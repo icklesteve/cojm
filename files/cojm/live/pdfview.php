@@ -49,7 +49,7 @@ $adminmenu ="0";
 $invoicemenu = "1";
 $filename='pdfview.php';
 
-$tempthree='';
+$tempthree='0';
 $trow='';
 $tarow='';
 
@@ -76,7 +76,7 @@ foreach ($stmt as $row) {
     $stmt = $prep->fetchAll();
     foreach ($stmt as $lastrow) {
 
-        $temptwo=''; 
+        $temptwo='0'; 
 
         $tempdate=$lastrow['collectiondate']; 
         
@@ -180,7 +180,6 @@ echo '
 // echo 'orderdep is '.$row['orderdep']; 
 
 $newjobclientid=$row['CustomerID'];
-$temp=$row['orderdep'];
 
     echo '<select class="ui-state-default ui-corner-left" id="invoiceselectdep" name="invoiceselectdep" >
     <option value="">All Departments</option>';

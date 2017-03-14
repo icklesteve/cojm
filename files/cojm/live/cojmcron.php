@@ -99,7 +99,8 @@ if ($sumtot) {
 	$backupruntype="No Cron Ran";
 	$backupdescription="COJM Cron job already running ";
     $auditerror=1;
-} else {
+}
+else {
     $infotext.= ' nothing running at moment. ';
 
     // every 6 hours, after 6am, 12pm and 18pm and 00 hrs
@@ -164,7 +165,7 @@ if ($sumtot) {
         $ranacron=1;        
         $sql = "UPDATE cojm_cron SET currently_running=1 WHERE ID='3' LIMIT 1";
         $stmt = $dbh->query($sql);
-        $infotext.= ' 12 hour cojm stats update ';
+        // $infotext.= ' 12 hour cojm stats update '.$lastran3.' '.$shouldhavelastran7;
         require  "phpmysqlautobackup/cojm-12-hr-stats.php";
         $sql = "UPDATE cojm_cron SET currently_running=0 , time_last_fired=".date("U")." WHERE ID='3' LIMIT 1";
         $stmt = $dbh->query($sql);

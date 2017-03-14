@@ -99,26 +99,26 @@ foreach ($stmt as $cojmcron) {
 
 
 // once a day after 1800
-if ($nowhour>17) { $shouldhavelastran1= mktime( 18, 00, 00, $nowmonth, $nowday, $nowyear ); }
-if ($nowhour<18) { $shouldhavelastran1= mktime( 18, 00, 00, $nowmonth, $nowday-1, $nowyear ); }
+if ($nowhour>17) { $shouldhavelastran1= mktime( 18, 0, 0, $nowmonth, $nowday, $nowyear ); }
+if ($nowhour<18) { $shouldhavelastran1= mktime( 18, 0, 0, $nowmonth, $nowday-1, $nowyear ); }
 
 // on the hour each day
-$shouldhavelastran2= mktime( $nowhour, 00, 00, $nowmonth, $nowday, $nowyear );
+$shouldhavelastran2= mktime( $nowhour, 0, 0, $nowmonth, $nowday, $nowyear );
 
 // 1am on a Sunday morning
-$shouldhavelastran3= mktime( 01, 00, 00, $nowmonth, ($nowday-date("w")), $nowyear );
+$shouldhavelastran3= mktime( 1, 0, 0, $nowmonth, ($nowday-date("w")), $nowyear );
 
 
 // half hourly
-if ($nowminute>30 ) { $shouldhavelastran4= mktime( $nowhour, 30, 00, $nowmonth, $nowday, $nowyear ); }
-else { $shouldhavelastran4= mktime( $nowhour, 00, 00, $nowmonth, $nowday, $nowyear ); }
+if ($nowminute>30 ) { $shouldhavelastran4= mktime( $nowhour, 30, 0, $nowmonth, $nowday, $nowyear ); }
+else { $shouldhavelastran4= mktime( $nowhour, 0, 0, $nowmonth, $nowday, $nowyear ); }
 
 
 // 2am first day of the month ( backup report )
 if ($nowhour>2) {
-$shouldhavelastran5= mktime( 02, 00, 00, $nowmonth, 01, $nowyear );
+$shouldhavelastran5= mktime( 2, 0, 0, $nowmonth, 1, $nowyear );
 } else {
-	$shouldhavelastran5= mktime( 02, 00, 00, $nowmonth-1, 01, $nowyear );
+	$shouldhavelastran5= mktime( 2, 0, 0, $nowmonth-1, 1, $nowyear );
 }
 
 
@@ -126,17 +126,23 @@ $shouldhavelastran5= mktime( 02, 00, 00, $nowmonth, 01, $nowyear );
 
 // one a day after 3am
 if ($nowhour>03) {
-$shouldhavelastran6= mktime( 03, 00, 00, $nowmonth, $nowday, $nowyear );
+$shouldhavelastran6= mktime( 3, 0, 0, $nowmonth, $nowday, $nowyear );
 } else {
-	$shouldhavelastran6= mktime( 03, 00, 00, $nowmonth, $nowday-1, $nowyear );
+	$shouldhavelastran6= mktime( 3, 0, 0, $nowmonth, $nowday-1, $nowyear );
 }
 
 
 
 // twice day after 0800 and 1800
-if ($nowhour<8) { $shouldhavelastran7= mktime( 18, 00, 00, $nowmonth, $nowday-1, $nowyear ); }
-if ($nowhour<18) { $shouldhavelastran7= mktime( 08, 00, 00, $nowmonth, $nowday, $nowyear ); }
-if ($nowhour>17) { $shouldhavelastran7= mktime( 18, 00, 00, $nowmonth, $nowday, $nowyear ); }
+if ($nowhour<18) {
+    $shouldhavelastran7= mktime( 8, 0, 0, $nowmonth, $nowday, $nowyear );
+    }
+if ($nowhour<8) {
+    $shouldhavelastran7= mktime( 18, 0, 0, $nowmonth, $nowday-1, $nowyear );
+    }
+if ($nowhour>17) {
+    $shouldhavelastran7= mktime( 18, 0, 0, $nowmonth, $nowday, $nowyear );
+    }
 // if ($nowhour<18) { $shouldhavelastran7= mktime( 18, 00, 00, $nowmonth, $nowday-1, $nowyear ); }
 
 

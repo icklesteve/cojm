@@ -126,7 +126,7 @@ if ($hasid) {
                         
                         
                         if ($newstatus>99) {
-                            $script.=' $("#Post").addClass("complete");   ';
+                            $script.='   ';
                             
                             // code here for checking gps
                             $query = "SELECT trackerid, starttrackpause, finishtrackpause, collectiondate, ShipDate
@@ -175,8 +175,6 @@ if ($hasid) {
                                 $infotext.= ' gps cache queued ';
                                 
                             }
-                        } else {
-                        $script.=' $("#Post").removeClass("complete");  ';
                         }
                         
                         

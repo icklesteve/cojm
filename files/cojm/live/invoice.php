@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	invoice.php - Create a PDF invoice
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -114,7 +114,7 @@ $invcomments=trim($_POST['invcomments']);
 $newinvdate=trim($_POST['newinvdate']);
 
 $addresstype= trim($_POST['addresstype']);
-$ir='';
+$ir='0';
   
 
 // Make sure that the client matches the department

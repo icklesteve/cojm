@@ -132,230 +132,230 @@ $today = date(" H:i A D j M Y");
 
 if (date_default_timezone_get()=='UTC') { $nowepoch=-900000000000000; }
 
-if ($nowepoch < $globalprefrow['formtimeout']) {
 
 
-    if (isset($_POST['vertices'])) { $vertices=trim($_POST['vertices']); } else { $vertices=''; }
-    // vertices used in a few pages
+if (isset($_POST['vertices'])) { $vertices=trim($_POST['vertices']); } else { $vertices=''; }
+// vertices used in a few pages
 
-    if ($page=='uploadkml') {
+if ($page=='uploadkml') {
 
-        $allowedExts = array("kml","KML");
-        $temp = explode(".", $_FILES["file"]["name"]);
-        $extension = end($temp);
-        $infotext.='<p>Type: '.$_FILES["file"]["type"].' </p>';
+    $allowedExts = array("kml","KML");
+    $temp = explode(".", $_FILES["file"]["name"]);
+    $extension = end($temp);
+    $infotext.='<p>Type: '.$_FILES["file"]["type"].' </p>';
+    
+    if (in_array($extension, $allowedExts)) {
         
-        if (in_array($extension, $allowedExts)) {
-            
-        // $pagetext.='<p> Allowed </p>';
-            
-            if ($_FILES["file"]["error"] > 0) {
-                echo "Return Code: " . $_FILES["file"]["error"] . "<br>";
-            } else {
-                $fileName = $label.$_FILES["file"]["name"];
-                //        echo "Upload: " . $_FILES["file"]["name"] . "<br>";
-                //        echo "Type: " . $_FILES["file"]["type"] . "<br>";
-                //        echo "Size: " . ($_FILES["file"]["size"] / 1024) . " kB<br>";
-                //        echo "Temp file: " . $_FILES["file"]["tmp_name"] . "<br>";
-                
-
-                $tmpName=$_FILES["file"]["tmp_name"];		
-                
-                $fp      = fopen($tmpName, 'r');
-                $content = fread($fp, filesize($tmpName));
-                // $content = addslashes($content);
-                fclose($fp);  
-                
-                if(!get_magic_quotes_gpc()) {
-                    $fileName = addslashes($fileName);
-                }
-                
-                $file_contents = file_get_contents($tmpName);
-
-                $saveto='cache/'.$fileName;
-
-                
-                // file_put_contents($saveto,$content);
-                
-                $myfile = fopen($saveto, "w");
-                fwrite($myfile, $content);
-                fclose($myfile);
-                
-                
-                $xml = simplexml_load_file($saveto);
-                
-                if ($xml) {
-                    $placemarks = $xml->Folder->Placemark->Polygon->outerBoundaryIs->LinearRing->coordinates;   
-                    // $infotext.='<p>Coords '.$placemarks.' </p>';
-                    $cor_d  =  explode(' ', $placemarks);
-                    $qtmp=array();
-                    foreach($cor_d as $value){
-                        if (trim($value)) {
-                        $tmp = explode(',',$value);
-                        $ttmp=$tmp[1];
-                        $tmp[1]=$tmp[0];
-                        $tmp[0]=$ttmp; 
-                        $qtmp[]= '' . $tmp[0] . ' ' .$tmp[1].'';
-                        }
-                    }
-                                        
-                    $vertices= join(", ",$qtmp);
-
-                    // $pagetext.=' vertices '. $vertices;
-                    $pagetext.='<p>Uploaded '.$fileName.' </p>';
-                }
-            }
+    // $pagetext.='<p> Allowed </p>';
+        
+        if ($_FILES["file"]["error"] > 0) {
+            echo "Return Code: " . $_FILES["file"]["error"] . "<br>";
         } else {
-            $pagetext.='Issue uploading kml, please recheck and retry. ';
+            $fileName = $label.$_FILES["file"]["name"];
+            //        echo "Upload: " . $_FILES["file"]["name"] . "<br>";
+            //        echo "Type: " . $_FILES["file"]["type"] . "<br>";
+            //        echo "Size: " . ($_FILES["file"]["size"] / 1024) . " kB<br>";
+            //        echo "Temp file: " . $_FILES["file"]["tmp_name"] . "<br>";
+            
+
+            $tmpName=$_FILES["file"]["tmp_name"];		
+            
+            $fp      = fopen($tmpName, 'r');
+            $content = fread($fp, filesize($tmpName));
+            // $content = addslashes($content);
+            fclose($fp);  
+            
+            if(!get_magic_quotes_gpc()) {
+                $fileName = addslashes($fileName);
+            }
+            
+            $file_contents = file_get_contents($tmpName);
+
+            $saveto='cache/'.$fileName;
+
+            
+            // file_put_contents($saveto,$content);
+            
+            $myfile = fopen($saveto, "w");
+            fwrite($myfile, $content);
+            fclose($myfile);
+            
+            
+            $xml = simplexml_load_file($saveto);
+            
+            if ($xml) {
+                $placemarks = $xml->Folder->Placemark->Polygon->outerBoundaryIs->LinearRing->coordinates;   
+                // $infotext.='<p>Coords '.$placemarks.' </p>';
+                $cor_d  =  explode(' ', $placemarks);
+                $qtmp=array();
+                foreach($cor_d as $value){
+                    if (trim($value)) {
+                    $tmp = explode(',',$value);
+                    $ttmp=$tmp[1];
+                    $tmp[1]=$tmp[0];
+                    $tmp[0]=$ttmp; 
+                    $qtmp[]= '' . $tmp[0] . ' ' .$tmp[1].'';
+                    }
+                }
+                                    
+                $vertices= join(", ",$qtmp);
+
+                // $pagetext.=' vertices '. $vertices;
+                $pagetext.='<p>Uploaded '.$fileName.' </p>';
+            }
+        }
+    } else {
+        $pagetext.='Issue uploading kml, please recheck and retry. ';
+    }
+}
+
+
+if ($vertices) {
+        $infotext.=' vertices: '.$vertices;
+        $pexploded=explode( ',', $vertices );
+    
+        foreach ($pexploded as $tv) {
+            $tv=trim($tv);
+            $ttransf = array(" " => ",");
+            $tcoord[]= strtr($tv, $ttransf);
+        }
+    
+        $tarrlength = count($tcoord);
+        $tareax = '0';
+        $twinding='0';
+    
+        while ( $tareax < ($tarrlength-1)) {
+            $do=( explode( ',', $tcoord[$tareax+1] ) );
+            $co=( explode( ',', $tcoord[$tareax] ) );
+            $twinding=$twinding+ (($co[0]-$do[0]) * ($do[1]+$co[1]));
+            $tareax++;
+        }
+    
+        if ($twinding<'0') {
+            $infotext.= '<br /> ant-clockwise ';
+            $newvertices='';
+            $tareax=($tarrlength-'1');
+            while ( $tareax > '-1') {
+                $co=( explode( ',', $tcoord[$tareax] ));
+                $newvertices.=' '.$co[0].' '.$co[1].', ';
+                $tareax--;
+            }
+            $newvertices = ''.rtrim($newvertices, ', ').' '; 
+            $vertices=$newvertices;
         }
     }
 
     
-    if ($vertices) {
-            $infotext.=' vertices: '.$vertices;
-            $pexploded=explode( ',', $vertices );
-        
-            foreach ($pexploded as $tv) {
-                $tv=trim($tv);
-                $ttransf = array(" " => ",");
-                $tcoord[]= strtr($tv, $ttransf);
-            }
-        
-            $tarrlength = count($tcoord);
-            $tareax = '0';
-            $twinding='0';
-        
-            while ( $tareax < ($tarrlength-1)) {
-                $do=( explode( ',', $tcoord[$tareax+1] ) );
-                $co=( explode( ',', $tcoord[$tareax] ) );
-                $twinding=$twinding+ (($co[0]-$do[0]) * ($do[1]+$co[1]));
-                $tareax++;
-            }
-        
-            if ($twinding<'0') {
-                $infotext.= '<br /> ant-clockwise ';
-                $newvertices='';
-                $tareax=($tarrlength-'1');
-                while ( $tareax > '-1') {
-                    $co=( explode( ',', $tcoord[$tareax] ));
-                    $newvertices.=' '.$co[0].' '.$co[1].', ';
-                    $tareax--;
-                }
-                $newvertices = ''.rtrim($newvertices, ', ').' '; 
-                $vertices=$newvertices;
-            }
+if ($page=='uploadkml') {
+        if (isset($_POST['areaname'])) {
+            $areaname=trim($_POST['areaname']);
+            
+                     $area = sprintf("POLYGON((%s))", $vertices); 
+        $sql="INSERT INTO opsmap (type,opsname, g) VALUES ( 
+        '2', 
+        :areaname,
+        PolygonFromText(:vertices) );";
+
+            
+        $stmt = $dbh->prepare($sql);
+        $stmt->bindParam(':areaname', $areaname, PDO::PARAM_INT); 
+        $stmt->bindParam(':vertices', $area, PDO::PARAM_INT); 
+
+        $stmt->execute();
+        $result = $dbh->lastInsertId();
+            
+        if ($result){
+            $infotext.="<br />Success";
+            $pagetext.='<p>Success</p>';
+            $pagetext.='<p>New area '.$areaname.' created from KML File.</p>';
+            $infotext.='<p>New OpsMapArea '.$result.' created.</p>';
+            $areaid=$result;
+            global $areaid;
         }
-
-        
-    if ($page=='uploadkml') {
-            if (isset($_POST['areaname'])) {
-                $areaname=trim($_POST['areaname']);
-                
-                         $area = sprintf("POLYGON((%s))", $vertices); 
-            $sql="INSERT INTO opsmap (type,opsname, g) VALUES ( 
-            '2', 
-            :areaname,
-            PolygonFromText(:vertices) );";
-   
-                
-            $stmt = $dbh->prepare($sql);
-            $stmt->bindParam(':areaname', $areaname, PDO::PARAM_INT); 
-            $stmt->bindParam(':vertices', $area, PDO::PARAM_INT); 
-    
-            $stmt->execute();
-            $result = $dbh->lastInsertId();
-                
-            if ($result){
-                $infotext.="<br />Success";
-                $pagetext.='<p>Success</p>';
-                $pagetext.='<p>New area '.$areaname.' created from KML File.</p>';
-                $infotext.='<p>New OpsMapArea '.$result.' created.</p>';
-                $areaid=$result;
-                global $areaid;
-            }
-                
-            }
+            
         }
-        
-    if ($page=='editarea') {
-            $infotext =$infotext. ' in edit ops map area ';
-            if (isset($_POST['areaid'])) { $areaid=trim($_POST['areaid']);} else { $areaid=''; }
-            if (isset($_POST['areaname'])) { $areaname=trim($_POST['areaname']);} else { $areaname=''; }
-            if (isset($_POST['areacomments'])) { $areacomments=trim($_POST['areacomments']);} else { $areacomments=''; }
-            if (isset($_POST['inarchive'])) { $inarchive=trim($_POST['inarchive']); } else { $inarchive='0'; }
-            if (isset($_POST['istoplayer'])) { $istoplayer=trim($_POST['istoplayer']); } else { $istoplayer='0'; }
-            if (isset($_POST['corelayer'])) { $corelayer=trim($_POST['corelayer']);} else { $corelayer='0'; }
-            if (($areaid) and ($vertices) and ($areaname)) {
-                $query = " UPDATE opsmap 
-                SET inarchive=:inarchive, 
-                opsname=:opsname, 
-                descrip=:descrip, 
-                g= PolygonFromText(:vertices),
-                istoplayer=:istoplayer,
-                corelayer=:corelayer 
-                WHERE opsmapid=:opsmapid ";
-                
-                $area = sprintf("POLYGON((%s))", $vertices); 
-                
-                $stmt = $dbh->prepare($query);
-                $stmt->bindParam(':inarchive', $inarchive, PDO::PARAM_INT); 
-                $stmt->bindParam(':opsname', $areaname, PDO::PARAM_INT);
-                $stmt->bindParam(':descrip', $areacomments, PDO::PARAM_INT); 
-                $stmt->bindParam(':vertices', $area, PDO::PARAM_STR);
-                $stmt->bindParam(':istoplayer', $istoplayer, PDO::PARAM_INT); 
-                $stmt->bindParam(':corelayer', $corelayer, PDO::PARAM_INT);                    
-                $stmt->bindParam(':opsmapid', $areaid, PDO::PARAM_INT);                    
-                
-                $stmt->execute();
-
-                $pagetext.='<p>Edited area '.$areaname.'.</p>';
-                $infotext.='<p>Edited OpsMapArea '.$areaid.' </p>';
-            } else {
-                $infotext.=' No vertices or areaid or name passed ';
-                $alerttext.=' No vertices or areaid or name passed ';
-            }
-        } // ends page editarea
-
+    }
     
-    if ($page=='opsmapnewarea') {
-            $infotext =$infotext. ' new ops map area ';
-            if (isset($_POST['areaname'])) { $areaname=trim($_POST['areaname']);} else {$areaname=''; }
-            if (isset($_POST['areacomments'])) { $areacomments=trim($_POST['areacomments']);} else { $areacomments=''; }
-            if (isset($_POST['inarchive'])) { $inarchive=trim($_POST['inarchive']); } else { $inarchive='0'; } // Show Working Windows
-            if (isset($_POST['istoplayer'])) { $istoplayer=trim($_POST['istoplayer']); } else { $istoplayer='0'; } // Show Working Windows
-            if (isset($_POST['corelayer'])) { $corelayer=trim($_POST['corelayer']);} else { $corelayer='0'; }
+if ($page=='editarea') {
+        $infotext =$infotext. ' in edit ops map area ';
+        if (isset($_POST['areaid'])) { $areaid=trim($_POST['areaid']);} else { $areaid=''; }
+        if (isset($_POST['areaname'])) { $areaname=trim($_POST['areaname']);} else { $areaname=''; }
+        if (isset($_POST['areacomments'])) { $areacomments=trim($_POST['areacomments']);} else { $areacomments=''; }
+        if (isset($_POST['inarchive'])) { $inarchive=trim($_POST['inarchive']); } else { $inarchive='0'; }
+        if (isset($_POST['istoplayer'])) { $istoplayer=trim($_POST['istoplayer']); } else { $istoplayer='0'; }
+        if (isset($_POST['corelayer'])) { $corelayer=trim($_POST['corelayer']);} else { $corelayer='0'; }
+        if (($areaid) and ($vertices) and ($areaname)) {
+            $query = " UPDATE opsmap 
+            SET inarchive=:inarchive, 
+            opsname=:opsname, 
+            descrip=:descrip, 
+            g= PolygonFromText(:vertices),
+            istoplayer=:istoplayer,
+            corelayer=:corelayer 
+            WHERE opsmapid=:opsmapid ";
+            
             $area = sprintf("POLYGON((%s))", $vertices); 
-            $sql="INSERT INTO opsmap (type,opsname,istoplayer,corelayer,descrip, g) VALUES ( 
-            '2', 
-            :areaname,
-            :istoplayer,
-            :corelayer,
-            :areacomments,
-            PolygonFromText(:vertices) );";
-
-            $stmt = $dbh->prepare($sql);
-            $stmt->bindParam(':areaname', $areaname, PDO::PARAM_INT); 
+            
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':inarchive', $inarchive, PDO::PARAM_INT); 
+            $stmt->bindParam(':opsname', $areaname, PDO::PARAM_INT);
+            $stmt->bindParam(':descrip', $areacomments, PDO::PARAM_INT); 
+            $stmt->bindParam(':vertices', $area, PDO::PARAM_STR);
             $stmt->bindParam(':istoplayer', $istoplayer, PDO::PARAM_INT); 
-            $stmt->bindParam(':corelayer', $corelayer, PDO::PARAM_INT); 
-            $stmt->bindParam(':areacomments', $areacomments, PDO::PARAM_INT); 
-            $stmt->bindParam(':vertices', $area, PDO::PARAM_INT); 
-    
+            $stmt->bindParam(':corelayer', $corelayer, PDO::PARAM_INT);                    
+            $stmt->bindParam(':opsmapid', $areaid, PDO::PARAM_INT);                    
+            
             $stmt->execute();
-            $result = $dbh->lastInsertId();
-                
-            if ($result){
-                $infotext.="<br />Success";
-                $pagetext.='<p>Success</p>';
-                $pagetext.='<p>New area '.$areaname.' created.</p>';
-                $infotext.='<p>New OpsMapArea '.$result.' created.</p>';
-                $areaid=$result;
-                global $areaid;
-            }
 
-            $page='editarea';	
+            $pagetext.='<p>Edited area '.$areaname.'.</p>';
+            $infotext.='<p>Edited OpsMapArea '.$areaid.' </p>';
+        } else {
+            $infotext.=' No vertices or areaid or name passed ';
+            $alerttext.=' No vertices or areaid or name passed ';
+        }
+    } // ends page editarea
 
-        } // ends page= opsmapnewarea
-    
+
+if ($page=='opsmapnewarea') {
+        $infotext =$infotext. ' new ops map area ';
+        if (isset($_POST['areaname'])) { $areaname=trim($_POST['areaname']);} else {$areaname=''; }
+        if (isset($_POST['areacomments'])) { $areacomments=trim($_POST['areacomments']);} else { $areacomments=''; }
+        if (isset($_POST['inarchive'])) { $inarchive=trim($_POST['inarchive']); } else { $inarchive='0'; } // Show Working Windows
+        if (isset($_POST['istoplayer'])) { $istoplayer=trim($_POST['istoplayer']); } else { $istoplayer='0'; } // Show Working Windows
+        if (isset($_POST['corelayer'])) { $corelayer=trim($_POST['corelayer']);} else { $corelayer='0'; }
+        $area = sprintf("POLYGON((%s))", $vertices); 
+        $sql="INSERT INTO opsmap (type,opsname,istoplayer,corelayer,descrip, g) VALUES ( 
+        '2', 
+        :areaname,
+        :istoplayer,
+        :corelayer,
+        :areacomments,
+        PolygonFromText(:vertices) );";
+
+        $stmt = $dbh->prepare($sql);
+        $stmt->bindParam(':areaname', $areaname, PDO::PARAM_INT); 
+        $stmt->bindParam(':istoplayer', $istoplayer, PDO::PARAM_INT); 
+        $stmt->bindParam(':corelayer', $corelayer, PDO::PARAM_INT); 
+        $stmt->bindParam(':areacomments', $areacomments, PDO::PARAM_INT); 
+        $stmt->bindParam(':vertices', $area, PDO::PARAM_INT); 
+
+        $stmt->execute();
+        $result = $dbh->lastInsertId();
+            
+        if ($result){
+            $infotext.="<br />Success";
+            $pagetext.='<p>Success</p>';
+            $pagetext.='<p>New area '.$areaname.' created.</p>';
+            $infotext.='<p>New OpsMapArea '.$result.' created.</p>';
+            $areaid=$result;
+            global $areaid;
+        }
+
+        $page='editarea';	
+
+    } // ends page= opsmapnewarea
+
+if ($nowepoch < $globalprefrow['formtimeout']) {
 
 
     if ($page=='editglobalemail') {

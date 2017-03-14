@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	cojmmenu.php - Main Menu which inserts at top each page
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -25,7 +25,6 @@ if (isset($hasforms)) { $hasforms='1'; } else { $hasforms=''; }
 if ((isset($adminmenu)) and ($adminmenu=='1')) { $adminmenu='1'; } else { $adminmenu=''; }		
 if ((isset($settingsmenu)) and ($settingsmenu=='1')) { $settingsmenu='1'; } else { $settingsmenu=''; }		
 if ((isset($invoicemenu)) and ($invoicemenu=='1')) { $invoicemenu='1'; } else { $invoicemenu=''; }	
-
 
 
 // pt delay - page text display length
@@ -56,12 +55,11 @@ alertdelay=15000;
 }
 
 
-
 echo ' <div id="infotext" class="infotext" >';
 echo '<span class="ctitle">C</span><span class="ctitle">O</span><span class="ctitle">J</span><span class="ctitle">M</span>';
 
 if (($mobdevice=='1') and ($globalprefrow['showdebug']>'0')) {
-        $pagetext.=$infotext;
+    $pagetext.=$infotext;
 }
 
 if ($globalprefrow['showdebug']>'0') {
@@ -74,16 +72,23 @@ echo '</div>'; //ends infotext div
 
 
 
+echo '<div class="top_menu_line clearfix';
 
 
-echo '<div class="top_menu_line clearfix" id="sticky_navigation">
+echo '" id="sticky_navigation">
 <ul>
-<li><a href="index.php"'; if ($filename=='index.php') { echo ' class="selected"'; } echo ' >Home</a></li>';
+<li><a href="index.php"'; 
+if ($filename=='index.php') { echo ' class="selected"'; } 
+echo ' >Home</a></li>';
 echo '<li><a title="New Job. If open, re-click to hide" id="togglenewjobchoose" href="#">New</a></li>'; 
-echo '<li><a href="whereis3.php"'; if ($filename=='whereis3.php') { echo ' class="selected"';}  echo '>Map</a></li>'; 
+echo '<li><a href="whereis3.php"'; 
+if ($filename=='whereis3.php') { echo ' class="selected"';}  
+echo '>Map</a></li>'; 
 
 echo '
-<li id="adminlink"><a href="fwr.php"'; if ($filename=='fwr.php') { echo ' class="selected"'; } echo '>Admin</a></li>
+<li id="adminlink"><a href="fwr.php"'; 
+if ($filename=='fwr.php') { echo ' class="selected"'; } 
+echo '>Admin</a></li>
 <li><form action="order.php" id="menusearch" method="get" >
 <input class="ui-corner-all topbox" id="menusearchinput" placeholder="Search" '; ?>data-autosize-input='{ "space": 14 }'<?php 
 echo ' name="id" ';
@@ -117,21 +122,16 @@ if ($filename=="gpstracking.php") { echo '<li><a href="startuploadgpx.php" class
 echo '<li> &nbsp; </li>';
 
 
+if (isset($menuhtml)) {   
+    echo '<li>'.$menuhtml.'</li>';
+}
 
 echo '</ul>';
 
-
 echo '<div id="toploader" class="clearfix"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>';
 
-
-
-
-	
 echo '</div>'; // id sticky navigation
 
-
-
-		
 if (isset($pagetext)) { $pagetext=$pagetext; } else {$pagetext='';} 
 
 
@@ -142,27 +142,36 @@ echo'<div id="alerttext" class="error ui-corner-all" ';
 if ((isset($alerttext)) and ($alerttext)) { } else { echo ' style="display:none;" '; } echo ' >'. $alerttext.' </div> ';
 
 
-
-
-
-
 if ((isset($adminmenu)) and ($adminmenu=='1')) {
     echo '<div class="top_menu_line clearfix"><ul>';
     echo '  <li><a id="toggleinvoicemenuchoose" href="#">Finance ▼</a></li>
-            <li><a href="new_cojm_client.php"'; if ($filename=='new_cojm_client.php') { echo ' class="selected"'; } echo '>Client</a></li>';
+            <li><a href="new_cojm_client.php"'; 
+    if ($filename=='new_cojm_client.php') { echo ' class="selected"'; } 
+    echo '>Client</a></li>';
+    
     echo '<li><a href="cyclist.php"'; if ($filename=='cyclist.php') { echo ' class="selected"';} 
     echo '> '.$globalprefrow['glob5'].'</a></li>';
 
-    echo '<li><a href="opsmap.php"'; if ($filename=='opsmap.php') { echo ' class="selected"';} 
+    echo '<li><a href="opsmap.php"';
+    if ($filename=='opsmap.php') { echo ' class="selected"';} 
 
     echo '> Ops Map</a></li>';
 
-    echo '<li><a href="favusr.php"'; if ($filename=='favusr.php') { echo' class="selected"'; } echo '>Favourites</a></li>
+    echo '<li><a href="favusr.php"'; 
+    if ($filename=='favusr.php') { echo' class="selected"'; } 
+    echo '>Favourites</a></li>
             <li><a href="recentlyclosed.php"'; 
-    if ($filename=='recentlyclosed.php') { echo ' class="selected"';} echo '>Last 100</a></li>
-    <li><a href="startuploadgpx.php"'; if ($filename=='startuploadgpx.php') echo ' class="selected"'; echo '>GPS</a></li>
-    <li><a href="dashboard.php"'; if ($filename=='dashboard.php') echo ' class="selected"'; echo '>Stats</a></li>
-    <li><a href="help.php"'; if ($filename=='help.php') { echo ' class="selected"'; } echo '>Help</a></li>';
+    if ($filename=='recentlyclosed.php') { echo ' class="selected"';} 
+    echo '>Last 100</a></li>
+    <li><a href="startuploadgpx.php"'; 
+    if ($filename=='startuploadgpx.php') { echo ' class="selected"'; } 
+    echo '>GPS</a></li>
+    <li><a href="dashboard.php"'; 
+    if ($filename=='dashboard.php') { echo ' class="selected"'; }
+    echo '>Stats</a></li>
+    <li><a href="help.php"'; 
+    if ($filename=='help.php') { echo ' class="selected"'; } 
+    echo '>Help</a></li>';
     if ($settingsmenu<>'1') { echo '<li><a href="#" id="togglesettingsmenuchoose" >Settings ▼</a></li>'; }
     echo '</ul>';
     echo '</div>'; 
@@ -179,19 +188,22 @@ if (($settingsmenu<>'1') and ($invoicemenu<>'1') and ($adminmenu<>'1')) {} else 
     <ul>';
     echo '<li><a href="view_all_invoices.php"'; if ($filename=='view_all_invoices.php') { echo ' class="selected"'; }
     echo '>Invoicing</a></li>';
-    echo '<li><a href="pdfview.php"'; if ($filename=='pdfview.php') { echo ' class="selected"'; }
+    echo '<li><a href="pdfview.php"'; 
+    if ($filename=='pdfview.php') { echo ' class="selected"'; }
     echo '>New Invoice</a></li>';
-    echo '<li><a href="paymentsin.php"'; if ($filename=='paymentsin.php') { echo ' class="selected"'; }
+    echo '<li><a href="paymentsin.php"'; 
+    if ($filename=='paymentsin.php') { echo ' class="selected"'; }
     echo '>Payment</a></li>';
 
-
-    // echo '<li><a href="paymentsin.php"'; if ($filename=='reconcile.php') { echo ' class="selected"'; }
-    // echo '>Reconcile / Statement</a></li>';    
-    
-    
-    echo '<li><a href="singleexpense.php"'; if ($filename=='singleexpense.php') echo ' class="selected"'; echo '>Expense</a></li>';
-    echo '<li><a href="expenseview.php"'; if ($filename=='expenseview.php') echo ' class="selected"'; echo '> P+L Search</a></li>';
-    echo '<li><a href="pandl.php"'; if ($filename=='pandl.php') echo ' class="selected"'; echo '>P+L</a></li> 
+    echo '<li><a href="singleexpense.php"'; 
+    if ($filename=='singleexpense.php') { echo ' class="selected"'; }
+    echo '>Expense</a></li>';
+    echo '<li><a href="expenseview.php"'; 
+    if ($filename=='expenseview.php') { echo ' class="selected"'; }
+    echo '> P+L Search</a></li>';
+    echo '<li><a href="pandl.php"'; 
+    if ($filename=='pandl.php') { echo ' class="selected"'; }
+    echo '>P+L</a></li> 
     </ul>';
     echo '</div>';
 }
@@ -205,13 +217,25 @@ if (($settingsmenu<>'1') and ($invoicemenu<>'1') and ($adminmenu<>'1')) {} else 
     echo ' class="top_menu_line clearfix';
     if ($settingsmenu<>'1') { echo ' togglesettingsmenu '; }
     echo ' "><ul> ';
-    echo '<li><a href="cojmglobal.php"'; if ($filename=='cojmglobal.php') echo ' class="selected"'; echo '>Main Settings</a></li>';
-    echo '<li><a href="service.php"'; if ($filename=='service.php') { echo ' class="selected"'; } echo '>Services</a></li>';
-    echo '<li><a href="corepricing.php"'; if ($filename=='corepricing.php') echo ' class="selected"'; echo '>Checkbox Pricing</a></li>';
-    echo '<li><a href="cojmglobalemail.php"'; if ($filename=='cojmglobalemail.php') echo ' class="selected"'; echo '>Set Email</a></li>';
-    echo '<li><a href="cojmglobalstatus.php"'; if ($filename=='cojmglobalstatus.php') echo ' class="selected"'; echo '>Status Text</a></li>';
-    if ($globalprefrow['showdebug']>'0') { 
-        echo '<li><a href="debug.php"'; if ($filename=='debug.php') echo ' class="selected"'; echo '>Debug</a></li>';
+    echo '<li><a href="cojmglobal.php"';
+    if ($filename=='cojmglobal.php') { echo ' class="selected"'; }
+    echo '>Main Settings</a></li>';
+    echo '<li><a href="service.php"'; 
+    if ($filename=='service.php') { echo ' class="selected"'; } 
+    echo '>Services</a></li>';
+    echo '<li><a href="corepricing.php"'; 
+    if ($filename=='corepricing.php') { echo ' class="selected"'; }
+    echo '>Checkbox Pricing</a></li>';
+    echo '<li><a href="cojmglobalemail.php"';
+    if ($filename=='cojmglobalemail.php') { echo ' class="selected"';} 
+    echo '>Set Email</a></li>';
+    echo '<li><a href="cojmglobalstatus.php"'; 
+    if ($filename=='cojmglobalstatus.php') { echo ' class="selected"'; } 
+    echo '>Status Text</a></li>';
+    if ($globalprefrow['showdebug']>'0') {
+        echo '<li><a href="debug.php"'; 
+        if ($filename=='debug.php') { echo ' class="selected"'; } 
+        echo '> php + db info </a></li>';
     }  
     if (($globalprefrow['inaccuratepostcode'])=='0') {
         echo '<li><a title="Add or Edit Postcode" href="newpc.php"';
@@ -220,8 +244,12 @@ if (($settingsmenu<>'1') and ($invoicemenu<>'1') and ($adminmenu<>'1')) {} else 
     }
     //  <a href="editbankhol.php">Bank Hols</a> 
 
-    echo '<li><a href="backupinfo.php"'; if ($filename=='backupinfo.php') echo ' class="selected"'; echo '>Backups</a></li>';
-    echo '<li><a href="cojmaudit.php"'; if ($filename=='cojmaudit.php') echo ' class="selected"'; echo '>System Log</a></li>';
+    echo '<li><a href="backupinfo.php"'; 
+    if ($filename=='backupinfo.php') { echo ' class="selected"'; }
+    echo '>Backups</a></li>';
+    echo '<li><a href="cojmaudit.php"'; 
+    if ($filename=='cojmaudit.php') { echo ' class="selected"'; } 
+    echo '>System Log</a></li>';
     echo '</ul>';
     echo '</div>';
 }

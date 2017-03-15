@@ -1252,30 +1252,43 @@ td.pl50 {
 padding-left:50px;
 }
 
-span.t122 {
-opacity:0;
+span#cdtext{
+    border-radius: 4px 4px 4px 4px;
+    font-size: 15px;
+    font-weight: bold;
+    height: 28px;
+    line-height: 30px;
+    margin: 0px 0px 0px 5px;
+    padding: 0px 6px 0px 4px;
+    cursor:default;
+    float: left;
 }
 
-
+span.t121  {
+    opacity:0;
+    transition: opacity 10s ease;
+}
 
 span.t120 {
-background-color:#333333; color:#DDDDDD;
-opacity:1;
-transition: opacity 59s ease;
-
-}
+ color:#ffffff;
+ transition: All 5s ease;
+ }
 
 span.t60 {
-opacity:1;
-background-color:#660099; color:#BDAEC6;
-transition: All 39s ease;
+background-color:#DDDDDD; color:#ff6600;
+ transition: All 5s ease;
 }
 
-span.t20 {
-background-color:#ff6600; color:#DDDDDD;
-transition: All 8s ease;
 
-opacity:1;
+span.t30 {
+background-color:#ff6600; color:#DDDDDD;
+ transition: All 5s ease;
+}
+
+
+span.t20 {
+background-color:#000000; color:#ffffff;
+ transition: All 5s ease;
 }
 
 
@@ -1286,14 +1299,10 @@ color:#cc0000;
 transition: All 0.5s ease;
 }
 
-
-
 span.t1 {
 background-color:#cc0000; color:#DDDDDD;
 transition: All 0.5s ease;
 }
-
-
 
 
 
@@ -2521,17 +2530,23 @@ top: 1px;
 }
 
 
-#topmenuselectrider {
+.top_menu_line select {
     font-size:19px;
     height:29px;
     margin-left:4px;
     top: -1px;
 }
 
+#topmenuselectrider {
+    width:110px;
+}
 
 
 
 
+#topmenutimeoutchoose {
+    width:60px;
+}
 
 
 
@@ -2653,19 +2668,7 @@ margin-top:2px;
 }
 
 
-span.t121  {
-border-radius: 4px 4px 4px 4px;
-color: #DDDDDD;
-display: block;
-float: left;
-font-size: 15px;
-font-weight: bold;
-height: 28px;
-line-height: 30px;
-margin: 0px 0px 0px 5px;
-padding: 0px 6px 0px 4px;
-cursor:default;
-}
+
 
 
 span.cbbprice {
@@ -2694,106 +2697,106 @@ margin-right:30px;
 
 
 @media screen and (max-width: 749px)  {
-
-
-div#newjobsubmita { display: none; }
-
-.ui-menu .ui-menu-item a {
-line-height: 40px;
-padding: 5px 8px;
-font-size: 20px;
-}
-
-input.w490 { width: 320px; }
-
-.fsl {
-    min-width: 65px;
-    text-align:right;
-    font-size: 13px;
-}
-.fs {  padding-bottom: 10px; }
-
-.fs input[type=checkbox]{ margin-left:45px; }
-.fsr { padding-right:10px;  min-height:1px; padding-left: 74px; }
-
-.gmap_left {
-width:270px;
-top:56px;
-}
-
-.full_map {
-padding-left:270px;
-}
-
-ui-helper-clearfix  {
-display: inline-block;
-}
-
-div.innerpad {
-padding: 5px; width:auto;
-}
-
-
-
-input.freetext {
-width: 200px;
-transition: 1s;
-}
-
-div.addresses {
-padding: 4px;
-transition: 1s;
-}
-
-.hangleft .addresses, .hangright .addresses { margin: 10px 0; }
-
-
-span.t121  {
-border-radius:4px;
-color: #DDDDDD;
-display: block;
-float: left;
-font-size: 14px;
-font-weight: bold;
-height: 26px;
-line-height: 28px;
-margin: 0px 0px 0px 1px;
-padding: 0px 6px;
-cursor:default;
-}
-
-
-
-
-div.cojmcopyright {
-display:none;
-}
-
-
-
-div.infotext {
-right:-200px;
-transition: 1.5s;
-}
-
-
-div.hangleft { width: 100%; }
-div.hangright { width: 100%; }
-
-img.orderpod { width: 100%; height:auto; }
-
-input.ui-widget { width: 320px; }
-
-button.menusearch {
-border: 0 none;
-position:relative;
-}
-
-
-
-div.pad10 {
-padding:4px 4px 35px;
-}
+    
+    
+    div#newjobsubmita { display: none; }
+    
+    .ui-menu .ui-menu-item a {
+    line-height: 40px;
+    padding: 5px 8px;
+    font-size: 20px;
+    }
+    
+    input.w490 { width: 320px; }
+    
+    .fsl {
+        min-width: 65px;
+        text-align:right;
+        font-size: 13px;
+    }
+    .fs {  padding-bottom: 10px; }
+    
+    .fs input[type=checkbox]{ margin-left:45px; }
+    .fsr { padding-right:10px;  min-height:1px; padding-left: 74px; }
+    
+    .gmap_left {
+    width:270px;
+    top:56px;
+    }
+    
+    .full_map {
+    padding-left:270px;
+    }
+    
+    ui-helper-clearfix  {
+    display: inline-block;
+    }
+    
+    div.innerpad {
+    padding: 5px; width:auto;
+    }
+    
+    
+    
+    input.freetext {
+    width: 200px;
+    transition: 1s;
+    }
+    
+    div.addresses {
+    padding: 4px;
+    transition: 1s;
+    }
+    
+    .hangleft .addresses, .hangright .addresses { margin: 10px 0; }
+    
+    
+    span.t121  {
+    border-radius:4px;
+    color: #DDDDDD;
+    display: block;
+    float: left;
+    font-size: 14px;
+    font-weight: bold;
+    height: 26px;
+    line-height: 28px;
+    margin: 0px 0px 0px 1px;
+    padding: 0px 6px;
+    cursor:default;
+    }
+    
+    
+    
+    
+    div.cojmcopyright {
+    display:none;
+    }
+    
+    
+    
+    div.infotext {
+    right:-200px;
+    transition: 1.5s;
+    }
+    
+    
+    div.hangleft { width: 100%; }
+    div.hangright { width: 100%; }
+    
+    img.orderpod { width: 100%; height:auto; }
+    
+    input.ui-widget { width: 320px; }
+    
+    button.menusearch {
+    border: 0 none;
+    position:relative;
+    }
+    
+    
+    
+    div.pad10 {
+    padding:4px 4px 35px;
+    }
 
 } /* ends max width  750px   */
 
@@ -2803,180 +2806,180 @@ padding:4px 4px 35px;
 
 @media screen and (max-width: 465px)  {
 
-div.Post {
-margin: 2px 0 0;
-}
-
-
-
-button.menusearch {
-height:24px;
-margin:1px 0 0 5px;
-width:26px;
-background: rgba(255, 255, 255, 0.25) url("../images/refresh.png") no-repeat scroll 2px 2px / 22px 19px
-}
-
-
-button.menusearch:hover {
-background: rgba(255, 255, 255, 0.55) url("../images/refresh.png") no-repeat scroll 2px 2px / 22px 19px
-}
-
-
-.top_menu_line ul li a {
-height:24px;
-font-size:17px;
-line-height:22px;
-margin: 1px 4px 7px 6px;
-padding: 0 8px 0 6px;
-}
-
-span.ctitle {
-visibility:hidden;
-transition: 1s;
-}
-
-
-.full_map {
-position:relative;
-padding-left:0px;
-height:400px;
-}
-
-.gmap_left {
-position:relative;
-width:100%;
-overflow-y:visible;
-top: 0;
-}
-
-#gmap_wrapper {
-height:auto !important;
-}
-
-.fsr { padding-left:0px; }
-
-.fsl { 
-border-top: 5px solid gray;
-float:none;
-overflow:visible;
-text-align: left;
-font-size: 18px;
-line-height: 35px;
-margin-top:10px;
-width:50%;
-}
-
-#collectiontext, #deliverytext, #ShipDatetext, #collectiondatetext { 
-display:block;
-}
-
-
-
-select#serviceid { 
-display:inline-block;
-}
-
-.hangleft .addresses, .hangright .addresses {
-    padding: 10px 15px;
+    div.Post {
+    margin: 2px 0 0;
     }
-
-
-
-
-.pad10 {
-padding:2px;
-}
-
-body.orderpage #adminlink { display:none; }
-
-
-#toploader { position:absolute; right:0;  }
-
-#menusearchinput {
-font-size: 17px;
-background-color:rgba(255,255,255,0.25);
-height: 24px;
-border-radius: 4px 4px 4px 4px;
-color: #333;
-display: inline-block;
-height: 25px;
-line-height: 28px;
-margin: 1px 4px 0px 6px;
-padding: 0 8px 0 6px;
-width: 55px;
-min-width: 40px;
-max-width: 600px;
-transition: width 0.25s;
-}
-
-#togglenewjob .fsl {
-float:left;
-}
-
-table.ord, input.ui-widget, input.w490, .orderjobcomments, input.freetext { width: 305px; }
-
-fieldset label {
-float:none;
-border-top: 5px solid gray;
-text-align:left;
-}
-
-.ord tbody tr {  display:table; width:305px; }
-
-.ord tr td { padding-left:5px;}
-
-.ord tr td:nth-of-type(even) { background-color:#f3f2f2; }  
-.ord tr td:nth-of-type(odd) { background-color:#fff; }  
-
-
-.ord tr td {  display:table-row; }
-
-
-
-.acc tbody tr { 
+    
+    
+    
+    button.menusearch {
+    height:24px;
+    margin:1px 0 0 5px;
+    width:26px;
+    background: rgba(255, 255, 255, 0.25) url("../images/refresh.png") no-repeat scroll 2px 2px / 22px 19px
+    }
+    
+    
+    button.menusearch:hover {
+    background: rgba(255, 255, 255, 0.55) url("../images/refresh.png") no-repeat scroll 2px 2px / 22px 19px
+    }
+    
+    
+    .top_menu_line ul li a {
+    height:24px;
+    font-size:17px;
+    line-height:22px;
+    margin: 1px 4px 7px 6px;
+    padding: 0 8px 0 6px;
+    }
+    
+    span.ctitle {
+    visibility:hidden;
+    transition: 1s;
+    }
+    
+    
+    .full_map {
+    position:relative;
+    padding-left:0px;
+    height:400px;
+    }
+    
+    .gmap_left {
+    position:relative;
+    width:100%;
+    overflow-y:visible;
+    top: 0;
+    }
+    
+    #gmap_wrapper {
+    height:auto !important;
+    }
+    
+    .fsr { padding-left:0px; }
+    
+    .fsl { 
+    border-top: 5px solid gray;
+    float:none;
+    overflow:visible;
+    text-align: left;
+    font-size: 18px;
+    line-height: 35px;
+    margin-top:10px;
+    width:50%;
+    }
+    
+    #collectiontext, #deliverytext, #ShipDatetext, #collectiondatetext { 
     display:block;
-    margin-bottom:15px;
-    padding:15px 10px;
-}
-.acc tr td {  display:table-row; }
-
-#fwr thead {  display:none; }
-
-
-table#cbb.ord tbody tr td { 
-padding-left:20px;
-}
-
-span.cbbprice {
-float:none;
-left:200px;
-position:absolute;
-}
-
-
-.ord thead span.cbbprice { 
-left:200px;
-}
-
-.ord th { 
-position:absolute;
-width:500px;
-}
-
-#cbb tbody td:nth-child(2) {  
-  border-left: 0;
-  }
-
-.ui-corner-left , .ui-corner-right {
-border-radius:4px;
-}
-
-.indexjoblink {
-font-size:22px;
-padding:15px;
-display:inline-block;
-}
-
-#baseservicecbbtext { padding-left:8px; }
+    }
+    
+    
+    
+    select#serviceid { 
+    display:inline-block;
+    }
+    
+    .hangleft .addresses, .hangright .addresses {
+        padding: 10px 15px;
+        }
+    
+    
+    
+    
+    .pad10 {
+    padding:2px;
+    }
+    
+    body.orderpage #adminlink { display:none; }
+    
+    
+    #toploader { position:absolute; right:0;  }
+    
+    #menusearchinput {
+    font-size: 17px;
+    background-color:rgba(255,255,255,0.25);
+    height: 24px;
+    border-radius: 4px 4px 4px 4px;
+    color: #333;
+    display: inline-block;
+    height: 25px;
+    line-height: 28px;
+    margin: 1px 4px 0px 6px;
+    padding: 0 8px 0 6px;
+    width: 55px;
+    min-width: 40px;
+    max-width: 600px;
+    transition: width 0.25s;
+    }
+    
+    #togglenewjob .fsl {
+    float:left;
+    }
+    
+    table.ord, input.ui-widget, input.w490, .orderjobcomments, input.freetext { width: 305px; }
+    
+    fieldset label {
+    float:none;
+    border-top: 5px solid gray;
+    text-align:left;
+    }
+    
+    .ord tbody tr {  display:table; width:305px; }
+    
+    .ord tr td { padding-left:5px;}
+    
+    .ord tr td:nth-of-type(even) { background-color:#f3f2f2; }  
+    .ord tr td:nth-of-type(odd) { background-color:#fff; }  
+    
+    
+    .ord tr td {  display:table-row; }
+    
+    
+    
+    .acc tbody tr { 
+        display:block;
+        margin-bottom:15px;
+        padding:15px 10px;
+    }
+    .acc tr td {  display:table-row; }
+    
+    #fwr thead {  display:none; }
+    
+    
+    table#cbb.ord tbody tr td { 
+    padding-left:20px;
+    }
+    
+    span.cbbprice {
+    float:none;
+    left:200px;
+    position:absolute;
+    }
+    
+    
+    .ord thead span.cbbprice { 
+    left:200px;
+    }
+    
+    .ord th { 
+    position:absolute;
+    width:500px;
+    }
+    
+    #cbb tbody td:nth-child(2) {  
+    border-left: 0;
+    }
+    
+    .ui-corner-left , .ui-corner-right {
+    border-radius:4px;
+    }
+    
+    .indexjoblink {
+    font-size:22px;
+    padding:15px;
+    display:inline-block;
+    }
+    
+    #baseservicecbbtext { padding-left:8px; }
 }
 

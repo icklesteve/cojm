@@ -31,9 +31,6 @@ echo '<!DOCTYPE html> <html lang="en"> <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, height=device-height" >
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
-
-<META HTTP-EQUIV="Refresh" CONTENT="'. $globalprefrow['formtimeout'].'; URL=index.php"> 
-
 <link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
@@ -61,8 +58,31 @@ foreach ($riderdata as $ridernum => $ridername) {
 }
 $menuhtml.= '</select> ';
 
-// $menuhtml.='    Checkbox for in progress at top   ';
 
+
+// one option needs to match global pref for form timeouts
+$menuhtml.='
+
+<select id="topmenutimeoutchoose" class="ui-corner-left ui-state-default left">
+<option ';
+
+if ($globalprefrow['formtimeout']==125) { $menuhtml.=' selected '; }
+$menuhtml.='value="125">2m </option>
+<option ';
+if ($globalprefrow['formtimeout']==300) { $menuhtml.=' selected '; }
+$menuhtml.='
+value="300">5m </option>
+<option ';
+if ($globalprefrow['formtimeout']==600) { $menuhtml.=' selected '; }
+$menuhtml.='
+value="600">10m </option>
+<option ';
+if ($globalprefrow['formtimeout']==900) { $menuhtml.=' selected '; }
+$menuhtml.='value="900">15m </option>
+<option ';
+if ($globalprefrow['formtimeout']==1200) { $menuhtml.=' selected '; }
+$menuhtml.='value="1200">20m </option>
+</select> ';
 
 
 
@@ -82,7 +102,6 @@ if($mobdevice) { // already coded as js variable ?
 <div id="allindexresults" class="hideuntilneeded">
 <hr />
 <div class="ui-state-highlight ui-corner-all p15">
-
     <h2> <span id="indexcounted">All</span> <span id="indextotal"> </span> Results Displayed.</h2>
     </div>
     <div class="vpad "> </div>
@@ -131,8 +150,6 @@ function addlines() {
                 }
                 oldday=newday;
             }
-            
-            
             var status=$("#stat"+orderid).val();
             if (oldstatus!==status){
                 if (oldstatus>0) {
@@ -145,8 +162,6 @@ function addlines() {
             if (afterhtml){
                 dayflag++;
             }
-            
-
             if (isEven(dayflag)) {
                 $("#index"+orderid).addClass("ui-state-default");
                 $("#stat"+orderid).addClass("ui-state-default");
@@ -158,9 +173,30 @@ function addlines() {
             }
         }
     });
-    
     $("#indexcounted").html(counted + ' of ');
 }
+
+
+
+$(document).on('change', '#topmenutimeoutchoose', function(){
+    pagetimeout=$("#topmenutimeoutchoose").val();
+    initialpagetimeout=$("#topmenutimeoutchoose").val();
+    $("span[id=cdtext]").addClass('hideuntilneeded');
+});
+
+function pagetimeoutfunc(){
+    $("#toploader").show();
+    // alert(" index timeout function ");
+    numberofresults=offset;
+    offset=0;
+    seeifnextday=0;
+    dayflag=0;
+    $("#indexajax").html("");
+    refreshindex(indexfilter);
+    pagetimeout=initialpagetimeout;
+    $("span[id=cdtext]").addClass('hideuntilneeded');
+}
+
 
 
 function alldisplayed() {
@@ -217,7 +253,7 @@ $(window).scroll(function() {
 });
 
 $(document).on('change', '.indexstatus', function(e){
-    $("#allindexresults").hide();
+    // $("#allindexresults").hide();
     flag = false;
     var id = e.target.id;
     orderid = parseInt(id.match(/(\d+)$/)[0], 10);
@@ -244,6 +280,7 @@ $(document).on('change', '.indexstatus', function(e){
                 offset=0;
                 seeifnextday=0;
                 dayflag=0;
+                $("#allindexresults").hide();
                 $("#indexajax").html("");
                 refreshindex();
             } else {

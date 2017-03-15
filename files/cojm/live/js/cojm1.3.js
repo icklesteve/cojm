@@ -29,7 +29,6 @@
 // date.js  Version: 1.0 Alpha-1 1455
 // zebra dialogue function v1.3.12
 // http://ryanday.org/konami   * Dual licensed under the MIT and GPL licenses.  1840
-// Stickyfill -- `position: sticky` polyfill * v. 1.1.4 | https://github.com/wilddeer/stickyfill  MIT License 1928
 
 // + other stuff
 
@@ -1047,12 +1046,6 @@ $.extend( $.ui.tabs.prototype, {
 	
 
 
-
-			
-			
-			
-			
-
 (function ($) {
 
 	/**
@@ -1081,18 +1074,15 @@ $.extend( $.ui.tabs.prototype, {
 				{text: 'Last 7 days', dateStart: 'today-7days', dateEnd: 'today' },
 				{text: 'Month to date', dateStart: function(){ return Date.parse('today').moveToFirstDayOfMonth();  }, dateEnd: 'today' },
 				{text: 'Year to date', dateStart: function(){ var x= Date.parse('today'); x.setMonth(0); x.setDate(1); return x; }, dateEnd: 'today' },
-				//extras:
-				{text: 'The previous Month', dateStart: function(){ return Date.parse('1 month ago').moveToFirstDayOfMonth();  }, dateEnd: function(){ return Date.parse('1 month ago').moveToLastDayOfMonth();  } },
-				//{text: 'Last 30 Days', dateStart: 'Today-30', dateEnd: 'Today' },
-				//{text: 'Next 30 Days', dateStart: 'Today', dateEnd: 'Today+30' },
-				//{text: 'Our Ad Campaign', dateStart: '03/07/08', dateEnd: '07/08/08' }
-			{text: '2016', dateStart: '01/01/16', dateEnd: '31/12/16' },			
-			{text: '2015', dateStart: '01/01/15', dateEnd: '31/12/15' },
-			{text: '2014', dateStart: '01/01/14', dateEnd: '31/12/14' },
-			{text: '2014 & 2015', dateStart: '01/01/14', dateEnd: '31/12/15' }
-
-
-			],
+				{text: 'The previous Month', dateStart: function(){ 
+                    return Date.parse('1 month ago').moveToFirstDayOfMonth(); 
+                }, dateEnd: function(){ return Date.parse('1 month ago').moveToLastDayOfMonth();  } 
+                },
+                {text: '2016', dateStart: '01/01/16', dateEnd: '31/12/16' },			
+                {text: '2015', dateStart: '01/01/15', dateEnd: '31/12/15' },
+                {text: '2014', dateStart: '01/01/14', dateEnd: '31/12/14' },
+                {text: '2014 & 2015', dateStart: '01/01/14', dateEnd: '31/12/15' }
+            ],
 			//presetRanges: array of objects for each menu preset.
 			//Each obj must have text, dateStart, dateEnd. dateStart, dateEnd accept date.js string or a function which returns a date object
 			presets: {
@@ -1100,26 +1090,26 @@ $.extend( $.ui.tabs.prototype, {
 				allDatesBefore: 'All Dates Before',
 				allDatesAfter: 'All Dates After',
 				dateRange: 'Date Range'
-		},
-		rangeStartTitle: 'Start date',
-		rangeEndTitle: 'End date',
-		nextLinkText: 'Next',
-		prevLinkText: 'Prev',
-		target: rangeInput,
-		doneButtonText: 'Done',
-		earliestDate: Date.parse('-15years'), //earliest date allowed 
-		latestDate: Date.parse('+15years'), //latest date allowed 
-		constrainDates: false,
-		rangeSplitter: '-', //string to use between dates in single input
-		dateFormat: 'd/m/yy', // date formatting. Available formats: http://docs.jquery.com/UI/Datepicker/%24.datepicker.formatDate
-		closeOnSelect: true, //if a complete selection is made, close the menu
-		arrows: false,
-		appendTo: 'body',
-		onClose: function(){ },
-		onOpen: function(){},
-		onChange: function(){ },
-		datepickerOptions: null //object containing native UI datepicker API options
-	}, settings);
+            },
+            rangeStartTitle: 'Start date',
+            rangeEndTitle: 'End date',
+            nextLinkText: 'Next',
+            prevLinkText: 'Prev',
+            target: rangeInput,
+            doneButtonText: 'Done',
+            earliestDate: Date.parse('-15years'), //earliest date allowed 
+            latestDate: Date.parse('+15years'), //latest date allowed 
+            constrainDates: false,
+            rangeSplitter: '-', //string to use between dates in single input
+            dateFormat: 'd/m/yy', // date formatting. Available formats: http://docs.jquery.com/UI/Datepicker/%24.datepicker.formatDate
+            closeOnSelect: true, //if a complete selection is made, close the menu
+            arrows: false,
+            appendTo: 'body',
+            onClose: function(){ },
+            onOpen: function(){},
+            onChange: function(){ },
+            datepickerOptions: null //object containing native UI datepicker API options
+        }, settings);
 	
 	
 
@@ -1443,14 +1433,9 @@ $.extend( $.ui.tabs.prototype, {
 	
 	
 	
+$(document).ready(function() {
 	
-	$(document).ready(function() {
-	
-    
-    
-    
-    
-    
+
 // was 1.01 alpha 1 , updated to 23/8/16 to resolve conflict with google searchbar preventing streetview access in certain situations
 
 /** 
@@ -1587,10 +1572,6 @@ this.getMilliseconds())};Date.prototype.getTimeOfDay=function(){return new d(0,t
 (function(){var h=function(a){return function(){return this[a]}},f=function(a){return function(b){this[a]=b;return this}},d=function(a,b,c,d){function f(){b.addMonths(-a);d.months++;12===d.months&&(d.years++,d.months=0)}if(1===a)for(;b>c;)f();else for(;b<c;)f();d.months--;d.months*=a;d.years*=a},c=function(a,b,c,f,h,k,n){if(7===arguments.length)this.set(a,b,c,f,h,k,n);else if(2===arguments.length&&arguments[0]instanceof Date&&arguments[1]instanceof Date){var l=arguments[0].clone(),p=arguments[1].clone(),
 q=l>p?1:-1;this.dates={start:arguments[0].clone(),end:arguments[1].clone()};d(q,l,p,this);var s=!1===(l.isDaylightSavingTime()===p.isDaylightSavingTime());s&&1===q?l.addHours(-1):s&&l.addHours(1);l=p-l;0!==l&&(l=new TimeSpan(l),this.set(this.years,this.months,l.getDays(),l.getHours(),l.getMinutes(),l.getSeconds(),l.getMilliseconds()))}return this};(function(a,b){for(var c=0;c<b.length;c++){var d=b[c],m=d.slice(0,1).toUpperCase()+d.slice(1);a.prototype[d]=0;a.prototype["get"+m]=h(d);a.prototype["set"+
 m]=f(d)}})(c,"years months days hours minutes seconds milliseconds".split(" "));c.prototype.set=function(a,b,c,d,f,h,n){this.setYears(a||this.getYears());this.setMonths(b||this.getMonths());this.setDays(c||this.getDays());this.setHours(d||this.getHours());this.setMinutes(f||this.getMinutes());this.setSeconds(h||this.getSeconds());this.setMilliseconds(n||this.getMilliseconds())};Date.TimePeriod=c;"undefined"!==typeof window&&(window.TimePeriod=c)})();
-
-
-
-
 
 
 
@@ -2733,18 +2714,6 @@ $(function(){  $.konami(function(){
 	
 	
 	
-	
-	
-
-	
-	
-	
-	
-	
-	
-	
-
-	
 	/*!
 	Autosize v1.17.8 - 2013-09-07
 	Automatically adjust textarea height based on user input.
@@ -3006,12 +2975,6 @@ $(function(){  $.konami(function(){
 
 
 	
-	
-	
-
-
-	
-	
 
 
 
@@ -3101,14 +3064,14 @@ $(document).on("click","a#showinactiveclient",function(event){
 
 
 
-$(function() { $( "#newjobselectclient" ).newjobcombobox();
-		$( "#toggle" ).click(function() {
-			$( "#newjobselectclient" ).toggle();
-		});
-		});
+$(function() { // initialise new job client selector
+    $( "#newjobselectclient" ).newjobcombobox();
+    $( "#toggle" ).click(function() {
+		$( "#newjobselectclient" ).toggle();
+	});
+});
 
 
-	
 (function( $ ) { $.widget( "ui.selectfavbox", {
 			_create: function() {
 				var self = this,
@@ -3798,90 +3761,102 @@ input.attr('id', 'modtobox');
 	
 	
 
-        var settimmer = 0;
- $(function(){ // page timeout timer
-                window.setInterval(function() {
-                    var timeCounter = $("b[id=show-time]").html();
-                    var updateTime = eval(timeCounter)- eval(1);
-                    $("b[id=show-time]").html(updateTime);
-					$("span[id=cdnum]").html(updateTime);
-
-					/*   div class used to be t120   */
-if(updateTime == 122){ $("span[id=cdtext]").addClass('t122'); }					
-if(updateTime == 121){ $("span[id=cdtext]").addClass('t121'); }
-if(updateTime == 120){ $("span[id=cdtext]").addClass('t120'); }
-if(updateTime == 120){ $("span[id=cdtext]").html('Timing Out'); }
-if(updateTime == 60){ $("span[id=cdtext]").removeClass('t120');  }
-if(updateTime == 60){ $("span[id=cdtext]").removeClass('t122');  }
-if(updateTime == 60){ $("span[id=cdtext]").addClass('t60'); }
-if(updateTime == 20){ $("span[id=cdtext]").removeClass('t60'); }
-if(updateTime == 20){ $("span[id=cdtext]").addClass('t20'); }
-if(updateTime == 10){ $("span[id=cdtext]").removeClass('t20'); }
-if(updateTime == 10){ $("span[id=cdtext]").addClass('t1'); }
-if(updateTime == 9){ $("span[id=cdtext]").removeClass('t1'); }
-if(updateTime == 9){ $("span[id=cdtext]").addClass('t2'); }
-if(updateTime == 8){ $("span[id=cdtext]").removeClass('t2'); }
-if(updateTime == 8){ $("span[id=cdtext]").addClass('t1'); }
-if(updateTime == 7){ $("span[id=cdtext]").removeClass('t1'); }
-if(updateTime == 7){ $("span[id=cdtext]").addClass('t2'); }
-if(updateTime == 6){ $("span[id=cdtext]").removeClass('t2'); }
-if(updateTime == 6){ $("span[id=cdtext]").addClass('t1'); }
-if(updateTime == 5){ $("span[id=cdtext]").removeClass('t1'); }
-if(updateTime == 5){ $("span[id=cdtext]").addClass('t2'); }
-if(updateTime == 4){ $("span[id=cdtext]").removeClass('t2'); }
-if(updateTime == 4){ $("span[id=cdtext]").addClass('t1'); }
-if(updateTime == 3){ $("span[id=cdtext]").removeClass('t1'); }
-if(updateTime == 3){ $("span[id=cdtext]").addClass('t2'); }
-if(updateTime == 2){ $("span[id=cdtext]").removeClass('t2'); }
-if(updateTime == 2){ $("span[id=cdtext]").addClass('t1'); }
-if(updateTime ==  1){ $("span[id=cdtext]").html('Timed Out'); }
-				
-                }, 1000);
-        });
-		
-
-
-
 function showmessage() {
 	if ((allok)==1) {
-	$("#pagetext").stop(true, true).removeAttr("style").attr("height","100%").html(message).delay(ptdelay).slideUp(ptslide);
-		} else {
-	$("#alerttext").stop(true, true).removeAttr("style").attr("height","100%").html(message).delay(alertdelay).slideUp(alertslide)
-		}
-	}
+        $("#pagetext").stop(true, true).removeAttr("style").attr("height","100%").html(message).delay(ptdelay).slideUp(ptslide);
+    } else {
+        $("#alerttext").stop(true, true).removeAttr("style").attr("height","100%").html(message).delay(alertdelay).slideUp(alertslide)
+    }
+}
 
 function pageloadedfine() {
-$(document).ready(function() {
-
- setTimeout( function() {
-    var hr = new XMLHttpRequest();
-    var url = "ajaxkickcron.php";
-    var vars = "screenWidth=" + screen.width + "&screenHeight=" + screen.height + "&newauditid=" + initialauditid;
-    hr.open("POST", url, true);
-    hr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    // Access the onreadystatechange event for the XMLHttpRequest object
-    hr.onreadystatechange = function() {
-	    if(hr.readyState == 4 && hr.status == 200) {
-		    var return_data = hr.responseText;
-//            $("#infotext").append("<br /> Sending screen size");	           
+    $(document).ready(function() {
+        setTimeout( function() {
+        var hr = new XMLHttpRequest();
+        var url = "ajaxkickcron.php";
+        var vars = "screenWidth=" + screen.width + "&screenHeight=" + screen.height + "&newauditid=" + initialauditid;
+        hr.open("POST", url, true);
+        hr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        // Access the onreadystatechange event for the XMLHttpRequest object
+        hr.onreadystatechange = function() {
+            if(hr.readyState == 4 && hr.status == 200) {
+            var return_data = hr.responseText;
+            //  $("#infotext").append("<br /> Sending screen size");	           
 			$("#activestatus").append("<br />" + return_data);
-	    }    }
-    hr.send(vars); // Actually execute the request
-
-	
-	
-	// adds sticky css polyfill for top menu
-
-	
-	}, 450 ); });
-
+            }
+        }
+        hr.send(vars); // Actually execute the request
+        // adds sticky css polyfill for top menu
+        }, 450 );
+    });
 }
 
 
-
 $(document).ready(function() {
 
 
+if (pagetimeout>1) {
+    var interval = null;
+    $(document).on('ready',function(){
+        interval = setInterval(updatetime,1000);
+    });
+}
+
+
+    function updatetime() {
+        pagetimeout--;
+        $('#cdtext').attr('title',pagetimeout + 's. ');
+        if (pagetimeout<75) {
+            if(pagetimeout == 74){ $("span[id=cdtext]").addClass('t121'); }// opacity 0        
+            if(pagetimeout == 64){ $("span[id=cdtext]").addClass('t120').removeClass('hideuntilneeded');; }
+            if(pagetimeout == 60){ $("span[id=cdtext]").removeClass('t121') }// opacity 0                
+            if(pagetimeout == 45){ $("span[id=cdtext]").removeClass('t120');  }
+            if(pagetimeout == 45){ $("span[id=cdtext]").addClass('t60'); }
+            
+            if(pagetimeout == 35){ $("span[id=cdtext]").removeClass('t60'); }
+            if(pagetimeout == 35){ $("span[id=cdtext]").addClass('t30'); }
+            
+            
+            
+            
+            if(pagetimeout == 25){ $("span[id=cdtext]").removeClass('t60'); }
+            if(pagetimeout == 25){ $("span[id=cdtext]").addClass('t20'); }
+            
+            
+            if(pagetimeout == 15){ $("span[id=cdtext]").removeClass('t20'); }
+            if(pagetimeout == 15){ $("span[id=cdtext]").addClass('t1'); } // background red
+            if(pagetimeout == 9){ $("span[id=cdtext]").removeClass('t1'); }
+            if(pagetimeout == 9){ $("span[id=cdtext]").addClass('t2'); }
+            if(pagetimeout == 8){ $("span[id=cdtext]").removeClass('t2'); }
+            if(pagetimeout == 8){ $("span[id=cdtext]").addClass('t1'); }
+            if(pagetimeout == 7){ $("span[id=cdtext]").removeClass('t1'); }
+            if(pagetimeout == 7){ $("span[id=cdtext]").addClass('t2'); }
+            if(pagetimeout == 6){ $("span[id=cdtext]").removeClass('t2'); }
+            if(pagetimeout == 6){ $("span[id=cdtext]").addClass('t1'); }
+            if(pagetimeout == 5){ $("span[id=cdtext]").removeClass('t1'); }
+            if(pagetimeout == 5){ $("span[id=cdtext]").addClass('t2'); }
+            if(pagetimeout == 4){ $("span[id=cdtext]").removeClass('t2'); }
+            if(pagetimeout == 4){ $("span[id=cdtext]").addClass('t1'); }
+            if(pagetimeout == 3){ $("span[id=cdtext]").removeClass('t1'); }
+            if(pagetimeout == 3){ $("span[id=cdtext]").addClass('t2'); }
+            if(pagetimeout == 2){ $("span[id=cdtext]").removeClass('t2'); }
+            if(pagetimeout == 2){ $("span[id=cdtext]").addClass('t1'); }
+            if(pagetimeout == 1){ $("span[id=cdtext]").removeClass('t1'); }
+            if(pagetimeout == 1){ $("span[id=cdtext]").addClass('t2'); }
+            
+            if(pagetimeout == 0){
+                if (typeof pagetimeoutfunc !== "undefined") {
+                    pagetimeoutfunc();
+                    $("span[id=cdtext]").removeClass('t2');
+                } else {
+                    clearInterval(interval); // stop the interval
+                    $("span[id=cdtext]").html('Timed Out');
+                }
+            }
+            
+        }
+
+    }
 
 
 
@@ -4110,8 +4085,7 @@ var Plugins;
  
 
     $("#menusearch").autosizeInput();
-    $('#menusearch').change(function() { $('#menusearch').submit(); });	
-        
+    $('#menusearch').change(function() { $('#menusearch').submit(); });
     
     
     
@@ -4171,17 +4145,9 @@ var Plugins;
 }); // ends doc ready
 
 
-
-
-    function b64DecodeUnicode(str) {
-        return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-    }
-    
-
-    
-   
-    
-    
+function b64DecodeUnicode(str) {
+    return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+}
     

@@ -40,19 +40,23 @@ var alertslide=1000;
 var allok=1;
 var message="";
 var showdebug='.$globalprefrow['showdebug'].';
-var mobdevice='.$mobdevice.';
-</script>
-';
+var mobdevice='.$mobdevice.'; ';
 
-// set a longer timesout if in debug mode
-if ($globalprefrow['showdebug']=='1') { 
-echo '
-<script>
-ptdelay=12000;
-alertdelay=15000;
-</script>
-';
+if ($hasforms) {
+    echo 'var pagetimeout = '.$globalprefrow['formtimeout'].'; var initialpagetimeout = '.$globalprefrow['formtimeout'].'; ';
+} else {
+    echo 'var pagetimeout = 0; initialpagetimeout =0; ';
 }
+
+
+
+// set a longer timeout if in debug mode
+if ($globalprefrow['showdebug']=='1') { 
+    echo ' ptdelay=12000; alertdelay=15000; ';
+}
+
+echo ' </script> ';
+
 
 
 echo ' <div id="infotext" class="infotext" >';
@@ -112,18 +116,22 @@ echo '">Date Search</a></li>';
 
 
 
-if ($hasforms=='1'){
-    echo '<li><span id="cdtext"> </span></li><li><b class="hidden" id="show-time" >'. $globalprefrow['formtimeout'].'</b></li>';
-}
+
 
 if ($filename=='opsmap.php') { echo '<li><a href="opsmap.php" class="selected"> Ops Map</a></li>'; }
 if ($filename=="gpstracking.php") { echo '<li><a href="startuploadgpx.php" class="selected" >GPS</a></li>'; }
 
-echo '<li> &nbsp; </li>';
 
 
-if (isset($menuhtml)) {   
+
+if (isset($menuhtml)) {  
     echo '<li>'.$menuhtml.'</li>';
+}
+
+
+if ($hasforms=='1'){
+    echo '<li>  <span id="cdtext" class="hideuntilneeded"> Timing Out</span>  </li>
+    ';
 }
 
 echo '</ul>';

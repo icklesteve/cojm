@@ -20,8 +20,6 @@
 
 */
 
-if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) ob_start("ob_gzhandler"); else ob_start();
-
 include "C4uconnect.php";
 
  error_reporting(E_ALL);

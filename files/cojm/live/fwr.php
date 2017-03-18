@@ -251,6 +251,8 @@ $sql = "SELECT cojmname, DOB FROM Cyclist
 	WHERE isactive='1' AND CyclistID>1 AND DOB > 0
 	ORDER BY `DOB` ";
 $stmt = $dbh->query($sql);
+$birthdayflag=0;
+$birthdayhtml='';
 foreach ($stmt as $row) {
     
     $temp_ar=explode("-",$row['DOB']);
@@ -285,27 +287,20 @@ foreach ($stmt as $row) {
     }
 
     if ($newreturn<'14') {
+        $birthdayflag=1;
+        
 
         // echo date('l', strtotime(date("Y-$month-$day")));
 
-        echo '<h4>'.$newreturn.' days until '.$row['cojmname']."'s Birthday, who will be "; 
-        echo ((date("Y")-$year)).' on '.date('l', strtotime(date("Y-$month-$day"))).', '.$day.' '.$month.' '.date("Y").'.</h4><br>';
+        $birthdayhtml.= '<p>'.$newreturn.' days until '.$row['cojmname']."'s Birthday, "; 
+        $birthdayhtml.= ((date("Y")-$year)).' on '.date('l jS m ', strtotime(date("Y-$month-$day"))).', '.$day.' '.$month.' '.date("Y").'.</p>';
     }
 
     if ($todaycheck==date("m-d")) {
-        echo "<h3>".$row['cojmname']."'s Birthday TODAY! (". ((date("Y")-$year)). ") </h3>";
+        $birthdayhtml.= "<h3>".$row['cojmname']."'s Birthday TODAY! (". ((date("Y")-$year)). ") </h3>";
     }
 
 } // ends loop
-
-
-
-
-
-
-
-
-
 
 
 
@@ -419,13 +414,46 @@ if ($flag==1) {
 echo $html.'<div class="vpad"> </div>';
 
 
+if ($birthdayflag>0) {
+    
+    echo ' <div class="ui-state-highlight ui-corner-all p15 undersearch" >  ';
+    echo $birthdayhtml;
+    echo ' </div> ';
+    
+}
 
 
 
-// jobs with status as invoiced but no invoice ref for jobs within the last year
+
+
+
+ 
+ 
+
 
 if ($globalprefrow['showdebug']>0) {
 
+ 
+ 
+ 
+ 
+ 
+
+    $res = preg_replace("/[^0-9,.]/", "", ini_get(upload_max_filesize) ); 
+    if ($res<3) {
+        echo ' <div class="ui-state-error ui-corner-all p15 undersearch" >  ';    
+    echo '<h2> Server Max File Upload Size set at '.ini_get(upload_max_filesize).' which may be too low for high accuracy GPX Files. </h2>';    
+        echo ' </div> ';    
+    } 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
  
  

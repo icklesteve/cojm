@@ -1842,6 +1842,7 @@ if ($lookuppage) {
         $stmt->execute();
         $sumtot = $stmt->rowCount();
         
+        $html='';
         
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             
@@ -1867,7 +1868,7 @@ if ($lookuppage) {
             $showcargo=''; 
             $showasap='';
         
-            echo '<div id="index'.$row['ID'].'" data-day="'.date('z', strtotime($row['nextactiondate'])).'" class="indexlisttr ui-corner-all"  > ';
+            $html.= '<div id="index'.$row['ID'].'" data-day="'.date('z', strtotime($row['nextactiondate'])).'" class="indexlisttr ui-corner-all"  > ';
         
         
             while ($i<21) { /////  CHECK TO SEE TO DISPLAY JUST 1 ASAP OR CARGOBIKE LOGO     //
@@ -1887,28 +1888,28 @@ if ($lookuppage) {
             if ($row['cargoservice']=='1') { $showcargo='1'; }
         
         
-            echo ' <span class="indexorder"><a class="indexjoblink" href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> ';
+            $html.= ' <span class="indexorder"><a class="indexjoblink" href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> ';
         
             
             if ($showasap=='1') {
-                echo '<img class="indexicon" title="ASAP" alt="ASAP" src="'.$globalprefrow['image5'].'">';
+                $html.= '<img class="indexicon" title="ASAP" alt="ASAP" src="'.$globalprefrow['image5'].'">';
             }
                 
             if ($showcargo=='1') {
-                echo '<img class="indexicon" title="Cargobike " alt="Cargo" src="'.$globalprefrow['image6'].'">';
+                $html.= '<img class="indexicon" title="Cargobike " alt="Cargo" src="'.$globalprefrow['image6'].'">';
             }
             
             
             ////////////     COMMENT TEXT ///////////////////////////////////////////////////////////////
         
         
-            echo ' <a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'.$row['CompanyName'].'</a>';
+            $html.= ' <a href="new_cojm_client.php?clientid='.$row['CustomerID'].'">'.$row['CompanyName'].'</a>';
         
-            if ($row['orderdep']>0) { echo ' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$row['depname'].'</a>) '; }
+            if ($row['orderdep']>0) { $html.= ' (<a href="new_cojm_department.php?depid='.$row['orderdep'].'">'.$row['depname'].'</a>) '; }
             
             
             if ($row['batchdropcount']<>'1') {
-                echo ' '.trim(strrev(ltrim(strrev($row['numberitems']), '0')),'.').' x '. $row['Service'] .' ';
+                $html.= ' '.trim(strrev(ltrim(strrev($row['numberitems']), '0')),'.').' x '. $row['Service'] .' ';
             }
             
             $n=0;
@@ -1917,87 +1918,87 @@ if ($lookuppage) {
                 if (((trim($row["enrpc$i"]))<>'') or (trim($row["enrft$i"]<>''))) { $n++; } $i++; }
             
             if ($n==1) { // via 1 stop
-                echo ' via '.htmlspecialchars($row["enrft1"]) .' '.htmlspecialchars($row["enrpc1"]).'';
+                $html.= ' via '.htmlspecialchars($row["enrft1"]) .' '.htmlspecialchars($row["enrpc1"]).'';
             }
             else if ($n>1) { // via n stops
-                echo ' via '.$n.' stops ';
+                $html.= ' via '.$n.' stops ';
             }
             
             if (($shortcomments)) {
-                echo ' - '.$shortcomments;
+                $html.= ' - '.$shortcomments;
             }
             
             if ($privateshortcomments) {
-                echo ' - '.$privateshortcomments;
+                $html.= ' - '.$privateshortcomments;
             }
         
             
-            echo '
+            $html.= '
             </span>
             
             <table class="index">
             <tbody> <tr>';
             
             if ($mobdevice<>'1') { // td rowspan=2
-                echo ' <td rowspan="2"> ';
+                $html.= ' <td rowspan="2"> ';
             }
             else { // td colspan=3
-                echo ' <td colspan="3"> ';
+                $html.= ' <td colspan="3"> ';
             }
             
         
         
         
             
-            echo '<select id="stat'. $row['ID'] .'" class="ui-corner-left indexstatus" >';
+            $html.= '<select id="stat'. $row['ID'] .'" class="ui-corner-left indexstatus" >';
             
             foreach($statusdata as $loopstatusname => $loopstatusnum) {
-                print ("<option ");
-                if ($row['status'] == $loopstatusnum) { echo 'selected="selected" ';}
-                print ("value=\"$loopstatusnum\">$loopstatusname</option>"); 
+                $html.= ("<option ");
+                if ($row['status'] == $loopstatusnum) { $html.= 'selected="selected" ';}
+                $html.= ("value=\"$loopstatusnum\">$loopstatusname</option>"); 
             }
-            print ("</select>");
+            $html.= ("</select>");
         
         
         
             
             //////////     CYCLIST   DROPDOWN     ///////////////////////////////////
-            echo '
+            $html.= '
             <select id="cyc'. $row['ID'] .'" class="ui-corner-left indexrider';
         
-            if ($row['CyclistID']=='1') { echo ' red'; }
-            echo '">';
+            if ($row['CyclistID']=='1') { $html.= ' red'; }
+            $html.= '">';
         
             foreach ($riderdata as $ridernum => $ridername) {
                 $ridername=htmlspecialchars($ridername);
-                print ("<option ");
-                if ($row['CyclistID'] == $ridernum) { echo ' selected="selected" '; }
-                if ($ridernum == '1') { echo ' class="unalo" '; }
-                print ("value=\"$ridernum\">$ridername</option>");
+                $html.= ("<option ");
+                if ($row['CyclistID'] == $ridernum) { $html.= ' selected="selected" '; }
+                if ($ridernum == '1') { $html.= ' class="unalo" '; }
+                $html.= ("value=\"$ridernum\">$ridername</option>");
             }
-            echo '</select> ';
+            $html.= '</select> ';
             
             
             if ($mobdevice=='1') {
-                echo ' </td></tr><tr><td> ';
+                $html.= ' </td></tr><tr><td> ';
             } else {
-                echo ' </td> <td> ';
+                $html.= ' </td> <td> ';
             }
             
             
             if (($row['status']) <'51' ) {
-                if ($latecoll>0) { echo '<span class="red">';}
-                echo 'Target PU';
-                if ($latecoll>0) { echo '</span>'; }
+                if ($latecoll>0) { $html.= '<span class="red">';}
+                $html.= 'Target PU';
+                if ($latecoll>0) { $html.= '</span>'; }
                 
-                echo '</td>
+                $html.= '</td>
                 <td>';
             
-                if ($latecoll>0) { echo ' <span class="red" >'; }
+                if ($latecoll>0) { $html.= ' <span class="red" >'; }
         
-                echo date('H:i', strtotime($row['targetcollectiondate']));
+                $html.= date('H:i', strtotime($row['targetcollectiondate']));
                 if (date('U', strtotime($row['collectionworkingwindow']))>10) {
-                    echo '-'.date('H:i ', strtotime($row['collectionworkingwindow']));
+                    $html.= '-'.date('H:i ', strtotime($row['collectionworkingwindow']));
                 }
             
                 $today=date('z');
@@ -2007,29 +2008,29 @@ if ($lookuppage) {
                 $year=date('Y', strtotime($row['targetcollectiondate']));
                 $cyea=date('Y');
                 if ($check==($today-'1')) {
-                    echo ' Yesterday ';
+                    $html.= ' Yesterday ';
                 } else
                 if ($check==$today) {
-                    echo ' Today ';
+                    $html.= ' Today ';
                 }
                 else if ($check==($today+'1')) {
-                    echo ' Tomorrow ';
+                    $html.= ' Tomorrow ';
                 }
                 else {
-                    echo date(' l ', strtotime($row['targetcollectiondate']));
+                    $html.= date(' l ', strtotime($row['targetcollectiondate']));
                 }
                 
-                echo date(' jS ', strtotime($row['targetcollectiondate']));
+                $html.= date(' jS ', strtotime($row['targetcollectiondate']));
                 if (($month<>$cmont) or ($year<>$cyea)) {
-                    echo date(' M ', strtotime($row['targetcollectiondate']));
+                    $html.= date(' M ', strtotime($row['targetcollectiondate']));
                 }
                 if ($year<>$cyea) {
-                    echo date(' Y ', strtotime($row['targetcollectiondate']));
+                    $html.= date(' Y ', strtotime($row['targetcollectiondate']));
                 }
-                if ($latecoll>0) { echo '</span> '; }
+                if ($latecoll>0) { $html.= '</span> '; }
             }
             else { // ends collection due , now  collected
-                echo ' PU was at 
+                $html.= ' PU was at 
                 </td>
                 <td> '. date('H:i', strtotime($row['collectiondate']));
                 $today=date('z');
@@ -2039,23 +2040,23 @@ if ($lookuppage) {
                 $year=date('Y', strtotime($row['collectiondate']));
                 $cyea=date('Y');
                 if ($check==($today-'1')) {
-                    echo ' Yesterday ';
+                    $html.= ' Yesterday ';
                 }
                 else if ($check==$today) {
-                    echo ' Today ';
+                    $html.= ' Today ';
                 }
                 else if ($check==($today+'1')) {
-                    echo ' Tomorrow ';
+                    $html.= ' Tomorrow ';
                 }
                 else {
-                    echo date(' l ', strtotime($row['collectiondate']));
+                    $html.= date(' l ', strtotime($row['collectiondate']));
                 } 
-                echo date(' jS ', strtotime($row['collectiondate']));
+                $html.= date(' jS ', strtotime($row['collectiondate']));
                 if (($month<>$cmont) or ($year<>$cyea)) {
-                    echo date(' M ', strtotime($row['collectiondate']));
+                    $html.= date(' M ', strtotime($row['collectiondate']));
                 }
                 if ($year<>$cyea) {
-                    echo date(' Y ', strtotime($row['collectiondate']));
+                    $html.= date(' Y ', strtotime($row['collectiondate']));
                 }
                 
             } // ends collection due / collected
@@ -2065,10 +2066,10 @@ if ($lookuppage) {
             
             $testdate = substr($row['targetcollectiondate'],0,10);
             $bhtext=(array_search("$testdate", $bankholdata));
-            if ($bhtext) { echo '<span class="bankhol">'.$bhtext.'</span>'; }
+            if ($bhtext) { $html.= '<span class="bankhol">'.$bhtext.'</span>'; }
             
         
-            echo ' </td> <td> ';
+            $html.= ' </td> <td> ';
             
         
         
@@ -2077,13 +2078,13 @@ if ($lookuppage) {
             
             if ((trim($row['enrpc0'])) or ($row['enrft0'])) {
                 if ( $globalprefrow["inaccuratepostcode"]=='1') { // echo ' full address link '; 
-                    echo ' <a class="newwin" target="_blank" href="https://www.google.com/maps/?q='.
+                    $html.= ' <a class="newwin" target="_blank" href="https://www.google.com/maps/?q='.
                     str_replace(" ", "+", trim($row['enrft0'])).'+'.str_replace(" ", "+", trim($row['enrpc0'])) .'">'.$row["enrft0"].' '.trim($row['enrpc0']).'</a> ';
                 }
                 else { // uk style address link
-                    echo $row['enrft0'].' ';
+                    $html.= $row['enrft0'].' ';
                     if (trim($row['enrpc0'])) {
-                        echo '<a target="_blank" class="newwin" href="https://www.google.com/maps/?q='.
+                        $html.= '<a target="_blank" class="newwin" href="https://www.google.com/maps/?q='.
                         str_replace(" ", "+", trim($row['enrpc0'])).'">'.trim($row['enrpc0']) .'</a> ';
                     }
                 }
@@ -2092,31 +2093,31 @@ if ($lookuppage) {
             
             //// CASH PAYMENT CHECK    ////////////////////////////////////////////////////
             if ($row['invoicetype']=='3') {
-                echo " <span title='Incl. VAT' style='". $globalprefrow['courier6']."'>Payment on PU &". 
+                $html.= " <span title='Incl. VAT' style='". $globalprefrow['courier6']."'>Payment on PU &". 
                 $globalprefrow['currencysymbol'].($row['FreightCharge']+$row['vatcharge']).'</span>';
             }
             
             
-            echo ' &nbsp;    </td> </tr>  <tr> <td>  ';
+            $html.= ' &nbsp;    </td> </tr>  <tr> <td>  ';
             
             
             
-            if ($latedeli>0) { echo ' <span class="red" >'; }
+            if ($latedeli>0) { $html.= ' <span class="red" >'; }
             
-            echo 'Target Drop';
+            $html.= 'Target Drop';
             
-            if ($latedeli>0) { echo '</span> '; }
+            if ($latedeli>0) { $html.= '</span> '; }
             
-            echo ' </td> <td>  ';
+            $html.= ' </td> <td>  ';
             
             
             
             // due date / time   ///////////////////////////////////////////////
-            if ($latedeli>0) { echo ' <span class="red" >'; }
-            echo date('H:i', strtotime($row['duedate'])); 
+            if ($latedeli>0) { $html.= ' <span class="red" >'; }
+            $html.= date('H:i', strtotime($row['duedate'])); 
             
             if (date('U', strtotime($row['deliveryworkingwindow']))>10) {
-                echo '-'.date('H:i', strtotime($row['deliveryworkingwindow']));
+                $html.= '-'.date('H:i', strtotime($row['deliveryworkingwindow']));
             }
             
             
@@ -2127,44 +2128,44 @@ if ($lookuppage) {
             $year=date('Y', strtotime($row['duedate']));
             $cyea=date('Y');
         
-            if ($check==($today-'1')) { echo ' Yesterday '; }
-            else if ($check==$today) { echo ' Today '; }
-            else if ($check==($today+'1')) { echo ' Tomorrow '; }
-            else { echo date(' l ', strtotime($row['duedate'])); }
+            if ($check==($today-'1')) { $html.= ' Yesterday '; }
+            else if ($check==$today) { $html.= ' Today '; }
+            else if ($check==($today+'1')) { $html.= ' Tomorrow '; }
+            else { $html.= date(' l ', strtotime($row['duedate'])); }
             
-            echo date(' jS ', strtotime($row['duedate']));
+            $html.= date(' jS ', strtotime($row['duedate']));
             
             if (($month<>$cmont) or ($year<>$cyea)) {
-                echo date(' M ', strtotime($row['duedate']));
+                $html.= date(' M ', strtotime($row['duedate']));
             }
             if ($year<>$cyea) {
-                echo date(' Y ', strtotime($row['duedate']));
+                $html.= date(' Y ', strtotime($row['duedate']));
             }
-            if ($latedeli>0) { echo '</span> '; }
+            if ($latedeli>0) { $html.= '</span> '; }
             
             
             
             
             $testdate = substr($row['duedate'],0,10);
             $bhtext=(array_search("$testdate", $bankholdata));
-            if ($bhtext) { echo '<span class="bankhol">'.$bhtext.'</span>'; }
+            if ($bhtext) { $html.= '<span class="bankhol">'.$bhtext.'</span>'; }
             
-            echo ' </td> <td> ';
+            $html.= ' </td> <td> ';
             
             
-            if ($row['opsname']<>'') {  echo '<span title="'.$row['descrip'].'">'.$row['opsname'].'</span> '; }
-            if ($row['subareaname']<>'') {  echo ' <span title="'.$row['subareadescrip'].'">('.$row['subareaname'].')</span> '; }
+            if ($row['opsname']<>'') {  $html.= '<span title="'.$row['descrip'].'">'.$row['opsname'].'</span> '; }
+            if ($row['subareaname']<>'') {  $html.= ' <span title="'.$row['subareadescrip'].'">('.$row['subareaname'].')</span> '; }
             
             if ((trim($row['enrpc21'])) or ($row['enrft21'])) {
                 if ( $globalprefrow["inaccuratepostcode"]=='1'){
-                    echo '<a target="_blank" class="newwin" href="https://www.google.com/maps/?q='.
+                    $html.= '<a target="_blank" class="newwin" href="https://www.google.com/maps/?q='.
                     str_replace(" ", "+", trim($row["enrft21"])).'+'. str_replace(" ", "+", trim($row['enrpc21'])).'">'.$row['enrft21'].' '. $enrpc21.'</a> ';
                 }
                 else { // uk address
-                    echo $row['enrft21'];
+                    $html.= $row['enrft21'];
                     if (trim($row['enrpc21'])) {
-                        echo ' <a target="_blank" class="newwin" href="https://www.google.com/maps/?q=';
-                        echo str_replace(" ", "+", trim($row['enrpc21'])).'">'. trim($row['enrpc21']).'</a> ';
+                        $html.= ' <a target="_blank" class="newwin" href="https://www.google.com/maps/?q=';
+                        $html.= str_replace(" ", "+", trim($row['enrpc21'])).'">'. trim($row['enrpc21']).'</a> ';
                     }
                 }
             }
@@ -2173,12 +2174,12 @@ if ($lookuppage) {
             
             
             if ($row['invoicetype']=='4') { // echo payment on drop
-                echo " <span style='". $globalprefrow['courier6']."'>Payment on Drop   &". 
+                $html.= " <span style='". $globalprefrow['courier6']."'>Payment on Drop   &". 
                 $globalprefrow['currencysymbol'].($row['FreightCharge']+$row['vatcharge']).'</span>';
             }
             
             
-            echo ' &nbsp; 
+            $html.= ' &nbsp; 
             </td> 
             </tr> 
             </tbody>
@@ -2190,6 +2191,8 @@ if ($lookuppage) {
         
         } // ends individual job loop
         
+        
+        echo $html;
         
         if ($numinloop<$numberofresults) {
             $script.=' alldisplayed(); flag = false; ';
@@ -2204,12 +2207,8 @@ if ($lookuppage) {
     }
     
     
-    
-    
-    
-    if ($script) {
-        echo ' <script> '.$script.' </script> ';
-    }
+    $script.=' $("#indexlastupdated").html("'.date("H:i").'") ';
+    echo ' <script> '.$script.' </script> ';
 }
 
 

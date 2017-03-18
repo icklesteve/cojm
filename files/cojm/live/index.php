@@ -98,15 +98,16 @@ if($mobdevice) { // already coded as js variable ?
 
 ?>
 <div id="Post" class="Post c9 lh16">
-<div id="indexajax"> </div>  
-<div id="allindexresults" class="hideuntilneeded">
-<hr />
-<div class="ui-state-highlight ui-corner-all p15">
-    <h2> <span id="indexcounted">All</span> <span id="indextotal"> </span> Results Displayed.</h2>
+    <div id="indexajax"> </div>  
+    <div id="allindexresults" class="hideuntilneeded">
+        <hr />
+        <div class="ui-state-highlight ui-corner-all p15">
+            <h2> <span id="indexcounted">All</span> <span id="indextotal"> </span> Results Displayed.</h2>
+            <p>Last Updated <span id="indexlastupdated"></span> </p>
+        </div>
+        <div class="vpad "> </div>
+        <hr />
     </div>
-    <div class="vpad "> </div>
-</div>
-<hr />
 </div>
 <script type="text/javascript">
 var formbirthday=<?php echo microtime(TRUE); ?>;
@@ -131,7 +132,6 @@ function addlines() {
     var dayflag=1;
     var counted=0;
     $( ".indexstatuschange" ).remove();
-
     $(".indexlisttr").removeClass("ui-state-default").removeClass("ui-state-highlight");
     $(".indexstatus").removeClass("ui-state-default").removeClass("ui-state-highlight");
     $(".indexrider").removeClass("ui-state-default").removeClass("ui-state-highlight");
@@ -163,13 +163,13 @@ function addlines() {
                 dayflag++;
             }
             if (isEven(dayflag)) {
-                $("#index"+orderid).addClass("ui-state-default");
-                $("#stat"+orderid).addClass("ui-state-default");
-                $("#cyc"+orderid).addClass("ui-state-default");
-            } else {
                 $("#index"+orderid).addClass("ui-state-highlight");
                 $("#stat"+orderid).addClass("ui-state-highlight");
                 $("#cyc"+orderid).addClass("ui-state-highlight");
+            } else {
+                $("#index"+orderid).addClass("ui-state-default");
+                $("#stat"+orderid).addClass("ui-state-default");
+                $("#cyc"+orderid).addClass("ui-state-default");
             }
         }
     });
@@ -191,6 +191,7 @@ function pagetimeoutfunc(){
     offset=0;
     seeifnextday=0;
     dayflag=0;
+    $("#allindexresults").addClass('hideuntilneeded');
     $("#indexajax").html("");
     refreshindex(indexfilter);
     pagetimeout=initialpagetimeout;
@@ -212,6 +213,7 @@ function alldisplayed() {
 }
 
 function refreshindex(callback) {
+    $("#allindexresults").hide();
     dataString = "lookuppage=indexlist" +  
     "&numberofresults=" + numberofresults +
     "&offset=" + offset +
@@ -227,6 +229,8 @@ function refreshindex(callback) {
             
         },
         complete: function () {
+            pagetimeout=$("#topmenutimeoutchoose").val();
+            
             $("#toploader").fadeOut();
             if (callback && typeof(callback) === "function") {
                 callback();
@@ -282,7 +286,7 @@ $(document).on('change', '.indexstatus', function(e){
                 dayflag=0;
                 $("#allindexresults").hide();
                 $("#indexajax").html("");
-                refreshindex();
+                refreshindex(indexfilter);
             } else {
                 if (allok==1) {
                     // alert(" beer ");

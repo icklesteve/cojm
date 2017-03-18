@@ -56,6 +56,7 @@ elseif (isset($_GET['newcyclist'])) { $CyclistID=trim($_GET['newcyclist']); } el
 $thisCyclistID=$CyclistID;
 
 
+
 if ($start) {
 
     $trackingtext='';
@@ -211,6 +212,9 @@ echo ' value="normal">Preview File</option>
 $allowedExtensions = array("gpx"); 
 foreach ($_FILES as $file) {
     
+    $infotext.=' startuploadgpx.php ln 215 found uploaded file ';
+
+    
     $file['name']=$file['name'];
     if ($file['tmp_name'] > '') {
 		if ( $thisCyclistID=='' or $thisCyclistID=='1' ) {		
@@ -224,7 +228,7 @@ foreach ($_FILES as $file) {
 				<p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
 				<strong> '.$file['name'].' is not a GPX file, please re-try.</strong></p></div><br />';
             } else {
-                // echo 'GPX File located :-)';
+                $infotext.=' startuploadgpx.php ln 232 GPX File located ';
                 if ($_FILES["file"]["error"] > 0) {
                     echo "Error: " . $_FILES["file"]["error"] . "<br />";
                 } else {
@@ -236,6 +240,9 @@ foreach ($_FILES as $file) {
                     // $ext = ($_FILES["file"]["extension"]);
                     // echo " File extension is ".$ext;
                     // $target = "/cache/newnamegpx.".$ext;
+                    
+                    $infotext.=' startuploadgpx.php ln 244 including trackstats.php ';
+                    
                     include"trackstats.php";
                 }
             }

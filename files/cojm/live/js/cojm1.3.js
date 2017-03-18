@@ -3808,7 +3808,7 @@ if (pagetimeout>1) {
         $('#cdtext').attr('title',pagetimeout + 's. ');
         if (pagetimeout<75) {
             if(pagetimeout == 74){ $("span[id=cdtext]").addClass('t121'); }// opacity 0        
-            if(pagetimeout == 64){ $("span[id=cdtext]").addClass('t120').removeClass('hideuntilneeded');; }
+            if(pagetimeout == 64){ $("span[id=cdtext]").addClass('t120').removeClass('hideuntilneeded'); }
             if(pagetimeout == 60){ $("span[id=cdtext]").removeClass('t121') }// opacity 0                
             if(pagetimeout == 45){ $("span[id=cdtext]").removeClass('t120');  }
             if(pagetimeout == 45){ $("span[id=cdtext]").addClass('t60'); }
@@ -3854,6 +3854,8 @@ if (pagetimeout>1) {
                 }
             }
             
+        } else {
+            $("span[id=cdtext]").addClass('hideuntilneeded');
         }
 
     }

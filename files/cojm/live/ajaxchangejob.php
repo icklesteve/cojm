@@ -801,7 +801,7 @@ if ($hasid) {
                         $depstmt->execute();
                         $dep = $depstmt->fetchObject();
                         $cojmname=$dep->cojmname;
-                        $message.="Rider changed to ".$cojmname;
+                        $message.="Rider updated to ".$cojmname;
                         $allok=1;
                         
                         if ($newrider<>1) {
@@ -1896,7 +1896,7 @@ if ($hasid) {
                     $stmt->execute();
                     $total = $stmt->rowCount();
                     if ($total=='1') {
-                        $message.="Job Comments changed to ".addslashes(json_encode($jobcomments));
+                        $message.="Job Comments updated to ".addslashes(json_encode($jobcomments));
                         $allok=1;
                         // $cojmaction='recalcprice';
                     } // ends total changed ==1 check
@@ -3492,7 +3492,7 @@ if ($page=='addnewexpense') { //
             $("#expensedate").val("'.date('d-m-Y').'");
             $("select#paid").val("0");
             $("#chequeref").val("");
-            $("#expensedescription").val("");
+            $("#expensedescription").html("");
             $("#explastupdated").html("'.date('H:i D jS M Y').'");
             $("#expcr").html("'.date('H:i D jS M Y').'");
             $("select#paymentmethod").val("");

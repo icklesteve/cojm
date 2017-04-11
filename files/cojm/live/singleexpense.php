@@ -43,7 +43,7 @@ $title = "COJM";
 <html lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="HandheldFriendly" content="true" >
-<meta name="viewport" content="width=device-width, height=device-height, user-scalable=no" >
+<meta name="viewport" content="width=device-width, height=device-height " >
 <meta name="generator" content="COJM Expenses">
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <?php echo '<link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
@@ -62,62 +62,56 @@ include "cojmmenu.php";
 ?>
 <div class="Post clearfix" id="Post">
 
-<div class="ui-state-highlight ui-corner-all p15 aligned" > 
-
-<form id="singleexpense">
-<input type="hidden" name="page" id="page" value="lookup" >
-<fieldset>
-<label class="fieldLabel"> Ref </label>
-<input class="caps ui-state-default ui-corner-left" name="expenseid" id="expenseid" type="number" step="1"
+    <div class="ui-state-highlight ui-corner-all p15 aligned" > 
+        <form id="singleexpense">
+            <input type="hidden" name="page" id="page" value="lookup" >
+            <fieldset>
+                <label class="fieldLabel"> Ref </label>
+                <input class="caps ui-state-default ui-corner-left" name="expenseid" id="expenseid" type="number" step="1"
  placeholder="Search ID" value="<?php echo $expenseref ?>">
 
-<button id="expensesearchbyid">Search Expense Ref</button>
- <button id="addnewexpense"> New Expense </button>
+                <button id="expensesearchbyid">Search Expense Ref</button>
+                <button id="addnewexpense"> New Expense </button>
+            </fieldset>
+        </form>
+        <hr />
+
+
+
+
+
+        <div id="expensedetails" class="hideuntilneeded ">
+
+            <fieldset> <label class="fieldLabel"> Total Amount &<?php echo $globalprefrow['currencysymbol']; ?> </label>
+<input class="caps ui-state-default ui-corner-all" type="text" name="amount" id="amount" size="6" />
 </fieldset>
-</form>
-<hr />
 
-
-
-
-
-<div id="expensedetails" class="hideuntilneeded ">
-
-<fieldset>
-<label class="fieldLabel"> Total Amount &<?php echo $globalprefrow['currencysymbol']; ?></label>
-<input class="caps ui-state-default ui-corner-all" type="text" name="amount" id="amount" size="6">
-</fieldset>
-
-<fieldset><label class="fieldLabel">
+            <fieldset><label class="fieldLabel">
  of which VAT <span style="position:relative; float:right;">
  &<?php echo $globalprefrow['currencysymbol']; ?> &nbsp;</span></label>
 <input class="caps ui-state-default ui-corner-all" type="text" name="expensevat" id="expensevat" size="6">
 </fieldset>
 
 
-<fieldset>
-<label class="fieldLabel"> Paid </label> 
+            <fieldset> <label class="fieldLabel"> Paid </label> 
 <select class="ui-state-default ui-corner-left" name="paid" id="paid"> 
-<option value="0" > No
-<option value="1" > Yes
+<option value="0" > No </option>
+<option value="1" > Yes </option>
 </select>
 </fieldset>
 
 
-<fieldset>
-<label class="fieldLabel"> Expense Date </label> 
+            <fieldset> <label class="fieldLabel"> Expense Date </label> 
 <input class="ui-state-default ui-corner-all caps" type="text" value="" id="expensedate" size="12" name="expensedate">
 </fieldset>
 
-<fieldset><label class="fieldLabel"> Department </label>
+            <fieldset> <label class="fieldLabel"> Department </label>
 <select class="ui-state-default ui-corner-left" name="expensecode" id="expensecode">
+<option value=""> Select Expense Code </option> 
 <?php 
 
 $expensetext='';
 $sql = "SELECT expensecode, smallexpensename FROM expensecodes ORDER BY expensecode"; 
-
-echo ' <option value=""> Select Expense Code </option> ';
-
 
 $stmt = $dbh->query($sql);
 $data = $stmt->fetchAll();
@@ -127,14 +121,15 @@ foreach ($data as $e) {
     if ($smallexpensename=='') { $smallexpensename=' &nbsp; '; }
     print"<option ";
     print 'value="'.$e['expensecode'].'">'.$smallexpensename.' </option>';
-} ?>
+}
+?>
 </select>
 <span id="expensedescription"> </span>
 </fieldset> 
 
 
 
-<fieldset id="riderselect" class="hideuntilneeded"><label class="fieldLabel">
+            <fieldset id="riderselect" class="hideuntilneeded"><label class="fieldLabel">
 <?php echo $globalprefrow['glob5'].'</label>';
 
 print ("<select class=\"ui-state-default ui-corner-left\" name=\"cyclistref\" id=\"cyclistref\">\n");
@@ -154,12 +149,12 @@ foreach ($data as $c) {
 </fieldset> 
 
  
-<fieldset><label class="fieldLabel">Who To </label>
+            <fieldset><label class="fieldLabel">Who To </label>
 <input class="caps ui-state-default ui-corner-all" type="text" name="whoto" id="whoto" value="">
 </fieldset>
 
 
-<fieldset>
+            <fieldset>
 <label class="fieldLabel"> Method </label> 
 <select class="ui-state-default ui-corner-left" name="paymentmethod" id="paymentmethod"> 
 <option value="" > &nbsp; </option>
@@ -175,7 +170,7 @@ foreach ($data as $c) {
         <span id="chequeref"></span>
         </fieldset>
 
-        <fieldset><label class="fieldLabel">Comments </label>
+            <fieldset><label class="fieldLabel">Comments </label>
         <textarea 
         class="ui-state-default ui-corner-all" 
         name="expensecomment" 
@@ -187,19 +182,21 @@ foreach ($data as $c) {
         ></textarea>
         </fieldset>
 
-        <fieldset><label class="fieldLabel">Created </label>
+            <fieldset><label class="fieldLabel">Created </label>
         <span id="expcr"></span>
         </fieldset>        
         
-        <fieldset><label class="fieldLabel">Last Updated </label>
+            <fieldset><label class="fieldLabel">Last Updated </label>
         <span id="explastupdated"></span>
         </fieldset>
-        <input type="hidden" id="newcomment" name="newcomment" value="">
-        <hr />
+       
+
+            <input type="hidden" id="newcomment" name="newcomment" value="">
+            <hr />
         </div>
     </div>
 
-<div id="expensestats"> </div>
+    <div id="expensestats"> </div>
 
 </div>
     
@@ -260,7 +257,7 @@ $(document).ready(function() {
                     $("#Post").append(data);
                 },
                 complete: function () {
-                    $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' }, function() {});
+                    $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' });
                     showmessage();
                 },
                 error:function (xhr, ajaxOptions, thrownError){
@@ -322,6 +319,7 @@ $(document).ready(function() {
             },
             complete: function () {
                 showmessage();
+                $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' });
             },
             error:function (xhr, ajaxOptions, thrownError){
                 alert(thrownError); //throw any errors
@@ -356,6 +354,7 @@ $(document).ready(function() {
                 $("#Post").append(data);
             },
             complete: function () {
+                $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' });
                 showmessage();
             },
             error:function (xhr, ajaxOptions, thrownError){
@@ -388,6 +387,7 @@ $(document).ready(function() {
             },
             complete: function () {
                 showmessage();
+                $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' });            
             },
             error:function (xhr, ajaxOptions, thrownError){
                 alert(thrownError); //throw any errors
@@ -419,6 +419,7 @@ $(document).ready(function() {
             },
             complete: function () {
                 showmessage();
+                $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' });
             },
             error:function (xhr, ajaxOptions, thrownError){
                 alert(thrownError); //throw any errors
@@ -449,6 +450,7 @@ $(document).ready(function() {
             },
             complete: function () {
                 showmessage();
+                $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' });            
             },
             error:function (xhr, ajaxOptions, thrownError){
                 alert(thrownError); //throw any errors
@@ -484,6 +486,7 @@ $(document).ready(function() {
             },
             complete: function () {
                 showmessage();
+                $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' });
             },
             error:function (xhr, ajaxOptions, thrownError){
                 alert(thrownError); //throw any errors
@@ -511,6 +514,7 @@ $(document).ready(function() {
             success:function(data){
                 // alert(data);
                 $("#Post").append(data);
+                $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' });
             },
             complete: function () {
                 showmessage();
@@ -544,6 +548,7 @@ $(document).ready(function() {
             },
             complete: function () {
                 showmessage();
+                $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' });
             },
             error:function (xhr, ajaxOptions, thrownError){
                 alert(thrownError); //throw any errors
@@ -617,6 +622,7 @@ $(document).ready(function() {
                 
                 $('#expensecomment').trigger('autosize.resize');
                 showmessage();
+                $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' });                
             },
             error:function (xhr, ajaxOptions, thrownError){
                 alert(thrownError); //throw any errors

@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	ordersearch.php - included in individual job screen ( order.php ), if a cojm ID is not found from a search in top menu
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -267,6 +267,39 @@ if ($stmt) {
     echo '</div></div><br /><div class="line"></div><br />';
     $found='1';
 }
+
+
+
+
+
+
+// expenses.description
+$sql="SELECT * FROM expenses
+WHERE expenses.whoto LIKE ?
+LIMIT 0,50";
+
+$prep = $dbh->prepare($sql);
+$prep->execute([$pdosearch]);
+$stmt = $prep->fetchAll();
+if ($stmt) {
+    $num_rows=0;
+    $txt='';
+    foreach($stmt as $row) {
+        $txt.= '<p><a href="singleexpense.php?expenseref='.$row['expenseref'].'">'.$row['expenseref'].'</a> '.$row['whoto'].'</p>';
+        $num_rows++;
+    }
+    echo '<div class="ui-widget"><div class="ui-state-highlight ui-corner-all" style="padding: 0.5em;"><h3>';
+    if ($num_rows>49) { echo 'At least '; }
+    echo $num_rows.' Job';
+    if ($num_rows<>1) { echo 's'; }
+    echo ' found with '.$searchid.' in Expense Payee </h3>'.$txt;
+    echo '</div></div><br /><div class="line"></div><br />';
+    $found='1';
+}
+
+
+
+
 
 
 

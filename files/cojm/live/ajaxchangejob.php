@@ -3814,6 +3814,9 @@ if ($page=='ajeditexpense') { // new payment from client
         catch(PDOException $e) { $message.= $e->getMessage(); }
     }   
  
+    if ($allok==1) {
+        $script.=' $("#explastupdated").html("'.date("H:i").'"); ';
+    }
  
 }
 
@@ -3980,7 +3983,7 @@ if ($page=='ajeditpayment') { // new payment from client
 
 }
 
-    if ($page=='reconcileinvoice') {
+if ($page=='reconcileinvoice') {
         $invoiceref=$_POST['ref']; 
         $invoicedate=trim($_POST['invoicedate']); 
         $invoicedate = str_replace("/", ":", "$invoicedate", $count);

@@ -276,14 +276,14 @@ while ($dinterim<$dend) { // each day loop
         $stmt->execute(array($dinterim, $dinterif, $thisCyclistID));
     }
     
-
-    $row_count = $stmt->rowCount();
+    $newstmt = $stmt->fetchAll();
+    
     $prevts='';
     $tabledatestart='';
     
-    if ($stmt) {
+    if ($newstmt) {
     
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { // got a valid device key for a particular day
+        foreach ($newstmt as $row) { // got a valid device key for a particular day
             $foundtracks++;
             $device_key=$row['device_key'];
             

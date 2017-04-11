@@ -1417,17 +1417,11 @@ if ($lookuppage) {
     if ($lookuppage=='updateexptable') { // update expense tables
         // echo ' Updating Expense Tables ';
 
-        
-        
-        
         $sql="
         SELECT expenseref, expts, paid, expensecost, expensevat, expensedate, whoto, smallexpensename, CyclistID, cojmname, expc1, expc2, expc3, expc4, expc5, expc6, chequeref, description FROM expenses 
-        INNER JOIN Cyclist 
-        INNER JOIN expensecodes
-        ON expenses.cyclistref = Cyclist.CyclistID 
-        AND expenses.expensecode = expensecodes.expensecode 
-        ORDER BY expensedate DESC LIMIT 0,20
-        ";
+        left JOIN Cyclist ON expenses.cyclistref = Cyclist.CyclistID
+        left JOIN expensecodes ON expenses.expensecode = expensecodes.expensecode
+        ORDER BY expensedate DESC LIMIT 0,20 ";
         
         $stmt = $dbh->query($sql);
         
@@ -1473,12 +1467,9 @@ if ($lookuppage) {
         
         $sql="
         SELECT expenseref, expts, paid, expensecost, expensevat, expensedate, whoto, smallexpensename, CyclistID, cojmname, expc1, expc2, expc3, expc4, expc5, expc6, chequeref, description FROM expenses 
-        INNER JOIN Cyclist 
-        INNER JOIN expensecodes
-        ON expenses.cyclistref = Cyclist.CyclistID 
-        AND expenses.expensecode = expensecodes.expensecode 
-        ORDER BY expts DESC LIMIT 0,10
-        ";
+        left JOIN Cyclist ON expenses.cyclistref = Cyclist.CyclistID 
+        left JOIN expensecodes ON expenses.expensecode = expensecodes.expensecode
+        ORDER BY expts DESC LIMIT 0,10 ";
         
         $stmt = $dbh->query($sql);
         
@@ -1840,11 +1831,12 @@ if ($lookuppage) {
 
         
         $stmt->execute();
-        $sumtot = $stmt->rowCount();
         
         $html='';
         
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $data = $stmt->fetchAll();
+        
+        foreach ($data as $row) {
             
             $numinloop++;
             

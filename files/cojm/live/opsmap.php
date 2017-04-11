@@ -47,7 +47,6 @@ $hasforms='0';
 <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>';
  ?>
-
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <?php
 echo '<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;libraries=geometry&amp;key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>'; 
@@ -658,11 +657,10 @@ class="ui-state-default ui-corner-all address" />
 
 <button id="uploadkmltonewopsmap"> Upoad KML area </button>
 
-
 </div>		
 </div>
-		
-</div>		
+
+</div>
 
 <form action="opsmap-new-area.php" method="post" id="uploadkml" enctype="multipart/form-data">
 <input type="hidden" name="page" value="uploadkml">
@@ -670,17 +668,14 @@ class="ui-state-default ui-corner-all address" />
 </form>
 
 
-
 <script>
 $(document).ready(function() {
-    
-        $('#uploadkmltonewopsmap').bind('click', function (e) {
+    $('#uploadkmltonewopsmap').bind('click', function (e) {
         e.preventDefault();
-    
-               $.Zebra_Dialog(' ' +
-                    ' <input id="opsmapname" name="areaname" form="uploadkml" size="15" type="text" placeholder="Name" class="ui-state-default ui-corner-all "> ' +
-                    ' <br /> ' +
-                    ' <input name="file" id="file" form="uploadkml" type="file" accept=".kml"> ', {
+        $.Zebra_Dialog(' ' +
+            ' <input id="opsmapname" name="areaname" form="uploadkml" size="15" type="text" placeholder="Name" class="ui-state-default ui-corner-all "> ' +
+            ' <br /> ' +
+            ' <input name="file" id="file" form="uploadkml" type="file" accept=".kml"> ', {
                     "type": "question",
                     "title": "Upload KML File to New Opsmap Area",
                     "buttons": [{
@@ -696,19 +691,14 @@ $(document).ready(function() {
                             
                             } else {
                                 alert("Please Add Area Name");
-                                
                             }
-   
                         }
                     },{
                         caption: "Cancel"
                     }]
                 });
-
         });
-                
 });
-                
 </script>
 <?php
 

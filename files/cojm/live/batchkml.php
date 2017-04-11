@@ -341,12 +341,6 @@ $sth = $dbh->prepare($sql);
 $sth->execute($parameters);
 
 
-
-
-
-
-
-
 while($map = $sth->fetch()) {
 	
  

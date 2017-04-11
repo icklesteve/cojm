@@ -1,6 +1,29 @@
 <?php
+
+/*
+    COJM Courier Online Operations Management
+	opsmap-new-place.php - edits single ops map place
+    Copyright (C) 2017 S.Young cojm.co.uk
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+
+
 $alpha_time = microtime(TRUE);
-if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) ob_start("ob_gzhandler"); else ob_start();
 $filename="opsmap-new-area.php";
 
 include "C4uconnect.php";
@@ -18,25 +41,25 @@ if (isset($_POST['opsmapid'])) { $opsmapid=trim($_POST['opsmapid']);} else {$ops
 <link rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
 <link rel="stylesheet" href="css/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
-<script src="//maps.googleapis.com/maps/api/js?v=3.22&key=<?php echo $globalprefrow['googlemapapiv3key']; ?>" type="text/javascript"></script>
-<title>OpsMap Place</title>
-
+<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;key=<?php echo $globalprefrow['googlemapapiv3key']; ?>" type="text/javascript"></script>
+<title>OpsMap Place <?php echo $opsmapid; ?></title>
 <?php
 
 $query = "SELECT * FROM opsmap WHERE opsmapid= ? ";
 $statement = $dbh->prepare($query);
 $statement->execute([$opsmapid]);
 $row = $statement->fetch(PDO::FETCH_ASSOC);
-        
-        $type=$row['type'];
-        $opsname=$row['opsname'];
-        $opsmapid=$row['opsmapid'];
-        $descrip=$row['descrip'];
-        $istoplayer=$row['istoplayer'];
-        $corelayer=$row['corelayer'];
-        $inarchive=$row['inarchive'];
-        $initiallat=$row['lat'];
-        $initiallon=$row['lng'];
+
+$type=$row['type'];
+$opsname=$row['opsname'];
+$opsmapid=$row['opsmapid'];
+$descrip=$row['descrip'];
+$istoplayer=$row['istoplayer'];
+$corelayer=$row['corelayer'];
+$inarchive=$row['inarchive'];
+$initiallat=$row['lat'];
+$initiallon=$row['lng'];
+$markertype=$row['markertype'];
 
 
 if (!$initiallat) {  $initiallat=$globalprefrow['glob1']; }
@@ -44,7 +67,9 @@ if (!$initiallon) {  $initiallon=$globalprefrow['glob2']; }
 ?>
 <script type="text/javascript"> 
 function initialize() {
-
+    
+    var toencode=atob("<?php echo base64_encode($descrip); ?>");
+    
     var EditForm =
 	'<form action="ajax-save.php" method="POST" name="EditMarker" id="EditMarker" class="EditMarker">'+
 	'<div class="marker-edit">'+
@@ -52,8 +77,8 @@ function initialize() {
 	'<input type="text" name="pName" class="save-name ui-state-default ui-corner-all w170" '+
     'placeholder="Enter Title" maxlength="50" value="<?php echo $opsname; ?>" /></div>'+
     '<div class="fs"><div class="fsli"> Info</div>'+
-	'<textarea name="pDesc" class="save-desc w170 normal ui-state-highlight ui-corner-all " placeholder="Comments" maxlength="300">'+
-	'<?php echo $descrip; ?></textarea></div>'+
+	'<textarea name="pDesc" id="pDesc" class="save-desc w170 normal ui-state-highlight ui-corner-all " placeholder="Comments" maxlength="300">'+
+	toencode + '</textarea></div>'+
     '<div class="fs"><div class="fsli">Type </div>'+
 	'<select name="pType" class="save-type ui-state-highlight ui-corner-left">'+
 	'<option <?php if ($markertype=='1') { echo ' selected="selected" '; } ?> value="1">General</option>'+
@@ -75,7 +100,7 @@ function initialize() {
     var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"];
     var map = new google.maps.Map(element, {
         center: new google.maps.LatLng(<?php echo $initiallat.','.$initiallon; ?>),
-        zoom: 11,
+        zoom: 18,
         mapTypeId: "OSM",
         draggableCursor: "crosshair",
         mapTypeControl: true,
@@ -126,10 +151,12 @@ function initialize() {
 
 
     // if OSM / OCM set as default, show copyright
-    $(document).ready(function() {setTimeout(function() {
-        $("div#outerdiv").html(osmcopyr);
-    },3000);});
-    
+    $(document).ready(function() {
+        setTimeout(function() {
+            $("div#outerdiv").html(osmcopyr);
+        },3000);
+    });
+
     var point = new google.maps.LatLng(<?php echo $initiallat.','.$initiallon; ?>);
 
     var marker = new google.maps.Marker({
@@ -186,7 +213,6 @@ function initialize() {
         $('#gmap_wrapper').css('height', (h - offsetTop));
     }).resize();
 
-    
 }
 
 google.maps.event.addDomListener(window, 'load', initialize); 

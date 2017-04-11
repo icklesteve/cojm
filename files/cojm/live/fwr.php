@@ -193,16 +193,9 @@ if ($stmt) {
         $rhtml.= ''.$row['jobcomments'].' '.$row['privatejobcomments'].'</td></tr>';
     } // end row loop
 
-
-
-
-
     $html.=$rhtml;
 
-
-
     $html.='</tbody></table>';
-
     $html.= '<div class="vpad line"></div>';
 }
 
@@ -215,11 +208,9 @@ if ($stmt) {
 
 
 
-    $sqlcostage = "SELECT SUM(FreightCharge + vatcharge) AS cost, count(*) AS number FROM Orders WHERE status > '98' AND status < '108' ";    
-    $awaiting = $dbh->query($sqlcostage)->fetchAll();
-    
+$sqlcostage = "SELECT SUM(FreightCharge + vatcharge) AS cost, count(*) AS number FROM Orders WHERE status > '98' AND status < '108' ";    
+$awaiting = $dbh->query($sqlcostage)->fetchAll();
 
-	 
 $fwrcost= number_format($fwrcost, 2, '.', '');
 
 
@@ -847,19 +838,16 @@ $sql = "SELECT id, time_last_fired FROM cojm_cron WHERE `currently_running` = '1
 
 try {        
     $stmt = $dbh->query($sql);
+    $prep = $stmt->fetchAll();   
     $plainbodytext='';
     // echo ' 964 new :  '. $total;
-    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    foreach ($prep as $row) {
         $plainbodytext.=' CRON Currently running with ID '.$row['id'].'.  Last fired in unix : '. $row['time_last_fired'].'<br />';
         $oldtime=$row['time_last_fired'];
     
         $plainbodytext.=' row id : '.$row['id'].' row time_last_fired '. $row['time_last_fired'].'  ' ;
-        // echo date('U', strtotime($oldtime));
-        // echo ' '.date("U");
         
-        
-        
-        $textoldtime=date('H:i D M Y', strtotime($oldtime));
+        $textoldtime=date('H:i D M Y', $oldtime);
 
         $crondiff=((date("U")-$oldtime)/60);
 

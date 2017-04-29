@@ -323,7 +323,7 @@ foreach ($stmt as $totco2row) {
 
 $tcomppm10=$ttablepm10;
 $tcompco2=$ttableco2;
- $ttablepm10 = number_format($ttablepm10, 1, '.', ',');
+ $ttablepm10 = number_format(floatval($ttablepm10), 1, '.', ',');
  
  
 

@@ -312,32 +312,36 @@ if ($lookuppage) {
         <hr />   ';
         echo $html;
     
+        echo ' <script> ';
+    
 ?>        
-    <script>
+
     var clientdetails=" <a href='new_cojm_client.php?clientid=<?php echo $newjobclientid; ?>' target='_blank' class='showclient' " + 
     " title='<?php echo $row['CompanyName']; ?> Details' > &nbsp; </a> <?php echo $invhtml; ?> ";
 
-    $("#newjobServiceID").change(function () {
-        $("#toploader").show();
-        var serviceid = $("select#newjobServiceID").val();    
-        $.ajax({
-            url: 'ajax_lookup.php',
-            data: {
-                lookuppage: 'newjobservice',
-                serviceid: serviceid
-            },
-            type: 'post',
-            success: function (data) {
-                $('#status').append(data);
-            },
-            complete: function () {
-                $("#toploader").fadeOut();
-            }
-        }); 
-    });    
+    <?php
     
-    </script>
-<?php
+            echo '  $("#newjobServiceID").change(function () {
+                        $("#toploader").show();
+                        var serviceid = $("select#newjobServiceID").val();    
+                        $.ajax({
+                            url: "ajax_lookup.php",
+                            data: {
+                                lookuppage: "newjobservice",
+                                serviceid: serviceid
+                            },
+                            type: "post",
+                            success: function (data) {
+                                $("#status").append(data);
+                            },
+                            complete: function () {
+                                $("#toploader").fadeOut();
+                            }
+                        }); 
+                    });    
+    
+    </script> ';
+
         } else { echo 'ERROR : Unable to get client details from database.'; }
     }
  
@@ -2195,12 +2199,12 @@ if ($lookuppage) {
         
         $script.= ' offset ='. ($offset+$numberofresults).'; ';
         
-        
+        $script.=' $("#indexlastupdated").html("'.date("H:i").'") ';
     }
     
-    
-    $script.=' $("#indexlastupdated").html("'.date("H:i").'") ';
-    echo ' <script> '.$script.' </script> ';
+    if (trim($script)) {
+        echo ' <script> '.$script.' </script> ';
+    }
 }
 
 

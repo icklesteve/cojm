@@ -399,7 +399,7 @@ if ($flag==1) {
 
 
 
-
+echo '<div class="vpad line"></div> ';
 
 
 echo $html.'<div class="vpad"> </div>';
@@ -860,6 +860,12 @@ try {
             echo '<p> Oldest >5mins ago, resetting cron.';
             $sql = "UPDATE cojm_cron SET currently_running=0 WHERE id=".$row['id'];
             $prep = $dbh->query($sql);
+            
+            
+            
+            
+            
+            
     
             $plainbodytextnice = ' Cron check failed as already running.  
             If oldest was more than 5 mins ago this was reset, 
@@ -919,24 +925,49 @@ try {
         
         
         
-            $message = wordwrap($message, 70, PHP_EOL);
-            $ok = @mail($to, $subject, $message, $headers, "-f$from");    
-        
-        
-        
-        
-        
-        
-            if ($ok) {
-                $transfer_backup_infotext=" Mail sent ";
-            } else {
-                $transfer_backup_infotext= " Message not sent. ";
-            }
+            if ($globalprefrow['showdebug']>0) {
             
+            
+                $message = wordwrap($message, 70, PHP_EOL);
+                $ok = @mail($to, $subject, $message, $headers, "-f$from");    
+            
+            
+            
+                if ($ok) {
+                    $transfer_backup_infotext=" Mail sent ";
+                } else {
+                    $transfer_backup_infotext= " Message not sent. ";
+                }
+                
+            }
             
             echo $plainbodytext;
             
             echo ' <hr /> ' . $transfer_backup_infotext;
+            
+
+            $query = " INSERT INTO cojm_audit 
+            (audituser,
+            auditpage,
+            auditfilename,
+            audittext,
+            auditinfotext,
+            auditorderid,
+            auditerror)
+            VALUES 
+            ('CojmCron',
+            'fwr.php',
+            'Cron Reset, Was running a task older than 5 minutes.' ,
+            :auditerror ,
+            '0',
+            '1'
+            ) 
+            ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':auditerror', $plainbodytext, PDO::PARAM_INT);
+            $stmt->execute();
+        
+ 
         }
     }
 }

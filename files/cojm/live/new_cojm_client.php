@@ -240,7 +240,7 @@ if ($row)  {
     echo 'value="0" >Account - Payment after Invoice (monthly invoice)</option>
     <option ';
     if ($row['invoicetype']=='1') { echo 'selected '; } 
-    echo ' >value="1" >Website Booked Pre-pay</option>
+    echo ' value="1" >Website Booked Pre-pay</option>
     <option ';
     if ($row['invoicetype']=='2') { echo 'selected '; } 
     echo 'value="2" >Immediate - Payment on ordering (Visa over phone)</option>

@@ -1444,8 +1444,7 @@ $(function () { // Document is ready
     });
 
 
-    $(function () {
-        $("#collectiondate").datetimepicker({
+    $(function () {  $("#collectiondate").datetimepicker({
             numberOfMonths: 1,
             changeYear: false,
             firstDay: 1,
@@ -1463,8 +1462,7 @@ $(function () { // Document is ready
     });
 
 
-    $(function () {
-        $("#starttrackpause").datetimepicker({
+    $(function () {   $("#starttrackpause").datetimepicker({
             numberOfMonths: 1,
             changeYear: false,
             firstDay: 1,
@@ -1489,8 +1487,7 @@ $(function () { // Document is ready
 
 
 
-    $(function () {
-        $("#finishtrackpause").datetimepicker({
+    $(function () {     $("#finishtrackpause").datetimepicker({
             numberOfMonths: 1,
             changeYear: false,
             firstDay: 1,
@@ -1520,8 +1517,7 @@ $(function () { // Document is ready
 
 
 
-    $(function () {
-        $("#duedate").datetimepicker({
+    $(function () {     $("#duedate").datetimepicker({
             numberOfMonths: 1,
             changeYear: false,
             firstDay: 1,
@@ -1540,8 +1536,7 @@ $(function () { // Document is ready
 
 
 
-    $(function () {
-        $("#deliveryworkingwindow").datetimepicker({
+    $(function () {     $("#deliveryworkingwindow").datetimepicker({
             numberOfMonths: 1,
             changeYear: false,
             firstDay: 1,
@@ -1565,8 +1560,7 @@ $(function () { // Document is ready
     });
 
 
-    $(function () {
-        $("#ShipDate").datetimepicker({
+    $(function () {   $("#ShipDate").datetimepicker({
             numberOfMonths: 1,
             changeYear: false,
             firstDay: 1,
@@ -1585,8 +1579,7 @@ $(function () { // Document is ready
 
 
 
-    $(function () {
-        $("#jobrequestedtime").datetimepicker({
+    $(function () {    $("#jobrequestedtime").datetimepicker({
             numberOfMonths: 1,
             changeYear: false,
             firstDay: 1,

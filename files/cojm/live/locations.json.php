@@ -46,7 +46,7 @@ if (($now >= $BSTStartDate) && ($now <= $BSTEndDate)){
 
 
 
-function rstrtrim($str, $remove=null) { 
+function rstrtrim($str, $remove=null) {
     $str    = (string)$str; 
     $remove = (string)$remove;    
     if(empty($remove)) {   return rtrim($str); } 

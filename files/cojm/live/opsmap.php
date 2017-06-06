@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	opsmap.php - Displays POI & Ops Areas
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -43,13 +43,22 @@ $hasforms='0';
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title><?php print ' Ops Map : '.($title); ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<link rel="stylesheet" type="text/css" href="../css/cojmmap.css">
 <?php echo '<link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>';
  ?>
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
+<style>
+/* starts spinner on page load, only for ajax pages  */
+#toploader { display:block; }
+</style>
+
 <?php
-echo '<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;libraries=geometry&amp;key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>'; 
+echo '<script src="//maps.googleapis.com/maps/api/js?v='.$globalprefrow['googlemapver'].'&amp;libraries=geometry&amp;key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>
+
+<script src="../js/maptemplate.js" type="text/javascript"></script>
+'; 
 
 if ($searchtype=='') { $query = "SELECT type, lat, lng, opsmapid, opsname, istoplayer, descrip, AsText(g) AS POLY FROM opsmap WHERE inarchive<>1 AND corelayer='0' "; }
 
@@ -175,8 +184,6 @@ foreach ($stmt as $row) {
 
 
 
-
-
         //Load Markers from the XML File, Check (ajaxopsmap_process.php)			
 if ($searchtype=='archive') {
     $ajaxlocation='ajaxopsmap_process.php?archive=1';    
@@ -187,76 +194,13 @@ if ($searchtype=='archive') {
 
 ?>
 <script>
+var globlat=<?php echo $globalprefrow['glob1']; ?>;
+var globlon=<?php echo $globalprefrow['glob2']; ?>;
 
-function initialize() {
+printtext =' ';
 
-    var geocoder = null;
-    var totalareas=0;
-    var markertype1=0;
-    var markertype2=0;
-    var markertype3=0;
-    var iconPath;
+function custominitialize() {
 
-    var element = document.getElementById("map-canvas");
-    var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"];
-    var map = new google.maps.Map(element, {
-        center: new google.maps.LatLng(<?php echo $globalprefrow['glob1']; ?>,<?php echo $globalprefrow['glob2']; ?>),
-        zoom: 11,
-        disableDoubleClickZoom: true,
-        mapTypeId: "OSM",
-		scaleControl: true,
-		mapTypeControl: true,
-        mapTypeControlOptions: {
-            mapTypeIds: mapTypeIds
-        }
-    });
-	
-    map.mapTypes.set("OSM", new google.maps.ImageMapType({
-        getTileUrl: function(coord, zoom) {
-            return "https://a.tile.openstreetmap.org/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-        },
-        tileSize: new google.maps.Size(256, 256),
-        name: "OSM",
-        alt: "Open Street Map",
-        maxZoom: 19
-    }));	
-	
-    map.mapTypes.set("OCM", new google.maps.ImageMapType({
-        getTileUrl: function(coord, zoom) {
-                return "https://a.tile.thunderforest.com/cycle/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-        },
-        tileSize: new google.maps.Size(256, 256),
-        name: "OCM",
-        alt: "Open Cycle Map",
-        maxZoom: 19
-    }));
-    
-    var osmcopyr="<span style='background: white; color:#444444; padding-right: 6px; padding-left: 6px; margin-right:-12px;'> &copy; <a style='color:#444444' href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors</span>";
-
-    var outerdiv = document.createElement("div");
-    outerdiv.id = "outerdiv";
-    outerdiv.style.fontSize = "10px";
-    outerdiv.style.opacity = "0.7";
-    outerdiv.style.whiteSpace = "nowrap";
-    
-    map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(outerdiv);
-
-    google.maps.event.addListener( map, "maptypeid_changed", function() {
-        var checkmaptype = map.getMapTypeId();
-        if ( checkmaptype=="OSM" || checkmaptype=="OCM") {
-            $("div#outerdiv").html(osmcopyr);
-        } else {
-            $("div#outerdiv").text("");
-        }
-    });
-
-
-    // if OSM / OCM set as default, show copyright
-    $(document).ready(function () {
-        setTimeout(function () {
-            $("div#outerdiv").html(osmcopyr);
-        },3000);
-    });
 
 
     $.get("<?php echo $ajaxlocation; ?>", function (data) {
@@ -337,7 +281,7 @@ function initialize() {
         
     //add click listner to open infowindow     
     google.maps.event.addListener(marker, 'click', function() {
-            infowindow.open(map,marker); // click on marker opens info window 
+        infowindow.open(map,marker); // click on marker opens info window 
     });
       				  
             });
@@ -368,7 +312,10 @@ function initialize() {
             //call create_marker() function
           create_marker( 0, event.latLng, 'New Marker', EditForm, true, true, true, "<?php echo $globalprefrow['clweb3']; ?>");
 			
-        });                             
+        });
+
+
+        
     <?php
 
 echo $js;
@@ -388,46 +335,42 @@ echo '
   
   echo "
 google.maps.event.addListener(map, 'click', function(event) {
-var areasfound	   = 0;
-$( '#showAll' ).removeClass( ' hidden ' );
-$( '#jssearch' ).empty();	  
-$( '#jssearch' ).append (  ' ');
-".$clickrow. "
-$( '#jssearch' ).append (' <p> ');
-$( '#jssearch' ).append (areasfound);
-$( '#jssearch' ).append (' areas found out of ');
-$( '#jssearch' ).append (totalareas);
-
-
-$( '#jssearch' ).append ('.</p> ');
-
-if (areasfound === 0 ) {
-
-
-$( '#opstable' ).addClass( ' hidden ' );
-	}
-else { 
-
-$( '#opstable' ).removeClass( ' hidden ' );
-}
-  });
+    var areasfound	   = 0;
+    $( '#showAll' ).removeClass( ' hidden ' );
+    $( '#jssearch' ).empty();	  
+    $( '#jssearch' ).append (  ' ');
+    ".$clickrow. "
+    $( '#jssearch' ).append (' <p> ');
+    $( '#jssearch' ).append (areasfound);
+    $( '#jssearch' ).append (' areas found out of ');
+    $( '#jssearch' ).append (totalareas);
+    
+    
+    $( '#jssearch' ).append ('.</p> ');
+    
+    if (areasfound === 0 ) {
+    
+    
+    $( '#opstable' ).addClass( ' hidden ' );
+        }
+    else {
+        $( '#opstable' ).removeClass( ' hidden ' );
+    }
+});
  
 
  
-// function hide_zone1_kml(){
-//            geoXml.docs[0].gpolygons[0].setMap(null);  
- //   }
+
   
 
 $('#showAll').click(function() {
-	
-".$showallrow."
-	
-	
-$( '#opstable' ).removeClass( ' hidden ' );	
-	$( '#showAll' ).addClass( ' hidden ' );
-$( '#jssearch' ).empty();	
+    ".$showallrow."
+    $( '#opstable' ).removeClass( ' hidden ' );	
+    $( '#showAll' ).addClass( ' hidden ' );
+    $( '#jssearch' ).empty();	
 });
+
+
 ";
 ?>
 
@@ -540,136 +483,11 @@ var savemarker="savemarker";
     }).resize();
 
 
-
- geocoder = new google.maps.Geocoder(); 
- 
- window.showAddress = function(address) {
-    geocoder.geocode( { 
-	"address": address + " , UK ",
-	"region":   "uk",
-    "bounds": bounds 
-	}, function(results, status) {
-        if (status == google.maps.GeocoderStatus.OK) {
-          if (status != google.maps.GeocoderStatus.ZERO_RESULTS) {
-          map.setCenter(results[0].geometry.location);
-            var infowindow = new google.maps.InfoWindow(
-                { content: "<div class='info'>"+address+"</div>",
-				    position: results[0].geometry.location,
-                map: map
-                });
-			infowindow.open(map);
-          } else {
-            alert("No results found");
-          }
-        } else {
-          alert("Search was not successful : " + status);
-        }
-      });
- };
- 
  $('#searchtype').change(function() { $('#searchopsmap').submit(); }); 
  
  map.fitBounds(bounds);
 
-<?php
-echo "
-
-}
-
- function formatNumber (num) {
-    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
-}
-
-
-google.maps.event.addDomListener(window, 'load', initialize);
-    </script>
-
-</head><body>  ";
-//  $adminmenu="1";
-$filename="opsmap.php";
-include "cojmmenu.php";
-
-
-echo '
-<div id="gmap_wrapper" >
-<div class="full_map" id="search_map">
-<div id="map-canvas" class="onehundred" ></div></div>
-<div class="gmap_left" id="scrolltable">
-<div class="pad10">
-<form id="searchopsmap" action="opsmap.php">';
-
-// echo $searchtype;
-
-echo '
-<select id="searchtype" name="searchtype" class="ui-state-highlight ui-corner-left">
-<option ';
-if ($searchtype=='') {  echo ' selected="selected" '; }
-echo 'value="">Active</option>';
-echo '<option ';
-if ($searchtype=='archive') {  echo ' selected="selected" '; }
-echo ' value="archive">Active + Archived</option>
-</select>
-</form>
-
-<form action="#" onsubmit="showAddress(this.address.value); return false" style=" background:none;">
-<input title="Address Search" type="text" style="width: 274px; padding-left:6px;" name="address" placeholder="Map Address Search . . ." 
-class="ui-state-default ui-corner-all address" />
-</form>	
-
-
-<br />
-<hr />
-
-<div id="jssearch"></div>
-
-<button class=" hidden " id="showAll">Show all Areas</button>
-
-<table id="opstable" class="ord"><tbody><tr>
-<th>Name </th>
-<th> </th>
-</tr>
-'.$tablerow;
-
-?>
-</tbody></table>
-<br />
-<table class="nolines">
-<tbody>
-<tr><td><img alt="Marker Type 1" class="opsmapicon" src="../images/info-50-50-trans.gif" /> </td><td> <span id="markertype1span"> </span> </td><td>General</td></tr>
-<tr><td><img alt="Marker Type 2" class="opsmapicon" src="../images/access-50-50-trans.gif" /> </td><td>  <span id="markertype2span"> </span> </td><td> Access </td></tr>
-<tr><td><img alt="Marker Type 3" class="opsmapicon" src="../images/alert-50-50-trans.gif" /> </td><td>  <span id="markertype3span"> </span>  </td><td> Safety </td></tr>
-
-</tbody>
-</table>
-
-<p> <?php echo $markersfound; ?> Locations, SQL Lookup in archive.</p>
-
-<p> Left click on map to search areas. </p>
-<p> Left click on marker to view / edit. </p>
-<p> Right click on map to add a marker. </p>
-
-<br />
-<hr />
-
- <form action="opsmap-new-area.php">
-<button type="submit" title="New Area">Create Blank New Area</button>
-</form>
-
-<button id="uploadkmltonewopsmap"> Upoad KML area </button>
-
-</div>		
-</div>
-
-</div>
-
-<form action="opsmap-new-area.php" method="post" id="uploadkml" enctype="multipart/form-data">
-<input type="hidden" name="page" value="uploadkml">
- <input type="hidden" name="formbirthday" value="<?php echo date("U"); ?>">
-</form>
-
-
-<script>
-$(document).ready(function() {
+ $(document).ready(function() {
     $('#uploadkmltonewopsmap').bind('click', function (e) {
         e.preventDefault();
         $.Zebra_Dialog(' ' +
@@ -699,6 +517,109 @@ $(document).ready(function() {
                 });
         });
 });
+ 
+ 
+ 
+}
+
+function loadmapfromtemplate() {
+    $(document).ready(function () {
+        initialize();
+        custominitialize();
+    });
+}
+
+
+google.maps.event.addDomListener(window, "load", loadmapfromtemplate);
+
+</script>
+</head><body>  <?php
+//  $adminmenu="1";
+$filename="opsmap.php";
+include "cojmmenu.php";
+?>
+
+<div id="gmap_wrapper" >
+<div class="full_map" id="search_map">
+<div id="map-canvas" class="onehundred" ></div></div>
+<div class="gmap_left" id="scrolltable">
+<div class="pad10">
+<form id="searchopsmap" action="opsmap.php">
+
+
+<select id="searchtype" name="searchtype" class="ui-state-highlight ui-corner-left">
+<option <?php if ($searchtype=='') {  echo ' selected="selected" '; } ?>
+value="">Active</option>
+<option 
+
+<?php if ($searchtype=='archive') {  echo ' selected="selected" '; } ?>
+ value="archive">Active + Archived</option>
+</select>
+</form>
+
+
+<br />
+<hr />
+
+<div id="jssearch"></div>
+
+<button class=" hidden " id="showAll">Show all Areas</button>
+
+<table id="opstable" class="ord"><tbody><tr>
+<th>Name </th>
+<th> </th>
+</tr>
+<?php echo $tablerow; ?>
+
+
+</tbody></table>
+<br />
+<table class="nolines">
+<tbody>
+<tr><td><img alt="Marker Type 1" class="opsmapicon" src="../images/info-50-50-trans.gif" /> </td><td> <span id="markertype1span"> </span> </td><td>General</td></tr>
+<tr><td><img alt="Marker Type 2" class="opsmapicon" src="../images/access-50-50-trans.gif" /> </td><td>  <span id="markertype2span"> </span> </td><td> Access </td></tr>
+<tr><td><img alt="Marker Type 3" class="opsmapicon" src="../images/alert-50-50-trans.gif" /> </td><td>  <span id="markertype3span"> </span>  </td><td> Safety </td></tr>
+
+</tbody>
+</table>
+
+<?php 
+
+
+$count = $dbh->query("SELECT count(1) FROM opsmap WHERE type='1' AND inarchive ='1' ")->fetchColumn();
+
+
+?>
+
+
+<p> <?php echo $markersfound; ?> Locations, <?php echo $count; ?> in archive.</p>
+
+<p> Left click on map to search areas. </p>
+<p> Left click on marker to view / edit. </p>
+<p> Right click on map to add a marker. </p>
+
+<br />
+<hr />
+
+ <form action="opsmap-new-area.php">
+<button type="submit" title="New Area">Create Blank New Area</button>
+</form>
+
+<button id="uploadkmltonewopsmap"> Upoad KML area </button>
+
+</div>		
+</div>
+
+</div>
+
+<form action="opsmap-new-area.php" method="post" id="uploadkml" enctype="multipart/form-data">
+<input type="hidden" name="page" value="uploadkml">
+ <input type="hidden" name="formbirthday" value="<?php echo date("U"); ?>">
+</form>
+
+
+<script>
+
 </script>
 <?php
 

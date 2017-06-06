@@ -358,61 +358,61 @@ foreach ($data as $s) {
     echo'</td>
     <td>';
     
-    if ($s['activeservice']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    if ($s['activeservice']=='1') { echo '<img class="px16" alt="Yes" src="../images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="../images/action_stop.gif">'; }
     
     
     echo '</td><td>';
-    if ($s['UnlicensedCount']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    if ($s['UnlicensedCount']=='1') { echo '<img class="px16" alt="Yes" src="../images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="../images/action_stop.gif">'; }
     
     // if (($globalprefrow['inaccuratepostcode'])==0) { 
     echo '</td><td>';
-    if ($s['chargedbybuild']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    if ($s['chargedbybuild']=='1') { echo '<img class="px16" alt="Yes" src="../images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="../images/action_stop.gif">'; }
     // }
     
     
     echo '</td><td>';
-    if ($s['chargedbycheck']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    if ($s['chargedbycheck']=='1') { echo '<img class="px16" alt="Yes" src="../images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="../images/action_stop.gif">'; }
     
     
     echo '</td><td>';
-    if ($row['canhavemap']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    if ($row['canhavemap']=='1') { echo '<img class="px16" alt="Yes" src="../images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="../images/action_stop.gif">'; }
     
     
     
     
     echo '</td><td>';
-    if ($s['hourlyothercount']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    if ($s['hourlyothercount']=='1') { echo '<img class="px16" alt="Yes" src="../images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="../images/action_stop.gif">'; }
     
     
     echo '</td><td>';
     if ($s['asapservice']=='1') { echo '<img class="px16" alt="Yes" src="'.$globalprefrow['image5'].'">'; }
-    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    else { echo '<img class="px16" alt="No" src="../images/action_stop.gif">'; }
     
     echo '</td><td>';
     if ($s['cargoservice']=='1') { echo '<img class="px16" alt="ASAP" src="'.$globalprefrow['image6'].'">'; }
-    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    else { echo '<img class="px16" alt="No" src="../images/action_stop.gif">'; }
     
     
     echo '</td><td>';
-    if ($s['isregular']=='1') { echo '<img class="px16" alt="Cargo" src="images/icon_accept.gif">'; }
-    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    if ($s['isregular']=='1') { echo '<img class="px16" alt="Cargo" src="../images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="../images/action_stop.gif">'; }
     
     if ($globalprefrow['showpostcomm']>'0') {
     echo '</td><td>';
-    if ($s['LicensedCount']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    if ($s['LicensedCount']=='1') { echo '<img class="px16" alt="Yes" src="../images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="../images/action_stop.gif">'; }
     
     
     echo '</td><td>';
     
-    if ($s['RMcount']=='1') { echo '<img class="px16" alt="Yes" src="images/icon_accept.gif">'; }
-    else { echo '<img class="px16" alt="No" src="images/action_stop.gif">'; }
+    if ($s['RMcount']=='1') { echo '<img class="px16" alt="Yes" src="../images/icon_accept.gif">'; }
+    else { echo '<img class="px16" alt="No" src="../images/action_stop.gif">'; }
     
     }
     

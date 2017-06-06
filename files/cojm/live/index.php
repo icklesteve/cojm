@@ -34,61 +34,8 @@ echo '<!DOCTYPE html> <html lang="en"> <head>
 <link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
-<title>COJM : '. ($cyclistid).'</title>
-<style>
-#toploader { display:block; }
-</style>
-</head>
-<body id="bodytop" >';
+<title>COJM : '. ($cyclistid).'</title>';
 
-
-
-$query = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID"; 
-$riderdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
-    
-
-//////////     CYCLIST   DROPDOWN     ///////////////////////////////////
-$menuhtml.= ' <select id="topmenuselectrider" class="ui-corner-left ui-state-default left" title="Filter by '.$globalprefrow['glob5'].'" >';
-$menuhtml.= ' <option value=""> All '.$globalprefrow['glob5'].'s </option> ';
-
-foreach ($riderdata as $ridernum => $ridername) {
-    $ridername=htmlspecialchars($ridername);
-    $menuhtml.= ("<option ");
-    $menuhtml.= ("value=\"$ridernum\">$ridername</option>");
-}
-$menuhtml.= '</select> ';
-
-
-
-// one option needs to match global pref for form timeouts
-$menuhtml.='
-
-<select id="topmenutimeoutchoose" class="ui-corner-left ui-state-default left">
-<option ';
-
-if ($globalprefrow['formtimeout']==125) { $menuhtml.=' selected '; }
-$menuhtml.='value="125">2m </option>
-<option ';
-if ($globalprefrow['formtimeout']==300) { $menuhtml.=' selected '; }
-$menuhtml.='
-value="300">5m </option>
-<option ';
-if ($globalprefrow['formtimeout']==600) { $menuhtml.=' selected '; }
-$menuhtml.='
-value="600">10m </option>
-<option ';
-if ($globalprefrow['formtimeout']==900) { $menuhtml.=' selected '; }
-$menuhtml.='value="900">15m </option>
-<option ';
-if ($globalprefrow['formtimeout']==1200) { $menuhtml.=' selected '; }
-$menuhtml.='value="1200">20m </option>
-</select> ';
-
-
-
-$hasforms='1';
-$filename="index.php";
-include "cojmmenu.php";
 
 if($mobdevice) { // already coded as js variable ?
     $numberofresults=$globalprefrow['numjobsm'];
@@ -96,20 +43,12 @@ if($mobdevice) { // already coded as js variable ?
     $numberofresults=$globalprefrow['numjobs'];
 }
 
+
 ?>
-<div id="Post" class="Post c9 lh16">
-    <div id="indexajax"> </div>  
-    <div id="allindexresults" class="hideuntilneeded">
-        <hr />
-        <div class="ui-state-highlight ui-corner-all p15">
-            <h2> <span id="indexcounted">All</span> <span id="indextotal"> </span> Results Displayed.</h2>
-            <p>Last Updated <span id="indexlastupdated"></span> </p>
-        </div>
-        <div class="vpad "> </div>
-        <hr />
-    </div>
-</div>
-<script type="text/javascript">
+<script>
+
+
+
 var formbirthday=<?php echo microtime(TRUE); ?>;
 var numberofresults=<?php echo $numberofresults; ?>;
 var offset=0;
@@ -244,7 +183,6 @@ function refreshindex(callback) {
 }
 
 refreshindex();
-
 $(window).scroll(function() {
 	if($(window).scrollTop() + $(window).height() + 250 > $(document).height()){
 		if(flag){
@@ -365,6 +303,84 @@ $(document).on('change', '#topmenuselectrider', function(){
 });
 
 
+
+
 </script>
+
+<style>
+#toploader { display:block; }
+</style>
+
+<?php 
+
+echo '
+
+</head>
+<body id="bodytop" >';
+
+
+
+$query = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID"; 
+$riderdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
+    
+
+//////////     CYCLIST   DROPDOWN     ///////////////////////////////////
+$menuhtml= ' <select id="topmenuselectrider" class="ui-corner-left ui-state-default left" title="Filter by '.$globalprefrow['glob5'].'" >';
+$menuhtml.= ' <option value=""> All '.$globalprefrow['glob5'].'s </option> ';
+
+foreach ($riderdata as $ridernum => $ridername) {
+    $ridername=htmlspecialchars($ridername);
+    $menuhtml.= ("<option ");
+    $menuhtml.= ("value=\"$ridernum\">$ridername</option>");
+}
+$menuhtml.= '</select> ';
+
+
+
+// one option needs to match global pref for form timeouts
+$menuhtml.='
+
+<select id="topmenutimeoutchoose" class="ui-corner-left ui-state-default left">
+<option ';
+
+if ($globalprefrow['formtimeout']==125) { $menuhtml.=' selected '; }
+$menuhtml.='value="125">2m </option>
+<option ';
+if ($globalprefrow['formtimeout']==300) { $menuhtml.=' selected '; }
+$menuhtml.='
+value="300">5m </option>
+<option ';
+if ($globalprefrow['formtimeout']==600) { $menuhtml.=' selected '; }
+$menuhtml.='
+value="600">10m </option>
+<option ';
+if ($globalprefrow['formtimeout']==900) { $menuhtml.=' selected '; }
+$menuhtml.='value="900">15m </option>
+<option ';
+if ($globalprefrow['formtimeout']==1200) { $menuhtml.=' selected '; }
+$menuhtml.='value="1200">20m </option>
+</select> ';
+
+
+
+$hasforms='1';
+$filename="index.php";
+include "cojmmenu.php";
+
+
+
+?>
+<div id="Post" class="Post c9 lh16">
+    <div id="indexajax"> </div>  
+    <div id="allindexresults" class="hideuntilneeded">
+        <hr />
+        <div class="ui-state-highlight ui-corner-all p15">
+            <h2> <span id="indexcounted">All</span> <span id="indextotal"> </span> Results Displayed.</h2>
+            <p>Last Updated <span id="indexlastupdated"></span> </p>
+        </div>
+        <div class="vpad "> </div>
+        <hr />
+    </div>
+</div>
 <?php include "footer.php";
 echo ' </body></html> ';

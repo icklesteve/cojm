@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	corepricing.php - Options for changing the checkbox pricing
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -21,7 +21,6 @@
 
 $alpha_time = microtime(TRUE);
 
-if (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) ob_start("ob_gzhandler"); else ob_start();
 error_reporting( E_ERROR | E_WARNING | E_PARSE );
 $title = "COJM";
 include "C4uconnect.php";

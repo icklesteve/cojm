@@ -72,13 +72,19 @@ $invoicetodate=trim($_POST['invoicetodate']);
 $invoicetodate = str_replace("/", ":", "$invoicetodate", $count);
 $invoicetodate = str_replace(",", ":", "$invoicetodate", $count);
 $invoicetodate = str_replace("-", ":", "$invoicetodate", $count);
-$temp_ar=explode(":",$invoicetodate); 
-$startday=$temp_ar['0']; 
-$startmonth=$temp_ar['1']; 
-$startyear=$temp_ar['2'];
-$collectionsuntildate=date("Y-m-d 23:59:59", mktime(01, 01, 01, $startmonth, $startday, $startyear));
 
+if ($invoicetodate) {
 
+    $temp_ar=explode(":",$invoicetodate); 
+    $startday=$temp_ar['0']; 
+    $startmonth=$temp_ar['1']; 
+    $startyear=$temp_ar['2'];
+    
+    $collectionsuntildate=date("Y-m-d 23:59:59", mktime(01, 01, 01, $startmonth, $startday, $startyear));
+
+} else {
+    $collectionsuntildate = date('Y-m-d 23:59:59');
+}
 
 
 
@@ -1034,7 +1040,7 @@ if ($page=='createpdf') {
     /**
     * blank image
     */
-    define ('K_BLANK_IMAGE', K_PATH_IMAGES.'images/_blank.png');
+    define ('K_BLANK_IMAGE', K_PATH_IMAGES.'../images/_blank.png');
     
     /**
     * page format

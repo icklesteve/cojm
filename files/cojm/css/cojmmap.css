@@ -1,0 +1,377 @@
+@charset "UTF-8";
+
+/*
+COJM Courier Online Operations Management
+cojmmap.css - COJM Map css File
+Copyright (C) 2017 S.Young cojm.co.uk
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+
+
+.batchhtmltracking {
+    font-family: Roboto,Arial,sans-serif;
+}
+
+
+
+.batchhtmltracking.adminlogoclass {
+    z-Index: 1;
+    position:fixed;
+    right: 10px;
+    top: 5px;
+    width:200px;
+
+}
+
+
+
+.batchhtmltracking p.highlight { color:#339900; }
+
+
+.batchhtmltracking div.info { color:#339900; font-weight:bold; }
+
+#map-canvas.batchhtmltracking {     height: 100%;
+        width: 100%;
+        left: 0;
+        position: absolute;
+        top: 0;    }
+
+
+.batchhtmltracking div.cojmcopyright { 
+    font-family: Roboto,Arial,sans-serif;
+    position:fixed;
+    bottom: 25px;
+    left: 7px;
+    font-size:small;
+    }        
+        
+        
+
+        
+        
+        
+  .batchhtmltracking       p {
+        background: white none repeat scroll 0 0;
+        margin-bottom: 5px;
+        margin-top: 0;
+        padding-bottom: 1px;
+        padding-right: 10px;
+        text-align: right;
+    } 
+        
+        
+        
+        
+        
+.batchhtmltracking div.orders {
+    background: white;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    max-height:140px;
+    margin-bottom:5px;
+    padding-top:5px;
+}        
+        
+        
+.batchhtmltracking ul.adminlogo li
+{ position:relative; right: 10px; text-align:right; }        
+        
+        
+        
+        
+        
+        
+
+#printlegend .orders {
+    
+    
+}
+
+
+.iconlabel {
+    position:relative;
+    top:25px;
+}
+
+
+#map-canvas { background-color:#e5e3df; }
+
+#gmapcyclelayerbutton {
+    background: #fff url("../images/bike_66x36.png") no-repeat scroll center center / 24px 18px;
+    width: 28px;
+    height: 29px;
+    border-radius: 2px;
+    cursor:pointer;
+    margin-top:10px;
+    box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
+    position:relative;
+    margin-left:10px;
+}
+
+
+#gmapcyclelayerbutton:hover {
+    background: #ebebeb url("../images/bike_66x36.png") no-repeat scroll 50% 50% / 25px 19px;
+}
+
+
+
+#gmaptransitlayerbutton {
+    background: #fff url("../images/metro_24x36.png") no-repeat scroll center center / 22px 22px;
+    width: 28px;
+    height: 29px;
+    border-radius: 2px;
+    cursor:pointer;
+    margin-top:10px;
+    box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
+    margin-left:10px;
+
+}
+
+#gmaptransitlayerbutton:hover {
+    background: #ebebeb url("../images/metro_24x36.png") no-repeat scroll 50% 50% / 23px 23px;
+}
+
+
+
+#gmaptrafficlayerbutton {
+    background: #fff url("../images/car_46x36.png") no-repeat scroll center center / 20px 16px;
+    width: 28px;
+    height: 29px;
+    border-radius: 2px;
+    cursor:pointer;
+    margin-top:10px;
+    margin-left:10px;
+    box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
+}
+#gmaptrafficlayerbutton:hover {
+    background: #ebebeb url("../images/car_46x36.png") no-repeat scroll 50% 50% / 21px 17px;
+}
+
+.gmapbuttonselected {
+    box-shadow: 0px 0px 3px 3px rgba(0, 255, 0, 1.00) !important;
+}
+
+
+.batchhtmltracking #geocodeaddress {
+    
+    right:215px;
+    margin-top:5px;
+}
+
+
+input#geocodeaddress::placeholder {
+  opacity: 0;
+  transition: all 1s;
+}
+
+#geocodeaddress:focus::placeholder {
+    opacity: 1;
+}
+
+#geocodeaddress {
+    background: #fff url("../images/search_65x62.png") no-repeat scroll center center / 25px 25px;
+    width:22px;
+    height: 22px;
+    position:absolute;
+    right: 14px;
+    z-index: 2;
+    cursor:pointer;
+    border: 1px solid #ddd;
+    transition: all 1s;
+    border-radius:2px;
+    box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
+    margin-top:40px;
+}
+
+#geocodeaddress:focus {
+    height:30px;
+    width:200px;
+    background:#fff;
+    cursor:default;
+    padding-left: 6px;
+}
+
+
+
+#mylocationbutton {
+    height: 23px;
+    width: 24px;
+    background: #ffffff url("../images/plus.png") no-repeat scroll 50% 50% / 19px 19px;
+    position:absolute;
+    opacity:0.4;
+    z-Index: 1;
+    right: 14px;
+    margin-top: 100px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius:2px;
+    box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+#mylocationbutton:hover {
+    background: #ebebeb url("../images/plus.png") no-repeat scroll 50% 50% / 20px 20px;
+}
+
+
+.batchhtmltracking #printbutton {
+    
+    right:215px;
+    top:35px;
+}
+
+
+
+.batchhtmltracking #mylocationbutton {
+    
+    right:215px;
+    margin-top:65px;
+}
+
+#printbutton {
+    height: 23px;
+    width: 24px;
+    background: #ffffff url("../images/noteb_print_22x22.png") no-repeat scroll 50% 50% / 18px 14px;
+    position:absolute;
+    z-Index: 1;
+    right: 14px;
+    top: 70px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius:2px;
+    box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+
+#printbutton:hover {
+    background: #ebebeb url("../images/noteb_print_22x22.png") no-repeat scroll 50% 50% / 19px 15px;
+}
+
+/* for printing google maps better :  */
+
+#map-canvas div > img {
+position: absolute;
+}
+
+
+
+
+.osmcopyr, .osmcopyr a {
+    background: white; color:#444444; padding-right: 6px; padding-left: 6px; margin-right:-12px;
+}
+
+p#mapprintcopyr.mapprint, #printlegend p#mapprintcopyr {
+    top:0;
+    font-size:18px;
+    line-height:19px;
+    position:absolute;
+    right:0;
+    text-align:right;
+    margin-top:0;
+}
+
+#printlegend {
+    position:absolute;
+    width:100%;
+}
+
+p.mapprint, .batchhtmltracking div#printlegend p.mapprint  {
+    background-color: rgba(255, 255, 255, 0.6);
+    display: table;
+    font-size: 22px;
+    margin-top: 5px;
+    padding: 5px;
+    text-align:left;
+}
+
+div.printContainer div#map-canvas div div.gm-style div.gmnoprint {
+              
+                display:none;
+            }
+
+
+.batchhtmltracking div#printlegend p {
+    
+    background:none;
+    text-align:left;
+}
+
+
+
+#printlegend .batchhtmltracking p {
+    padding: 0px;
+    
+}
+
+
+
+
+
+
+#btn-exit-print-screen {
+    background: #ffffff url("../images/noteb_close_22x22.png") no-repeat scroll 50% 50% / 22px 22px;
+    position:absolute;
+    z-Index:1;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius:4px;
+    box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    height:32px;
+    width: 30px;
+    right:0;
+}
+
+button#btn-exit-print-screen:hover {
+    background: #ebebeb url("../images/noteb_close_22x22.png") no-repeat scroll 50% 50% / 23px 23px;
+}
+
+div.map-sub-area-label {
+    background:white;
+    font-size:14px;
+    padding:3px;
+    border-radius:4px;
+}
+    
+div.map-sub-area-selected {
+    font-size:18px;
+    font-weight:bold;
+    padding:6px;
+}
+
+
+#outerdiv {
+    font-size: 10px;
+    opacity: 0.7;
+    white-space: nowrap;
+}
+
+.error { color:red; } 
+
+@media print {
+    
+    
+    div.orders p.markers {
+        display:none;			
+    }
+    
+}
+
+
+
+
+
+

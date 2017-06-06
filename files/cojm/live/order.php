@@ -46,9 +46,22 @@ $subareacomments='';
 <meta name="viewport" content="width=device-width, height=device-height" >
 <meta name="generator" content="COJM www.cojm.co.uk">
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
-<link id="pagestyle" rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
-<script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
+
+<link rel="stylesheet" type="text/css" href="../css/cojmmap.css">
+
+
+
 <?php 
+
+echo '<link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" > 
+
+<script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
+
+<script src="//maps.googleapis.com/maps/api/js?v='.$globalprefrow['googlemapver'].'&libraries=geometry&amp;key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>
+
+<script src="js/order.js" type="text/javascript"></script>
+';
 
 include "changejob.php";
 
@@ -69,8 +82,6 @@ $statement->execute([$id]);
 $row = $statement->fetch(PDO::FETCH_ASSOC);
 
 $cojmid=$id;
-
-
 
 if ($row['ID']) {
     
@@ -125,19 +136,17 @@ var initialjobcomments<?php if ($row["jobcomments"]) { echo '=1'; } ?>;
 var initialprivatejobcomments<?php if ($row["privatejobcomments"]) { echo '=1'; } ?>;
 var googlemapapiv3key="<?php echo $globalprefrow['googlemapapiv3key']; ?>";
 var canshowareafromservice<?php if ($row['canhavemap']) { echo '=1'; } ?>;
+var googlemapver=<?php echo $globalprefrow['googlemapver']; ?>; 
+var globlat=<?php echo $globalprefrow['glob1']; ?>;
+var globlon=<?php echo $globalprefrow['glob2']; ?>;
+var clweb3="<?php echo $globalprefrow['clweb3']; ?>"; // 1 minute gps track marker logo location
+var opsmapsubarea="<?php echo $row['opsmapsubarea']; ?>"; 
 
-function downloadJSAtOnload() {
- var element = document.createElement("script");
- element.src = "js/order.js";
- document.body.appendChild(element);
- }
 
- if (window.addEventListener)
- window.addEventListener("load", downloadJSAtOnload, false);
- else if (window.attachEvent)
- window.attachEvent("onload", downloadJSAtOnload);
- else window.onload = downloadJSAtOnload;
+ 
 
+
+ 
 </script>
 <title><?php echo $id; ?> COJM</title>
 <style>
@@ -478,7 +487,17 @@ if ($row['ID']) {
         if ($arearow['inarchive']) { echo ' ARCHIVED '; }
         
         echo $arearow['opsname'];
-        if ($arearow['istoplayer']=='1') { 
+        
+        
+        
+        //  possible to move this query into main area query using count ??
+        $query = "SELECT opsmapid, opsname, descrip  FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer=:opsmaparea ";
+        $deprowstmt   = $dbh->prepare($query);
+        $deprowstmt->bindParam(':opsmaparea', $arearow['opsmapid'], PDO::PARAM_INT); 
+        $deprowstmt->execute();
+        $deprow = $deprowstmt->fetchAll();
+
+        if ($deprow) {
             echo ' ++ ';
         }
         
@@ -493,7 +512,7 @@ if ($row['ID']) {
     echo '" title="Area Details" target="_blank" href="opsmap-new-area.php?areaid='.$row['opsmaparea'].'"> </a>';
 
     
-    echo '<script> var initialhassubarea='.$showsubarea.'; </script>';
+    echo '<script> initialhassubarea='.$showsubarea.'; </script>';
 
     echo ' <select id="opsmapsubarea" name="opsmapsubarea" class="ui-state-default ui-corner-left';
 
@@ -1268,11 +1287,19 @@ if ($showsubarea<>'1') {
     }
     echo '</div>';
     
-    echo '<div class="fs" id="requestordiv"><div class="fsl">Requestor</div>
+    echo '<div class="fs';
+    
+    if ((!$row['requestor']) and ($row['status']>99)) { echo ' hideuntilneeded'; }
+    
+    echo '" id="requestordiv"><div class="fsl">Requestor</div>
     <input id="requestor" type="text" class="caps ui-state-default ui-corner-all" name="requestor" size="28" value="'. 
     $row['requestor'].'" /></div> ';
     
-    echo '<div id="clientjobreferencediv" class="fs"><div class="fsl">Clients Ref </div>
+    echo '<div id="clientjobreferencediv" class="fs';
+    
+    if ((!$row['clientjobreference']) and ($row['status']>99)) { echo ' hideuntilneeded'; }
+    
+    echo '"><div class="fsl">Clients Ref </div>
     <input id="clientjobreference" type="text" title="Client Reference" class="caps ui-state-default ui-corner-all"
     name="clientjobreference" size="28" value="'.$row['clientjobreference'].'"> </div> ';
     
@@ -1311,9 +1338,40 @@ if ($showsubarea<>'1') {
     </div>
     </div>
     </div>
-    <div class="hangright">
     
-    <div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses hideuntilneeded clearfix"></div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="hangright">
+        <div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses clearfix hideuntilneeded"> 
+    
+            
+            <div id="gmap-wrapper" > 
+                <div class="ordermap" id="map-canvas" > </div>  
+            </div>
+            <div id="mapcomments"> </div>
+        </div>
+        <span id="mapajax"></span>
+    
     
     <div class="ui-corner-all ui-state-highlight addresses">    
     
@@ -1420,7 +1478,7 @@ else { // no COJM ID located
     } // ends check for ID		
 }
 
-echo ' <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" > ';
+echo '  ';
 
 include "footer.php";
 

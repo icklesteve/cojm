@@ -63,14 +63,22 @@ $row = $statement->fetch(PDO::FETCH_ASSOC);
 <meta name="viewport" content="width=device-width, height=device-height" >
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
 <link rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
+<link rel="stylesheet" type="text/css" href="../css/cojmmap.css">
 <link rel="stylesheet" href="css/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
-<script type="text/javascript" src="https://maps.google.com/maps/api/js?libraries=geometry&amp;key=<?php echo $globalprefrow['googlemapapiv3key']; ?>"></script>
+
+
+<script src="//maps.googleapis.com/maps/api/js?v=<?php echo $globalprefrow['googlemapver']; ?>&amp;libraries=geometry&amp;key=<?php echo $globalprefrow['googlemapapiv3key']; ?>" type="text/javascript"></script>
+<script src="../js/maptemplate.js" type="text/javascript"></script>
+
+
+
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
-<script src="js/richmarker.js" type="text/javascript"></script>
+
 <title>OpsMap Area <?php echo $row['opsname']; ?></title>
 <style> #toploader { display:inline; } </style>
 <script type="text/javascript"> 
-
+        var globlat=<?php echo $globalprefrow['glob1']; ?>;
+var globlon=<?php echo $globalprefrow['glob2']; ?>;
 var markers = [];
 var poly, map;
 var path = new google.maps.MVCArray();
@@ -109,89 +117,11 @@ MarkerLabel.prototype = $.extend(new google.maps.OverlayView(), {
 
 
 
-function initialize() {
-        var geocoder = null;
+function custominitialize() {
+
         $(function(){ $(".normal").autosize();	});
 
-        var element = document.getElementById("map-canvas");
-
-        var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"];
-			
-		var map = new google.maps.Map(element, {
-                center: new google.maps.LatLng(<?php echo $globalprefrow['glob1'].','.$globalprefrow['glob2']; ?>),
-                zoom: 11,
-                mapTypeId: "OSM",
-			    draggableCursor: "crosshair",
-				 mapTypeControl: true,
-				 scaleControl: true,
-                mapTypeControlOptions: {
-                mapTypeIds: mapTypeIds
-                }
-        });
-	
-        map.mapTypes.set("OSM", new google.maps.ImageMapType({
-                getTileUrl: function(coord, zoom) {
-                    return "https://a.tile.openstreetmap.org/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-                },
-                tileSize: new google.maps.Size(256, 256),
-                name: "OSM",
-				alt: "Open Street Map",
-                maxZoom: 19
-        }));	
-	
-        map.mapTypes.set("OCM", new google.maps.ImageMapType({
-                getTileUrl: function(coord, zoom) {
-                    return "https://a.tile.thunderforest.com/cycle/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-                },
-                tileSize: new google.maps.Size(256, 256),
-                name: "OCM",
-				alt: "Open Cycle Map",
-                maxZoom: 20
-        }));
-	
-    var osmcopyr="<span style='background: white; color:#444444; padding-right: 6px; padding-left: 6px; margin-right:-12px;'> &copy; " +
-    " <a style='color:#444444' href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors</span>";
-
-    var outerdiv = document.createElement("div");
-    outerdiv.id = "outerdiv";
-    outerdiv.style.fontSize = "10px";
-    outerdiv.style.opacity = "0.7";
-    outerdiv.style.whiteSpace = "nowrap";
-	
-    map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(outerdiv);	
-
-    google.maps.event.addListener( map, "maptypeid_changed", function() {
-        var checkmaptype = map.getMapTypeId();
-        if ( checkmaptype=="OSM" || checkmaptype=="OCM") { 
-            $("div#outerdiv").html(osmcopyr);
-        } else { $("div#outerdiv").text(""); }
-    });
-
-
-// if OSM / OCM set as default, show copyright
-    $(document).ready(function() {setTimeout(function() {
-        $("div#outerdiv").html(osmcopyr);
-    },3000);
-    });
-
-	
     var padded_points=[];
-    
-    var worldCoords = [
-        new google.maps.LatLng(85,180),
-        new google.maps.LatLng(85,90),
-        new google.maps.LatLng(85,0),
-        new google.maps.LatLng(85,-90),
-        new google.maps.LatLng(85,-180),
-        new google.maps.LatLng(0,-180),
-        new google.maps.LatLng(-85,-180),
-        new google.maps.LatLng(-85,-90),
-        new google.maps.LatLng(-85,0),
-        new google.maps.LatLng(-85,90),
-        new google.maps.LatLng(-85,180),
-        new google.maps.LatLng(0,180),
-        new google.maps.LatLng(85,180)
-    ];
   
   	
 	poly = new google.maps.Polygon({
@@ -212,38 +142,6 @@ function initialize() {
     anchor: new google.maps.Point(10, 10)
     };  
 	
-    geocoder = new google.maps.Geocoder(); 
-    $("#areageocodeaddress").change(function (e) { // map address search
-    // e == our event data
-    e.preventDefault();
-
-	var addtocheck=$("#areageocodeaddress").val();
-
-    if (addtocheck.length>2) {
-	
-        geocoder.geocode( {
-        "address": addtocheck + " , UK ",
-        "region":   "uk",
-        "bounds": bounds 
-        }, function(results, status) {
-            if (status == google.maps.GeocoderStatus.OK) {
-            if (status != google.maps.GeocoderStatus.ZERO_RESULTS) {
-            map.setCenter(results[0].geometry.location);
-                var infowindow = new google.maps.InfoWindow(
-                    { content: "<div class='info'>"+addtocheck+"</div>",
-                        position: results[0].geometry.location,
-                    map: map
-                    });
-                infowindow.open(map);
-            } else {
-                alert("No results found");
-            }
-            } else {
-            alert("Search was not successful : " + status);
-            }
-        });
-    }
-});
 
 <?php	
 
@@ -707,14 +605,29 @@ if ($row) { // show passed area
         $("#gmap_wrapper").css("height", ($(window).height() - menuheight));
     }).resize();
 
-    google.maps.event.addListenerOnce(map, 'idle', function(){ //loaded fully
-    $("#toploader").fadeOut(750);
-    });
+
 
 
 
 
 } // ends initialise
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
@@ -725,10 +638,31 @@ if ($row) { // show passed area
 //# sourceMappingURL=underscore-min.map
 
 
+
+
+function loadmapfromtemplate() {
+    
+    initialize();
+    $(document).ready(function () {
+        
+        custominitialize();
+    });
+}
+
+
+google.maps.event.addDomListener(window, "load", loadmapfromtemplate);
+
+
+
 </script>
 
+
+
+
+
+
 </head>
-<body onload="initialize()">
+<body >
 <?php 
 
 // $type=$row['type'];
@@ -808,7 +742,7 @@ echo '
 <input type="checkbox" name="inarchive" value="1" '; if ($minarchive=='1') { echo 'checked';} echo ' />  Archived area ? ';
  
  
- if (($page=='') and ($areaid=='')) { // add area or edit area button
+if (($page=='') and ($areaid=='')) { // add area or edit area button
 
     echo '
     <input type="hidden" name="page" value="opsmapnewarea" />
@@ -817,16 +751,15 @@ echo '
     <button id="opsmapareasubmit">Add Area </button>';
 
 } else {
-	 
+	
 
     echo '
     <input type="hidden" name="areaid" value="'.$areaid.'" />
     <input type="hidden" name="page" value="editarea" />
     <br />
     <button title="Edit Area" id="opsmapareasubmit">Edit Area</button>';
-	 
-	 
-	 
+	
+
  }
 
  ?>
@@ -836,11 +769,6 @@ echo '
 <input type="hidden" id="vertices" name="vertices" value="" />
 </form>
 </div>
- 
-<hr />
- 
-<input id="areageocodeaddress" title="Address Search" type="text" style="width: 98%;" placeholder="Map Address Search . . ." 
-class="ui-state-default ui-corner-all address pad" />
  
 <hr />
 

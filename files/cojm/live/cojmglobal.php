@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	cojmglobal.php - Main Change Settings File + Online License
-    Copyright (C) 2016 S.Young cojm.co.uk
+    Copyright (C) 2017 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -221,6 +221,32 @@ $ridernamf = $dbh->query("SELECT poshname from Cyclist WHERE `Cyclist`.`CyclistI
 </div>
 
 
+<div id="tabs-1">   <!-- business details -->
+	
+<fieldset><label class="fieldLabel" style="width:250px;"> Name </label> 
+<input class="ui-state-default ui-corner-all pad" type="text" size="30" id="globalname" value="<? echo $globalprefrow['globalname']; ?>"></fieldset>
+
+<fieldset><label class="fieldLabel"> Short Name </label> 
+<input class="ui-state-default ui-corner-all pad" type="text" size="10" id="globalshortname" value="<? echo $globalprefrow['globalshortname']; ?>"></fieldset>
+	
+<fieldset><label class="fieldLabel"> Address 1 </label> 
+<input class="ui-state-default ui-corner-all pad" type="text" size="50" id="myaddress1" value="<? echo $globalprefrow['myaddress1']; ?>"></fieldset>
+	
+<fieldset><label class="fieldLabel"> Address 2 </label> 
+<input class="ui-state-default ui-corner-all pad" type="text" size="50" id="myaddress2" value="<? echo $globalprefrow['myaddress2']; ?>"></fieldset>
+
+<fieldset><label class="fieldLabel"> Address 3 </label> 
+<input class="ui-state-default ui-corner-all pad" type="text" size="50" id="myaddress3" value="<? echo $globalprefrow['myaddress3']; ?>"></fieldset>
+
+<fieldset><label class="fieldLabel"> Address 4 </label> 
+<input class="ui-state-default ui-corner-all pad" type="text" size="50" id="myaddress4" value="<? echo $globalprefrow['myaddress4']; ?>"></fieldset>
+
+<fieldset><label class="fieldLabel"> Address 5 </label> 
+<input class="ui-state-default ui-corner-all pad" type="text" size="50" id="myaddress5" value="<? echo $globalprefrow['myaddress5']; ?>"></fieldset>
+		
+</div>
+
+
 <div id="tabs-7"> <!-- theme -->
 <?php // theme settings  ?>
 <fieldset><label class="fieldLabel"> &nbsp; </label>
@@ -301,9 +327,9 @@ For PDF Invoices and other, aim for about 200px x 60px
 <fieldset><label class="fieldLabel">
 Admin Logo Preview </label>
 
-<img alt="Please check settings if you cant see 2 logos" title="Relative" src="<?php echo $globalprefrow['adminlogo']; ?>" />
+<img id="iadminlogo" alt="Please check settings if you cant see 2 logos" title="Relative" src="<?php echo $globalprefrow['adminlogo']; ?>" />
 
-<img alt="Please check settings if you cant see 2 logos" title="Absolute" src="<?php echo $globalprefrow['adminlogoabs']; ?>" />
+<img id="iadminlogoabs" alt="Please check settings if you cant see 2 logos" title="Absolute" src="<?php echo $globalprefrow['adminlogoabs']; ?>" />
 
 
 </fieldset>
@@ -346,38 +372,13 @@ Only use the main part of the filename, ie without the .mp3 extenstion.
 </div>
 
 
-<div id="tabs-1">   <!-- business details -->
-	
-<fieldset><label class="fieldLabel" style="width:250px;"> Name </label> 
-<input class="ui-state-default ui-corner-all pad" type="text" size="30" id="globalname" value="<? echo $globalprefrow['globalname']; ?>"></fieldset>
-
-<fieldset><label class="fieldLabel"> Short Name </label> 
-<input class="ui-state-default ui-corner-all pad" type="text" size="10" id="globalshortname" value="<? echo $globalprefrow['globalshortname']; ?>"></fieldset>
-	
-<fieldset><label class="fieldLabel"> Address 1 </label> 
-<input class="ui-state-default ui-corner-all pad" type="text" size="50" id="myaddress1" value="<? echo $globalprefrow['myaddress1']; ?>"></fieldset>
-	
-<fieldset><label class="fieldLabel"> Address 2 </label> 
-<input class="ui-state-default ui-corner-all pad" type="text" size="50" id="myaddress2" value="<? echo $globalprefrow['myaddress2']; ?>"></fieldset>
-
-<fieldset><label class="fieldLabel"> Address 3 </label> 
-<input class="ui-state-default ui-corner-all pad" type="text" size="50" id="myaddress3" value="<? echo $globalprefrow['myaddress3']; ?>"></fieldset>
-
-<fieldset><label class="fieldLabel"> Address 4 </label> 
-<input class="ui-state-default ui-corner-all pad" type="text" size="50" id="myaddress4" value="<? echo $globalprefrow['myaddress4']; ?>"></fieldset>
-
-<fieldset><label class="fieldLabel"> Address 5 </label> 
-<input class="ui-state-default ui-corner-all pad" type="text" size="50" id="myaddress5" value="<? echo $globalprefrow['myaddress5']; ?>"></fieldset>
-		
-</div>
-
 <div id="tabs-6">  <!-- maps / tracking icons -->
 <?php // tracking and maps setup ?>
 
 
 
 <fieldset><label class="fieldLabel"> Job viewed 
-<?php echo '<img class="littleset" alt="viewedicon" title="viewedicon" src="'.$globalprefrow['viewedicon'].'">'; ?>
+<?php echo '<img id="iviewedicon" class="littleset" alt="viewedicon" title="viewedicon" src="'.$globalprefrow['viewedicon'].'">'; ?>
 </label>
 <input type="text" class="ui-state-default ui-corner-all pad" size="30" id="viewedicon" value="<?php echo $globalprefrow['viewedicon']; ?>">
 </fieldset>
@@ -387,7 +388,7 @@ Only use the main part of the filename, ie without the .mp3 extenstion.
 
 
 <fieldset><label class="fieldLabel"> Not yet viewed 
-<?php echo '<img class="littleset" alt="unviewedicon" title="unviewedicon" src="'.$globalprefrow['unviewedicon'].'">'; ?>
+<?php echo '<img id="iunviewedicon" class="littleset" alt="unviewedicon" title="unviewedicon" src="'.$globalprefrow['unviewedicon'].'">'; ?>
 </label>
 <input type="text" class="ui-state-default ui-corner-all pad" size="30" id="unviewedicon" value="<?php echo $globalprefrow['unviewedicon']; ?>">
 </fieldset>
@@ -396,14 +397,14 @@ Only use the main part of the filename, ie without the .mp3 extenstion.
 
 
 <fieldset><label class="fieldLabel"> ASAP Icon 
-<?php echo '<img class="littleset" alt="asap" title="asap" src="'.$globalprefrow['image5'].'">'; ?>
+<?php echo '<img id="i5" class="littleset" alt="asap" title="asap" src="'.$globalprefrow['image5'].'">'; ?>
 </label>
 <input type="text" class="ui-state-default ui-corner-all pad" size="30" id="image5" value="<?php echo $globalprefrow['image5']; ?>">
 </fieldset>
 
 
 <fieldset><label class="fieldLabel"> Cargo Icon 
-<?php echo '<img class="littleset" alt="cargo" title="cargo" src="'.$globalprefrow['image6'].'">'; ?>
+<?php echo '<img id="i6" class="littleset" alt="cargo" title="cargo" src="'.$globalprefrow['image6'].'">'; ?>
 </label>
 <input type="text" class="ui-state-default ui-corner-all pad" size="30" id="image6" value="<?php echo $globalprefrow['image6']; ?>">
 </fieldset>
@@ -411,7 +412,7 @@ Only use the main part of the filename, ie without the .mp3 extenstion.
 <div class="line"> </div>
 
 <fieldset><label class="fieldLabel"> Awaiting Scheduling 
-<?php echo '<img class="littleset" alt="image1" title="image1" src="'.$globalprefrow['image1'].'">'; ?>
+<?php echo '<img id="i1" class="littleset" alt="image1" title="image1" src="'.$globalprefrow['image1'].'">'; ?>
 </label>
 <input type="text" class="ui-state-default ui-corner-all pad" size="30" id="image1" value="<?php echo $globalprefrow['image1']; ?>">
 
@@ -421,20 +422,29 @@ See the /cojm/live/images/ directory for all images
 
 
 <fieldset><label class="fieldLabel"> Awaiting Collection 
-<?php echo '<img class="littleset" alt="image2" title="image2" src="'.$globalprefrow['image2'].'">'; ?>
+<?php echo '<img id="i2" class="littleset" alt="image2" title="image2" src="'.$globalprefrow['image2'].'">'; ?>
 </label>
 <input type="text" class="ui-state-default ui-corner-all pad" size="30" id="image2" value="<?php echo $globalprefrow['image2']; ?>">
 </fieldset>
 
+
+<fieldset><label class="fieldLabel"> Via Location 
+<?php echo '<img id="i7" class="littleset" alt="image7" title="image7" src="'.$globalprefrow['image7'].'">'; ?>
+</label>
+<input type="text" class="ui-state-default ui-corner-all pad" size="30" id="image7" value="<?php echo $globalprefrow['image7']; ?>">
+</fieldset>
+
+
+
 <fieldset><label class="fieldLabel"> Awaiting Delivery 
-<?php echo '<img class="littleset" alt="image3" title="image3" src="'.$globalprefrow['image3'].'">'; ?>
+<?php echo '<img id="i3" class="littleset" alt="image3" title="image3" src="'.$globalprefrow['image3'].'">'; ?>
 </label>
 <input type="text" class="ui-state-default ui-corner-all pad" size="30" id="image3" value="<?php echo $globalprefrow['image3']; ?>">
 </fieldset>
 
 
 <fieldset><label class="fieldLabel"> Cyclist Icon
-<?php echo '<img class="littleset" alt="image4" title="image4" src="'.$globalprefrow['image4'].'">'; ?>
+<?php echo '<img id="i4" class="littleset" alt="image4" title="image4" src="'.$globalprefrow['image4'].'">'; ?>
 </label>
 <input type="text" class="ui-state-default ui-corner-all pad" size="30" id="image4" value="<?php echo $globalprefrow['image4']; ?>">
 </fieldset>
@@ -443,13 +453,20 @@ See the /cojm/live/images/ directory for all images
 
 
 <fieldset><label class="fieldLabel"> Dot for Google Earth
-<?php echo '<img class="littleset" alt="imagecge" title="clweb3" src="'.$globalprefrow['clweb3'].'">'; ?>
+<?php echo '<img id="iclweb3" class="littleset" alt="imagecge" title="clweb3" src="'.$globalprefrow['clweb3'].'">'; ?>
 </label>
 <input type="text" class="ui-state-default ui-corner-all pad" size="50" id="clweb3" value="<?php echo $globalprefrow['clweb3']; ?>">
 Needs full root https:// address
 </fieldset>
 
 
+<fieldset><label class="fieldLabel">
+Absolute link to cojm map js file client standalone
+<?php echo '<img id="iglob14" class="littleset" alt="imagecge" title="glob14" src="'.$globalprefrow['glob14'].'">'; ?>
+</label> 
+<input class="ui-state-default ui-corner-all pad" type="text" size="60" id="glob14" value="<? echo $globalprefrow['glob14']; ?>">
+Needs full root https:// address
+</fieldset>
 
 
 
@@ -460,6 +477,12 @@ Needs full root https:// address
 
 <fieldset><label class="fieldLabel"> googlemapapiv3key </label> <input 
 class="ui-state-default ui-corner-all pad" placeholder="Get from google for your domain" size="60" id="googlemapapiv3key" value="<? echo $globalprefrow['googlemapapiv3key']; ?>"></fieldset>
+
+
+
+<fieldset><label class="fieldLabel"> Google Map Version </label> <input 
+class="ui-state-default ui-corner-all pad" size="10" id="googlemapver" value="<? echo $globalprefrow['googlemapver']; ?>"></fieldset>
+
 
 
 <fieldset><label class="fieldLabel"> Adress Search Link https://</label> <input 
@@ -798,6 +821,16 @@ style="width:60%;"><? echo $globalprefrow['courier10']; ?></textarea>
 
 <fieldset><label class="fieldLabel"> COJM CSS File </label> 
 <input class="ui-state-default ui-corner-all pad" type="text" size="30" id="glob10" value="<? echo $globalprefrow['glob10']; ?>"></fieldset>
+
+<fieldset><label class="fieldLabel">
+Absolute link to cojm map css file</label> 
+<input class="ui-state-default ui-corner-all pad" type="text" size="45" id="glob12" value="<? echo $globalprefrow['glob12']; ?>"></fieldset>
+
+<fieldset><label class="fieldLabel">
+Absolute link to cojm map js file</label> 
+<input class="ui-state-default ui-corner-all pad" type="text" size="60" id="glob13" value="<? echo $globalprefrow['glob13']; ?>"></fieldset>
+
+
 
 <fieldset><label class="fieldLabel"> Show Licensed Mail Options</label>
 <input type="checkbox" id="showpostcomm" value="1" <?php if ($globalprefrow['showpostcomm']>0) { echo 'checked';} ?>></fieldset>
@@ -1536,7 +1569,7 @@ copy of the Program in return for a fee.</p>
     var max = 0;
     $("label").each(function(){
         if ($(this).width() > max)
-            max = $(this).width();    
+            max = $(this).width();
     });
     $("label").width((max+5));
 });
@@ -1624,6 +1657,37 @@ changedvar();
 });
 
 
+
+
+$("#glob12").change(function () {
+ globalname='glob12';
+ newvalue=$("#glob12").val();
+//  alert(globalname +' ' + newvalue);
+changedvar();
+});
+
+
+
+$("#glob13").change(function () {
+ globalname='glob13';
+ newvalue=$("#glob13").val();
+//  alert(globalname +' ' + newvalue);
+changedvar();
+});
+
+
+$("#glob14").change(function () {
+ globalname='glob14';
+ newvalue=$("#glob14").val();
+//  alert(globalname +' ' + newvalue);
+changedvar();
+updateimage();
+});
+
+
+
+
+
 $("#glob1").change(function () {
  globalname='glob1';	
  newvalue=$("#glob1").val();	
@@ -1685,6 +1749,7 @@ $("#adminlogo").change(function () {
  newvalue=$("#adminlogo").val();	
 //  alert(globalname +' ' + newvalue);
 changedvar();
+updateimage();
 });
 
 
@@ -1693,6 +1758,7 @@ $("#adminlogoabs").change(function () {
  newvalue=$("#adminlogoabs").val();	
 //  alert(globalname +' ' + newvalue);
 changedvar();
+updateimage();
 });
 
 
@@ -1733,6 +1799,7 @@ $("#viewedicon").change(function () {
  newvalue=$("#viewedicon").val();	
 //  alert(globalname +' ' + newvalue);
 changedvar();
+updateimage();
 });
 
 
@@ -1741,6 +1808,7 @@ $("#unviewedicon").change(function () {
  newvalue=$("#unviewedicon").val();	
 //  alert(globalname +' ' + newvalue);
 changedvar();
+updateimage();
 });
 
 
@@ -1749,6 +1817,7 @@ $("#image1").change(function () {
  newvalue=$("#image1").val();	
 //  alert(globalname +' ' + newvalue);
 changedvar();
+updateimage();
 });
 
 
@@ -1757,6 +1826,7 @@ $("#image2").change(function () {
  newvalue=$("#image2").val();	
 //  alert(globalname +' ' + newvalue);
 changedvar();
+updateimage();
 });
 
 
@@ -1765,6 +1835,7 @@ $("#image3").change(function () {
  newvalue=$("#image3").val();	
 //  alert(globalname +' ' + newvalue);
 changedvar();
+updateimage();
 });
 
 
@@ -1773,6 +1844,7 @@ $("#image4").change(function () {
  newvalue=$("#image4").val();	
 //  alert(globalname +' ' + newvalue);
 changedvar();
+updateimage();
 });
 
 
@@ -1781,6 +1853,7 @@ $("#image5").change(function () {
  newvalue=$("#image5").val();	
 //  alert(globalname +' ' + newvalue);
 changedvar();
+updateimage();
 });
 
 
@@ -1789,8 +1862,16 @@ $("#image6").change(function () {
  newvalue=$("#image6").val();	
 //  alert(globalname +' ' + newvalue);
 changedvar();
+updateimage();
 });
 
+$("#image7").change(function () {
+ globalname='image7';	
+ newvalue=$("#image7").val();	
+//  alert(globalname +' ' + newvalue);
+changedvar();
+updateimage();
+});
 
 $("#sound1").change(function () {
  globalname='sound1';	
@@ -1861,6 +1942,7 @@ $("#clweb3").change(function () {
  newvalue=$("#clweb3").val();	
 //  alert(globalname +' ' + newvalue);
 changedvar();
+updateimage();
 });
 
 
@@ -2279,6 +2361,16 @@ changedvar();
 });
 
 
+$("#googlemapver").change(function () {
+ globalname='googlemapver';	
+ newvalue=$("#googlemapver").val();	
+//  alert(globalname +' ' + newvalue);
+changedvar();
+});
+
+
+
+
 $("#addresssearchlink").change(function () {
     globalname='addresssearchlink';
     newvalue=$("#addresssearchlink").val();	
@@ -2380,7 +2472,23 @@ changedvar();
 
 });	
 
+function updateimage(){
 
+    $("#i1").attr('src',$("#image1").val());    
+    $("#i2").attr('src',$("#image2").val());    
+    $("#i3").attr('src',$("#image3").val());    
+    $("#i4").attr('src',$("#image4").val());    
+    $("#i5").attr('src',$("#image5").val());    
+    $("#i6").attr('src',$("#image6").val());    
+    $("#i7").attr('src',$("#image7").val());
+
+    $("#iclweb3").attr('src',$("#clweb3").val());
+    $("#iviewedicon").attr('src',$("#viewedicon").val());
+    $("#iunviewedicon").attr('src',$("#unviewedicon").val());
+    $("#iadminlogo").attr('src',$("#adminlogo").val());
+    $("#iadminlogoabs").attr('src',$("#adminlogoabs").val());    
+    $("#iglob14").attr('src',$("#glob14").val());   
+}
 
 function changedvar(){
 // alert(globalname + ' ' + newvalue);
@@ -2401,5 +2509,14 @@ $('#tabs').append(data);
 		}
 });
 }
+
+
+
+
+
+
+
+
+
 </script>
 <?php  include 'footer.php'; echo '</body></html>';

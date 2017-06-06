@@ -1,6 +1,6 @@
 //     COJM Courier Online Operations Management
 //     order.js - Javascript File only used in order.php , the main edit job page
-//     Copyright (C) 2016 S.Young cojm.co.uk
+//     Copyright (C) 2017 S.Young cojm.co.uk
 //
 //    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU Affero General Public License as
@@ -48,34 +48,719 @@ var statustoohigh;
 var publictrackingref;
 var canshowareafromservice;
 var initialhassubarea;
+var b64lineCoordinates;
+var lineCoordinates=[];
+var line;
+var thismarkerloop=[];
+var thisareamaxlat = -99;
+var thisareamaxlng = -99;
+var thisareaminlat = 999;
+var thisareaminlng = 999;
 
-
-
+var subareaselectedmaxlat = -99;
+var subareaselectedmaxlng = -99;
+var subareaselectedminlat = 999;
+var subareaselectedminlng = 999;
+                
+                
+console.log("started order.js");
 
 $(function () { // Document is ready
     "use strict";
 
 
+    
+    
+    
+    
+        
+function onBoundsChanged() {
+    
+    var mapheight = $(map.getDiv()).children().eq(0).height();
+    var mapwidth = $(map.getDiv()).children().eq(0).width();
+    
+    if ( (mapheight == window.innerHeight ) && ( mapwidth == window.innerWidth ) ) {
+        // console.log( 'FULL SCREEN' );
+    }
+    else {
+        // console.log ('NOT FULL SCREEN');
+    }
+
+    if (oldheight==mapheight) {
+        // console.log ('MAP HEIGHT NOT CHANGED');
+    }
+    else {
+        oldheight=mapheight;
+        console.log ('MAP HEIGHT CHANGED in onBoundsChanged, running resetmapbounds');
+        resetmapbounds();
+    }
+}
+
+
+
+    
+    
+    function processordermap() {
+        
+        var mapcomments='';
+        
+        var areachanged=0;
+        var subareachanged=0;
+        
+        
+        console.log("Starting to process order map");
+        
+        var lineSymbol = {
+            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+            strokeOpacity: 0.3
+        };
+        
+        
+        
+        var image = {
+            url: clweb3,
+            size: new google.maps.Size(20, 20),
+            origin: new google.maps.Point(0,0),
+            anchor: new google.maps.Point(10, 10)
+        };
+        
+
+        var gmarkers = []; // container for all gmarkers to be included in 
+        
+        
+        
+        
+
+        // locations - array of 1 min GPS tracks
+        // b64lineCoordinates - b64 line co-ordinate array ( lat,lng ) 
+        // oldb64lineCoordinates
+        
+        
+
+        
+        
+        
+        if (b64clientlocations == oldb64clientlocations) {
+            console.log("b64clientlocations the same");
+        } else {
+            console.log("b64clientlocations different");
+            oldb64clientlocations=b64clientlocations;
+            
+            var temp=b64DecodeUnicode(b64clientlocations);
+            
+            clientdetailarray = JSON.parse(temp);
+            
+            if (clientcoords.length>0) {  }
+            
+                for (var i=0; i<clientcoords.length; i++) {
+                clientcoords[i].setMap(null);
+            }
+            
+            
+            console.log(" 0 : " + clientdetailarray[0]);
+            console.log(" 1 : " + clientdetailarray[1]);
+            console.log(" 2 : " + clientdetailarray[2]);
+            
+            if (clientdetailarray[0]) {
+
+                console.log("client address found");
+                
+                var myLatLng = new google.maps.LatLng(clientdetailarray[0][0],clientdetailarray[0][1]);
+                var marker = new google.maps.Marker({
+                    position: myLatLng,
+                    map: map,
+                    title: 'Client Address',
+                    zIndex: 2,
+                    icon: goldStar,
+                    class: 'clientdetailsicon',
+                    optimized: false
+                });
+                
+                clientcoords.push(marker);
+                
+            }
+            
+            if (( clientdetailarray[1][0] == 0 ) || ( clientdetailarray[1][0]==clientdetailarray[0][0] )) {
+                console.log("No Invoice postcode ");
+            } else {
+                console.log("Different Invoice postcode");
+                var myLatLng = new google.maps.LatLng(clientdetailarray[1][0],clientdetailarray[1][1]);
+                var marker = new google.maps.Marker({
+                    position: myLatLng,
+                    map: map,
+                    title: 'Client Invoice Address',
+                    zIndex: 1,
+                    icon: goldStar,
+                    class: 'clientdetailsicon',
+                    optimized: false
+                });
+                
+                clientcoords.push(marker);              
+            }
+            
+            if (( clientdetailarray[2][0] == 0 ) || ( clientdetailarray[2][0]==clientdetailarray[0][0] )) {
+                console.log("No department postcode ");
+            } else {
+                console.log("Department postcode");
+                
+                
+                var myLatLng = new google.maps.LatLng(clientdetailarray[2][0],clientdetailarray[2][1]);
+                var marker = new google.maps.Marker({
+                    position: myLatLng,
+                    map: map,
+                    title: 'Department Address',
+                    zIndex: 1,
+                    icon: goldStar,
+                    class: 'clientdetailsicon',
+                    optimized: false
+                });
+                
+                clientcoords.push(marker);                
+                
+                
+            }
+            
+            
+            
+        }
+        
+        
+        
+        
+        
+        if (b64jobstuff == oldb64jobstuff ) {
+            // console.log("b64jobstuff the same");
+        } else {
+            // console.log("b64jobstuff changed");
+            oldb64jobstuff=b64jobstuff;
+            
+            if (jobstuffcoords.length>0) {  }
+            
+                for (var i=0; i<jobstuffcoords.length; i++) {
+                jobstuffcoords[i].setMap(null);
+            }
+            
+            jobstuffcoords=[];
+            
+            var temp=b64DecodeUnicode(b64jobstuff);
+            
+            console.log("jobarray temp: " + temp);
+            jobarray = JSON.parse(temp);
+            
+            console.log("jobarray length : " + jobarray.length);
+            
+            
+            jobmaxlat = -99;
+            jobmaxlng = -99;
+            jobminlat = 999;
+            jobminlng = 999;
+            
+            
+            
+            
+            
+            for (var i = 0; i < jobarray.length; i++) {
+            
+                if (jobarray[i][1]) { // address has latitude
+                    // console.log("Address " + jobarray[i]);
+                    
+                    if(jobarray[i][2]>jobmaxlng) { jobmaxlng = jobarray[i][2]; }
+                    if(jobarray[i][2]<jobminlng) { jobminlng = jobarray[i][2]; }
+                    if(jobarray[i][1]>jobmaxlat) { jobmaxlat = jobarray[i][1]; }
+                    if(jobarray[i][1]<jobminlat) { jobminlat = jobarray[i][1]; }
+                    
+                    var myLatLng = new google.maps.LatLng(jobarray[i][1], jobarray[i][2]);
+                    var marker = new google.maps.Marker({
+                        position: myLatLng,
+                        map: map,
+                        title: jobarray[i][0],
+                        zIndex: 5,
+                        icon: jobarray[i][3],
+                        optimized: false
+                    });
+                    
+                    jobstuffcoords.push(marker);
+                    
+                }
+            
+            }
+            
+        }
+        
+        
+        
+        
+        
+        
+        if (b64lineCoordinates==oldb64lineCoordinates) {
+            // console.log("rider line unchanged");
+        } else {
+            // console.log("rider line changed");
+            
+            if (lineCoordinates.length>0) { line.setMap(null); }
+            
+            // console.log("removed rider line");
+            
+            oldb64lineCoordinates=b64lineCoordinates;
+            var templine=b64DecodeUnicode(b64lineCoordinates);
+            
+            // console.log("templine: " + templine);
+            
+            
+            lineCoordinates = JSON.parse(templine);
+            
+            // console.log("number of line co-ordinates : " + lineCoordinates.length );
+        
+            for (var j = 0; j < lineCoordinates.length; j++) {
+                var lat = lineCoordinates[j][0];
+                var lng = lineCoordinates[j][1];
+                var marker = new google.maps.LatLng(lat, lng);
+                gmarkers.push(marker);
+            }
+            
+            // console.log("finished rider coordinates array");
+            
+            line = new google.maps.Polyline({
+                path: gmarkers,
+                geodesic: true,
+                strokeOpacity: 0.7,
+                icons: [{
+                    icon: lineSymbol,
+                    repeat: "50px"
+                }],
+                map: map,
+                zIndex: 1600,
+                optimized: false
+            });
+            
+        }
+        
+        // console.log("finished rider line");
+        
+        
+        
+        if (oldb64locations==b64locations) { // console.log("rider 1 min locations unchanged");
+            
+        } else {
+            
+            // console.log("rider 1 min locations changed");
+            oldb64locations=b64locations;
+            
+            var temploc=b64DecodeUnicode(b64locations);
+            // console.log("temploc: " + temploc);
+            locations = JSON.parse(temploc);
+            
+            for (var i=0; i<markers.length; i++) {
+                markers[i].setMap(null);
+            }    
+            // Reset the markers array
+            markers = [];
+            
+            var infowindow = new google.maps.InfoWindow();
+        
+            var marker, i;
+
+
+            
+            console.log("total 1 min rider locations : " + locations.length);
+            
+            ridermaxlat = -99;
+            ridermaxlng = -99;
+            riderminlat = 999;
+            riderminlng = 999;
+            
+            for (i = 0; i < locations.length; i++) {
+                marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+                    map: map,
+                    icon: image,
+                    zIndex: 2000,
+                    optimized: false
+                });
+                google.maps.event.addListener(marker, "mouseover", (function(marker, i) {
+                    return function() {
+                    infowindow.setContent(" <div style=\" width: 110px; \"> "+locations[i][0] + " </div> " );
+                    infowindow.setOptions({ disableAutoPan: true });
+                    infowindow.open(map, marker);
+                    }
+                })(marker, i));
+                
+                markers.push(marker);
+                                
+                if(locations[i][2]>ridermaxlng) { ridermaxlng = locations[i][2]; }
+                if(locations[i][2]<riderminlng) { riderminlng = locations[i][2]; }
+                if(locations[i][1]>ridermaxlat) { ridermaxlat = locations[i][1]; }
+                if(locations[i][1]<riderminlat) { riderminlat = locations[i][1]; }
+            }
+            
+        }
+        
+        
+        if (oldmainarea==b64mainarea) {
+            // console.log("main area the same");
+        } else {
+            // console.log("main area different");
+            
+            // console.log("b64mainarea : " + b64mainarea);
+            
+            if (mainareamarkers.length>0) { polymainarea.setMap(null); }
+            
+            var templine=b64DecodeUnicode(b64mainarea);
+            
+            // console.log("area b4 json parse : " + templine);
+            
+            mainarea = JSON.parse(templine);
+            
+            console.log("total main area points : " + mainarea.length);
+            
+            mainareamaxlat = -99;
+            mainareamaxlng = -99;
+            mainareaminlat = 999;
+            mainareaminlng = 999;
+            
+            mainareamarkers=[];
+            
+            if (mainarea.length>0) {
+            
+                for (i = 0; i < mainarea.length; i++) {
+                    var areamarker = new google.maps.LatLng(mainarea[i][0], mainarea[i][1]);
+                    mainareamarkers.push(areamarker);
+                
+                    if(mainarea[i][1]>mainareamaxlng) { mainareamaxlng = mainarea[i][1]; }
+                    if(mainarea[i][1]<mainareaminlng) { mainareaminlng = mainarea[i][1]; }
+                    if(mainarea[i][0]>mainareamaxlat) { mainareamaxlat = mainarea[i][0]; }
+                    if(mainarea[i][0]<mainareaminlat) { mainareaminlat = mainarea[i][0]; }
+                }
+                
+                // console.log("mainareamarkers points : " + mainareamarkers.length);
+
+                polymainarea = new google.maps.Polygon({
+                    paths: [worldCoords, mainareamarkers],
+                    strokeWeight: 3,
+                    strokeOpacity: 0.6,
+                    fillColor: "#667788",
+                    fillOpacity: 0.2,
+                    strokeColor: "#000000",
+                    clickable:false,
+                    map:map
+                    });
+            }
+            
+            
+            // get b64 sub area array in [[areaid,[co-ords]],[areaid,[co-ords]]],
+            
+            // console.log("process sub areas into array format");
+            
+            var temp=b64DecodeUnicode(subareaarrayb64);
+       
+            subareaarray = JSON.parse(temp);
+            
+            // console.log(subareaarray);
+            
+            // console.log("total sub areas : " + subareaarray.length);
+        
+        } // ends check main area data has changed
+        
+        
+        allsubareamarkers=[];
+        
+        // reset areas
+        
+        if (mapofselectedopsmapsubarea) { mapofselectedopsmapsubarea.setMap(null); }
+        
+        // console.log(" existing sub area maps (excl. selected) " + mapsofsubareas.length);
+        
+        if (mapsofsubareas.length) {
+            for (i = 0; i < mapsofsubareas.length; i++) {
+                // console.log("existing overlay found");
+                mapsofsubareas[i].setMap(null);
+            }
+        }
+        
+        
+        
+        if (subareaarray.length>0) {
+            // console.log(" sub areas in array, about to loop through them all");
+            
+            for (i = 0; i < subareaarray.length; i++) {
+            
+                // console.log(subareaarray[i][3]);
+                
+                thismarkerloop=[];
+                
+                thisareamaxlat = -99;
+                thisareamaxlng = -99;
+                thisareaminlat = 999;
+                thisareaminlng = 999;
+                
+                for (j = 0; j < subareaarray[i][3].length; j++) {
+                    // console.log("Point in sub area found" + subareaarray[i][3][j][0] + " " + subareaarray[i][3][j][1]);
+                    var areamarker = new google.maps.LatLng(subareaarray[i][3][j][0],subareaarray[i][3][j][1]);
+
+                    allsubareamarkers.push(areamarker);
+                    thismarkerloop.push(areamarker);
+                    
+                    if(subareaarray[i][3][j][1]>thisareamaxlng) { thisareamaxlng = subareaarray[i][3][j][1]; }
+                    if(subareaarray[i][3][j][1]<thisareaminlng) { thisareaminlng = subareaarray[i][3][j][1]; }
+                    if(subareaarray[i][3][j][0]>thisareamaxlat) { thisareamaxlat = subareaarray[i][3][j][0]; }
+                    if(subareaarray[i][3][j][0]<thisareaminlat) { thisareaminlat = subareaarray[i][3][j][0]; }
+                }
+                
+                
+                
+                var centlat=((thisareamaxlat-thisareaminlat)/2)+thisareaminlat;   
+                var centlng=((thisareamaxlng-thisareaminlng)/2)+thisareaminlng;
+                var cent = new google.maps.LatLng(centlat, centlng);
+                
+                // console.log("cent" + cent);
+
+                if (opsmapsubarea==subareaarray[i][0]) { // console.log("Sub Area Selected");
+                    
+                    mapofselectedopsmapsubarea= new google.maps.Polygon({
+                    paths: [worldCoords, thismarkerloop],
+                    strokeWeight: 10,
+                    strokeOpacity: 0.6,
+                    fillColor: "#5555FF",
+                    fillOpacity: 0.15,
+                    strokeColor: "#00FF00",
+                    clickable: false,
+                    map: map
+                    });
+    
+                    subareaselectedmaxlat = thisareamaxlat;
+                    subareaselectedminlng = thisareaminlng;
+                    subareaselectedminlat = thisareaminlat;
+                    subareaselectedmaxlng = thisareamaxlng;
+                
+                } else {
+                    // console.log("Not Selected");
+                    
+                    // console.log("thismarkerloop" + thismarkerloop)
+                    
+                    mapsofsubareas.push ( new google.maps.Polygon({
+                    paths: [thismarkerloop],
+                    strokeWeight: 3,
+                    strokeOpacity: 0.3,
+                    strokeColor: "#000000",
+                    fillOpacity: 0,
+                    clickable: false,
+                    map: map
+                    }));
+                    
+                    mapsofsubareas.push ( new RichMarker({
+                    position: cent,
+                    flat: true,
+                    map: map,
+                    draggable: false,
+                    content: '<div class="map-sub-area-label"><a href="opsmap-new-area.php?areaid=' + subareaarray[i][0] + '">' + subareaarray[i][1] + '</a></div>'
+                    }));
+        
+                }
+               
+            }
+            
+        }
+        
+        
+        
+        // all arays up to date
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        // update lat / lng + sub areas
+        
+        maxlat = -99;
+        maxlng = -99;
+        minlat = 999;
+        minlng = 999;
+        
+
+
+
+
+        
+        if (locations.length) { // rider tracking
+            
+            mapcomments=mapcomments  + '<div class="fs"> <div class="fsl"> Tracking </div>' + maptimes + ' ' + locations.length + ' markers, ' + lineCoordinates.length + ' points. </div>';
+            
+            if( ridermaxlat > maxlat) { maxlat = ridermaxlat; }
+            if( riderminlng < minlng) { minlng = riderminlng; }
+            if( riderminlat < minlat) { minlat = riderminlat; }
+            if( ridermaxlng > maxlng) { maxlng = ridermaxlng; }
+            
+            // console.log("rider locations found with max / mins of : ");
+            // console.log(ridermaxlng);
+            // console.log(riderminlng);
+            // console.log(ridermaxlat);
+            // console.log(riderminlat);     
+        } else {
+            
+            
+            if (jobmaxlat>-98) {
+
+                if( jobmaxlat > maxlat) { maxlat = jobmaxlat; }
+                if( jobminlng < minlng) { minlng = jobminlng; }
+                if( jobminlat < minlat) { minlat = jobminlat; }
+                if( jobmaxlng > maxlng) { maxlng = jobmaxlng; }
+                
+                // console.log("job locations found with max / mins of : ");
+                // console.log(jobmaxlng);
+                // console.log(jobminlng);
+                // console.log(jobmaxlat);
+                // console.log(jobminlat);
+            }
+        }
+        
+        
+        // console.log("opsmapsubarea: " + opsmapsubarea);
+        
+        
+
+
+
+        if (opsmapsubarea>0) {
+            console.log("using sub area min / max");
+        
+            if ( subareaselectedmaxlat > maxlat ) { maxlat = subareaselectedmaxlat; }
+            if ( subareaselectedminlng < minlng ) { minlng = subareaselectedminlng; }
+            if ( subareaselectedminlat < minlat ) { minlat = subareaselectedminlat; }
+            if ( subareaselectedmaxlng > maxlng ) { maxlng = subareaselectedmaxlng; }
+        
+        } else if (mainareamarkers.length>0) {
+            console.log("using main area min / max");
+            if( mainareamaxlat > maxlat) { maxlat = mainareamaxlat; }
+            if( mainareaminlng < minlng) { minlng = mainareaminlng; }
+            if( mainareaminlat < minlat) { minlat = mainareaminlat; }
+            if( mainareamaxlng > maxlng) { maxlng = mainareamaxlng; }
+        }
+        
+        
+        
+        // console.log("new total max mins are : ");
+        // 
+        // console.log(maxlng);
+        // console.log(minlng);                       
+        // console.log(maxlat);
+        // console.log(minlat);
+        
+        
+        
+        
+        var needtoshowmap = locations.length + mainareamarkers.length + jobstuffcoords.length;
+        
+        console.log("locations : " + locations.length);
+        console.log("mainareamarkers : " + mainareamarkers.length);
+        console.log("jobstuffcoords : " + jobstuffcoords.length);
+        console.log("needtoshowmap : " + needtoshowmap);
+        
+        
+        if ((needtoshowmap)>0) { // add other array lengths if need to be in map
+            
+            console.log("locations present so show map, running resetmapbounds");
+
+            $("#orderajaxmap").removeClass("hideuntilneeded");
+            
+            
+            
+            google.maps.event.trigger(map, 'resize');
+                        resetmapbounds();
+            if (existingmap==1) {
+                // console.log("existing map");
+            } else {
+                // console.log("NEED TO initialise map");
+                existingmap=1;
+                google.maps.event.addListener( map, 'bounds_changed', onBoundsChanged );
+
+            }
+            
+            
+
+            
+            
+        } else {
+            // console.log("NO locations present NO map");
+            $("#orderajaxmap").addClass("hideuntilneeded");
+        }
+        
+        
+
+        if (mapcomments=='') {
+            $("#mapcomments").hide();
+        } else {
+            $("#mapcomments").html(mapcomments).show();
+        }
+        
+        console.log("finished processordermap function  ");
+    }
+ 
+ 
+    function resetmapbounds() {
+        
+        console.log("function resetmapbounds ");
+        
+        console.log(maxlng);
+        console.log(minlng);                       
+        console.log(maxlat);
+        console.log(minlat);
+        
+        map.setZoom(17);
+        var bounds = new google.maps.LatLngBounds();
+        bounds.extend(new google.maps.LatLng(maxlat, minlng)); // upper left
+        bounds.extend(new google.maps.LatLng(maxlat, maxlng)); // upper right
+        bounds.extend(new google.maps.LatLng(minlat, maxlng)); // lower right
+        bounds.extend(new google.maps.LatLng(minlat, minlng)); // lower left
+        map.setOptions({ maxZoom: 17 });
+        map.fitBounds(bounds);
+        map.setOptions({ maxZoom: null });
+        
+    }
+
+ 
+    
     function ordermapupdater() {
         $("#toploader").show();
         showhidebystatus();
+        
+        console.log(" trigger update order.js 63 ");
+        
         $.ajax({
-            url: 'ajaxordermap.php',
+            url: 'ajax_lookup.php',
             data: {
-                page: 'ajaxclientjobreference',
+                lookuppage: 'ordermap',
                 formbirthday: formbirthday,
                 id: id
             },
             type: 'post',
             success: function (data) {
-                $('#orderajaxmap').html(data);
+                $('#mapajax').html(data);
             },
-            complete: function () {
-            $("#toploader").fadeOut();
+            complete: function (data) {
+                
+                processordermap();
+                
+                $("#toploader").fadeOut();
             }
         });
     }
-
 
 
     function loadScript(url, callback) {
@@ -92,24 +777,35 @@ $(function () { // Document is ready
     
         // Fire the loading
         head.appendChild(script);
+        console.log("loading " + url);
     }
     
     
-    var whengmapapiloaded = function() {
-        // callback function
-        // Here, do what ever you want
-        loadScript("js/richmarker.js", richmarkerloaded);
+   
+    
+    
+    
+    
+    var whenmaptemplateloaded = function() {
+        initialize();
+        console.log("map template loaded");
+
+         ordermapupdater();
+        
     };
 
 
-   
-    var richmarkerloaded = function() {
-        ordermapupdater();
-    };
-   
-   
-    loadScript("//maps.googleapis.com/maps/api/js?v=3.22&key=" + googlemapapiv3key, whengmapapiloaded);
 
+
+
+function loadmaptemplate() {
+
+     loadScript("../js/maptemplate.js", whenmaptemplateloaded);
+
+}
+    
+ loadmaptemplate();    
+    
 
 
     (function( $ ) {
@@ -687,7 +1383,7 @@ $(function () { // Document is ready
     
     
     
-    $( "#orderviadiv" ).load( "ajaxordervias.php", { id: id }, function() {
+    $( "#orderviadiv" ).load( "ajax_lookup.php", { id: id, lookuppage: 'ajaxordervias' }, function() {
         // alert( "Load was performed." );
 
         $(document).ready(function(){
@@ -947,9 +1643,6 @@ $(function () { // Document is ready
         });
         
     });
-    
-    
-    
     
     
     
@@ -1777,7 +2470,8 @@ $(function () { // Document is ready
             },
             complete: function () {
                 showmessage();
-                ordermapupdater();
+                processordermap();
+                $("#toploader").fadeOut();
             }
         });
     });

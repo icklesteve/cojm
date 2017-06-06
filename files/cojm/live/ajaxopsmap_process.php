@@ -104,7 +104,7 @@ $parnode = $dom->appendChild($node); //make the node show up
 
 // Select all the rows in the markers table
 if ($_GET['archive']=='0') { $query=("SELECT * FROM opsmap WHERE type='1' AND inarchive ='0' "); } else { 
-if ($_GET['archive']=='1') { $query=("SELECT * FROM opsmap WHERE type='1' AND inarchive ='1' "); } }
+if ($_GET['archive']=='1') { $query=("SELECT * FROM opsmap WHERE type='1'  "); } }
 
 $stmt = $dbh->query($query);
 $row_count = $stmt->rowCount();

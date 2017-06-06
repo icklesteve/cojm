@@ -608,7 +608,7 @@ if ($result) {
                 echo ' '.$shortcomments.' '.$privateshortcomments.' '.$row['podsurname'];
             } else {
                 if (($row['jobcomments']) or ($row['privatejobcomments']) or ($row['podsurname']) ) {
-                    echo ' <img src="images/page_java.gif" alt="Job Comments" title="'. $row['jobcomments'].' ' . $row['privatejobcomments'].' ' . $row['podsurname'].'" > ' ;
+                    echo ' <img src="../images/page_java.gif" alt="Job Comments" title="'. $row['jobcomments'].' ' . $row['privatejobcomments'].' ' . $row['podsurname'].'" > ' ;
                 }
             }
             
@@ -666,7 +666,7 @@ if ($result) {
             }
             
             if ($trackingtext) {
-                echo '<a href="../createkml.php?id='. $row['publictrackingref'].'"><img src="images/icon_world_dynamic.gif" alt="Download Tracking" title="'.$trackingtext.'"></a>';
+                echo '<a href="../createkml.php?id='. $row['publictrackingref'].'"><img src="../images/icon_world_dynamic.gif" alt="Download Tracking" title="'.$trackingtext.'"></a>';
                 
                 array_push($gpxarray,$row['publictrackingref']);
             }
@@ -680,7 +680,7 @@ if ($result) {
             $stmt->execute();
             $total = $stmt->rowCount();
             if ($total=='1') {
-                echo ' <img src="images/noteb_pod_20x21.png" style="height:19px; width:18px;" alt="POD" title="POD" > ';
+                echo ' <img src="../images/noteb_pod_20x21.png" style="height:19px; width:18px;" alt="POD" title="POD" > ';
             }
             
             echo '</td>';
@@ -937,10 +937,9 @@ if ($result) {
     <input type="checkbox" name="showarea" value="1" checked />';  } 
     
     
-    if ($sarearesult) { echo '
-    
-    &amp; Sub Areas : 
-    <input type="checkbox" name="showsubarea" value="1" checked />';  }
+    if ($sarearesult) {
+        // echo ' &amp; Sub Areas : <input type="checkbox" name="showsubarea" value="1" checked />';
+    }
     
     
     

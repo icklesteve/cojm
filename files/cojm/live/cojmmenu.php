@@ -21,7 +21,7 @@
 
 
 if(preg_match('/iPhone|Android|Blackberry/i', $_SERVER['HTTP_USER_AGENT'])) {  $mobdevice="1";} else { $mobdevice='0'; }
-if (isset($hasforms)) { $hasforms='1'; } else { $hasforms=''; }
+if (!isset($hasforms)) { $hasforms=''; }
 if ((isset($adminmenu)) and ($adminmenu=='1')) { $adminmenu='1'; } else { $adminmenu=''; }		
 if ((isset($settingsmenu)) and ($settingsmenu=='1')) { $settingsmenu='1'; } else { $settingsmenu=''; }		
 if ((isset($invoicemenu)) and ($invoicemenu=='1')) { $invoicemenu='1'; } else { $invoicemenu=''; }	
@@ -40,9 +40,12 @@ var alertslide=1000;
 var allok=1;
 var message="";
 var showdebug='.$globalprefrow['showdebug'].';
-var mobdevice='.$mobdevice.'; ';
+var mobdevice='.$mobdevice.'; 
+var globalshortname="'.$globalprefrow['globalshortname'].'";
+var adminlogo="'.$globalprefrow['adminlogo'].'";
+';
 
-if ($hasforms) {
+if ($hasforms>0) {
     echo 'var pagetimeout = '.$globalprefrow['formtimeout'].'; var initialpagetimeout = '.$globalprefrow['formtimeout'].'; ';
 } else {
     echo 'var pagetimeout = 0; initialpagetimeout =0; ';
@@ -85,8 +88,8 @@ echo '" id="sticky_navigation">
 if ($filename=='index.php') { echo ' class="selected"'; } 
 echo ' >Home</a></li>';
 echo '<li><a title="New Job. If open, re-click to hide" id="togglenewjobchoose" href="#">New</a></li>'; 
-echo '<li><a href="whereis3.php"'; 
-if ($filename=='whereis3.php') { echo ' class="selected"';}  
+echo '<li><a href="map.php"'; 
+if ($filename=='map.php') { echo ' class="selected"';}  
 echo '>Map</a></li>'; 
 
 echo '

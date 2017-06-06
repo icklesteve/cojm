@@ -2479,21 +2479,26 @@ if ($hasid) {
                         $script.=' $("#arealink").attr("title", "'.$opsname.' Details"); ';
                         $script.=' $("#subarealink").hide(); ';
                         
+                        $script.=' opsmapsubarea=0; ';
+                        
+                        
                         if ($descrip) {
                             $script.=' $("#areacomments").html("'.$descrip.'<span id=\"subareacomments\"></span>").show(); ';
                         } else {
                             $script.='$("#areacomments").hide(); ';	
                         }
                         
-                        
-                        if ($istoplayer>0) {
-                            $query = "SELECT opsmapid, opsname, descrip  FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer=:opsmaparea ";
-                            $deprowstmt   = $dbh->prepare($query);
-                            $deprowstmt->bindParam(':opsmaparea', $opsmaparea, PDO::PARAM_INT); 
-                            $deprowstmt->execute();
-                            $deprow = $deprowstmt->fetchAll();
 
-                            $script.='
+
+                        $query = "SELECT opsmapid, opsname, descrip  FROM opsmap WHERE type=2 AND inarchive<>1 AND corelayer=:opsmaparea ";
+                        $deprowstmt   = $dbh->prepare($query);
+                        $deprowstmt->bindParam(':opsmaparea', $opsmaparea, PDO::PARAM_INT); 
+                        $deprowstmt->execute();
+                        $deprow = $deprowstmt->fetchAll();
+
+                        
+                        if (($deprow) and ($opsmaparea>0)) {
+                                $script.=' console.log("                          Subareas found on db"); 
                             initialhassubarea=1;
                             toAppendto= "<option value=0 >Choose SubArea</option>" + ';
                         
@@ -2502,14 +2507,18 @@ if ($hasid) {
                                 $script.='</option>" + ';
                             }
                         
-                            $script.=' ""
-                        
+                            $script.='
                             $("#opsmapsubarea").val("");
                             $("#opsmapsubarea").html(toAppendto);	
-                            $("#opsmapsubarea").show(); ';
+                            $("select#opsmapsubarea").show(); ';                                
+                                
+                                
                         } else {
+                            $script.=' console.log("                        No sub areas found on db"); ';
+
                             $script.='
-                            $("#opsmapsubarea").hide();
+                            initialhassubarea="";
+                            $("select#opsmapsubarea").hide();
                             $("#subarealink").hide(); ';	
                             
                         }
@@ -2545,14 +2554,18 @@ if ($hasid) {
                         $allok=1;                    
                         if ($opsmapsubarea==0) { 
                             $message.="Sub Area Removed";
+                            $script.=' opsmapsubarea=0; ';
                         } else {
                             $message.="Sub Area changed to ".$opsname;
+                            $script.=' opsmapsubarea='.$opsmapsubarea.'; ';
                         }
 
+                        
+                        
+                        
                         if ($opsmapsubarea>0) {
                             $script.=' $("#subarealink").show().attr("href", "opsmap-new-area.php?areaid='.$opsmapsubarea.'"); ';
                             $script.=' $("#subarealink").attr("title", "'.$opsname.' Details"); ';
-                            $script.=' $("#subarealink").show(); ';
                             // finishes sub area > 0, now no sub area
                         } else {
                             $script.=' $("#subarealink").hide(); ';
@@ -2863,11 +2876,13 @@ if ($hasid) {
                 // $infotext.='<br>301 custom : '.$ifcbbbuile;
                 // $infotext.='<br>301 Distance : '.$distance;
                 
+                $infotext.='<br/> buildloopcharge : '.$buildloopcharge;
                 
                 if ($iscustomprice=='0') {
                     // $infotext.='<br/>4513 Recalculating total price';
-                
-                
+                    $infotext.='<br/>Service Price : '.$serviceprice;                
+                    $infotext.='<br/>Number Items : '.$numberitems;
+
                     if ($ifcbbbuile=='1') { // mileage rate
                         // $infotext.='<br /> 4531 Mileage rate about to Update 1st mile cost ';
                         $cbbnewcost = $dbh->query("SELECT cbbcost from chargedbybuild WHERE chargedbybuildid = 1 LIMIT 1")->fetchColumn();
@@ -2886,6 +2901,7 @@ if ($hasid) {
                             
                         }
                 
+                        $infotext.='<br/> buildloopcharge 2905 : '.$buildloopcharge;
                 
                 
                         if ($distance>'1.00') { // set cost on cbb2
@@ -2907,11 +2923,11 @@ if ($hasid) {
                         // $infotext.='<br/>2nd mile sql and cost is :  ' .$cbbnewcost;
                         // set main price to zero
                 
-                    } else { // set service price : 
-                        // $infotext.='<br/>Service Price : '.$serviceprice;                
-                        // $infotext.='<br/>Number Items : '.$numberitems;
+                    } else { // finishes non-mileage rate
+                        $infotext.='<br/> Not mileage rate, using number of items x service price ';
                         $buildloopcharge=$buildloopcharge+($numberitems*$serviceprice);
-                    } // ends chck for distance / non-distance (non distance bit)
+                        $infotext.='<br/> buildloopcharge 2886 : '.$buildloopcharge;
+                    }
                 
                 
                     // starts 2nd phase check box pricing
@@ -2920,7 +2936,7 @@ if ($hasid) {
                     if ($ifcbbbuild=='1') { // uses tick boxes
                 
                         $infotext.='<br/>Using tick boxes';
-                
+                        $infotext.='<br/> buildloopcharge 2936 : '.$buildloopcharge;
                         $query="
                         SELECT * FROM chargedbybuild 
                         WHERE chargedbybuildid > 2
@@ -3729,6 +3745,31 @@ if ($page=='ajeditexpense') { // new payment from client
         catch(PDOException $e) { $message.= $e->getMessage(); }
     }    
     
+
+
+    if ($whatchanged=='localexpense') {
+        $localexpense =$_POST['localexpense'];
+        try {
+            $query = "UPDATE expenses SET localexpense=:localexpense WHERE expenseref =:expenseref; ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':expenseref', $expenseref, PDO::PARAM_INT);        
+            $stmt->bindParam(':localexpense', $localexpense, PDO::PARAM_INT);
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated, ';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Expense '. $expenseref.' localexpense updated to '.$localexpense;
+                $infotext.='Ref : '.$expenseid.' localexpense: '.$localexpense;
+                $updateexptable=1;
+            } else {
+                $message.=' No Change Made ';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
+    }    
+
     
     if ($whatchanged=='paid') {
         $paid =$_POST['paid'];         
@@ -4408,23 +4449,82 @@ if ($page=='ajaxeditglobals') {
     
     
     if ($globalname=='glob11') {
-    try {
-    $query = "UPDATE globalprefs SET glob11=:newvalue WHERE settingsid=:settingsid";
-    $stmt = $dbh->prepare($query);
-    $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
-    $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
-    $stmt->execute();
-    $total = $stmt->rowCount();
-    $infotext.=$total.' row updated <br />';
-    if ($total=='1') {
-    $allok='1';
-    $newformbirthday=microtime(TRUE);
-    $message.='Show Working Windows updated to '.$newvaluet.'<br />';
+        try {
+            $query = "UPDATE globalprefs SET glob11=:newvalue WHERE settingsid=:settingsid";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+            $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated <br />';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Show Working Windows updated to '.$newvaluet.'<br />';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
     }
+
+
+    if ($globalname=='glob12') {
+        try {
+            $query = "UPDATE globalprefs SET glob12=:newvalue WHERE settingsid=:settingsid";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+            $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated <br />';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Absolute map css to '.$newvaluet.'<br />';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
     }
-    catch(PDOException $e) { $message.= $e->getMessage(); }
-    }
+
     
+    if ($globalname=='glob13') {
+        try {
+            $query = "UPDATE globalprefs SET glob13=:newvalue WHERE settingsid=:settingsid";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+            $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated <br />';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Absolute map js to '.$newvaluet.'<br />';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
+    }
+
+
+    if ($globalname=='glob14') {
+        try {
+            $query = "UPDATE globalprefs SET glob14=:newvalue WHERE settingsid=:settingsid";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+            $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated <br />';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Absolute location Bluedot map png to '.$newvaluet.'<br />';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
+    }
+
+
+
     
     if ($globalname=='unrider1') {
         try {
@@ -4729,22 +4829,42 @@ if ($page=='ajaxeditglobals') {
     
     
     if ($globalname=='image6') {
-    try {
-    $query = "UPDATE globalprefs SET image6=:newvalue WHERE settingsid=:settingsid";
-    $stmt = $dbh->prepare($query);
-    $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
-    $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
-    $stmt->execute();
-    $total = $stmt->rowCount();
-    $infotext.=$total.' row updated <br />';
-    if ($total=='1') {
-    $allok='1';
-    $newformbirthday=microtime(TRUE);
-    $message.='Cargobike icon updated to '.$newvaluet.'<br />';
+        try {
+            $query = "UPDATE globalprefs SET image6=:newvalue WHERE settingsid=:settingsid";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+            $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated <br />';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Cargobike icon updated to '.$newvaluet.'<br />';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
     }
+
+    if ($globalname=='image7') {
+        try {
+            $query = "UPDATE globalprefs SET image7=:newvalue WHERE settingsid=:settingsid";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+            $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated <br />';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Via Address icon updated to '.$newvaluet.'<br />';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
     }
-    catch(PDOException $e) { $message.= $e->getMessage(); }
-    }
+
+
     
     
     if ($globalname=='sound1') {
@@ -5752,25 +5872,45 @@ if ($page=='ajaxeditglobals') {
     }
     
     
-    if ($globalname=='googlemapapiv3key') {   
-    try {
-    $query = "UPDATE globalprefs SET googlemapapiv3key=:newvalue WHERE settingsid=:settingsid";
-    $stmt = $dbh->prepare($query);
-    $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
-    $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
-    $stmt->execute();
-    $total = $stmt->rowCount();
-    $infotext.=$total.' row updated <br />';
-    if ($total=='1') {
-    $allok='1';
-    $newformbirthday=microtime(TRUE);
-    $message.='Google Maps API v3 Key updated to '.$newvaluet.' <br />';
+    if ($globalname=='googlemapapiv3key') {
+        try {
+            $query = "UPDATE globalprefs SET googlemapapiv3key=:newvalue WHERE settingsid=:settingsid";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+            $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated <br />';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Google Maps API v3 Key updated to '.$newvaluet.' <br />';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
+        
     }
-    }
-    catch(PDOException $e) { $message.= $e->getMessage(); }
+
+    
+    if ($globalname=='googlemapver') { 
+        try {
+            $query = "UPDATE globalprefs SET googlemapver=:newvalue WHERE settingsid=:settingsid";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindParam(':newvalue', $newvalue, PDO::PARAM_INT); 
+            $stmt->bindParam(':settingsid', $settingsid, PDO::PARAM_INT); 
+            $stmt->execute();
+            $total = $stmt->rowCount();
+            $infotext.=$total.' row updated <br />';
+            if ($total=='1') {
+                $allok='1';
+                $newformbirthday=microtime(TRUE);
+                $message.='Google Maps Version updated to '.$newvaluet.' <br />';
+            }
+        }
+        catch(PDOException $e) { $message.= $e->getMessage(); }
     }
     
-
+    
     if ($globalname=='addresssearchlink') {   
     try {
     $query = "UPDATE globalprefs SET addresssearchlink=:newvalue WHERE settingsid=:settingsid";

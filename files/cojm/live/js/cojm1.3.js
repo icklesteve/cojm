@@ -3325,7 +3325,7 @@ $(function() { // initialise new job client selector
 								});
 	var params='value='+ value;
 pic1 = new Image(16, 16); 
-pic1.src = "images/loader.gif";
+pic1.src = "../../images/loader.gif";
 var usr = $("#newjobselectdep").val();
 // var usr = value ;
 if(usr.length >= 1) {
@@ -3760,7 +3760,15 @@ input.attr('id', 'modtobox');
 	})( jQuery );	
 	
 	
-
+    $( document ).ajaxError(function( event, request, settings ) {
+        allok=0;    
+        message = ( "Error requesting page " + settings.url );
+        showmessage();
+    });
+    
+    
+    
+    
 function showmessage() {
 	if ((allok)==1) {
         $("#pagetext").stop(true, true).removeAttr("style").attr("height","100%").html(message).delay(ptdelay).slideUp(ptslide);

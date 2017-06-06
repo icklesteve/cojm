@@ -33,293 +33,292 @@ if ($lookuppage) {
     if ($lookuppage=='ajaxcheck'){
 
 
-    $html='';
-    $invhtml='';
-    $tablecost=0; 
-    $itablecost=0; 
-
-    $newjobclientid = $_POST['newjobselectclient'];
-
+        $html='';
+        $invhtml='';
+        $tablecost=0; 
+        $itablecost=0; 
     
+        $newjobclientid = $_POST['newjobselectclient'];
     
-    $query="SELECT isdepartments, defaultrequestor, defaultfromtext, defaulttotext, defaultservice, CompanyName
-    FROM Clients 
-    WHERE Clients.CustomerID = ? 
-    LIMIT 1"; 
-    $parameters = array($newjobclientid);
-    $statement = $dbh->prepare($query);
-    $statement->execute($parameters);
-    $row = $statement->fetch(PDO::FETCH_ASSOC);
-    if ($row) {
-        // starts check for unpaid invoices
-        $invoicecount=0;
-        $overduecount=0;
-        $todayDate = date("Y-m-d 00:00:00");    
-
-        $isql = "SELECT (cost + invvatcost) AS cost, invdue FROM invoicing  
-        WHERE (`invoicing`.`paydate` =0 )
-        AND (`invoicing`.`client` = :newjobclientid ) ";
         
-        $prep = $dbh->prepare($isql);
-        $prep->bindParam(':newjobclientid', $newjobclientid, PDO::PARAM_INT);
-        $prep->execute();
-        $stmt = $prep->fetchAll();
-        foreach ($stmt as $irow) {
-            $invoicecount++;
-            $itablecost=$itablecost+$irow['cost'];
-            if ($irow['invdue']<$todayDate){
-                $tablecost+=$irow['cost'];
-                $overduecount++;
-            }
-        }
-
-
-        if ($overduecount) {
-            $itablecost= number_format($itablecost, 2, '.', ','); 
-            $tablecost= number_format($tablecost, 2, '.', ','); 
-            $invhtml=' '.$overduecount.' Overdue Invoice'; if ($overduecount>1) { $invhtml.='s '; }
-            $invhtml.=" <span title='Incl. VAT'> (&". $globalprefrow['currencysymbol']. $tablecost.') </span> ';
-            if ($invoicecount-$overduecount) {
-                $invhtml.=' + '.($invoicecount-$overduecount)." in date <span title='Incl. VAT'> ( Total &". $globalprefrow['currencysymbol']. $itablecost.') </span>. ';
-            }
-        }
         
-        if ($row['isdepartments']) {
-            // starts has departments
-            $query = "SELECT depnumber, depname FROM clientdep 
-            WHERE associatedclient = :newjobclientid 
-            AND isactivedep='1' 
-            ORDER BY depname"; 
+        $query="SELECT isdepartments, defaultrequestor, defaultfromtext, defaulttotext, defaultservice, CompanyName
+        FROM Clients 
+        WHERE Clients.CustomerID = ? 
+        LIMIT 1"; 
+        $parameters = array($newjobclientid);
+        $statement = $dbh->prepare($query);
+        $statement->execute($parameters);
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            // starts check for unpaid invoices
+            $invoicecount=0;
+            $overduecount=0;
+            $todayDate = date("Y-m-d 00:00:00");    
+    
+            $isql = "SELECT (cost + invvatcost) AS cost, invdue FROM invoicing  
+            WHERE (`invoicing`.`paydate` =0 )
+            AND (`invoicing`.`client` = :newjobclientid ) ";
+            
+            $prep = $dbh->prepare($isql);
+            $prep->bindParam(':newjobclientid', $newjobclientid, PDO::PARAM_INT);
+            $prep->execute();
+            $stmt = $prep->fetchAll();
+            foreach ($stmt as $irow) {
+                $invoicecount++;
+                $itablecost=$itablecost+$irow['cost'];
+                if ($irow['invdue']<$todayDate){
+                    $tablecost+=$irow['cost'];
+                    $overduecount++;
+                }
+            }
+    
+            if ($overduecount) {
+                $itablecost= number_format($itablecost, 2, '.', ','); 
+                $tablecost= number_format($tablecost, 2, '.', ','); 
+                $invhtml=' '.$overduecount.' Overdue Invoice'; if ($overduecount>1) { $invhtml.='s '; }
+                $invhtml.=" <span title='Incl. VAT'> (&". $globalprefrow['currencysymbol']. $tablecost.') </span> ';
+                if ($invoicecount-$overduecount) {
+                    $invhtml.=' + '.($invoicecount-$overduecount)." in date <span title='Incl. VAT'> ( Total &". $globalprefrow['currencysymbol']. $itablecost.') </span>. ';
+                }
+            }
+            
+            if ($row['isdepartments']) {
+                // starts has departments
+                $query = "SELECT depnumber, depname FROM clientdep 
+                WHERE associatedclient = :newjobclientid 
+                AND isactivedep='1' 
+                ORDER BY depname"; 
+                
+                $stmt = $dbh->prepare($query);
+                $stmt->bindParam(':newjobclientid', $newjobclientid, PDO::PARAM_INT); 
+                $stmt->execute();
+                $data = $stmt->fetchAll();
+        
+                echo '<div class="fs"> <div class="fsl"> ';
+                
+                $numdeps=0;
+                $html.= '</div> <div class="left"> <select class="ui-state-default ui-corner-all " 
+                id="newjobselectdep" name="newjobselectdep" ><option value="">Select one...</option>';
+                foreach ($data as $deprow ) {  
+                    $numdeps++;
+                    $depnumber = ($deprow['depnumber']); 
+                    $CompanyName = htmlspecialchars($deprow['depname']); 
+                    $html.= ' <option value="'.$depnumber.'">'.$CompanyName.'</option>';
+                } 
+                
+                $html.= '</select> </div> ';
+                
+                echo $numdeps.' Departments '.$html;
+                
+    
+                
+                echo ' <div id="afterdepselect" class="left"> </div> 
+                <div class="clear"> </div>
+                </div> ';
+            
+                echo '<input type="hidden" name="newjobclientid" value="'.$newjobclientid.'"> '; 
+                $maindivclass=' class="hideuntilneeded" ';
+                // $maindivclass="";
+            } // ends has departments
+            else { // starts no departments
+            
+                $maindivclass="";
+            
+            }
+            
+            $html=' <div id="newjobdetails" '.$maindivclass.' > 
+            
+            <div class="cbbnewjobl">
+            
+            <div class="fs hideuntilneeded" id="deppassworddiv">
+                <div class="fsl"> Password </div>
+                <span class="red" id="deppassword"></span>
+            </div>
+            
+            <input id="newjobdepid" type="hidden" name="newjobdepid" value="">
+            
+            <div class="fs">
+            <div class="fsl">   Requested By </div>
+            <input type="text" id="requestedby" class="caps ui-state-default ui-corner-all" style="width: 250px;" name="requestedby" 
+            value="'. $row['defaultrequestor'].'">
+            
+            <span id="requestortext"> </span>
+            </div> 
+            <div class="fs">
+            <div class="fsl">
+            <button name="showallfav" title="All Favourites" id="showallfav" type="button" class="showallfav"> &nbsp; </button> 
+            
+            Collection </div>
+            <select name="frombox" id="frombox">
+            <option value=""> Select One ...</option>';
+            
+            $sql="SELECT favadrid, favadrft, favadrpc FROM cojm_favadr
+            WHERE  favadrclient = :newjobclientid
+            AND favadrisactive ='1' ";
+            
+            $stmt = $dbh->prepare($sql);
+            $stmt->bindParam(':newjobclientid', $newjobclientid, PDO::PARAM_INT); 
+            $stmt->execute();
+            $data = $stmt->fetchAll();
+            foreach ($data as $favrow) {
+                $html.= ' <option value="'.$favrow['favadrid'].'"';
+                if ($favrow['favadrid']==$row['defaultfromtext']) {
+                    $html.= ' SELECTED ';
+                }
+                $html.= '>'.$favrow['favadrft'].', '.$favrow['favadrpc'].'</option>';
+            }
+    
+            $html.= ' </select>
+            <span id="fromcomments"> </span>        
+            </div>
+            <div class="fs">
+            <div class="fsl">   Delivery </div>
+            <select name="tobox" id="tobox"><option value=""> Select One ...</option>';
+            
+            foreach ($data as $favrow) {
+                $html.= ' <option value="'.$favrow['favadrid'].'"';
+                if ($favrow['favadrid']==$row['defaulttotext']) { $html.= ' SELECTED '; }
+                $html.= '>'.$favrow['favadrft'].', '.$favrow['favadrpc'].'</option>';
+            }
+            $html.= '</select>'; 
+            
+            $html.= ' <span id="tocomments"> </span>  
+            </div>
+            <div class="fs">
+            <div class="fsl"> </div>
+            <input type="text" placeholder="Instructions" class="w490 caps ui-state-default ui-corner-all" name="jobcomments" /> </div>';
+            
+        
+            //////////////////////// starts service code
+            
+            $html.= ' <div class="fs"><div class="fsl">   Service </div>';
+            $html.= ' <select class="jlabel ui-state-default ui-corner-left" name="serviceID" id="newjobServiceID" > '; 
+            
+            
+            $chargedbycheck=1;
+            
+            
+            $query = "SELECT ServiceID, Service , slatime, sldtime, chargedbycheck
+            FROM Services 
+            WHERE activeservice='1' 
+            ORDER BY serviceorder DESC, ServiceID ASC"; 
             
             $stmt = $dbh->prepare($query);
             $stmt->bindParam(':newjobclientid', $newjobclientid, PDO::PARAM_INT); 
             $stmt->execute();
             $data = $stmt->fetchAll();
-    
-            echo '<div class="fs"> <div class="fsl"> ';
-            
-            $numdeps=0;
-            $html.= '</div> <div class="left"> <select class="ui-state-default ui-corner-all " 
-            id="newjobselectdep" name="newjobselectdep" ><option value="">Select one...</option>';
-            foreach ($data as $deprow ) {  
-                $numdeps++;
-                $depnumber = ($deprow['depnumber']); 
-                $CompanyName = htmlspecialchars($deprow['depname']); 
-                $html.= ' <option value="'.$depnumber.'">'.$CompanyName.'</option>';
-            } 
-            
-            $html.= '</select> </div> ';
-            
-            echo $numdeps.' Departments '.$html;
-            
-
-            
-            echo ' <div id="afterdepselect" class="left"> </div> 
-            <div class="clear"> </div>
-            </div> ';
-        
-            echo '<input type="hidden" name="newjobclientid" value="'.$newjobclientid.'"> '; 
-            $maindivclass=' class="hideuntilneeded" ';
-            // $maindivclass="";
-        } // ends has departments
-        else { // starts no departments
-        
-            $maindivclass="";
-        
-        }
-        
-        $html=' <div id="newjobdetails" '.$maindivclass.' > 
-        
-        <div class="cbbnewjobl">
-        
-        <div class="fs hideuntilneeded" id="deppassworddiv">
-            <div class="fsl"> Password </div>
-            <span class="red" id="deppassword"></span>
-        </div>
-        
-        <input id="newjobdepid" type="hidden" name="newjobdepid" value="">
-        
-        <div class="fs">
-        <div class="fsl">   Requested By </div>
-        <input type="text" id="requestedby" class="caps ui-state-default ui-corner-all" style="width: 250px;" name="requestedby" 
-        value="'. $row['defaultrequestor'].'">
-        
-        <span id="requestortext"> </span>
-        </div> 
-        <div class="fs">
-        <div class="fsl">
-        <button name="showallfav" title="All Favourites" id="showallfav" type="button" class="showallfav"> &nbsp; </button> 
-        
-        Collection </div>
-        <select name="frombox" id="frombox">
-        <option value=""> Select One ...</option>';
-        
-        $sql="SELECT favadrid, favadrft, favadrpc FROM cojm_favadr
-        WHERE  favadrclient = :newjobclientid
-        AND favadrisactive ='1' ";
-        
-        $stmt = $dbh->prepare($sql);
-        $stmt->bindParam(':newjobclientid', $newjobclientid, PDO::PARAM_INT); 
-        $stmt->execute();
-        $data = $stmt->fetchAll();
-        foreach ($data as $favrow) {
-            $html.= ' <option value="'.$favrow['favadrid'].'"';
-            if ($favrow['favadrid']==$row['defaultfromtext']) {
-                $html.= ' SELECTED ';
+            foreach ($data as $srow) {
+                $ServiceID = ($srow['ServiceID']);	
+                $Service = htmlspecialchars ($srow['Service']);
+                $html.= ("<option "); 
+                if ($row['defaultservice'] == $ServiceID) {
+                    $html.= " selected='SELECTED' "; 
+                    $thisslatime=$srow['slatime'];
+                    $thissldtime=$srow['sldtime'];
+                    $chargedbycheck=$srow['chargedbycheck'];
+                }
+                $html.= ("value=\"$ServiceID\">$Service</option> 
+                "); 
             }
-            $html.= '>'.$favrow['favadrft'].', '.$favrow['favadrpc'].'</option>';
-        }
-
-        $html.= ' </select>
-        <span id="fromcomments"> </span>        
-        </div>
-        <div class="fs">
-        <div class="fsl">   Delivery </div>
-        <select name="tobox" id="tobox"><option value=""> Select One ...</option>';
+            $html.= ("</select>
         
-        foreach ($data as $favrow) {
-            $html.= ' <option value="'.$favrow['favadrid'].'"';
-            if ($favrow['favadrid']==$row['defaulttotext']) { $html.= ' SELECTED '; }
-            $html.= '>'.$favrow['favadrft'].', '.$favrow['favadrpc'].'</option>';
-        }
-        $html.= '</select>'; 
-        
-        $html.= ' <span id="tocomments"> </span>  
-        </div>
-        <div class="fs">
-        <div class="fsl"> </div>
-        <input type="text" placeholder="Instructions" class="w490 caps ui-state-default ui-corner-all" name="jobcomments" /> </div>';
-        
+            <span id='servicefromdefault'> </span>
+            </div>"); 
+            
     
-        //////////////////////// starts service code
-        
-        $html.= ' <div class="fs"><div class="fsl">   Service </div>';
-        $html.= ' <select class="jlabel ui-state-default ui-corner-left" name="serviceID" id="newjobServiceID" > '; 
-        
-        
-        $chargedbycheck=1;
-        
-        
-        $query = "SELECT ServiceID, Service , slatime, sldtime, chargedbycheck
-        FROM Services 
-        WHERE activeservice='1' 
-        ORDER BY serviceorder DESC, ServiceID ASC"; 
-        
-        $stmt = $dbh->prepare($query);
-        $stmt->bindParam(':newjobclientid', $newjobclientid, PDO::PARAM_INT); 
-        $stmt->execute();
-        $data = $stmt->fetchAll();
-        foreach ($data as $srow) {
-            $ServiceID = ($srow['ServiceID']);	
-            $Service = htmlspecialchars ($srow['Service']);
-            $html.= ("<option "); 
-            if ($row['defaultservice'] == $ServiceID) {
-                $html.= " selected='SELECTED' "; 
-                $thisslatime=$srow['slatime'];
-                $thissldtime=$srow['sldtime'];
-                $chargedbycheck=$srow['chargedbycheck'];
-            }
-            $html.= ("value=\"$ServiceID\">$Service</option> 
-            "); 
-        }
-        $html.= ("</select>
-       
-        <span id='servicefromdefault'> </span>
-        </div>"); 
-        
-
-        $html.= '<div class="fs"><div class="fsl">   PU Due </div>';
-        $html.= '<select class="ui-state-default ui-corner-left" id="ajcolldue" name="ajcolldue">';
-        $html.= '<option value="now">Now </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:15:00') { $html.= 'SELECTED'; } $html.= ' value="15">15 mins </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:30:00') { $html.= 'SELECTED'; } $html.= ' value="30">30 mins </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:45:00') { $html.= 'SELECTED'; } $html.= ' value="45">45 mins </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='01:00:00') { $html.= 'SELECTED'; } $html.= ' value="60">1 hour </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='01:30:00') { $html.= 'SELECTED'; } $html.= ' value="90">1 &amp;1/2 hours </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='02:00:00') { $html.= 'SELECTED'; } $html.= ' value="120">2 hours </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='03:00:00') { $html.= 'SELECTED'; } $html.= ' value="180">3 hours </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:00:08') { $html.= 'SELECTED'; } $html.= ' value="next8">Next 8AM </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:00:09') { $html.= 'SELECTED'; } $html.= ' value="next9">Next 9AM </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:00:10') { $html.= 'SELECTED'; } $html.= ' value="next10">Next 10AM </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:00:11') { $html.= 'SELECTED'; } $html.= ' value="next11">Next 11AM </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:00:12') { $html.= 'SELECTED'; } $html.= ' value="next12">Next 12PM </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:00:13') { $html.= 'SELECTED'; } $html.= ' value="next13">Next 1PM </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:00:14') { $html.= 'SELECTED'; } $html.= ' value="next14">Next 2PM </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:00:15') { $html.= 'SELECTED'; } $html.= ' value="next15">Next 3PM </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:00:16') { $html.= 'SELECTED'; } $html.= ' value="next16">Next 4PM </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:00:17') { $html.= 'SELECTED'; } $html.= ' value="next17">Next 5PM </option>';
-        $html.= "\n".' <option ';  if ($thisslatime=='00:00:18') { $html.= 'SELECTED'; } $html.= ' value="next18">Next 6PM </option>';
-        $html.= "\n".' </select></div>';
-        
-        $html.= '<div class="fs">
-        <div class="fsl">   Drop Due </div> ';
-        $html.= '<select class="jlabel ui-state-default ui-corner-left" id="ajdelldue" name="ajdelldue">';
-        $html.= ' <option value="now">Now </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:15:00') { $html.= 'SELECTED'; } $html.= ' value="15">15 mins </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:30:00') { $html.= 'SELECTED'; } $html.= ' value="30">30 mins </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:45:00') { $html.= 'SELECTED'; } $html.= ' value="45">45 mins </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='01:00:00') { $html.= 'SELECTED'; } $html.= ' value="60">1 hour </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='01:30:00') { $html.= 'SELECTED'; } $html.= ' value="90">1 &amp;1/2 hours </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='02:00:00') { $html.= 'SELECTED'; } $html.= ' value="120">2 hours </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='03:00:00') { $html.= 'SELECTED'; } $html.= ' value="180">3 hours </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:00:08') { $html.= 'SELECTED'; } $html.= ' value="next8">Next 8AM  </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:00:09') { $html.= 'SELECTED'; } $html.= ' value="next9">Next 9AM  </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:00:10') { $html.= 'SELECTED'; } $html.= ' value="next10">Next 10AM  </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:00:11') { $html.= 'SELECTED'; } $html.= ' value="next11">Next 11AM </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:00:12') { $html.= 'SELECTED'; } $html.= ' value="next12">Next 12PM  </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:00:13') { $html.= 'SELECTED'; } $html.= ' value="next13">Next 1PM  </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:00:14') { $html.= 'SELECTED'; } $html.= ' value="next14">Next 2PM  </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:00:15') { $html.= 'SELECTED'; } $html.= ' value="next15">Next 3PM </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:00:16') { $html.= 'SELECTED'; } $html.= ' value="next16">Next 4PM </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:00:17') { $html.= 'SELECTED'; } $html.= ' value="next17">Next 5PM </option>';
-        $html.= "\n".' <option ';  if ($thissldtime=='00:00:18') { $html.= 'SELECTED'; } $html.= ' value="next18">Next 6PM </option>';
-        $html.= ' </select></div> ';
-        
-        $html.= ' </div> <div class="cbbnewjobr"> ';
-        
-        $html.= ' <div id="newjobcbb" ';
-            if (!$chargedbycheck) { $html.= ' class="hideuntilneeded" '; }
-        $html.='> ';
-        
-        
-        $query = "SELECT 
-        chargedbybuildid, 
-        cbbname
-        FROM chargedbybuild 
-        WHERE cbbcost <> '0.00'
-        AND chargedbybuildid > 3
-        ORDER BY cbborder";
-        
-        $stmt = $dbh->query($query);
-
-        foreach ($stmt as $crow) {            
-            $cbbname = htmlspecialchars ($crow['cbbname']);
-            $cb=$crow['chargedbybuildid'];
+            $html.= '<div class="fs"><div class="fsl">   PU Due </div>';
+            $html.= '<select class="ui-state-default ui-corner-left" id="ajcolldue" name="ajcolldue">';
+            $html.= '<option value="now">Now </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:15:00') { $html.= 'SELECTED'; } $html.= ' value="15">15 mins </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:30:00') { $html.= 'SELECTED'; } $html.= ' value="30">30 mins </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:45:00') { $html.= 'SELECTED'; } $html.= ' value="45">45 mins </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='01:00:00') { $html.= 'SELECTED'; } $html.= ' value="60">1 hour </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='01:30:00') { $html.= 'SELECTED'; } $html.= ' value="90">1 &amp;1/2 hours </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='02:00:00') { $html.= 'SELECTED'; } $html.= ' value="120">2 hours </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='03:00:00') { $html.= 'SELECTED'; } $html.= ' value="180">3 hours </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:00:08') { $html.= 'SELECTED'; } $html.= ' value="next8">Next 8AM </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:00:09') { $html.= 'SELECTED'; } $html.= ' value="next9">Next 9AM </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:00:10') { $html.= 'SELECTED'; } $html.= ' value="next10">Next 10AM </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:00:11') { $html.= 'SELECTED'; } $html.= ' value="next11">Next 11AM </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:00:12') { $html.= 'SELECTED'; } $html.= ' value="next12">Next 12PM </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:00:13') { $html.= 'SELECTED'; } $html.= ' value="next13">Next 1PM </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:00:14') { $html.= 'SELECTED'; } $html.= ' value="next14">Next 2PM </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:00:15') { $html.= 'SELECTED'; } $html.= ' value="next15">Next 3PM </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:00:16') { $html.= 'SELECTED'; } $html.= ' value="next16">Next 4PM </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:00:17') { $html.= 'SELECTED'; } $html.= ' value="next17">Next 5PM </option>';
+            $html.= "\n".' <option ';  if ($thisslatime=='00:00:18') { $html.= 'SELECTED'; } $html.= ' value="next18">Next 6PM </option>';
+            $html.= "\n".' </select></div>';
+            
             $html.= '<div class="fs">
-            <div class="fsl">    <input type="checkbox" name="chkcbb'.$cb.'" value="1" '; 
-            $html.= '></div> '.$cbbname.'  </div> ';
-        } // ends loop for valid cbbs
-        
-        
-        $html.= '
-        </div>
-        <div class="fs" > <div class="fsl"> </div>
-        <button class="newjobsubmit" type="submit"> Create New Job </button></div></div>
-        <div class="clear"> </div> ';
-        
-        $html.=' </div> 
-
-        <hr />   ';
-        echo $html;
+            <div class="fsl">   Drop Due </div> ';
+            $html.= '<select class="jlabel ui-state-default ui-corner-left" id="ajdelldue" name="ajdelldue">';
+            $html.= ' <option value="now">Now </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:15:00') { $html.= 'SELECTED'; } $html.= ' value="15">15 mins </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:30:00') { $html.= 'SELECTED'; } $html.= ' value="30">30 mins </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:45:00') { $html.= 'SELECTED'; } $html.= ' value="45">45 mins </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='01:00:00') { $html.= 'SELECTED'; } $html.= ' value="60">1 hour </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='01:30:00') { $html.= 'SELECTED'; } $html.= ' value="90">1 &amp;1/2 hours </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='02:00:00') { $html.= 'SELECTED'; } $html.= ' value="120">2 hours </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='03:00:00') { $html.= 'SELECTED'; } $html.= ' value="180">3 hours </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:00:08') { $html.= 'SELECTED'; } $html.= ' value="next8">Next 8AM  </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:00:09') { $html.= 'SELECTED'; } $html.= ' value="next9">Next 9AM  </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:00:10') { $html.= 'SELECTED'; } $html.= ' value="next10">Next 10AM  </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:00:11') { $html.= 'SELECTED'; } $html.= ' value="next11">Next 11AM </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:00:12') { $html.= 'SELECTED'; } $html.= ' value="next12">Next 12PM  </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:00:13') { $html.= 'SELECTED'; } $html.= ' value="next13">Next 1PM  </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:00:14') { $html.= 'SELECTED'; } $html.= ' value="next14">Next 2PM  </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:00:15') { $html.= 'SELECTED'; } $html.= ' value="next15">Next 3PM </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:00:16') { $html.= 'SELECTED'; } $html.= ' value="next16">Next 4PM </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:00:17') { $html.= 'SELECTED'; } $html.= ' value="next17">Next 5PM </option>';
+            $html.= "\n".' <option ';  if ($thissldtime=='00:00:18') { $html.= 'SELECTED'; } $html.= ' value="next18">Next 6PM </option>';
+            $html.= ' </select></div> ';
+            
+            $html.= ' </div> <div class="cbbnewjobr"> ';
+            
+            $html.= ' <div id="newjobcbb" ';
+                if (!$chargedbycheck) { $html.= ' class="hideuntilneeded" '; }
+            $html.='> ';
+            
+            
+            $query = "SELECT 
+            chargedbybuildid, 
+            cbbname
+            FROM chargedbybuild 
+            WHERE cbbcost <> '0.00'
+            AND chargedbybuildid > 3
+            ORDER BY cbborder";
+            
+            $stmt = $dbh->query($query);
     
-        echo ' <script> ';
+            foreach ($stmt as $crow) {            
+                $cbbname = htmlspecialchars ($crow['cbbname']);
+                $cb=$crow['chargedbybuildid'];
+                $html.= '<div class="fs">
+                <div class="fsl">    <input type="checkbox" name="chkcbb'.$cb.'" value="1" '; 
+                $html.= '></div> '.$cbbname.'  </div> ';
+            } // ends loop for valid cbbs
+            
+            
+            $html.= '
+            </div>
+            <div class="fs" > <div class="fsl"> </div>
+            <button class="newjobsubmit" type="submit"> Create New Job </button></div></div>
+            <div class="clear"> </div> ';
+            
+            $html.=' </div> 
     
-?>        
-
-    var clientdetails=" <a href='new_cojm_client.php?clientid=<?php echo $newjobclientid; ?>' target='_blank' class='showclient' " + 
-    " title='<?php echo $row['CompanyName']; ?> Details' > &nbsp; </a> <?php echo $invhtml; ?> ";
-
-    <?php
+            <hr />   ';
+            echo $html;
+        
+            echo ' <script> ';
+        
+?>            
+    
+        var clientdetails=" <a href='new_cojm_client.php?clientid=<?php echo $newjobclientid; ?>' target='_blank' class='showclient' " + 
+        " title='<?php echo $row['CompanyName']; ?> Details' > &nbsp; </a> <?php echo $invhtml; ?> ";
+    
+        <?php
     
             echo '  $("#newjobServiceID").change(function () {
                         $("#toploader").show();
@@ -340,7 +339,7 @@ if ($lookuppage) {
                         }); 
                     });    
     
-    </script> ';
+            </script> ';
 
         } else { echo 'ERROR : Unable to get client details from database.'; }
     }
@@ -574,11 +573,1081 @@ if ($lookuppage) {
     }
     
     
+    
+    if ($lookuppage=='livemap') {
+        // $script.=' alert(" livemap from ajax '.date("H:i:s").'"); ';
+       
+        $ridertimerange=$_POST['ridertimerange']*60;
+        include_once ("GeoCalc.class.php");
+        $riderlocations='';
+       
+        $sql="SELECT timestamp, latitude,longitude, speed, heading, CyclistID, cojmname
+            FROM instamapper a, Cyclist
+            INNER JOIN (
+            SELECT device_key, id, MAX(timestamp) AS beer
+            FROM instamapper
+            WHERE timestamp >= UNIX_TIMESTAMP(DATE_SUB(now(), INTERVAL ? MINUTE))
+            GROUP BY device_key ) b
+            WHERE a.timestamp = b.beer AND a.device_key = b.device_key
+            AND a.device_key = Cyclist.trackerid";
+            
+            
+            // $script.=' alert("'.$ridertimerange.'");  ';
+            
+            
+        $parameters = array($ridertimerange);
+        $statement = $dbh->prepare($sql);
+        $statement->execute($parameters);
+            
+            
+            
+            
+            
+        // $stmt=$dbh->query($sql);
+       
+       
+        $newstmt = $statement->fetchAll();
+        $scriptb='';
+        
+        
+
+        
+        
+
+        
+        
+        
+       
+        if ($newstmt) {
+    
+            foreach ($newstmt as $row) { // got a valid device key for a particular day
+                // $foundtracks++;
+                
+                
+                $oGC = new GeoCalc();
+                $dRadius = '0.1'; 
+                $dLongitude = $row['longitude'];
+                $dLatitude = $row['latitude'];
+                $dAddLat = $oGC->getLatPerKm() * $dRadius;
+                $dAddLon = $oGC->getLonPerKmAtLat($dLatitude) * $dRadius;
+                $dNorthBounds = $dLatitude + $dAddLat;
+                $dSouthBounds = $dLatitude - $dAddLat;
+                $dWestBounds = $dLongitude - $dAddLon;
+                $dEastBounds = $dLongitude + $dAddLon;
+
+                $trsumtot=0;
+                
+                
+                $beer = "   SELECT PZ_Postcode, 
+                ( 3959 * acos( cos( radians(?) ) * cos( radians( PZ_northing ) ) * cos( radians( PZ_easting ) - radians(?) ) + sin( radians(?) ) * sin( radians( PZ_northing ) ) ) ) AS distance ,
+                PZ_easting
+                FROM postcodeuk 
+                WHERE PZ_northing > ?
+                AND PZ_northing < ?
+                AND PZ_easting < ? 
+                AND PZ_easting > ?
+                ORDER BY distance 
+                LIMIT 1; ";
+
+                $cbstmt = $dbh->prepare($beer);
+                $cbstmt->execute([$row["latitude"],$row["longitude"],$row["latitude"],$dSouthBounds,$dNorthBounds,$dWestBounds,$dEastBounds]);
+                $data = $cbstmt->fetchAll();
+
+
+                $cyclistpos='';
+                
+                if ($data) {
+                    $thispc=$data[0][PZ_Postcode];
+                    $start= substr($thispc, 0, -3); 
+                    $cyclistpos= $start.' '.substr($thispc, -3);
+                }
+                
+                
+                
+                
+                $thists=date('H:i A D', $row['timestamp']);
+                
+                
+                
+                $riderlocations.='["'.$row['cojmname'].'",'.$row['latitude'].','.$row['longitude'].',2000,'.$row['CyclistID'].',"'.$thists.'",'.$row['speed'].',"'.$globalprefrow['image4'].'","'.$cyclistpos.'"],';
+            }
+        
+        } else {
+            $ridertable.=' No Rider GPS Plots within last hour.';
+        }
+        
+        $riderlocations = '['.rtrim($riderlocations, ',').']';
+        
+        $ridertable.=' <hr /> ';
+
+         // $script.= ' riders = [(b64DecodeUnicode("' . base64_encode($riderlocations) . '"))]; ';     
+
+        // $script.=' riders = '.$riderlocations.';  ';   
+        $script.=' b64riders = "' . base64_encode($riderlocations) . '"; ';
+        
+        $lastupdated='Last Updated '.date("H:i:s");
+        $script.=' $("#maplastupdated").text(b64DecodeUnicode("'.base64_encode($lastupdated).'")); ';
+        // $script.=' $("#ridertable").html(b64DecodeUnicode("'.base64_encode($ridertable).'")); ';
+       
+       
+       
+        $numberofresults=777;
+        $offset=0;
+        
+        $jobslider=$_POST['jobslider'];
+        $jobrow='';
+
+        
+        
+        
+        // $script.=' alert("'.$jobslider.'");  '; 
+       
+        $query='
+        SELECT
+        p.ID,
+        p.nextactiondate,
+        p.jobcomments,
+        p.privatejobcomments,
+        p.targetcollectiondate,
+        p.collectionworkingwindow,
+        p.duedate,
+        p.deliveryworkingwindow,
+        p.cbb1,
+        p.cbb2,
+        p.cbb3,
+        p.cbb4,
+        p.cbb5,
+        p.cbb6,
+        p.cbb7,
+        p.cbb8,
+        p.cbb9,
+        p.cbb10,
+        p.cbb11,
+        p.cbb12,
+        p.cbb13,
+        p.cbb14,
+        p.cbb15,
+        p.cbb16,
+        p.cbb17,
+        p.cbb18,
+        p.cbb19,
+        p.cbb20,
+        p.CustomerID,
+        p.orderdep,
+        p.numberitems,
+        p.enrpc0,
+        p.enrft0,
+        p.enrpc1,
+        p.enrpc2,
+        p.enrpc3,
+        p.enrpc4,
+        p.enrpc5,
+        p.enrpc6,
+        p.enrpc7,
+        p.enrpc8,
+        p.enrpc9,
+        p.enrpc10,
+        p.enrpc11,
+        p.enrpc12,
+        p.enrpc13,
+        p.enrpc14,
+        p.enrpc15,
+        p.enrpc16,
+        p.enrpc17,
+        p.enrpc18,
+        p.enrpc19,
+        p.enrpc20,
+        p.enrft1,
+        p.enrft2, 
+        p.enrft3, 
+        p.enrft4, 
+        p.enrft5, 
+        p.enrft6, 
+        p.enrft7, 
+        p.enrft8, 
+        p.enrft9, 
+        p.enrft10, 
+        p.enrft11, 
+        p.enrft12, 
+        p.enrft13, 
+        p.enrft14, 
+        p.enrft15, 
+        p.enrft16, 
+        p.enrft17, 
+        p.enrft18, 
+        p.enrft19, 
+        p.enrft20, 
+        p.status, 
+        p.CyclistID, 
+        p.collectiondate, 
+        p.FreightCharge, 
+        p.vatcharge,
+        p.enrpc21,
+        p.enrft21,
+        t.asapservice,
+        t.cargoservice,
+        u.CompanyName,
+        t.batchdropcount,
+        t.Service,
+        u.invoicetype,
+        y.opsname,
+        y.descrip,
+        z.opsname AS `subareaname`,
+        z.descrip AS `subareadescrip`,
+        l.depname
+        
+        FROM Orders p
+        INNER JOIN Clients u ON p.CustomerID = u.CustomerID
+        INNER JOIN Services t ON p.ServiceID = t.ServiceID
+        left join clientdep l ON p.orderdep = l.depnumber
+        left join opsmap y ON p.opsmaparea = y.opsmapid
+        left join opsmap z on p.opsmapsubarea = z.opsmapid
+        WHERE `p`.`status` <70 
+        AND DATE_ADD(NOW(), INTERVAL :jobslider HOUR) > `p`.`nextactiondate`
+        ORDER BY  `p`.`status` DESC, `p`.`nextactiondate`
+        LIMIT :offset , :numberofresults';
+        
+        $stmt = $dbh->prepare($query);
+        
+        
+        $stmt->bindParam(':numberofresults', ($numberofresults), PDO::PARAM_INT);
+        $stmt->bindParam(':offset', ($offset), PDO::PARAM_INT);
+        $stmt->bindParam(':jobslider', ($jobslider), PDO::PARAM_INT);
+        
+        $stmt->execute();
+        
+        $html='';
+        
+        $data = $stmt->fetchAll();
+        
+        
+        if ($data) {
+            foreach ($data as $row) {
+                
+                list ($lat0, $lon0) = latlngfrompc($row['enrpc0']);
+                list ($lat1, $lon1) = latlngfrompc($row['enrpc1']);
+                list ($lat2, $lon2) = latlngfrompc($row['enrpc2']);
+                list ($lat3, $lon3) = latlngfrompc($row['enrpc3']);
+                list ($lat4, $lon4) = latlngfrompc($row['enrpc4']);
+                list ($lat5, $lon5) = latlngfrompc($row['enrpc5']);
+                list ($lat6, $lon6) = latlngfrompc($row['enrpc6']);
+                list ($lat7, $lon7) = latlngfrompc($row['enrpc7']);
+                list ($lat8, $lon8) = latlngfrompc($row['enrpc8']);
+                list ($lat9, $lon9) = latlngfrompc($row['enrpc9']);
+                list ($lat10, $lon10) = latlngfrompc($row['enrpc10']);
+                list ($lat11, $lon11) = latlngfrompc($row['enrpc11']);
+                list ($lat12, $lon12) = latlngfrompc($row['enrpc12']);
+                list ($lat13, $lon13) = latlngfrompc($row['enrpc13']);
+                list ($lat14, $lon14) = latlngfrompc($row['enrpc14']);
+                list ($lat15, $lon15) = latlngfrompc($row['enrpc15']);
+                list ($lat16, $lon16) = latlngfrompc($row['enrpc16']);
+                list ($lat17, $lon17) = latlngfrompc($row['enrpc17']);
+                list ($lat18, $lon18) = latlngfrompc($row['enrpc18']);
+                list ($lat19, $lon19) = latlngfrompc($row['enrpc19']);
+                list ($lat20, $lon20) = latlngfrompc($row['enrpc20']);
+                list ($lat21, $lon21) = latlngfrompc($row['enrpc21']);
+                
+                
+                $jobrow.='['.$row['ID'].','.$row['CyclistID'].','.$row['status'].','.
+                '"'.($row['enrft0']).'","' .($row['enrpc0']).'",' .$lat0.','.$lon0.','.
+                '"'.($row['enrft1']).'","' .($row['enrpc1']).'",' .$lat1.','.$lon1.','.
+                '"'.($row['enrft2']).'","' .($row['enrpc2']).'",' .$lat2.','.$lon2.','.
+                '"'.($row['enrft3']).'","' .($row['enrpc3']).'",' .$lat3.','.$lon3.','.
+                '"'.($row['enrft4']).'","' .($row['enrpc4']).'",' .$lat4.','.$lon4.','.
+                '"'.($row['enrft5']).'","' .($row['enrpc5']).'",' .$lat5.','.$lon5.','.
+                '"'.($row['enrft6']).'","' .($row['enrpc6']).'",' .$lat6.','.$lon6.','.
+                '"'.($row['enrft7']).'","' .($row['enrpc7']).'",' .$lat7.','.$lon7.','.
+                '"'.($row['enrft8']).'","' .($row['enrpc8']).'",' .$lat8.','.$lon8.','.
+                '"'.($row['enrft9']).'","' .($row['enrpc9']).'",' .$lat9.','.$lon9.','.
+                '"'.($row['enrft10']).'","'.($row['enrpc10']).'",'.$lat10.','.$lon10.','.
+                '"'.($row['enrft11']).'","'.($row['enrpc11']).'",'.$lat11.','.$lon11.','.
+                '"'.($row['enrft12']).'","'.($row['enrpc12']).'",'.$lat12.','.$lon12.','.
+                '"'.($row['enrft13']).'","'.($row['enrpc13']).'",'.$lat13.','.$lon13.','.
+                '"'.($row['enrft14']).'","'.($row['enrpc14']).'",'.$lat14.','.$lon14.','.
+                '"'.($row['enrft15']).'","'.($row['enrpc15']).'",'.$lat15.','.$lon15.','.
+                '"'.($row['enrft16']).'","'.($row['enrpc16']).'",'.$lat16.','.$lon16.','.
+                '"'.($row['enrft17']).'","'.($row['enrpc17']).'",'.$lat17.','.$lon17.','.
+                '"'.($row['enrft18']).'","'.($row['enrpc18']).'",'.$lat18.','.$lon18.','.
+                '"'.($row['enrft19']).'","'.($row['enrpc19']).'",'.$lat19.','.$lon19.','.
+                '"'.($row['enrft20']).'","'.($row['enrpc20']).'",'.$lat20.','.$lon20.','.
+                '"'.($row['enrft21']).'","'.($row['enrpc21']).'",'.$lat21.','.$lon21.','.
+                
+                '"'.$row['targetcollectiondate'].'","'.$row['collectionworkingwindow'].'"],';
+            }
+        }
+       
+        $jobrow = '['.rtrim($jobrow, ',').']';
+       
+        // $script.=' var jobsrow='.$jobrow.'; ';
+        $script.=' b64jobsrow = "' . base64_encode($jobrow) . '"; ';
+                
+       
+    }
+    
+    
+
+    if ($lookuppage=='ordermap') {
+
+        // include_once ("GeoCalc.class.php");
+        
+        if (isset($_POST['id'])) { $postedid = trim($_POST['id']); }
+    
+        $query = "SELECT bankholcomment, bankholdate FROM bankhols";
+        $bankholdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
+        
+        
+        
+        $sql='
+        SELECT
+        p.starttrackpause,
+        p.finishtrackpause,
+        p.collectiondate,
+        p.targetcollectiondate,
+        p.collectionworkingwindow,
+        p.deliveryworkingwindow,
+        p.duedate,
+        p.ShipDate,
+        p.cbb1,
+        p.cbb2,
+        p.cbb3,
+        p.cbb4,
+        p.cbb5,
+        p.cbb6,
+        p.cbb7,
+        p.cbb8,
+        p.cbb9,
+        p.cbb10,
+        p.cbb11,
+        p.cbb12,
+        p.cbb13,
+        p.cbb14,
+        p.cbb15,
+        p.cbb16,
+        p.cbb17,
+        p.cbb18,
+        p.cbb19,
+        p.cbb20,
+        p.enrpc0,
+        p.enrft0,
+        p.enrpc1,
+        p.enrpc2,
+        p.enrpc3,
+        p.enrpc4,
+        p.enrpc5,
+        p.enrpc6,
+        p.enrpc7,
+        p.enrpc8,
+        p.enrpc9,
+        p.enrpc10,
+        p.enrpc11,
+        p.enrpc12,
+        p.enrpc13,
+        p.enrpc14,
+        p.enrpc15,
+        p.enrpc16,
+        p.enrpc17,
+        p.enrpc18,
+        p.enrpc19,
+        p.enrpc20,
+        p.enrft1,
+        p.enrft2, 
+        p.enrft3, 
+        p.enrft4, 
+        p.enrft5, 
+        p.enrft6, 
+        p.enrft7, 
+        p.enrft8, 
+        p.enrft9, 
+        p.enrft10, 
+        p.enrft11, 
+        p.enrft12, 
+        p.enrft13, 
+        p.enrft14, 
+        p.enrft15, 
+        p.enrft16, 
+        p.enrft17, 
+        p.enrft18, 
+        p.enrft19, 
+        p.enrft20, 
+        p.status, 
+        p.CyclistID, 
+        p.collectiondate, 
+        p.enrpc21,
+        p.enrft21,
+        p.opsmaparea, 
+        p.opsmapsubarea, 
+        y.opsname,
+        y.descrip,
+        AsText(y.g) AS `POLY`,
+        AsText(z.g) AS `SUBPOLY`,
+        z.opsname AS `subareaname`,
+        z.descrip AS `subareadescrip`,
+        c.cojmname,
+        c.trackerid,
+        u.Postcode AS `clientpostcode`,
+        u.invoicePostcode AS `clientinvoicepostcode`,
+        l.depaddsix AS `clientdeppostcode`
+        
+        FROM Orders p
+        INNER JOIN Clients u ON p.CustomerID = u.CustomerID
+        INNER JOIN Services t ON p.ServiceID = t.ServiceID
+        left JOIN Cyclist c ON p.CyclistID = c.CyclistID 
+        left join clientdep l ON p.orderdep = l.depnumber
+        left join opsmap y ON p.opsmaparea = y.opsmapid
+        left join opsmap z on p.opsmapsubarea = z.opsmapid
+        WHERE p.id = :getid LIMIT 1';
+        
+        $stmt = $dbh->prepare($sql);
+        $stmt->bindParam(':getid', $postedid, PDO::PARAM_INT); 
+        $stmt->execute();
+        
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+
+        
+        if ($row) {
+            
+            
+            $printtext='';
+        
+            echo '<script> console.log(" loading data from ajaxordermap.php "); ';
+            
+            $subareaarray='';
+            
 
 
 
+            list ($lata, $lona) = latlngfrompc($row['clientpostcode']);
+            list ($latb, $lonb) = latlngfrompc($row['clientinvoicepostcode']);            
+            if ($row['clientdeppostcode']) { list ($latc, $lonc) = latlngfrompc($row['clientdeppostcode']); } else { $latc=0; $lonc=0; }
+            
+            $clientlocations = '[[['.$lata.'],['.$lona .']],[['.$latb.'],['.$lonb .']],[['.$latc.'],['.$lonc .']]]';
+            
+            
+            
+            
+            
+            
+            $lat0='0';
+            $lat1='0';
+            $lat2='0';
+            $lat3='0';
+            $lat4='0';
+            $lat5='0';
+            $lat6='0';
+            $lat7='0';
+            $lat8='0';
+            $lat9='0';
+            $lat10='0';            
+            $lat11='0';            
+            $lat12='0';            
+            $lat13='0';            
+            $lat14='0';            
+            $lat15='0';            
+            $lat16='0';            
+            $lat17='0';            
+            $lat18='0';            
+            $lat19='0';            
+            $lat20='0';            
+            $lat21='0';            
+            
+            $lon0='0';
+            $lon1='0';
+            $lon2='0';
+            $lon3='0';
+            $lon4='0';
+            $lon5='0';
+            $lon6='0';
+            $lon7='0';
+            $lon8='0';
+            $lon9='0';
+            $lon10='0';            
+            $lon11='0';            
+            $lon12='0';            
+            $lon13='0';            
+            $lon14='0';            
+            $lon15='0';            
+            $lon16='0';            
+            $lon17='0';            
+            $lon18='0';            
+            $lon19='0';            
+            $lon20='0';
+            $lon21='0';
+            
+            if ($row['enrpc0']) { list ($lat0, $lon0) = latlngfrompc($row['enrpc0']);    }
+            if ($row['enrpc1']) { list ($lat1, $lon1) = latlngfrompc($row['enrpc1']);    }
+            if ($row['enrpc2']) { list ($lat2, $lon2) = latlngfrompc($row['enrpc2']);    }
+            if ($row['enrpc3']) { list ($lat3, $lon3) = latlngfrompc($row['enrpc3']);    }
+            if ($row['enrpc4']) { list ($lat4, $lon4) = latlngfrompc($row['enrpc4']);    }
+            if ($row['enrpc5']) { list ($lat5, $lon5) = latlngfrompc($row['enrpc5']);    }
+            if ($row['enrpc6']) { list ($lat6, $lon6) = latlngfrompc($row['enrpc6']);    }
+            if ($row['enrpc7']) { list ($lat7, $lon7) = latlngfrompc($row['enrpc7']);    }
+            if ($row['enrpc8']) { list ($lat8, $lon8) = latlngfrompc($row['enrpc8']);    }
+            if ($row['enrpc9']) { list ($lat9, $lon9) = latlngfrompc($row['enrpc9']);    }
+            if ($row['enrpc10']) { list ($lat10, $lon10) = latlngfrompc($row['enrpc10']); }
+            if ($row['enrpc11']) { list ($lat11, $lon11) = latlngfrompc($row['enrpc11']); }
+            if ($row['enrpc12']) { list ($lat12, $lon12) = latlngfrompc($row['enrpc12']); }
+            if ($row['enrpc13']) { list ($lat13, $lon13) = latlngfrompc($row['enrpc13']); }
+            if ($row['enrpc14']) { list ($lat14, $lon14) = latlngfrompc($row['enrpc14']); }
+            if ($row['enrpc15']) { list ($lat15, $lon15) = latlngfrompc($row['enrpc15']); }
+            if ($row['enrpc16']) { list ($lat16, $lon16) = latlngfrompc($row['enrpc16']); }
+            if ($row['enrpc17']) { list ($lat17, $lon17) = latlngfrompc($row['enrpc17']); }
+            if ($row['enrpc18']) { list ($lat18, $lon18) = latlngfrompc($row['enrpc18']); }
+            if ($row['enrpc19']) { list ($lat19, $lon19) = latlngfrompc($row['enrpc19']); }
+            if ($row['enrpc20']) { list ($lat20, $lon20) = latlngfrompc($row['enrpc20']); }
+            if ($row['enrpc21']) { list ($lat21, $lon21) = latlngfrompc($row['enrpc21']); }
+            
+            
+            $jobrow='['.
+            '["'.($row['enrft0']).' '.$row['enrpc0'].'",'.$lat0.','.$lon0.',"'.$globalprefrow['image2'].'"],'.
+            '["'.($row['enrft1']).' '.$row['enrpc1'].'",'.$lat1.','.$lon1.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft2']).' '.$row['enrpc2'].'",'.$lat2.','.$lon2.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft3']).' '.$row['enrpc3'].'",'.$lat3.','.$lon3.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft4']).' '.$row['enrpc4'].'",'.$lat4.','.$lon4.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft5']).' '.$row['enrpc5'].'",'.$lat5.','.$lon5.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft6']).' '.$row['enrpc6'].'",'.$lat6.','.$lon6.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft7']).' '.$row['enrpc7'].'",'.$lat7.','.$lon7.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft8']).' '.$row['enrpc8'].'",'.$lat8.','.$lon8.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft9']).' '.$row['enrpc9'].'",'.$lat9.','.$lon9.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft10']).' '.$row['enrpc10'].'",'.$lat10.','.$lon10.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft11']).' '.$row['enrpc11'].'",'.$lat11.','.$lon11.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft12']).' '.$row['enrpc12'].'",'.$lat12.','.$lon12.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft13']).' '.$row['enrpc13'].'",'.$lat13.','.$lon13.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft14']).' '.$row['enrpc14'].'",'.$lat14.','.$lon14.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft15']).' '.$row['enrpc15'].'",'.$lat15.','.$lon15.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft16']).' '.$row['enrpc16'].'",'.$lat16.','.$lon16.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft17']).' '.$row['enrpc17'].'",'.$lat17.','.$lon17.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft18']).' '.$row['enrpc18'].'",'.$lat18.','.$lon18.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft19']).' '.$row['enrpc19'].'",'.$lat19.','.$lon19.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft20']).' '.$row['enrpc20'].'",'.$lat20.','.$lon20.',"'.$globalprefrow['image7'].'"],'.
+            '["'.($row['enrft21']).' '.$row['enrpc21'].'",'.$lat21.','.$lon21.',"'.$globalprefrow['image3'].'"]'.
+            ']';
+            
+            
+            // if waitingstarttime use that instead
+            if (($row['status']) >'76' ) { // calcs job time, english : $lengthtext
+            
+                $secmod='';
+                $lengthtext='';
+                $tottimec=strtotime($row['starttrackpause']);
+                $tottimed=strtotime($row['finishtrackpause']);
+                if (($tottimec>'1') AND ($tottimed>'1')) {
+                    $secmod=($tottimed-$tottimec);
+                }
+                $tottimea=strtotime($row['collectiondate']); 
+                $tottimeb=strtotime($row['ShipDate']); 
+                $tottimedif=($tottimeb-$tottimea-$secmod);
+                $inputval = $tottimedif; // USER DEFINES NUMBER OF SECONDS FOR WORKING OUT | 3661 = 1HOUR 1MIN 1SEC 
+                $unitd ='86400';
+                $unith ='3600';        // Num of seconds in an Hour... 
+                $unitm ='60';            // Num of seconds in a min... 
+                $dd = intval($inputval / $unitd);       // days
+                $hh_remaining = ($inputval - ($dd * $unitd));
+                $hh = intval($hh_remaining / $unith);    // '/' given value by num sec in hour... output = HOURS 
+                $ss_remaining = ($hh_remaining - ($hh * $unith)); // '*' number of hours by seconds, then '-' from given value... output = REMAINING seconds 
+                $mm = intval($ss_remaining / $unitm);    // take remaining sec and devide by sec in a min... output = MINS 
+                $ss = ($ss_remaining - ($mm * $unitm));        // '*' number of mins by seconds, then '-' from remaining sec... output = REMAINING seconds. 
+                if ($dd=='1') {$lengthtext.= $dd . "day "; } if ($dd>'1' ) { $lengthtext=$lengthtext. $dd . "days "; }
+                if ($hh=='1') {$lengthtext.= $hh . "hr "; } if ($hh>'1') { $lengthtext=$lengthtext. $hh . "hrs "; }
+                if ($mm>'1' ) {$lengthtext.= $mm . "mins "; } if ($mm=='1') {$lengthtext=$lengthtext. $mm . "min "; }
+                if ($dd) {} else {
+                    if ($mm) {   
+                        $thrs= number_format((($mm/60)+$hh), 2, '.', '');
+                        $lengthtext.= '('. (float)$thrs .'hrs)';
+                    }
+                }
+                if ($ss_remaining) {
+                    $lengthtext= "Tot ".$lengthtext;
+                }
+            } // ends check greater than status 76
+            
+            
+            if (date('U', strtotime($row['collectionworkingwindow']))>10) {
+                $collectiontext= ' '.time2str(($row['collectionworkingwindow']));
+                $bhtext=(array_search((substr($row['collectionworkingwindow'],0,10)), $bankholdata));
+                if ($bhtext) { $collectiontext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
+            } else {
+                $collectiontext=' '.time2str(($row['targetcollectiondate']));
+                $bhtext=(array_search((substr($row['targetcollectiondate'],0,10)), $bankholdata));
+                if ($bhtext) { $collectiontext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
+                }
+            
+            
+            if (date('U', strtotime($row['deliveryworkingwindow']))>10) {
+                $deliverytext= time2str($row['deliveryworkingwindow']);
+                $bhtext=(array_search((substr($row['deliveryworkingwindow'],0,10)), $bankholdata));
+                if ($bhtext) { $deliverytext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
+            } else {
+                $deliverytext=time2str(($row['duedate']));
+                $bhtext=(array_search((substr($row['duedate'],0,10)), $bankholdata));
+                if ($bhtext) { $deliverytext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
+            }
+            
+            
+            if (date('U', strtotime($row['collectiondate']))>10) {
+                $collectiondatetext= time2str($row['collectiondate']);
+                $bhtext=(array_search((substr($row['collectiondate'],0,10)), $bankholdata));
+                if ($bhtext) { $collectiondatetext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
+            } else {
+                $collectiondatetext='';
+            }
+            
+            
+            if (date('U', strtotime($row['ShipDate']))>10) {
+                $ShipDatetext= time2str($row['ShipDate']);
+                $bhtext=(array_search((substr($row['ShipDate'],0,10)), $bankholdata));
+                if ($bhtext) { $ShipDatetext.=' <span class=\"bankhol\">'.$bhtext.'</span>'; }
+            } else {
+                $ShipDatetext='';
+            }
+            
+                echo '
+                
+                $("#collectiontext").html("'.$collectiontext.'"); 
+                $("#collectiondatetext").html("'.$collectiondatetext.'");
+                $("#deliverytext").html("'.$deliverytext.'");
+                $("#ShipDatetext").html("'.$ShipDatetext.'");
+                $("#totaltime").html("'.$lengthtext.'");
+                ';
+            
+            $mainareaname=$row['opsname'];
+            $subareaname=$row['subareaname'];
+            
+            $thistrackerid=$row['trackerid'];
+            $mainarea="";
+            
+            $startpause=strtotime($row['starttrackpause']); 
+            $finishpause=strtotime($row['finishtrackpause']);
+            $collecttime=strtotime($row['collectiondate']); 
+            $delivertime=strtotime($row['ShipDate']);
+            
+            
+            if (($startpause > '10') and ( $finishpause < '10')) {
+                $delivertime=$startpause;
+            } 
+            if ($startpause <'10') {
+                $startpause='9999999999';
+            }
+            if (($row['status']<'86') and ($delivertime < '200')) {
+                $delivertime='9999999999';
+            } 
+            if ($row['status']<'50') {
+                $delivertime='0';
+            }
+            if ($collecttime < '10') {
+                $collecttime='9999999999';
+            }
+            
+            
+            
+            
+            
+            // start of tracking script
+            $sql = "SELECT latitude, longitude, speed, timestamp 
+            FROM `instamapper`  
+            WHERE `device_key` = ?
+            AND `timestamp` > ?
+            AND `timestamp` NOT BETWEEN ? AND ?
+            AND `timestamp` < ?
+            ORDER BY `timestamp` ASC"; 
+            
+            $statement = $dbh->prepare($sql);
+            $statement->execute([$thistrackerid,$collecttime,$startpause,$finishpause,$delivertime]);
+            if (!$statement) throw new Exception("Query execution error.");
+            $tracking = $statement->fetchAll();
+            $script='';
+            $orderjs='';
+        
+            $btmdescrip='';
+            $topdescrip=''; 
+            
+            $linecoords='';
+            
+
+        
+            
+            if ($tracking) {
+        
+                $locations='';
+                $prevts='';
+                $i=0;
+                
+                foreach ($tracking as $map) {
+                    $i++;
+                    
+                    $map['latitude']=round($map['latitude'],5);
+                    $map['longitude']=round($map['longitude'],5);
+                    
+                    $linecoords.= ' ['.$map['latitude'] . "," . $map['longitude'].'],';
+                    $thists=date('H:i A D j M ', $map['timestamp']);
+                    
+                    if ($thists<>$prevts) {
+                        if ($i==1){
+                            $englishfirst= date('H:i jS', $map['timestamp']);
+                            $englishfirstda= date('H:i', $map['timestamp']);
+                            $englishfirstd= date('jS', $map['timestamp']);
+                        }
+                        
+                        $englishlast= date('H:i', $map['timestamp']); 
+                        $englishlastd=date('jS', $map['timestamp']);
+                        $englishlastda=date('H:i jS', $map['timestamp']); 
+                        
+                        $comments=date('H:i D j M ', $map['timestamp']).'<br />';
+                        
+
+                        $test = pcfromlatlng($map['latitude'],$map['longitude']);
+                        $comments.=' '.$test.' ';
+        
+                    
+                        if ($map['speed']) {
+                            $comments.=''. round($map['speed']);
+                            if ($globalprefrow['distanceunit']=='miles') {
+                                $comments.= 'mph';
+                            }
+                            if ($globalprefrow['distanceunit']=='km') {
+                                $comments.= 'km ph';
+                            }
+                        }
+                    
+                        $locations.= '["' . $comments .'",'. $map['latitude'] . ',' . $map['longitude'] . ',"' .$postedid.'-'. $i .'"],'; 
+                        $prevts=date('H:i A D j M ', $map['timestamp']); 
+                        
+                    
+                    } // checks timestamp different
+                } // finished waypoint loop
+            
+        
+                if ($englishlastd==$englishfirstd) {
+                    $trackingtext= ' ' . $englishfirstda . '-' . $englishlast . '';
+                }
+                else {
+                    $trackingtext= ' ' . $englishfirst . ' - ' . $englishlastda . '';
+                }    
+            
+            } // ends sumtot > 0.5 rider tracking
+            
+        
+            if ($row['POLY']) {
+                
+                $printext.= '<p class="mapprint">'.$row['opsname']. '</p>';
+                
+                if ($row['POLY']) {
+                    $p=$row['POLY'];
+                    $trans = array("POLYGON" => "", "((" => "", "))" => "");
+                    $p= strtr($p, $trans);
+                    $pexploded=explode( ',', $p );
+        
+                    foreach ($pexploded as $v) {
+                        $transf = array(" " => ",");
+                        $v= strtr($v, $transf);
+                        $mainarea.= ' ['. $v.'],';
+                    }
+        
+                } // ends top layer
+        
+        
+                $lilquery = "SELECT opsmapid, opsname, descrip, AsText(g) AS POLY FROM opsmap WHERE inarchive=0 AND corelayer=?";
+                $cbstmt = $dbh->prepare($lilquery);
+                $cbstmt->execute([$row['opsmaparea']]);            
+        
+        
+                $lildata = $cbstmt->fetchAll();
+                // $lilareaarray=[];
+        
+                if ($lildata) {
+                    
+                                    // sub area name & comments in brackets go here
+                    if ($row['subareaname']) {
+                        $printext.=  '<p class="mapprint"> '.$row['subareaname']. '</p>';
+                    }
+                    
+                    foreach ($lildata as $lilrow ) {  
+        
+                        // $lilareaarray[]=$lilrow['opsmapid'];
+        
+                        $p=$lilrow['POLY'];
+                        
+                        $trans = array("POLYGON" => "", "((" => "", "))" => "");
+                        $p= strtr($p, $trans);
+                        $pexploded=explode( ',', $p );
+                        
+                        $subareaarray.='['.$lilrow['opsmapid'].',"'.$lilrow['opsname'].'","'.$lilrow['descrip'].'",';
+                        $coordloop='';
+                        
+                        foreach ($pexploded as $v) {
+                            $transf = array(" " => ",");
+                            $v= strtr($v, $transf);
+                            $coordloop.='['.$v.'],';
+                        } // ends each in array
+                        
+                        $coordloop = '['. rtrim($coordloop, ',').']'; 
+                        
+                        $subareaarray.=$coordloop.'],';
+                        
+                    } // ends lil area row extract
+                } // ends check lil sum tot
+            } // ends main area
+        
+        
+        
+        
+            $printext.= '<p class="mapprint">'. date('l jS M', strtotime($row['targetcollectiondate'])).'</p>';
+            
+            $printext.= '<p class="mapprint"> '.$postedid.' </p>';
+            
+            if ($row['CyclistID']<>'1') { $printext.=  '<p class="mapprint"> '.$row['cojmname'].' </p>'; }
+            
+            
+            echo ' printtext=b64DecodeUnicode("'.base64_encode($printext).'");
+            maptimes=b64DecodeUnicode("'.base64_encode($trackingtext).'"); ';
+            
+            $linecoords = '['. rtrim($linecoords, ',').']'; 
+            $script.=' b64lineCoordinates = "' . base64_encode($linecoords) . '"; ';     
+        
+            $locations = '['. rtrim($locations, ',').']'; 
+            $script.=' b64locations = "' . base64_encode($locations) . '"; ';
+        
+            $mainarea = '['. rtrim($mainarea, ',').']'; 
+            $script.=' b64mainarea = "' . base64_encode($mainarea) . '"; ';  
+            
+            $subareaarray = '['. rtrim($subareaarray, ',').']'; 
+            $script.='  subareaarrayb64 = "'.base64_encode($subareaarray).'"; ';
+            
+            
+            $script.=' b64jobstuff = "'.base64_encode($jobrow).'"; ';
+            // $script.=' var myjobstuff = '.($jobrow).'; ';
 
 
+            $script.=' b64clientlocations = "'.base64_encode($clientlocations).'";  ';
+
+            
+            echo $orderjs.' </script>'; 
+        
+        }
+        
+    }
+    
+    
+
+    if ($lookuppage=='ajaxordervias') {
+        
+        $id=$_POST['id'];
+        
+        $query = "SELECT *
+        FROM Orders
+        WHERE Orders.ID = ? LIMIT 0,1";
+        
+        $parameters = array($id);
+        $statement = $dbh->prepare($query);
+        $statement->execute($parameters);
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+        
+        $ntot=1;    
+        $i=1;
+        
+        while ($i<21) {
+            
+            $prenPC=str_replace(" ", "+", trim($row["enrpc$i"]));
+            $prenFT=str_replace(" ", "+", trim($row["enrft$i"]));
+            
+            $linkpc='https://'.$globalprefrow['addresssearchlink'].$prenPC;
+            $linkboth='https://'.$globalprefrow['addresssearchlink'].$prenFT.'+'.$prenPC;
+            
+            echo '<div id="togglenr'.$i.'" class="togglenr';
+            if ((!$prenPC) and (!$prenFT)) {
+                echo ' hideuntilneeded';
+            } else {
+                $ntot++;
+            }
+            
+            echo '"> <div class="fs">
+                        <div class="fsl" > ';  
+                        
+        
+            if ($globalprefrow['inaccuratepostcode']=='0') {
+                echo '<a class="newwin';
+                if (!$prenPC) {
+                    echo ' hideuntilneeded';
+                }
+                echo '" id="viewinmap'.$i.'" title="View in Maps" target="_blank" href="'.$linkpc.'" >via</a> ';
+            } else {
+                echo '<a class="newwin';
+                    if ((!$prenPC) and (!$prenFT)) {
+                echo ' hideuntilneeded';
+                    }
+                echo '" id="viewinmap'.$i.'" title="View in Maps" target="_blank" href="'. $linkboth.'">via</a> ';        
+            }
+            
+        
+            
+            $sql = "SELECT * FROM cojm_favadr WHERE 
+            favadrft = ?
+            AND favadrclient= '".$row['CustomerID']."'
+            AND favadrpc= ?
+            AND favadrisactive='1' 
+            LIMIT 1";
+            
+            try {
+                $stmt = $dbh->prepare($sql);
+                $stmt->execute([$row["enrft$i"],$row["enrpc$i"]]);
+                $favdata = $stmt->fetchAll();
+            }
+            
+            catch(PDOException $e) { $message.= $e->getMessage(); }
+                    
+            if ($favdata) {
+                $message.='<br /> Favourite Found ';
+                if ($favdata[0]['favadrcomments']) {
+                    $favcomments=$favdata[0]['favadrcomments'];
+                }
+            } else {
+                $infotext.='<br /> No Fav Found ';
+                $favcomments='';
+            }
+            
+            echo '<button title="Add / Edit Favourite" id="editfav'.$i.'" class="editfav';
+            
+            if (!$favdata) {
+                echo ' newfav';
+            }
+        
+        
+            if ((!$row["enrft$i"]) and (!$row["enrpc$i"])) {
+                echo ' hideuntilneeded';
+            }
+            
+            echo '"> Edit Favourite </button>';    
+        
+            
+            $postcodenotfoundtext='';
+            $postcodeclass='';
+            
+            
+            if (($globalprefrow['inaccuratepostcode'])=='0') { ///  check to see if postcode on database //
+        
+                $pcprenPC=trim($row["enrpc$i"]);
+                $pctocheck= str_replace(" ", "", "$pcprenPC", $count);
+                
+                if (trim($pctocheck)) {
+                    $updatesql = "SELECT PZ_northing FROM  `postcodeuk` 
+                    WHERE  `PZ_Postcode` LIKE :pc
+                    LIMIT 0 , 1";
+                
+                    $stmt = $dbh->prepare($updatesql);
+                    $stmt->bindParam(':pc', $pctocheck, PDO::PARAM_INT); 
+                    $stmt->execute();
+                    $obj = $stmt->fetchObject();
+                
+                    if ($obj) {
+                        // You have the data! No need for the rowCount() ever!
+                    }
+                    else {
+                        $postcodeclass=" ui-state-error";
+                        $postcodenotfoundtext= ' Postcode Not Found ';
+                    }
+                } else {
+                    
+                    if ((trim($row["enrft$i"]))) {
+                        $postcodeclass=" ui-state-error";
+                    }
+                }
+            } // ends check to see if postcode
+        
+            
+            
+            echo '
+            <button 
+            class="chngfav" 
+            title="Choose Favourite" 
+            id="jschangfavvia'.$i.'">
+            </button>';
+        
+            echo ' </div>
+            <input placeholder="via . . ."
+            type="text"
+            title="Via '.$i.' Address"
+            class="addfield caps ui-state-default ui-corner-left freetext"
+            name="enrft'.$i.'"
+            id="enrft'.$i.'"
+            value="'.$row["enrft$i"].'"><input 
+            size="9" ';
+        
+            if (($globalprefrow['inaccuratepostcode'])=='0') {
+                if (((!trim($prenPC)) and (trim($row["enrft$i"]))) or (($sumtot=='0') and (trim($prenPC))))  {
+                    echo ' style="'.$globalprefrow['highlightcolourno'].'"';
+                }
+            }
+            
+            echo '
+            class="addfield caps ui-state-default ui-corner-right'.$postcodeclass.'"
+            placeholder="Postcode" name="enrpc'.$i.'"
+            type="text"
+            title="Via '.$i.' Postcode"
+            id="enrpc'.$i.'"
+            value="'.$row["enrpc$i"].'">';
+            
+            echo ' <button title="Add Postcode" id="addpostcodebutton'.$i.'" class="addpostcodebutton';
+        
+            if (!$postcodenotfoundtext) { echo ' hideuntilneeded'; }    
+            
+            echo '"> Add PC </button>       ';
+            
+            
+            
+            if ($i<20) {
+                echo '
+                <button class="addvia hideuntilneeded" title="Add Via"
+                id="togglenr'.($i+1).'choose" >Add Via </button>
+                ';
+            }
+        
+            echo '
+            </div>
+            <div id="favcomment'.$i.'" class="favcomments fsr';
+            if (!$favcomments) {    
+                echo ' hideuntilneeded';
+            }
+            echo '" >'. $favcomments .'</div>
+                
+            </div> '; // ends via loops        
+                
+            $i++;
+                
+        } // less than 21 loop
+        
+        
+        $j=0;
+        $tempcount=0;
+        while ( $j < 21 ) {
+            if ( $j>$ntot-1) {
+                $script.=' $("#togglenr'.$j.'choose").show(); ';
+                $tempcount=$j;
+            }
+            
+            $j++;
+        }
+        
+        $script.='  $("#togglenr'.$ntot.'choose").addClass("activewheneditable"); ';
+        
+        
+        if (($row['status']>99) or ($ntot>1)) {
+            // $script.= ' alert("'.$ntot.'"); ';
+            $script.= ' $("#togglenr1choose").hide(); '; // needed on own as displayed straight after collection address
+        }
+        
+        if ($ntot>1){
+            $script.= ' $("#togglenr1choose").removeClass("activewheneditable")  ';
+        }
+        
+        echo '<script> ' .$script.' </script> ';
+        echo $bottomhtml;
+        
+        
+        
+    }
+    
+    
+    
     if ($lookuppage=='newjobservice') {
         $serviceid =$_POST['serviceid'];
 
@@ -649,8 +1718,6 @@ if ($lookuppage) {
         $script.='  $("#ajdelldue").removeAttr("selected");
         $("#ajdelldue option[value='."'".$value."'".']").attr("selected", "selected"); ';
     }
-
-
 
     
     if ($lookuppage=='cojmaudit') {
@@ -1066,6 +2133,7 @@ if ($lookuppage) {
                 $("expenseid").val("'.$row['expenseref'].'");
                 $("#expensevat").val("'.$row['expensevat'].'");
                 $("select#expensecode").val("'.$row['expensecode'].'");
+                $("select#localexpense").val("'.$row['localexpense'].'");
                 $("#expensedescription").html("'.$row['expensedescription'].'");
                 $("#explastupdated").html("'.date('H:i D jS M Y', strtotime($row['expts'])).'");
                 $("#expcr").html("'.date('H:i D jS M Y', strtotime($row['expcr'])).'");                
@@ -1079,6 +2147,7 @@ if ($lookuppage) {
                 var regex = /<br\s*[\/]?>/gi;
                 $("#expensecomment").val(str.replace(regex, "\n"));
                 $("#expensedetails").removeClass("hideuntilneeded");
+                
                 $("#expensecomment").trigger("autosize.resize");
                 
                 window.history.pushState("object or string", "Expense '.$row['expenseref'].'", "/cojm/live/singleexpense.php?expenseref='.$row['expenseref'].'"); ';
@@ -1098,6 +2167,7 @@ if ($lookuppage) {
                 $("select#expensecode").val("");
                 $("#whoto").val(""); 
                 $("select#cyclistref").val("");
+                $("select#localexpense").val("");
                 $("#expensedate").val("");
                 $("#explastupdated").html("");
                 $("#expcr").html("");
@@ -2206,6 +3276,153 @@ if ($lookuppage) {
         echo ' <script> '.$script.' </script> ';
     }
 }
+
+
+
+
+
+
+
+function pcfromlatlng($dLatitude,$dLongitude) {
+    include_once ("GeoCalc.class.php");
+    global $dbh;
+    $toreturn;
+    $oGC = new GeoCalc();
+    $dRadius = '0.1'; 
+
+    $dAddLat = $oGC->getLatPerKm() * $dRadius;
+    $dAddLon = $oGC->getLonPerKmAtLat($dLatitude) * $dRadius;
+    $dNorthBounds = $dLatitude + $dAddLat;
+    $dSouthBounds = $dLatitude - $dAddLat;
+    $dWestBounds = $dLongitude - $dAddLon;
+    $dEastBounds = $dLongitude + $dAddLon;
+    
+    $beer = "   SELECT PZ_Postcode, 
+    ( 3959 * acos( cos( radians(?) ) * cos( radians( PZ_northing ) ) * cos( radians( PZ_easting ) - radians(?) ) + sin( radians(?) ) * sin( radians( PZ_northing ) ) ) ) AS distance ,
+    PZ_easting
+    FROM postcodeuk 
+    WHERE PZ_northing > ?
+    AND PZ_northing < ?
+    AND PZ_easting < ? 
+    AND PZ_easting > ?
+    ORDER BY distance 
+    LIMIT 1; ";
+    
+    $cbstmt = $dbh->prepare($beer);
+    $cbstmt->execute([$dLatitude,$dLongitude,$dLatitude,$dSouthBounds,$dNorthBounds,$dWestBounds,$dEastBounds]);
+    $data = $cbstmt->fetchAll();
+    
+    if ($data) {
+        $thispc=$data[0][PZ_Postcode];
+        $start= substr($thispc, 0, -3); 
+        $toreturn= $start.' '.substr($thispc, -3);
+    }
+    
+    return $toreturn;
+
+}
+
+
+
+function time2str($ts) {
+            if(!ctype_digit($ts))
+                $ts = strtotime($ts);
+    
+    
+    // echo ' cj 5643 ';		
+            
+            $tempdaydiff=date('z', $ts)-date('z');
+            
+    // echo $tempday.' '.date('z');		// passed date day
+            
+    // 		$tempday<>date('z', $ts)
+            
+    //		$tempnay
+            
+            
+    //		echo $tempdaydiff;
+            
+            
+            $diff = time() - $ts;
+            if($diff == 0)
+                return 'now';
+            elseif($diff > 0)
+            {
+                $day_diff = floor($diff / 86400);
+                if($day_diff == 0)
+                {
+                    if($diff < 60) return ' Just now. ';
+                    if($diff < 120) return ' 1 min ago. ';
+                    if($diff < 3600) return ' '.floor($diff / 60) . ' min ago. ';
+                    if($diff < 7200) return ' 1 hr, ' . floor(($diff-3600) / 60) . ' min ago. ';
+                    
+                    
+                if($diff < 86400) return floor($diff / 3600) . ' hours ago';
+                
+                }
+                
+                if($tempdaydiff=='-1') { return 'Yesterday '. date('A', $ts).'. '; }
+                
+    //			if($day_diff == 1) return 'Yesterday';
+                if($day_diff < 7) return ' Last '. date('D A', $ts).'. ';
+                
+                //date('D', $ts).' '. $day_diff . ' days ago';
+        
+    
+        if($day_diff < 31) return date('D', $ts).' '. ceil($day_diff / 7) . ' weeks ago. ';
+                if($day_diff < 60) return 'Last month';
+                return date('D M Y', $ts);
+            }
+            else
+            {
+                $diff = abs($diff);
+                $day_diff = floor($diff / 86400);
+                if($day_diff == 0)
+                {
+                    if($diff < 120) return 'In a minute';
+                    if($diff < 3600) return 'In ' . floor($diff / 60) . ' mins. ';
+                    if($diff < 7200) { return ' 1hr, ' . floor(($diff-3600) / 60) . ' mins. '; }
+                //	if(($diff < 86400) and ($tempday<>date('z', $ts))) {  return ' Tomorrow ';    }
+                    
+                    if($diff < 86400) return ' ' . floor($diff / 3600) . ' hrs. ';
+                }
+                if($tempdaydiff == 1) return ' Tomorrow '. date('A', $ts).'. ';
+                if($day_diff < 4) return date(' D A', $ts);
+                if($day_diff < 7 + (7 - date('w'))) return date('D ', $ts).'next week. ';
+                if(ceil($day_diff / 7) < 4) return date('D ', $ts).' in ' . ceil($day_diff / 7) . ' weeks. ';
+                if(date('n', $ts) == date('n') + 1) return date('D', $ts).' next month. ';
+                return date('D M Y', $ts);
+            }
+        }
+  
+
+
+function latlngfrompc($pctouse) {
+    include_once ("GeoCalc.class.php");
+    global $dbh;
+    
+    $pclat='';
+    $pclon='';
+    $pctouse = str_replace (" ", "", trim($pctouse));
+    
+    if (trim($pctouse)) {
+        $query="SELECT *   FROM  `postcodeuk`   WHERE  `PZ_Postcode` =  ?  LIMIT 1"; 
+        $parameters = array($pctouse);
+        $statement = $dbh->prepare($query);
+        $statement->execute($parameters);
+        $pcrow = $statement->fetch(PDO::FETCH_ASSOC);
+        $pclon=$pcrow['PZ_easting'];
+        $pclat=$pcrow['PZ_northing'];
+    }
+    
+    if ($pclat=='') {
+        $pclat=0;
+        $pclon=0;
+    }
+    
+    return array ($pclat,$pclon);
+}
+
 
 
 /////////////////      FUNCTION FOR FORMATTING MONEY VALUES ////////////////////////////////////////

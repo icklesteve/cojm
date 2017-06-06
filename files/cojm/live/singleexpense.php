@@ -182,6 +182,19 @@ foreach ($data as $c) {
         ></textarea>
         </fieldset>
 
+        
+                    <fieldset> <label class="fieldLabel"> Spent Locally </label> 
+<select class="ui-state-default ui-corner-left" id="localexpense">
+<option value=""> </option>
+<option value="1" > Yes </option>
+<option value="0" > No </option>
+</select>
+</fieldset>
+        
+        
+        
+        
+        
             <fieldset><label class="fieldLabel">Created </label>
         <span id="expcr"></span>
         </fieldset>        
@@ -495,6 +508,42 @@ $(document).ready(function() {
         }
     });
     
+
+
+
+
+    $("#localexpense").change(function () {
+        var expenseref=$("#expenseid").val();
+        if (expenseref) {
+        message='';
+        $.ajax({
+            url: 'ajaxchangejob.php',
+            data: {
+                page: 'ajeditexpense',
+                whatchanged: 'localexpense',
+                formbirthday: formbirthday,
+                expenseref: expenseref,
+                localexpense: $("#localexpense").val()
+            },
+            type: 'post',
+            success:function(data){
+                // alert(data);
+                $("#Post").append(data);
+                $( "#expensestats" ).load( "ajax_lookup.php", { lookuppage:'updateexptable' });
+            },
+            complete: function () {
+                showmessage();
+            },
+            error:function (xhr, ajaxOptions, thrownError){
+                alert(thrownError); //throw any errors
+            }
+        });            
+        
+        }
+    });
+
+
+
     
     
     $("#paid").change(function () {
@@ -587,8 +636,6 @@ $(document).ready(function() {
             allok=0;
             showmessage();
         }
-
-        
     }
     
     

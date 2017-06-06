@@ -382,7 +382,7 @@ if ($page=='createreceipt') {
     /**
     * blank image
     */
-    define ('K_BLANK_IMAGE', K_PATH_IMAGES.'images/_blank.png');
+    define ('K_BLANK_IMAGE', K_PATH_IMAGES.'../images/_blank.png');
     
     /**
     * page format

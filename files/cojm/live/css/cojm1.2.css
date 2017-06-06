@@ -3,7 +3,7 @@
 /*
 COJM Courier Online Operations Management
 cojm(version).css - Master COJM CSS File - responsive gets smaller towards the bottom
-Copyright (C) 2016 S.Young cojm.co.uk
+Copyright (C) 2017 S.Young cojm.co.uk
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -95,15 +95,8 @@ span.bankhol { background-color:#5c6;
 padding: 0px 5px 1px;
 }
 
-#geocodeaddress {
-display: none;
-padding-left: 6px;
-position: absolute;
-right: 88px;
-top: 8px;
-z-index: 2;
-height: 30px;
-}
+
+
 
 table.backupinfo tr.major-error { background-color:#D80532; color: #ffffff; }
 table.backupinfo tr.minor-error { background-color:#e6b41a;  }
@@ -162,7 +155,7 @@ overflow-x:hidden;
 }
 
 
-#map-canvas { background-color:#e5e3df; }
+
 
 .onehundred {
 width:100%;
@@ -299,6 +292,8 @@ clear:both;
 }
 
 
+
+
 button.newjobsubmit {
 background: #333 none repeat scroll 0 0;
 border: thin solid #111;
@@ -318,14 +313,17 @@ background:#111;
 cursor:pointer;
 }
 
-#map-container {
-    z-index:1;
-}
 
 #orderajaxmap {
-    
-    display:block;
-    
+    display:block;   
+}
+
+
+.mapslider {
+    border:1px solid #fff;
+    margin:0;
+    padding:0;
+    width: 100%;
 }
 
 
@@ -361,7 +359,6 @@ float:left;
 min-height:1px;
 padding-right: 8px;
 position:relative;
-padding-top:1px;
 }
 
 .fsr {
@@ -383,7 +380,7 @@ div#afterclientselect { position:relative; float: left; }
 
 
 button.infobutton {
-background: rgba(0, 0, 0, 0) url("../images/noteb_info_22_22_dark.png") no-repeat scroll center center / 24px 24px;
+background: rgba(0, 0, 0, 0) url("../../images/noteb_info_22_22_dark.png") no-repeat scroll center center / 24px 24px;
 border:none;
 cursor: pointer;
 display: inline-block;
@@ -401,7 +398,7 @@ button.infobutton:hover {
 
 
 a.showclient {
-background: rgba(0, 0, 0, 0) url("../images/noteb_info_22_22_dark.png") no-repeat scroll center center / 18px 18px;
+background: rgba(0, 0, 0, 0) url("../../images/noteb_info_22_22_dark.png") no-repeat scroll center center / 18px 18px;
 border:none;
 cursor: pointer;
 display: inline-block;
@@ -414,18 +411,17 @@ position:relative;
 opacity: 0.65;
 }
 
+#subarealink {
+    position:absolute;
+}
+
+
+
 .marright10 {
 margin-right:10px;
 }
 
 
-
-div.map-sub-area-label {
-background-color: rgba(255, 255, 255, .8);
-padding:5px;
-border-radius:4px;
-font-size: 16px;
-}
 
 div.map-sub-area-label a {
 color: rgba(0, 0, 0, 1);
@@ -476,7 +472,7 @@ cursor:pointer;
 
 
 a.showinactiveclient {
-background: rgba(0, 0, 0, 0) url("../images/noteb_box_22x21.png") no-repeat scroll center center / 18px 18px;
+background: rgba(0, 0, 0, 0) url("../../images/noteb_box_22x21.png") no-repeat scroll center center / 18px 18px;
 border:none;
 cursor: pointer;
 display: inline-block;
@@ -492,7 +488,7 @@ opacity: 0.5;
 
 
 a.loader {
-background: rgba(0, 0, 0, 0) url("../images/loader.gif") no-repeat scroll center center / 18px 18px;
+background: rgba(0, 0, 0, 0) url("../../images/loader.gif") no-repeat scroll center center / 18px 18px;
 border:none;
 cursor: pointer;
 display: inline-block;
@@ -576,7 +572,7 @@ position:relative; float:left;
 div.ordermap {
 position: relative;
 width: 100%;
-height: 240px;
+height: 270px;
 line-height:10px;
 }
 
@@ -644,7 +640,7 @@ div.info { font-weight:bold; }
 
 
 #ajaxremovepod {
-background: rgba(0, 0, 0, 0) url("../images/noteb_trash_32x22.png") no-repeat scroll center center;
+background: rgba(0, 0, 0, 0) url("../../images/noteb_trash_32x22.png") no-repeat scroll center center;
 float: right;
 height: 22px;
 position: absolute;
@@ -655,7 +651,7 @@ opacity:0.3;
 }
 
 #alerttext {
-background: #fcd66e url("../images/c_error.png") no-repeat scroll 10px center;
+background: #fcd66e url("../../images/c_error.png") no-repeat scroll 10px center;
 position:fixed;
 padding:15px 50px 15px 70px;
 border:1px solid #cd0a0a;
@@ -663,7 +659,7 @@ border:1px solid #cd0a0a;
 
 
 button.cancelpricelock {
-background : url("../images/Lock-icon.png") no-repeat center center;
+background : url("../../images/Lock-icon.png") no-repeat center center;
 width : 20px;
 height :20px;
 border : none;
@@ -673,18 +669,18 @@ margin-left:5px;
 
 
 button.cancelpricelock:hover {
-background : url("../images/Lock-Unlock-icon.png") no-repeat center center;
+background : url("../../images/Lock-Unlock-icon.png") no-repeat center center;
 }
 
 
 button.buttoncancelpricelocklocked { opacity:0.5;  }
 
 button.buttoncancelpricelocklocked:hover {
-background : url("../images/Lock-icon.png") no-repeat center center;
+background : url("../../images/Lock-icon.png") no-repeat center center;
 }
 
 a.chngfav:link {
-background : url("../images/page_favourites.gif") no-repeat center center;
+background : url("../../images/page_favourites.gif") no-repeat center center;
 height:16px;
 width:16px;
 text-decoration:none;
@@ -695,7 +691,7 @@ cursor:default;
 padding:6px;
 }
 a.chngfav:visited {
-background : url("../images/page_favourites.gif") no-repeat center center;
+background : url("../../images/page_favourites.gif") no-repeat center center;
 height:16px;
 width:16px;
 text-decoration:none;
@@ -706,7 +702,7 @@ cursor:default;
 padding:6px;
 }
 a.chngfav:active {
-background : url("../images/page_favourites.gif") no-repeat center center;
+background : url("../../images/page_favourites.gif") no-repeat center center;
 height:16px;
 width:16px;
 text-decoration:none;
@@ -717,7 +713,7 @@ cursor:default;
 padding:6px;
 }
 a.chngfav:hover {
-background : url("../images/page_favourites.gif") no-repeat center center;
+background : url("../../images/page_favourites.gif") no-repeat center center;
 height:16px;
 width:16px;
 text-decoration:none;
@@ -730,7 +726,7 @@ padding:6px;
 
 
 a.favcomments:link  {
-background : url("../images/comment_blue.gif") no-repeat center center;
+background : url("../../images/comment_blue.gif") no-repeat center center;
 height :16px;
 width : 16px;
 text-decoration:none;
@@ -742,7 +738,7 @@ padding:6px;
 }
 
 a.favcomments:visited  {
-background : url("../images/comment_blue.gif") no-repeat center center;
+background : url("../../images/comment_blue.gif") no-repeat center center;
 height :16px;
 width : 16px;
 text-decoration:none;
@@ -753,7 +749,7 @@ cursor:default;
 padding:6px;
 }
 a.favcomments:active  {
-background : url("../images/comment_blue.gif") no-repeat center center;
+background : url("../../images/comment_blue.gif") no-repeat center center;
 height :16px;
 width : 16px;
 text-decoration:none;
@@ -765,7 +761,7 @@ padding:6px;
 }
 
 a.favcomments:hover  {
-background : url("../images/comment_blue.gif") no-repeat center center;
+background : url("../../images/comment_blue.gif") no-repeat center center;
 height :16px;
 width : 16px;
 text-decoration:none;
@@ -779,7 +775,7 @@ padding:6px;
 
 input.chngfav
 {
-background : url("../images/page_new.gif") no-repeat center center;
+background : url("../../images/page_new.gif") no-repeat center center;
 width : 16px;
 height :16px;
 border : none;
@@ -790,7 +786,7 @@ color : transparent;
 
 button.chngfav
 {
-background : rgba(0, 0, 0, 0) url("../images/page_favourites.gif") repeat scroll 0 0 / cover;
+background : rgba(0, 0, 0, 0) url("../../images/page_favourites.gif") repeat scroll 0 0 / cover;
 width : 22px;
 height :22px;
 border : none;
@@ -801,7 +797,7 @@ float:left;
 
 
 button.editfav {
-    background : url("../images/page_edit_22x22.png") no-repeat center center;
+    background : url("../../images/page_edit_22x22.png") no-repeat center center;
     border : none;
     color : transparent;
     float:left;
@@ -813,14 +809,14 @@ button.editfav {
 
 
 button.editfav.newfav {
-    background : url("../images/action_save.gif") no-repeat scroll 0 0 / cover;
+    background : url("../../images/action_save.gif") no-repeat scroll 0 0 / cover;
 }
 
 
 
 
 button.addslot {
-    background : url("../images/action_go.gif") no-repeat scroll 0 0 / cover;
+    background : url("../../images/action_go.gif") no-repeat scroll 0 0 / cover;
     border : none;
     color : transparent;
     vertical-align:middle;
@@ -830,7 +826,7 @@ button.addslot {
 
 
 button.addvia {
-    background : url("../images/image_new.gif") no-repeat scroll 0 0 / cover;
+    background : url("../../images/image_new.gif") no-repeat scroll 0 0 / cover;
     border : none;
     color : transparent;
     vertical-align:middle;
@@ -840,7 +836,7 @@ button.addvia {
 
 
 button.addpostcodebutton {
-    background : url("../images/page_new.gif") no-repeat scroll 0 0 / cover;
+    background : url("../../images/page_new.gif") no-repeat scroll 0 0 / cover;
     border : none;
     color : transparent;
     vertical-align:middle;
@@ -855,7 +851,7 @@ button.addpostcodebutton {
 
 
 button.showallfav {
-    background : url("../images/fav24.png") no-repeat center center;
+    background : url("../../images/fav24.png") no-repeat center center;
     width : 24px;
     height :22px;
     border : none;
@@ -865,155 +861,34 @@ button.showallfav {
 }
 
 button.loader {
-    background : url("../images/loader.gif") no-repeat center center;
+    background : url("../../images/loader.gif") no-repeat center center;
     opacity:1;
 }
 
-
-div.printcopyr {  }
-
-div.btn-full-screen { text-align: right; position:relative }
-
-
-
-
-
-button#btn-enter-full-screen {
-height: 32px;
-width: 30px;
-background: #ffffff url("../images/noteb_expand_22x22_light.png") no-repeat scroll 50% 50% / 22px 22px;
-position:absolute;
-z-Index: 1;
-right: 9px;
-top: 9px;
-border: 1px solid rgba(0, 0, 0, 0.15);
-border-radius:4px;
-box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
-cursor: pointer;
-}
-
-button#btn-enter-full-screen:hover {
-background: #ebebeb url("../images/noteb_expand_22x22_light.png") no-repeat scroll 50% 50% / 23px 23px;
-}
-
-
-button#btn-exit-full-screen {
-
-
-background: #ffffff url("../images/noteb_close_22x22.png") no-repeat scroll 50% 50% / 22px 22px;
-display: none;
-position:absolute;
-top: 10px;
-z-Index:1;
-border: 1px solid rgba(0, 0, 0, 0.15);
-border-radius:4px;
-box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
-cursor: pointer;
-height:32px;
-width: 30px;
-right:9px;
-}
-
-button#btn-exit-full-screen:hover {
-background: #ebebeb url("../images/noteb_close_22x22.png") no-repeat scroll 50% 50% / 23px 23px;
-}
-
-button#mylocation {
-height: 32px;
-width: 30px;
-background: #ffffff url("../../images/plus.png") no-repeat scroll 50% 50% / 22px 22px;
-position:absolute;
-z-Index: 1;
-right: 9px;
-top: 48px;
-border: 1px solid rgba(0, 0, 0, 0.15);
-border-radius:4px;
-box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
-cursor: pointer;
-}
-
-button#mylocation:hover {
-background: #ebebeb url("../../images/plus.png") no-repeat scroll 50% 50% / 23px 23px;
-}
-
-
-button#printbutton {
-display:none;
-height: 32px;
-width: 30px;
-background: #ffffff url("../images/noteb_print_22x22.png") no-repeat scroll 50% 50% / 22px 22px;
-position:absolute;
-z-Index: 2;
-right: 50px;
-top: 10px;
-border: 1px solid rgba(0, 0, 0, 0.15);
-border-radius:4px;
-box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
-cursor: pointer;
-}
-
-
-button#printbutton:hover {
-background: #ebebeb url("../images/noteb_print_22x22.png") no-repeat scroll 50% 50% / 23px 23px;
-
-}
-
-
-/* for printing google maps better :  */
-
-#map-canvas div > img {
-position: absolute;
-}
 
 #ordermap div > img {
 position: absolute;
 }
 
 
-.printinfo {
-
-display:none;
-
-}
-
-.printinfo {
-
-position:relative;
-right:0;
-z-Index:5;
-}
-
 
 span.printcopyr {
-
-
-display:none;
-
+    display:none;
 }
-
-span.inlinemapcopy {
-
-background: white;
-color:#444444;
-padding-right: 6px;
-padding-left:4px;
-}
-
-
 
 
 
 
 
 span.badge {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
 margin: 3px 1px 2px 1px;
 }
 span.desktoponline {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1021,7 +896,7 @@ margin: 3px 1px 2px 1px;
 background-position: 0 0;
 }
 span.desktopoffline {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1029,7 +904,7 @@ margin: 3px 1px 2px 1px;
 background-position: -48px 0;
 }
 span.mobileonline {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1037,7 +912,7 @@ margin: 3px 1px 2px 1px;
 background-position: -24px 0;
 }
 span.mobileoffline {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1045,7 +920,7 @@ margin: 3px 1px 2px 1px;
 background-position: -72px 0;
 }
 span.buddy {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1053,7 +928,7 @@ margin: 3px 1px 2px 1px;
 background-position: -96px 0;
 }
 span.webcam {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1061,7 +936,7 @@ margin: 3px 1px 2px 1px;
 background-position: -120px 0;
 }
 span.videos {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1069,7 +944,7 @@ margin: 3px 1px 2px 1px;
 background-position: -144px 0;
 }
 span.new {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1077,7 +952,7 @@ margin: 3px 1px 2px 1px;
 background-position: -168px 0;
 }
 span.ignore {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1085,7 +960,7 @@ margin: 3px 1px 2px 1px;
 background-position: -192px 0;
 }
 span.fanclubmember {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1093,7 +968,7 @@ margin: 3px 1px 2px 1px;
 background-position: 0 -24px;
 }
 span.escort {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1101,7 +976,7 @@ margin: 3px 1px 2px 1px;
 background-position: -24px -24px;
 }
 span.sexsoon {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1109,7 +984,7 @@ margin: 3px 1px 2px 1px;
 background-position: -48px -24px;
 }
 span.topscrew {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1117,7 +992,7 @@ margin: 3px 1px 2px 1px;
 background-position: -72px -24px;
 }
 span.bottomscrew {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1125,7 +1000,7 @@ margin: 3px 1px 2px 1px;
 background-position: -96px -24px;
 }
 span.versatile {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1133,16 +1008,15 @@ margin: 3px 1px 2px 1px;
 background-position: -120px -24px;
 }
 span.pictures {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
 margin: 3px 1px 2px 1px;
 background-position: -144px -24px;
 }
-
 span.email {
-background-image: url("../images/badges_sprite.png");
+background-image: url("../../images/badges_sprite.png");
 width: 22px;
 height: 22px;
 display: inline-block;
@@ -1335,8 +1209,7 @@ label, input.jlabel{
 display:block;
 }
 
-label
-{
+label {
 margin-right: 15px;
 }
 
@@ -1390,7 +1263,15 @@ margin-right:10px;
 margin-top:5px;
 }
 
+#joberrordata p {
+    
+    color:red;
+}
 
+
+.bigmapinfowindow {
+    min-width: 300px;
+}
 
 
 a {
@@ -1434,12 +1315,10 @@ font-style: normal;
 }
 
 
-
 /* Start Content headings Fonts & Colors  */
 h1, h1 a, h1 a:link, h1 a:visited, h1 a:hover
 {
 font-size: 25px;
-padding: 3px;
 text-align: left;
 color: #111111;
 line-height:25px;
@@ -1460,29 +1339,26 @@ h3, h3 a, h3 a:link, h3 a:visited, h3 a:hover
 font-size: 22px;
 line-height: 22px;
 color: #000000;
-margin: 0 0 15px;
+margin: 0 0 5px;
 }
 
 h4, h4 a, h4 a:link, h4 a:visited, h4 a:hover
 {
 font-size: 15px;
-padding: 1px;
 text-align: left;
-color: #cc3311;
+color: #000000;
 }
 
 h5, h5 a, h5 a:link, h5 a:visited, h5 a:hover
 {
 font-size: 14px;
 text-align: left;
-padding: 1px;
 color: #000000;
 }
 
 h6, h6 a, h6 a:link, h6 a:visited, h6 a:hover
 {
 font-size: 13px;
-padding: 1px;
 text-align: left;
 color: #000000;
 }
@@ -1578,7 +1454,7 @@ input.ui-state-error,
 .ui-widget-content .ui-state-error, 
 .ui-widget-header .ui-state-error {
     border: 1px solid #cd0a0a; 
-    background: #fef1ec/*{bgColorError}*/ url(../images/ui-bg_glass_95_fef1ec_1x400.png) 50% 50% repeat-x; 
+    background: #fef1ec url(../../images/ui-bg_glass_95_fef1ec_1x400.png) 50% 50% repeat-x; 
     color: #cd0a0a; }
     
 .ui-state-error a, 
@@ -1980,13 +1856,13 @@ color: #000000;
 .ui-widget-header .ui-state-focus {
 
 border: 1px solid #999999; 
-background: #dadada url(../images/ui-bg_glass_75_dadada_1x400.png) 50% 50% repeat-x; 
+background: #dadada url(../../images/ui-bg_glass_75_dadada_1x400.png) 50% 50% repeat-x; 
 color: #212121; 
 }
 .ui-state-hover a, .ui-state-hover a:hover { color: #212121;  }
 .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
     border: 1px solid #aaaaaa;
-    background: #ffffff url(../images/ui-bg_glass_65_ffffff_1x400.png) 50% 50% repeat-x;
+    background: #ffffff url(../../images/ui-bg_glass_65_ffffff_1x400.png) 50% 50% repeat-x;
     color: #212121; }
 .ui-state-active a,
 .ui-state-active a:link,
@@ -1998,15 +1874,10 @@ color: #212121;
 .ui-state-highlight,
 .ui-widget-content .ui-state-highlight,
 .ui-widget-header .ui-state-highlight  {
-/*    border: 1px solid #e5e4e2; 
-    background: #fbf9ee url(../images/ui-bg_glass_55_fbf9ee_1x400.png) 50% 50% repeat-x; 
-    color: #363636;
-  */
-
- border: 1px solid #dddddd; 
+    border: 1px solid #dddddd; 
     background: #eeeeee; 
     color: #222222;
-    }
+}
     
     
 #Post.complete .ui-state-highlight {
@@ -2075,6 +1946,9 @@ li.resli.inactive{opacity:.3;}
 font-size: 12px;line-height: 160%;padding: 0px 6px;
 border-right:0px;box-shadow: rgba(0, 0, 0, 0.347656) 0px 2px 3px;
 min-width: 40px;color: #444;border: 1px solid #A9BBDF;padding-left: 6px;font-weight: normal; background: #FEFEFE;}
+
+
+
 #dialog{color:#444;display:none;}
 #welcome{color:#444;display:none;}
 
@@ -2082,7 +1956,7 @@ min-width: 40px;color: #444;border: 1px solid #A9BBDF;padding-left: 6px;font-wei
 
 
 .newwin {
-background: url("../images/new-window_13x13.png ") no-repeat;
+background: url("../../images/new-window_13x13.png ") no-repeat;
 padding-left:14px;
 }
 
@@ -2154,7 +2028,7 @@ z-index: 12; }
 .success {
 padding: 5px 15px 5px 40px; width:auto;
 border-color: #A2D246;
-background: #EBF8A4 url("../images/s_success.png");
+background: #EBF8A4 url("../../images/s_success.png");
 background-repeat: no-repeat;
 background-position: 15px 50%;
 border-radius: 4px;
@@ -2165,7 +2039,7 @@ box-shadow: 0 1px 1px white inset;
 div.loadingsuccess {
 padding: 0.5em 0.5em 0.5em 65px; width:auto;
 border-color: #A2D246;
-background: url('../images/loader.gif') no-repeat scroll 20px 50% #ebf8a4;
+background: url('../../images/loader.gif') no-repeat scroll 20px 50% #ebf8a4;
 border-radius: 4px;
 border: 1px solid;
 box-shadow: 0 1px 1px white inset;
@@ -2175,7 +2049,7 @@ box-shadow: 0 1px 1px white inset;
 div.successinfo {
 padding: 0.5em 0.5em 0.5em 65px; width:auto;
 border-color: #A2D246;
-background: url('../images/c_information.png') no-repeat scroll 20px 50% / 30px #ebf8a4;
+background: url('../../images/c_information.png') no-repeat scroll 20px 50% / 30px #ebf8a4;
 border-radius: 4px;
 border: 1px solid;
 box-shadow: 0 1px 1px white inset;
@@ -2319,11 +2193,11 @@ padding: 7px 10px;
 
 .ZebraDialog .ZebraDialog_Body          { background-repeat: no-repeat; background-position: 10px 10px; padding: 10px; text-align: left }
 .ZebraDialog .ZebraDialog_Icon          { padding: 10px 10px 10px 68px; min-height: 48px; }
-.ZebraDialog .ZebraDialog_Confirmation  { background-image: url('../images/c_confirmation.png') }
-.ZebraDialog .ZebraDialog_Error         { background-image: url('../images/c_error.png') }
-.ZebraDialog .ZebraDialog_Information   { background-image: url('../images/c_information.png') }
-.ZebraDialog .ZebraDialog_Question      { background-image: url('../images/c_question.png') }
-.ZebraDialog .ZebraDialog_Warning       { background-image: url('../images/c_warning.png') }
+.ZebraDialog .ZebraDialog_Confirmation  { background-image: url('../../images/c_confirmation.png') }
+.ZebraDialog .ZebraDialog_Error         { background-image: url('../../images/c_error.png') }
+.ZebraDialog .ZebraDialog_Information   { background-image: url('../../images/c_information.png') }
+.ZebraDialog .ZebraDialog_Question      { background-image: url('../../images/c_question.png') }
+.ZebraDialog .ZebraDialog_Warning       { background-image: url('../../images/c_warning.png') }
 
 .ZebraDialog .ZebraDialog_Buttons {
 background: #E5E5E5;
@@ -2541,7 +2415,10 @@ top: 1px;
     width:110px;
 }
 
-
+#leftmenuselectrider {
+    width:100%;
+    height:100px;
+}
 
 
 #topmenutimeoutchoose {
@@ -2583,7 +2460,7 @@ background-color:rgba(255,255,255,1);
 
 button.menusearch {
 margin: 0 0 0 5px;
-background: rgba(255,255,255,0.25) url("../images/refresh.png") no-repeat scroll 2px 4px / 24px 20px;
+background: rgba(255,255,255,0.25) url("../../images/refresh.png") no-repeat scroll 2px 4px / 24px 20px;
 width: 28px;
 height:28px;
 border-radius: 4px;
@@ -2592,7 +2469,7 @@ border:0;
 }
 
 button.menusearch:hover {
-background: rgba(255,255,255,0.55) url("../images/refresh.png") no-repeat scroll 2px 4px / 24px 20px;
+background: rgba(255,255,255,0.55) url("../../images/refresh.png") no-repeat scroll 2px 4px / 24px 20px;
 }
 
 button.menusearch:hover {  cursor:pointer; }
@@ -2636,7 +2513,7 @@ padding:1px;
 
 a#back-top {
 display:none;
-background: #ddd url(../images/up-arrow6.png) no-repeat scroll 3px 3px;
+background: #ddd url(../../images/up-arrow6.png) no-repeat scroll 3px 3px;
 border-radius: 4px;
 right:8px;
 bottom:8px;
@@ -2648,7 +2525,7 @@ position:fixed;
 }
 
 a#back-top:hover { 
-background: #777 url(../images/up-arrow6.png) no-repeat scroll 3px -4px;
+background: #777 url(../../images/up-arrow6.png) no-repeat scroll 3px -4px;
 }
 
 
@@ -2681,9 +2558,7 @@ margin-right:30px;
 
 
 
-.osmcopyr, .osmcopyr a {
-    background: white; color:#444444; padding-right: 6px; padding-left: 6px; margin-right:-12px;
-}
+
 
 
 
@@ -2816,12 +2691,12 @@ margin-right:30px;
     height:24px;
     margin:1px 0 0 5px;
     width:26px;
-    background: rgba(255, 255, 255, 0.25) url("../images/refresh.png") no-repeat scroll 2px 2px / 22px 19px
+    background: rgba(255, 255, 255, 0.25) url("../../images/refresh.png") no-repeat scroll 2px 2px / 22px 19px
     }
     
     
     button.menusearch:hover {
-    background: rgba(255, 255, 255, 0.55) url("../images/refresh.png") no-repeat scroll 2px 2px / 22px 19px
+    background: rgba(255, 255, 255, 0.55) url("../../images/refresh.png") no-repeat scroll 2px 2px / 22px 19px
     }
     
     
@@ -2855,6 +2730,9 @@ margin-right:30px;
     #gmap_wrapper {
     height:auto !important;
     }
+    
+    
+    
     
     .fsr { padding-left:0px; }
     
@@ -2982,4 +2860,17 @@ margin-right:30px;
     
     #baseservicecbbtext { padding-left:8px; }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 

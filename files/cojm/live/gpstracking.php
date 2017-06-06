@@ -126,9 +126,16 @@ $dend='';
 <meta name="HandheldFriendly" content="true" >
 <meta name="viewport" content="width=device-width, height=device-height " >
 <link rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
+<link rel="stylesheet" type="text/css" href="../css/cojmmap.css">
 <link rel="stylesheet" href="css/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
-<script src="https://maps.google.com/maps/api/js?libraries=geometry&key=<?php echo $globalprefrow['googlemapapiv3key']; ?>"></script>
+<?php 
+
+echo '<script src="//maps.googleapis.com/maps/api/js?v='.$globalprefrow['googlemapver'].'&amp;libraries=geometry&amp;key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>
+<script src="../js/maptemplate.js" type="text/javascript"></script>';
+
+?>
+
 <?php if ($clientview=='cluster') { echo '<script type="text/javascript" src="js/markerclusterer.js"></script> '; } ?>
 <style>
  div.info {  color:green; font-weight:bold; } 
@@ -138,22 +145,31 @@ form#cvtc div.ui-state-highlight.ui-corner-all.p15 input.ui-autocomplete-input.u
 </style>
 <title>COJM GPS Tracking</title>
 <script>
+
+var globlat=<?php echo $globalprefrow['glob1']; ?>;
+var globlon=<?php echo $globalprefrow['glob2']; ?>;
+
+printtext =' ';
+
  
+var markercount = [];
+var lineplotscount = [];
 var max_lat = [];
 var min_lat = [];
 var max_lon = [];
 var min_lon = [];
+
+
+function custominitialize() {
+
+console.log(" in custominitialize 191 ");
+
 var cluster;
 var gmarkers = [];
-var markercount = [];
-var lineplotscount = [];
 
-function initialize() {
 
-    var geoXml = null;
-    var geocoder = null;
+
     var marker, i, j, lat, lng;
-    var element = document.getElementById("map-canvas");
     var imagehighlight = {
         url: "../images/plot-20-20-339900-square-pad.png",
         size: new google.maps.Size(20, 20),
@@ -161,67 +177,7 @@ function initialize() {
         anchor: new google.maps.Point(10, 10)
         };  
 		
-    var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"];
-    var map = new google.maps.Map(element, {
-        center: new google.maps.LatLng(<?php echo $globalprefrow['glob1'].','.$globalprefrow['glob2']; ?>),
-        zoom: 11,
-        mapTypeId: "OSM",
-		mapTypeControl: true,
-        mapTypeControlOptions: {
-        mapTypeIds: mapTypeIds
-        }
-    });
-			
-	
-    map.mapTypes.set("OSM", new google.maps.ImageMapType({
-        getTileUrl: function(coord, zoom) {
-            return "https://a.tile.openstreetmap.org/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-        },
-        tileSize: new google.maps.Size(256, 256),
-        name: "OSM",
-		alt: "Open Street Map",
-        maxZoom: 19
-    }));	
-	
-    map.mapTypes.set("OCM", new google.maps.ImageMapType({
-        getTileUrl: function(coord, zoom) {
-            return "https://a.tile.thunderforest.com/cycle/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-        },
-        tileSize: new google.maps.Size(256, 256),
-        name: "OCM",
-        alt: "Open Cycle Map",
-        maxZoom: 20
-    }));
 
-    var osmcopyr="<span style='background: white; color:#444444; padding-right: 6px; padding-left: 6px; margin-right:-12px;'> &copy; <a style='color:#444444;' href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors</span>";
-
-
-    var outerdiv = document.createElement("div");
-    outerdiv.id = "outerdiv";
-    outerdiv.style.fontSize = "10px";
-    outerdiv.style.opacity = "0.7";
-    outerdiv.style.whiteSpace = "nowrap";
-	
-    map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(outerdiv);	
-
-
-    google.maps.event.addListener( map, "maptypeid_changed", function() {
-        var checkmaptype = map.getMapTypeId();
-        if ( checkmaptype=="OSM" || checkmaptype=="OCM") { 
-            $("div#outerdiv").html(osmcopyr);
-        } else {
-            $("div#outerdiv").text("");
-        }
-    });
-
-
-    // if OSM / OCM set as default, show copyright
-    $(document).ready(function() {
-        setTimeout(function() {
-            $("div#outerdiv").html(osmcopyr);
-        },3000);
-    });
- 
     var lineSymbol = {
         path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
         strokeOpacity: 0.4
@@ -234,8 +190,7 @@ function initialize() {
         size: new google.maps.Size(20, 20),
         origin: new google.maps.Point(0,0),
         anchor: new google.maps.Point(10, 10)
-    };   
-
+    };
 <?php
 
 $dinterim=$dstart;
@@ -500,12 +455,18 @@ while ($dinterim<$dend) { // each day loop
     
                     var gmarkers<?php echo $oro; ?>=[];
                 
+                
+                
+                
                     for (i = 0; i < markers<?php echo $oro; ?>.length; i++) {
                         marker = new google.maps.Marker({
                             position: new google.maps.LatLng(<?php echo $markervar; ?>[i][1], <?php echo $markervar; ?>[i][2]),
                             map: map,
-                            icon: image,
+                            icon: image
                         });
+                        
+                        console.log(" in marker loop 469 ");
+                        
                         
                         gmarkers<?php echo $oro; ?>.push(marker);
                         
@@ -597,6 +558,9 @@ while ($dinterim<$dend) { // each day loop
                         }
                     });
                     
+                    
+                    
+                    
                 <?php
                 } // ends view = normal, not clustered
             } // ends cached ok or today check
@@ -627,43 +591,6 @@ if ($clientview=='cluster') { echo ' var markerCluster = new MarkerClusterer(map
     map.fitBounds(bounds); 
  
  
-    $(window).resize(function () {
-        var menuheight=0;
-        $(".top_menu_line").each(function( index ) {
-            if ($(this).is(':visible')) {
-                menuheight = menuheight + $( this ).height();
-            }
-        });
-//        var h = ;
-        $("#gmap_wrapper").css("height", ($(window).height() - menuheight));
-    }).resize();
-
-    geocoder = new google.maps.Geocoder(); 
-    window.showAddress = function(address) {
-        geocoder.geocode( { 
-            "address": address + " , UK ",
-            "region": "uk",
-            "bounds": bounds 
-        }, function(results, status) {
-            if (status == google.maps.GeocoderStatus.OK) {
-                if (status != google.maps.GeocoderStatus.ZERO_RESULTS) {
-                    map.setCenter(results[0].geometry.location);
-                    var infowindow = new google.maps.InfoWindow({
-                        content: "<div class='info'>"+address+"</div>",
-                        position: results[0].geometry.location,
-                        map: map
-                    });
-                infowindow.open(map);
-                } else {
-                    alert("No results found");
-                }
-            } else {
-                alert("Search was not successful : " + status);
-            }
-        });
-    };
-
-
     function sum(input){
         
         if (toString.call(input) !== "[object Array]") { 
@@ -695,14 +622,23 @@ if ($clientview=='cluster') { echo ' var markerCluster = new MarkerClusterer(map
     });
     function comboboxchanged() { };
 
+function loadmapfromtemplate() {
+    
+    initialize();
+    $(document).ready(function () {
+        
+        custominitialize();
+    });
+}
+
+
+google.maps.event.addDomListener(window, "load", loadmapfromtemplate);
+
 
 </script>
 <?php
 
-echo '</head><body ';
-
- if ($foundtracks>'0') { echo 'onload="initialize()" '; }
-echo '>';
+echo '</head><body>';
 
 $adminmenu=0;
 $filename="gpstracking.php";
@@ -757,12 +693,6 @@ if ($tableerror) { echo '<table><tbody>'.$tableerror.'</tbody></table>'; }
 echo $error;
 
 if ($foundtracks<>'0') {
-    echo '
-    <form action="#" onsubmit="showAddress(this.address.value); return false" style=" background:none;">
-    <input title="Address Search" type="text" style="width: 274px; padding-left:6px;" name="address" placeholder="Map Address Search . . ." 
-    class="ui-state-default ui-corner-all address" />
-    </form>	
-    ';
     
     echo ' <br /> <p>'.$foundtracks.' tracks found, '.$foundcache.' cached.</p> ';
     

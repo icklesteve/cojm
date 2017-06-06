@@ -3194,7 +3194,7 @@ if (($page=="newjobfromajax" ) and (trim($_POST['serviceID'])) and (trim($_POST[
 
 function addTrackref($id) {
         
-        $infotext.=' in function with id '.$id;
+        // $infotext.=' in function with id '.$id;
         
         $length = 6;
         $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -3208,7 +3208,7 @@ function addTrackref($id) {
         
         $newsecurity_code=$id.$string; 
         // echo 'security code : '.$string.'<br>New Security code :'.$newsecurity_code.'<br>';
-        $infotext.="Generated tracking reference ".$newsecurity_code;
+        // $infotext.="Generated tracking reference ".$newsecurity_code;
         
         
         

@@ -63,18 +63,8 @@ if (isset($_POST['clientid'])) { $clientid=trim($_POST['clientid']); } else { $c
 if (!$clientid) { if (isset($_GET['clientid'])) { $clientid=trim($_GET['clientid']); } }
 
 
-
-
 if (isset($_GET['depid'])) { $posteddepid=$_GET['depid']; } else { $posteddepid=''; }
 if (isset($_POST['depid'])) { $posteddepid=$_POST['depid']; }
-
-
-
-
-
-
-
-
 
 
 
@@ -95,8 +85,6 @@ if ($posteddepid) {
     </script>
     ';
     
-    
-        
     
     $sql = "SELECT * FROM clientdep 
 INNER JOIN Clients ON Clients.CustomerID = clientdep.associatedclient
@@ -123,7 +111,7 @@ $clrow = $prep->fetch(PDO::FETCH_ASSOC);
     
 if ($clrow) {
     
-$clientid=$clrow['CustomerID'];
+    $clientid=$clrow['CustomerID'];
     
     $sql = "SELECT CustomerID, CompanyName FROM Clients WHERE isdepartments='1' ORDER BY CompanyName";
     $prep = $dbh->query($sql);

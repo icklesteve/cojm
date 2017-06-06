@@ -122,12 +122,15 @@ if($gpsadminrow) {
                 
                 $comments.= $orow['poshname'];
                 
+                /*
                 
                 if ($map['speed']) {
                     $comments.= ' <br /> '. round($map['speed']);
                 if ($globalprefrow['distanceunit']=='miles') { $comments.=  'mph '; } 
                 else if ($globalprefrow['distanceunit']=='km') { $comments.= 'km ph '; }
                 }
+                
+                */
                 
                 $comments.= '<br />'.$ID;
                 

@@ -38,10 +38,12 @@ if (isset($_POST['opsmapid'])) { $opsmapid=trim($_POST['opsmapid']);} else {$ops
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, height=device-height" >
 <link href="favicon.ico" rel="shortcut icon" type="image/x-icon" >
+<link rel="stylesheet" type="text/css" href="../css/cojmmap.css">
 <link rel="stylesheet" type="text/css" href="<?php echo $globalprefrow['glob10']; ?>" >
 <link rel="stylesheet" href="css/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
-<script src="//maps.googleapis.com/maps/api/js?v=3.22&amp;key=<?php echo $globalprefrow['googlemapapiv3key']; ?>" type="text/javascript"></script>
+<script src="//maps.googleapis.com/maps/api/js?v=<?php echo $globalprefrow['googlemapver']; ?>&amp;libraries=geometry&amp;key=<?php echo $globalprefrow['googlemapapiv3key']; ?>" type="text/javascript"></script>
+<script src="../js/maptemplate.js" type="text/javascript"></script>
 <title>OpsMap Place <?php echo $opsmapid; ?></title>
 <?php
 
@@ -66,7 +68,13 @@ if (!$initiallat) {  $initiallat=$globalprefrow['glob1']; }
 if (!$initiallon) {  $initiallon=$globalprefrow['glob2']; }
 ?>
 <script type="text/javascript"> 
-function initialize() {
+
+
+        var globlat=<?php echo $globalprefrow['glob1']; ?>;
+var globlon=<?php echo $globalprefrow['glob2']; ?>;
+
+
+function custominitialize() {
     
     var toencode=atob("<?php echo base64_encode($descrip); ?>");
     
@@ -95,67 +103,10 @@ function initialize() {
     '<div class="fs"> Click and drag the marker to relocate.</div> '+
 	'</form>';
     
-    var element = document.getElementById("map-canvas");
-    var mapTypeIds = [];
-    var mapTypeIds = ["OSM", "roadmap", "satellite", "OCM"];
-    var map = new google.maps.Map(element, {
-        center: new google.maps.LatLng(<?php echo $initiallat.','.$initiallon; ?>),
-        zoom: 18,
-        mapTypeId: "OSM",
-        draggableCursor: "crosshair",
-        mapTypeControl: true,
-        mapTypeControlOptions: {
-            mapTypeIds: mapTypeIds
-        }
-    });
-    
-    map.mapTypes.set("OSM", new google.maps.ImageMapType({
-        getTileUrl: function(coord, zoom) {
-            return "https://a.tile.openstreetmap.org/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-        },
-        tileSize: new google.maps.Size(256, 256),
-        name: "OSM",
-        alt: "Open Street Map",
-        maxZoom: 20
-    }));
-    
-    map.mapTypes.set("OCM", new google.maps.ImageMapType({
-        getTileUrl: function(coord, zoom) {
-            return "https://a.tile.thunderforest.com/cycle/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
-        },
-        tileSize: new google.maps.Size(256, 256),
-        name: "OCM",
-        alt: "Open Cycle Map",
-        maxZoom: 20
-    }));
-    
-    var osmcopyr="<span class='osmcopyr'> &copy; <a href='https://www.openstreetmap.org/copyright' " +
-    "target='_blank'>OpenStreetMap</a> contributors</span>";
-    
-    var outerdiv = document.createElement("div");
-    outerdiv.id = "outerdiv";
-    outerdiv.style.fontSize = "10px";
-    outerdiv.style.opacity = "0.7";
-    outerdiv.style.whiteSpace = "nowrap";
-	
-    map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(outerdiv);	
-
-    google.maps.event.addListener( map, "maptypeid_changed", function() {
-        var checkmaptype = map.getMapTypeId();
-        if ( checkmaptype=="OSM" || checkmaptype=="OCM") { 
-            $("div#outerdiv").html(osmcopyr);
-        } else {
-            $("div#outerdiv").text("");
-        }
-    });
 
 
-    // if OSM / OCM set as default, show copyright
-    $(document).ready(function() {
-        setTimeout(function() {
-            $("div#outerdiv").html(osmcopyr);
-        },3000);
-    });
+    
+
 
     var point = new google.maps.LatLng(<?php echo $initiallat.','.$initiallon; ?>);
 
@@ -207,15 +158,21 @@ function initialize() {
         });
     }); // ends infowindow listener
     
-    $(window).resize(function () {
-        var h = $(window).height();
-        offsetTop = 72; // Calculate the top offset
-        $('#gmap_wrapper').css('height', (h - offsetTop));
-    }).resize();
 
 }
 
-google.maps.event.addDomListener(window, 'load', initialize); 
+
+function loadmapfromtemplate() {
+    
+    initialize();
+    $(document).ready(function () {
+        
+        custominitialize();
+    });
+}
+
+
+google.maps.event.addDomListener(window, 'load', loadmapfromtemplate); 
 </script>
 </head>
 <body>

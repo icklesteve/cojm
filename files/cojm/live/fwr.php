@@ -187,7 +187,7 @@ if ($stmt) {
         $rhtml.='</td><td>';
 
         if ($row['type']<>'') {
-            $rhtml.=' <img src="images/noteb_pod_20x21.png" alt="POD" title="POD" > ';
+            $rhtml.=' <img src="../images/noteb_pod_20x21.png" alt="POD" title="POD" > ';
         }
         
         $rhtml.= ''.$row['jobcomments'].' '.$row['privatejobcomments'].'</td></tr>';
@@ -430,7 +430,7 @@ if ($globalprefrow['showdebug']>0) {
  
  
 
-    $res = preg_replace("/[^0-9,.]/", "", ini_get(upload_max_filesize) ); 
+    $res = preg_replace("/[^0-9,.]/", "", ini_get('upload_max_filesize') ); 
     if ($res<3) {
         echo ' <div class="ui-state-error ui-corner-all p15 undersearch" >  ';    
     echo '<h2> Server Max File Upload Size set at '.ini_get(upload_max_filesize).' which may be too low for high accuracy GPX Files. </h2>';    
@@ -507,24 +507,6 @@ if ($globalprefrow['showdebug']>0) {
     }
     
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     
@@ -836,7 +818,7 @@ if ($globalprefrow['showdebug']>0) {
 $cronissue='0';
 $sql = "SELECT id, time_last_fired FROM cojm_cron WHERE `currently_running` = '1' ";
 
-try {        
+try {
     $stmt = $dbh->query($sql);
     $prep = $stmt->fetchAll();   
     $plainbodytext='';
@@ -862,20 +844,12 @@ try {
             $prep = $dbh->query($sql);
             
             
-            
-            
-            
-            
     
             $plainbodytextnice = ' Cron check failed as already running.  
             If oldest was more than 5 mins ago this was reset, 
             however you need to contact your admin if you get this message too often.</p>';
 
 	
-        
-        
-        
-
         
             $plainbodytextnice=' There may be an issue with COJMCron, which schedules background jobs.  
             Further info is available in the main audit log.
@@ -956,6 +930,7 @@ try {
             auditerror)
             VALUES 
             ('CojmCron',
+            'fwr.php',
             'fwr.php',
             'Cron Reset, Was running a task older than 5 minutes.' ,
             :auditerror ,

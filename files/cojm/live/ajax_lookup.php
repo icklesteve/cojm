@@ -610,12 +610,6 @@ if ($lookuppage) {
         $scriptb='';
         
         
-
-        
-        
-
-        
-        
         
        
         if ($newstmt) {
@@ -803,8 +797,14 @@ if ($lookuppage) {
         left join opsmap y ON p.opsmaparea = y.opsmapid
         left join opsmap z on p.opsmapsubarea = z.opsmapid
         WHERE `p`.`status` <70 
-        AND DATE_ADD(NOW(), INTERVAL :jobslider HOUR) > `p`.`nextactiondate`
+        AND (
+            ( DATE_ADD(NOW(), INTERVAL :jobslider HOUR) > `p`.`nextactiondate` )
+        or 
+            (`p`.`status`>30)
+        )
+        
         ORDER BY  `p`.`status` DESC, `p`.`nextactiondate`
+        
         LIMIT :offset , :numberofresults';
         
         $stmt = $dbh->prepare($query);
@@ -822,7 +822,41 @@ if ($lookuppage) {
         
         
         if ($data) {
+            
+            
+            $cbbasapdata = $dbh->query('SELECT chargedbybuildid from chargedbybuild WHERE cbbasap = "1" and cbbcost <> 0 ')->fetchAll(PDO::FETCH_COLUMN);
+            
+            $cbbcargodata = $dbh->query('SELECT chargedbybuildid from chargedbybuild WHERE cbbcargo = "1" and cbbcost <> 0 ')->fetchAll(PDO::FETCH_COLUMN);
+            
+            
+            
+            
             foreach ($data as $row) {
+                $i=0;
+                $showasap=0;
+                $showcargo=0;
+                    
+                while ($i<21) { /////  CHECK TO SEE TO DISPLAY JUST 1 ASAP OR CARGOBIKE LOGO     //
+                
+                // $script.=' console.log(" in cbb loop '.$i.' '. $row["cbb$i"] .'"); ';
+                
+                    if (($row["cbb$i"])<>0) { // order cbb has price 
+                        if (in_array("$i", $cbbasapdata)) {
+                            $showasap=1;
+                            
+                            
+                            
+                        }
+                        
+                        if (in_array("$i", $cbbcargodata)) {
+                            $showcargo=1;
+                        }
+                    }
+                    $i++;
+                }
+            
+                if ($row['asapservice']=='1') { $showasap=1; }
+                if ($row['cargoservice']=='1') { $showcargo=1; }
                 
                 list ($lat0, $lon0) = latlngfrompc($row['enrpc0']);
                 list ($lat1, $lon1) = latlngfrompc($row['enrpc1']);
@@ -871,6 +905,11 @@ if ($lookuppage) {
                 '"'.($row['enrft19']).'","'.($row['enrpc19']).'",'.$lat19.','.$lon19.','.
                 '"'.($row['enrft20']).'","'.($row['enrpc20']).'",'.$lat20.','.$lon20.','.
                 '"'.($row['enrft21']).'","'.($row['enrpc21']).'",'.$lat21.','.$lon21.','.
+                
+                
+                '"'.$showasap.'",'.
+                '"'.$showcargo.'",'.                
+                
                 
                 '"'.$row['targetcollectiondate'].'","'.$row['collectionworkingwindow'].'"],';
             }

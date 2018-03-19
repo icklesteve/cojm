@@ -208,7 +208,7 @@ else if ($row['ID']) {  // starts main table
     $lPC=$row["enrpc19"];if (($lPC)or($row['enrft19'])){$lPC=str_replace(" ","%20","$lPC",$c);echo'<tr><td>via</td><td>'.$row['enrft19'].' <a target="_blank" href="http://maps.google.com/maps?q='.$lPC.'">'.$row['enrpc19'].'</a></td></tr>'; }
     $lPC=$row["enrpc20"];if (($lPC)or($row['enrft20'])){$lPC=str_replace(" ","%20","$lPC",$c);echo'<tr><td>via</td><td>'.$row['enrft20'].' <a target="_blank" href="http://maps.google.com/maps?q='.$lPC.'">'.$row['enrpc20'].'</a></td></tr>'; }
     
-    if ((trim($row['enrpc0'])) or (trim($row['enrft21']))) {  
+    if ((trim($row['enrpc21'])) or (trim($row['enrft21']))) {  
         echo '<tr><td>To</td><td>'.$row['enrft21'].' <a target="_blank" href="http://maps.google.com/maps?q='. $linkShipPC.'">'. $row['enrpc21'].'</a></td></tr> '; 
     }
     

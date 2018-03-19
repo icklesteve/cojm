@@ -6309,8 +6309,8 @@ if ($globalprefrow['showdebug']=='1') {
 if (!$newformbirthday) { $newformbirthday=0; }
 
 echo ' <script> '.$script.'
-var allok='.$allok.';
-var formbirthday='.$newformbirthday.';
-var message='.json_encode($message).'; </script>';
+allok='.$allok.';
+formbirthday='.$newformbirthday.';
+message='.json_encode($message).'; </script>';
 
 ?>

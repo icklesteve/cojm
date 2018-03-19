@@ -525,7 +525,7 @@ if ($showsubarea<>'1') {
     
     if ($row['opsmaparea']>0) {
 
-        $pbtmareaquery = "SELECT opsmapid, inarchive, opsname, descrip  FROM opsmap WHERE type=2 AND corelayer= :opsmaparea "; 
+        $pbtmareaquery = "SELECT opsmapid, inarchive, opsname, descrip  FROM opsmap WHERE type=2 AND corelayer= :opsmaparea ORDER BY opsname ASC "; 
         $stmt = $dbh->prepare($pbtmareaquery);
         $stmt->bindParam(':opsmaparea', $row['opsmaparea'], PDO::PARAM_INT); 
         $stmt->execute();
@@ -1345,24 +1345,8 @@ if ($showsubarea<>'1') {
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <div class="hangright">
-        <div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses clearfix hideuntilneeded"> 
+        <div id="orderajaxmap" class="ui-corner-all ui-state-highlight addresses clearfix"> 
     
             
             <div id="gmap-wrapper" > 

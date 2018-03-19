@@ -184,21 +184,82 @@ if ($page=='uploadkml') {
             $xml = simplexml_load_file($saveto);
             
             if ($xml) {
-                $placemarks = $xml->Folder->Placemark->Polygon->outerBoundaryIs->LinearRing->coordinates;   
-                // $infotext.='<p>Coords '.$placemarks.' </p>';
-                $cor_d  =  explode(' ', $placemarks);
-                $qtmp=array();
-                foreach($cor_d as $value){
-                    if (trim($value)) {
-                    $tmp = explode(',',$value);
-                    $ttmp=$tmp[1];
-                    $tmp[1]=$tmp[0];
-                    $tmp[0]=$ttmp; 
-                    $qtmp[]= '' . $tmp[0] . ' ' .$tmp[1].'';
+                
+                
+                $pagetext.=' xml found ';
+                
+                
+                $placemarkarray=$xml->Folder->Placemark;
+                
+                $areacount=0;
+                $createdarea=0;
+                
+                foreach ($placemarkarray as $placemarkloop) {
+                    
+
+                    $areacount++;
+                    
+                    $placemarks=$placemarkloop->Polygon->outerBoundaryIs->LinearRing->coordinates;
+                    
+                    
+                    //   $placemarks = $xml->Folder->Placemark->Polygon->outerBoundaryIs->LinearRing->coordinates;   
+                    // $infotext.='<p>Coords '.$placemarks.' </p>';
+                    $cor_d  =  explode(' ', $placemarks);
+                    $qtmp=array();
+                    foreach($cor_d as $value){
+                        if (trim($value)) {
+                        $tmp = explode(',',$value);
+                        $ttmp=$tmp[1];
+                        $tmp[1]=$tmp[0];
+                        $tmp[0]=$ttmp; 
+                        $qtmp[]= '' . $tmp[0] . ' ' .$tmp[1].'';
+                        }
                     }
+                                        
+                    $vertices= join(", ",$qtmp);
+                    
+                    
+                    
+                    $vertices=checkvertices($vertices);
+                    
+                    
+                    if (isset($_POST['areaname'])) {
+                        $areaname=trim($_POST['areaname']).' '.$areacount;
+            
+            
+            
+            
+                        $area = sprintf("POLYGON((%s))", $vertices); 
+                        $sql="INSERT INTO opsmap (type,opsname, g) VALUES ( 
+                        '2', 
+                        :areaname,
+                        PolygonFromText(:vertices) );";
+                
+                            
+                        $stmt = $dbh->prepare($sql);
+                        $stmt->bindParam(':areaname', $areaname, PDO::PARAM_INT); 
+                        $stmt->bindParam(':vertices', $area, PDO::PARAM_INT); 
+                
+                        $stmt->execute();
+                        $result = $dbh->lastInsertId();
+                            
+                        if ($result){
+                            $createdarea++;
+                            
+                            $infotext.="<br />Success";
+                            $pagetext.='<p>Success</p>';
+                            $pagetext.='<p>New area '.$areaname.' created from KML File.</p>';
+                            $infotext.='<p>New OpsMapArea '.$result.' created.</p>';
+                            $areaid=$result;
+                            global $areaid;
+                        }
+            
+                    }
+                    
                 }
-                                    
-                $vertices= join(", ",$qtmp);
+                
+                $pagetext=' <br /> ' . $areacount .' Areas found '.$pagetext;
+                $pagetext.=' <br /> ' . $createdarea .' Areas added to Database ';
 
                 // $pagetext.=' vertices '. $vertices;
                 $pagetext.='<p>Uploaded '.$fileName.' </p>';
@@ -210,7 +271,10 @@ if ($page=='uploadkml') {
 }
 
 
-if ($vertices) {
+
+
+function checkvertices($vertices) {
+
         $infotext.=' vertices: '.$vertices;
         $pexploded=explode( ',', $vertices );
     
@@ -243,40 +307,18 @@ if ($vertices) {
             $newvertices = ''.rtrim($newvertices, ', ').' '; 
             $vertices=$newvertices;
         }
+        
+        return $vertices;
+        
     }
 
     
-if ($page=='uploadkml') {
-        if (isset($_POST['areaname'])) {
-            $areaname=trim($_POST['areaname']);
-            
-                     $area = sprintf("POLYGON((%s))", $vertices); 
-        $sql="INSERT INTO opsmap (type,opsname, g) VALUES ( 
-        '2', 
-        :areaname,
-        PolygonFromText(:vertices) );";
 
-            
-        $stmt = $dbh->prepare($sql);
-        $stmt->bindParam(':areaname', $areaname, PDO::PARAM_INT); 
-        $stmt->bindParam(':vertices', $area, PDO::PARAM_INT); 
-
-        $stmt->execute();
-        $result = $dbh->lastInsertId();
-            
-        if ($result){
-            $infotext.="<br />Success";
-            $pagetext.='<p>Success</p>';
-            $pagetext.='<p>New area '.$areaname.' created from KML File.</p>';
-            $infotext.='<p>New OpsMapArea '.$result.' created.</p>';
-            $areaid=$result;
-            global $areaid;
-        }
-            
-        }
-    }
     
 if ($page=='editarea') {
+    
+    $vertices=checkvertices($vertices);
+    
         $infotext =$infotext. ' in edit ops map area ';
         if (isset($_POST['areaid'])) { $areaid=trim($_POST['areaid']);} else { $areaid=''; }
         if (isset($_POST['areaname'])) { $areaname=trim($_POST['areaname']);} else { $areaname=''; }
@@ -317,6 +359,7 @@ if ($page=='editarea') {
 
 
 if ($page=='opsmapnewarea') {
+    $vertices=checkvertices($vertices);
         $infotext =$infotext. ' new ops map area ';
         if (isset($_POST['areaname'])) { $areaname=trim($_POST['areaname']);} else {$areaname=''; }
         if (isset($_POST['areacomments'])) { $areacomments=trim($_POST['areacomments']);} else { $areacomments=''; }

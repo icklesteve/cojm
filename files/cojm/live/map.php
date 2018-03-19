@@ -62,8 +62,6 @@ if ($globalprefrow['distanceunit']=='miles') {
     $dunit= 'kmph ';
 }
 
-
-
 ?>
 <style>
 /* starts spinner on page load, only for ajax pages  */
@@ -91,12 +89,17 @@ var linearray = [];
 var image2 = "<?php echo $globalprefrow['image2']; ?>";
 var image3 = "<?php echo $globalprefrow['image3']; ?>";
 var image7 = "<?php echo $globalprefrow['image7']; ?>";
+var image5 = "<?php echo $globalprefrow['image5']; ?>";
+var image6 = "<?php echo $globalprefrow['image6']; ?>";
+
 var bounds;
 var viatocheck=[7,11,15,19,23,27,31,35,39,43,47,51,55,59,63,67,71,75,79,83];
 
 var statuses=[];
 var infowindow;
-
+var allriders=[];
+var formbirthday;
+var jobdatabyrider=[];
 
 <?php
 
@@ -107,7 +110,31 @@ foreach($data as $statusname => $status) {
     echo ' statuses.push({id:'.$status.',name:"'.$statusname.'"}); ';
 }
 
+
+
+$query = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID"; 
+$riderdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
+    
+
+
+$riderselecthtml= ' <select id="leftmenuselectrider" multiple="multiple" class="ui-corner-left ui-state-default bigmap" title="Filter by '.$globalprefrow['glob5'].'" >';
+$riderselecthtml.= ' <option selected value=""> All '.$globalprefrow['glob5'].'s (0)</option> ';
+
+foreach ($riderdata as $ridernum => $ridername) {
+    $ridername=htmlspecialchars($ridername);
+    $riderselecthtml.= ("<option ");
+    $riderselecthtml.= ("value=\"$ridernum\">$ridername (0)</option>");
+    
+    echo ' allriders.push({riderid:'.$ridernum.',ridername:"'.$ridername.'"}); ';
+    
+    
+}
+$riderselecthtml.= '</select> ';
+
 ?>
+
+
+
 
 
 
@@ -132,7 +159,27 @@ function lookupridername(id) {
 
 
 
+function displayriderselect(thisriderid,thisjobid) {
+    
+    var riderselect=' <select id ="riderselect' + thisjobid + '" class="bigmapinfowindowriderselect ui-state-default ui-corner-left" > ';
+    
+    for (var allridersloop=0; allridersloop<allriders.length; allridersloop++) {
+    
+        riderselect+=' <option value="' + allriders[allridersloop].riderid + '" ';
+        
+        if (thisriderid==allriders[allridersloop].riderid) {
+            riderselect+=' selected ';
+        }
 
+        riderselect+= '>' + allriders[allridersloop].ridername + ' </option  > ';
+        
+    }
+    
+    riderselect+= ' </select> ';
+    
+    return riderselect;
+    
+}
 
 
 
@@ -149,7 +196,7 @@ function loadmapfromtemplate() {
       
         autorefreshmap();
         
-        $("#prevridertime").change(refreshmap);
+        $("#prevridertime").change(timesliderchanged);
         $("#leftmenuselectrider").change(applyriderfilter);
         $("#jobslider").change(timesliderchanged);
         
@@ -160,9 +207,18 @@ function loadmapfromtemplate() {
 
 google.maps.event.addDomListener(window, 'load', loadmapfromtemplate);
 
-
+var riderslider;
+var hrs;
 
 function timesliderchanged() {
+    
+    slidertime = $("#jobslider").val();
+    if (slidertime==1) { hrs='Hr'; } else { hrs='Hrs'; }
+    $("#jobsliderval").text(slidertime + hrs);
+    riderslider=$("#prevridertime").val();
+    if (riderslider==1) { hrs='Hr'; } else { hrs='Hrs'; }
+    $("#prevriderhours").text(riderslider + hrs);
+    
     refreshmap();
 }
 
@@ -171,37 +227,9 @@ function timesliderchanged() {
 
 
 
-
-
-
-
-
-
-
-
-
-
 function addtomap() {
-    slidertime = $("#jobslider").val();
     
-    
-    
-    var hrs;
 
-    if (slidertime==1) { hrs='Hr'; } else { hrs='Hrs'; }
-    $("#jobsliderval").text(slidertime + hrs);
-    
-    var riderslider=$("#prevridertime").val();
-    
-    if (riderslider==1) { hrs='Hr'; } else { hrs='Hrs'; }
-    
-    $("#prevriderhours").text(riderslider + hrs);
-    
-    
-    var lineSymbol = {
-        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-        strokeOpacity: 0.3
-    };
     
     
     var infowindow = new google.maps.InfoWindow({
@@ -247,7 +275,7 @@ function addtomap() {
         });
     
     
-        bounds.extend(finalLatLng);
+
         markers.push(marker);
 
         google.maps.event.addListener(marker, "mouseover", createinfowindow);
@@ -256,27 +284,19 @@ function addtomap() {
         function createinfowindow(e){
     
             // console.log("marker mouseover in new func");
-            console.log("marker mouseover class:" + this.class );
-                        
-                        
-                        
+            // console.log("marker mouseover class:" + this.class );
+
             var markerclass=this.class;
             
             if (/rider/i.test(markerclass)) {
-                console.log("rider icon");
+                // console.log("rider icon");
                 
                 iwindowtext = " rider infotext " + html;
-                
-                
-                
             } else {
-                console.log("not rider icon");
-            
+                // console.log("not rider icon");
             }
             
 
-            
-            
             infowindow.setContent("<div class='bigmapinfowindow'>" + html + " <hr /> </div>");
             infowindow.setOptions({ disableAutoPan: true });
             infowindow.open(map, marker);
@@ -284,16 +304,7 @@ function addtomap() {
         };
    
         return finalLatLng;
-   
-   
-   
-   
     }
-    
-    
-    
-
-    
     
     
     
@@ -302,7 +313,7 @@ function addtomap() {
     } else {
         console.log("data changed ");
     
-        
+        formbirthday=Date.now();
         
         var i;
         
@@ -313,9 +324,7 @@ function addtomap() {
     
         newjobsrow=b64DecodeUnicode(b64jobsrow);
         
-        
         // $("#test").html(newjobsrow);
-        
         
         jobsrow = JSON.parse(newjobsrow);
         // console.log("jobsrow: " + jobsrow);
@@ -331,14 +340,7 @@ function addtomap() {
                 
         linearray = [];
         
-        
-        
-        
-        
-        
-        
-        markers = [];
-        bounds = new google.maps.LatLngBounds();            
+        markers = [];      
         
         
         var joberrordata="";
@@ -346,74 +348,13 @@ function addtomap() {
         
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        var tabletext=' <table class="acc onehundred" > <tbody>';
-        
-        
-        for (i = 0; i < riders.length; i++) {
-            var rider = riders[i];
-            
-            var thisfinalLatLng = new google.maps.LatLng(rider[1], rider[2]);
-
-            // function     function createMarker(latlng,name,html,mapicon,markerclass,index,id) {
-            
-            
-            var infotexthtml="<div class=''><h3>" + rider[0] + "</h3><p>" + rider[8] + "</p>  </div>";
-            
-            
-            
-            
-            tabletext=tabletext + '<tr id="rider' + rider[4] + '"><td><a href="cyclist.php?thiscyclist=' + rider[4] + '">' + rider[0] + '</a></td><td>';
-            
-            if (rider[6]>0) { tabletext=tabletext + rider[6] + dunit; }
-            
-            tabletext=tabletext + '</td>' + '<td>' + rider[8]+ '</td>' + '<td>' + rider[5] + ' </td> </tr>';
-            
-            
-            // function createMarker(latlng,name,html,mapicon,markerclass,index,id) {
-            createMarker(thisfinalLatLng,rider[0],infotexthtml,rider[7],("rider"+rider[4]),rider[3],("rider"+rider[4]));
-        
-        }
-    
-        tabletext = tabletext+ " </tbody></table> <hr /> ";
-        
-        
-        if (riders.length==0) { tabletext=''; }
-        $("#ridertable").html(tabletext);
-        
-        if (riders.length==1) {
-            var tmp=' 1 Rider has';
-        } else {
-            var tmp=riders.length + ' Riders have ';
-        }
-
-        $("#totalriderpositions").text(tmp);
-
         /*
-        
         job positions
-        
         */
         
  
  
- 
- 
- 
+        jobdatabyrider=[];
  
  
         var job;
@@ -437,32 +378,14 @@ function addtomap() {
             
             // console.log("jobsrow.length " + jobsrow.length  + " i " + i);
             
-            
             var linedata=[];
         
             
-        
-            idlist += "<p id=" + job[0] + ">" + job[0] + "</p>";
-
-            totaljobs++;
-            
-            
-            if (job[1]==1) { // add to unscheduled / ( job alert ?? ) list
-                unschedtext = unschedtext + ' <a href="order.php?id=' + job[0] + '">' + job[0] + '</a> ';
-                numunsched++;
-            
-            }
-            
-                  
-            
             // console.log("order id " + job[4] + job[5] );
 
-            var viasfound=0;            
-
-
+            var viasfound=0;
             // console.log("jobsrow.length " + jobsrow.length);
 
-            
             
             for ( var v = 0; v < viatocheck.length; v++) {
                 var temp = viatocheck[v]+1;
@@ -471,7 +394,7 @@ function addtomap() {
                 
                 // console.log( v + ":" + temp + ":" + (job[viatocheck[v]]) + ":" + (job[temp]) + ":"  + (job[temptwo]) + ":"  + (job[tempthree]) + ":");
                 
-                            // console.log("jobsrow.length " + jobsrow.length  + " i " + i);
+                // console.log("jobsrow.length " + jobsrow.length  + " i " + i);
                 
                 
                 if (job[viatocheck[v]]+job[temp]==="") {
@@ -486,11 +409,11 @@ function addtomap() {
                         
                         joberrordata += "<p>No via " + job[viatocheck[v]] + " location for <a title='" + job[0] + "' href='order.php?id=" + job[0] + "'>" + job[0] + "</a></p>";
                     
-                                
+                    
                     } else {
                     
-                    
-                        iwindowtext="<h3>Via point " + job[viatocheck[v]] + " </h3><h4> " + job[0] + "</h4>";
+                        iwindowtext="<h3>Via point " + job[viatocheck[v]] + " </h3><h4> " + job[0] + "</h4>"
+                        + displayriderselect(job[1],job[0]);
                         
                         viasfound++;
                         // console.log(" __________________________________   found via, adding marker");
@@ -499,9 +422,7 @@ function addtomap() {
                         var finalLatLng = new google.maps.LatLng(job[temptwo], job[tempthree]);
                         
                         var name=job[viatocheck[v]] + " " + job[temp];
-    
-                        
-                        
+            
                         finalLatLng = createMarker(finalLatLng,name,iwindowtext,image7,(" via " + job[0] + " rider" + job[1]),1005,("via"+job[0]));
                         // function createMarker(latlng,name,html,mapicon,markerclass,index,id) {
                         
@@ -512,12 +433,7 @@ function addtomap() {
                     
                     }
                     
-                    
                 }
-                
-                
-                
-                
                 
             }
             
@@ -550,10 +466,6 @@ function addtomap() {
 
 
 
-
-
-      
-            
             
 
             if (job[4]==0) {
@@ -585,10 +497,14 @@ function addtomap() {
                     var iwindowtext = "<h3><a title='" + job[0] + "' href='order.php?id=" + job[0] + "'>" + job[0] + "</a> "
                     + lookupstatusname(job[2]) 
                     
-                    + " </h3> <h4>"
-                    + $("#leftmenuselectrider option[value=" + job[1] + "]").text()
+                    + "</h3> " +
                     
-                    + "</h4> <hr /> "
+                    displayriderselect(job[1],job[0])
+                    
+
+                    // + $("#leftmenuselectrider option[value=" + job[1] + "]").text()
+                    
+                    + " <hr /> "
                     + " <p> PU: " + job[3] + " " + job[4] + " </p> ";
                     
                     if (viasfound>0) {
@@ -604,14 +520,9 @@ function addtomap() {
                     } else {
                         // collected, just need to add marker to start
                         
-    
-                        
                     }
-                
             
                 }
-            
-
             
             
             
@@ -625,13 +536,10 @@ function addtomap() {
                 
             } else {
                 
-                
-
                     // console.log("lat found for delivery job ref  " + job[0]);
                     
                     var finalLatLng = new google.maps.LatLng(job[89], job[90]);
                     //check to see if any of the existing markers match the latlng of the new marker
-                        
     
                     
                     var viatext="";
@@ -642,10 +550,12 @@ function addtomap() {
                     var iwindowtext = "<h3><a title='" + job[0] + "' href='order.php?id=" + job[0] + "'>" + job[0] + "</a> "
                     + lookupstatusname(job[2]) 
                     
-                    + " </h3> <h4>"
-                    + $("#leftmenuselectrider option[value=" + job[1] + "]").text()
+                    + " </h3> "
+                    // + $("#leftmenuselectrider option[value=" + job[1] + "]").text()
                     
-                    + "</h4> <hr /> "
+                    +    displayriderselect(job[1],job[0])
+
+                    + " <hr /> "
                     + " <p> PU: " + job[3] + " " + job[4] + " </p> ";
                     
                     if (viasfound>0) {
@@ -657,45 +567,161 @@ function addtomap() {
                     finalLatLng = createMarker(finalLatLng,job[3],iwindowtext,image3,(" job deliver" + job[0]+ " rider" + job[1]),1006,("deliver"+job[0]));
     
                     linedata.push(finalLatLng);
-    
-
-            
                 }
-                        
-            
-            
-            
-            
-            
-            
-            
-            
             
             
             // console.log("jobsrow.length " + jobsrow.length + " i " + i );
-            console.log("linedata: " +  linedata.length + " " + linedata);
-            
-            line = new google.maps.Polyline({
-                path: linedata,
-                geodesic: true,
-                strokeOpacity: 0.7,
-                icons: [{
-                    icon: lineSymbol,
-                    repeat: "50px"
-                }],
-                map: map,
-                class: "rider"+job[1],
-                id: "line"+job[0],
-                zIndex: 1600,
-                optimized: false
-            });
+            // console.log("linedata: " +  linedata.length + " " + linedata);
             
             
-            linearray.push(line);
+            var lineSymbol = {
+                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                strokeOpacity: 0.4
+            };
+
+
+            var asaplineSymbol = {
+                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                strokeOpacity: 0.9
+            };
+
+            
+            
+
             // markers.push(line);
             
             
             
+            
+            // console.log("asap should be " + job[91]);
+            
+            var showline=0;
+            
+            
+            if (job[91]>0){ // asap job
+                showline=1;
+                line = new google.maps.Polyline({
+                    path: linedata,
+                    geodesic: true,
+                    strokeOpacity: 0.7,
+                    icons: [{
+                        icon: asaplineSymbol,
+                        fillColor : '#FF0000',
+                        repeat: "50px",
+                        offset: ((i * 7) + '%')
+                    }],
+                    strokeColor: '#FF0000',
+                    strokeOpacity: 1.0,
+                    map: map,
+                    class: "rider"+job[1],
+                    zIndex: 1800,
+                    optimized: false
+                });
+                
+                linearray.push(line);
+                
+            }
+            
+            if (job[92]>0){ // cargobike icons
+                showline=1;
+                line = new google.maps.Polyline({
+                    path: linedata,
+                    geodesic: true,
+                    strokeOpacity: 0.7,
+                    icons: [{
+                        icon: asaplineSymbol,
+                        fillColor : '#0000FF',
+                        repeat: "40px",
+                        offset: ((i * 7) + '%')
+                    }],
+                    strokeColor: '#0000FF',
+                    strokeWeight: 4,
+                    strokeOpacity: 1.0,
+                    map: map,
+                    class: "rider"+job[1],
+                    zIndex: 1550,
+                    optimized: false
+                });
+                
+                linearray.push(line);
+            
+            
+            } 
+            
+            if (showline==0) {
+                
+                line = new google.maps.Polyline({
+                    path: linedata,
+                    geodesic: true,
+                    strokeOpacity: 0.7,
+                    icons: [{
+                        icon: lineSymbol,
+                        repeat: "50px",
+                        offset: ((i * 7) + '%')
+                    }],
+                    map: map,
+                    class: "rider"+job[1],
+                    id: "line"+job[0],
+                    zIndex: 1600,
+                    optimized: false
+                });
+                
+                
+                linearray.push(line);
+                
+                
+                
+            }
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            var jobforrider = "<p>" 
+            
+            + ' <a href="order.php?id=' + job[0] + '">' + job[0] + '</a> ' 
+            
+            + lookupstatusname(job[2]) 
+            
+            + " </p>";
+        
+            jobdatabyrider.push([job[1],jobforrider]);
+            // console.log(" XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx ");
+        
+            
+        
+            idlist += "<p id=" + job[0] + ">"  + ' <a href="order.php?id=' + job[0] + '">' + job[0] + '</a> ' + "</p>";
+
+            totaljobs++;
+            
+            
+            if (job[1]==1) { // add to unscheduled / ( job alert ?? ) list
+                unschedtext = unschedtext + ' <a href="order.php?id=' + job[0] + '">' + job[0] + '</a> ';
+                numunsched++;
+            
+            }
             
         } // end of job loop
         
@@ -728,22 +754,108 @@ function addtomap() {
         $("#totaljobs").text(tmp);
         
         
+        var tabletext=' <table class="acc onehundred" > <tbody>';
         
-        var nummarkers = markers.length;
-        // alert(nummarkers);
         
-        if (($("#scaleonrefresh").is(':checked')) && (nummarkers>0))    {
-            map.fitBounds(bounds);
+        for (i = 0; i < riders.length; i++) {
+            var rider = riders[i];
+            
+            var thisfinalLatLng = new google.maps.LatLng(rider[1], rider[2]);
+
+
+            var infotexthtml="<div class=''><h3>" + rider[0] + " " + rider[5] + "</h3>"
+            + "<p>" 
+            + rider[8] 
+            + "</p>"
+            // + rider[4]
+            // + "</p><p>"
+           
+            + " </div>";
+            // + " Loop to go here "
+            // + " <p> Scheduled </p> <p> At Collection </p> <p> Paused </p> <p> en route </p> ";
+            
+            // console.log("  jobdatabyrider" + jobdatabyrider.length);
+            var iloop = 0; 
+            for ( iloop = 0; iloop < jobdatabyrider.length; iloop++) {
+                
+                // console.log( iloop + "loop in rider lookup : " + jobdatabyrider[iloop][0] );
+                
+                if (jobdatabyrider[iloop][0]==rider[4]) {
+                    infotexthtml+=jobdatabyrider[iloop][1];
+                }
+            }
+            
+            
+            tabletext=tabletext + '<tr id="rider' + rider[4] + '"><td><a href="cyclist.php?thiscyclist=' + rider[4] + '">' + rider[0] + '</a></td><td>';
+            
+            if (rider[6]>0) { tabletext=tabletext + rider[6] + dunit; }
+            
+            tabletext=tabletext + '</td>' + '<td>' + rider[8]+ '</td>' + '<td>' + rider[5] + ' </td> </tr>';
+            
+            
+            // function createMarker(latlng,name,html,mapicon,markerclass,index,id) {
+            createMarker(thisfinalLatLng,rider[0],infotexthtml,rider[7],("rider"+rider[4]),rider[3],("rider"+rider[4]));
+        
         }
+    
+        tabletext = tabletext+ " </tbody></table> <hr /> ";
         
-        if (nummarkers==1) {
-            map.setZoom(17);
+        
+        if (riders.length==0) { tabletext=''; }
+        $("#ridertable").html(tabletext);
+        
+        if (riders.length==1) {
+            var tmp=' 1 Rider has';
+        } else {
+            var tmp=riders.length + ' Riders have ';
         }
+
+        $("#totalriderpositions").text(tmp);
+
+        
     
     }
     
     
+    var totaljobsfound=0;
+    
+    for (var allridersloop=0; allridersloop<allriders.length; allridersloop++) { // changes rider select text
+    
+        // console.log(' all riders loop' + allriders[allridersloop].riderid + allriders[allridersloop].ridername);
+        
+        
+        var numberofjoubsfound=0;
+        
+        var iloop = 0; 
+        for ( iloop = 0; iloop < jobdatabyrider.length; iloop++) {
+            
+            
+            // console.log( iloop + "loop in rider lookup : " + jobdatabyrider[iloop][0] );
+            
+            if (jobdatabyrider[iloop][0]==allriders[allridersloop].riderid) {
+                
+                // infotexthtml+=jobdatabyrider[iloop][1];
+                totaljobsfound++;
+                
+                numberofjoubsfound++;
+                
+                // console.log(" ***************************************************************************  ");
+                // console.log(" ***********************             JOB FOUND FOR RIDER ");
+                
+                
+            }
+        }
+        
+        $('#leftmenuselectrider option[value=' + allriders[allridersloop].riderid + ']').text( allriders[allridersloop].ridername + " (" + numberofjoubsfound + ") ");
+    
 
+    }
+    
+    
+    $('#leftmenuselectrider option[value=""]').text("All Riders (" + totaljobsfound + ") ");
+    // $("#totaljobsfoundtext").text(totaljobsfound);
+    
+    
     
     
     applyriderfilter();
@@ -751,11 +863,9 @@ function addtomap() {
     // function createMarker(latlng,name,html,mapicon,markerclass,index,id) {
     
     
-    
-    
-    
     $("#toploader").fadeOut();
 }
+
 
 
     function applyriderfilter() {
@@ -771,7 +881,7 @@ function addtomap() {
 
         
         if (riderfilter=='') {
-            console.log("All riders");
+            // console.log("All riders");
             for (showhideloop = 0; showhideloop < superarray.length; showhideloop++) {
                 superarray[showhideloop].setVisible(true);
             }
@@ -780,24 +890,19 @@ function addtomap() {
         } else {
             
             
-            
             // console.log("riderfilter: " + riderfilter);
             // console.log("riderfilter length: " + riderfilter.length);
             
             
-
-            
-            
-            console.log("______________________________________________________   superarray" + superarray.length);
+            // console.log("______________________________________________________   superarray" + superarray.length);
             
             
             for (showhideloop = 0; showhideloop < superarray.length; showhideloop++) {
 
-                console.log("riderfilter: " + riderfilter);
-                console.log (superarray[showhideloop].class)
+                // console.log("riderfilter: " + riderfilter);
+                // console.log (superarray[showhideloop].class)
                 
-                
-                console.log ("________________________________________   CLASS : " + superarray[showhideloop].class)
+                // console.log ("________________________________________   CLASS : " + superarray[showhideloop].class)
                 
                 
                 var visibleflag =0;
@@ -826,11 +931,65 @@ function addtomap() {
             
         } // check for not all markers
         
-        console.log(" if visible set bounds then rest map ");
+        // console.log(" if visible set bounds then rest map ");
+        
+        
+        if ($("#scaleonrefresh").is(':checked')) {
+        
+            zoommap();
+
+        }
         
         
     }
 
+    
+    
+function zoommap() {
+    
+    bounds = new google.maps.LatLngBounds();
+    
+    var visiblemarkers=0;
+    
+    for (showhideloop = 0; showhideloop < markers.length; showhideloop++) {
+        
+        var thisvisible=markers[showhideloop].visible;
+        
+        
+        if (markers[showhideloop].visible===true) {
+            // console.log("visible: " + thisvisible);
+            
+            // console.log("        position : " + markers[showhideloop].position);
+            
+            bounds.extend(markers[showhideloop].position);
+            
+            visiblemarkers++;
+            
+            // position
+            
+            
+        } else {
+        
+            // console.log(" NOT visible: " + thisvisible);
+        }
+        
+        
+    }
+    
+    // console.log("bounds" + bounds);
+    
+    if (visiblemarkers>0) {
+        map.fitBounds(bounds);
+    }
+
+    if (markers.length==1) {
+        map.setZoom(17);
+    }
+
+
+}    
+    
+    
     function refreshmap() {
         $("#toploader").show();
         oldriders = riders;
@@ -854,23 +1013,49 @@ function addtomap() {
     }
 
     function autorefreshmap() {
-        
 
-        
         refreshmap();
         setTimeout(autorefreshmap, 20000);
     }
 
     
+    $(document).ready(function(){
     
-
+        $("#rescalemapbutton").bind("click", function () {
+            // console.log("button clicked");
+            zoommap();
+        });
     
+    });
+    
+$(document).on('change', '.bigmapinfowindowriderselect', function(e){
+    var id = e.target.id;
+    orderid = parseInt(id.match(/(\d+)$/)[0], 10);
+    $("#toploader").show();
+    var newrider=$("#riderselect"+orderid).val();
+    $.ajax({
+        url: 'ajaxchangejob.php',
+        data: {
+            page: 'ajaxchangerider',
+            formbirthday: formbirthday,
+            id: orderid,
+            newrider: newrider
+        },
+        type: 'post',
+        success: function (data) {
+            $('#gmap_wrapper').prepend(data);
+        },
+        complete: function () {
+            showmessage();
+            refreshmap();
+        }
+    });
+});
     
 </script>
 </head>
 <body> 
 <?php 
-
 
 //  $adminmenu="1";
 $filename="map.php";
@@ -887,38 +1072,23 @@ include "cojmmenu.php";
 <h3>Live Job Map</h3>
 <span id="maplastupdated">Last Updated : </span>
 
-<?php
-
-$query = "SELECT CyclistID, cojmname FROM Cyclist WHERE Cyclist.isactive='1' ORDER BY CyclistID"; 
-$riderdata = $dbh->query($query)->fetchAll(PDO::FETCH_KEY_PAIR);
-    
-
-    
-//////////     CYCLIST   DROPDOWN     ///////////////////////////////////
-
-
-
-$menuhtml= ' <select id="leftmenuselectrider" multiple="multiple" class="ui-corner-left ui-state-default bigmap" title="Filter by '.$globalprefrow['glob5'].'" >';
-$menuhtml.= ' <option selected value=""> All '.$globalprefrow['glob5'].'s </option> ';
-
-foreach ($riderdata as $ridernum => $ridername) {
-    $ridername=htmlspecialchars($ridername);
-    $menuhtml.= ("<option ");
-    $menuhtml.= ("value=\"$ridernum\">$ridername</option>");
-}
-$menuhtml.= '</select> ';
-
-echo $menuhtml;
-
-?>
+<br />
+<button id="rescalemapbutton"> Rescale Map </button>
 
 
 <hr />
 
+<?php
+
+//////////     CYCLIST   DROPDOWN     ///////////////////////////////////
+echo $riderselecthtml;
+
+?>
+
+
 
 
 <div id="test"> </div>
-
 
 <datalist id="tickmarks">
 <option>0</option>
@@ -930,18 +1100,31 @@ echo $menuhtml;
 </datalist>
 
 
-<input id="prevridertime" class="mapslider" title="Rider Positions" type="range" min="0" max="48" step="0.5" value="1" list="tickmarks" />
-<span id="totalriderpositions">0 Riders have</span> GPS in previous <span id="prevriderhours">Hr</span>.
+
 
 <hr />
 
 <div class="sliderdiv">
-<input id="jobslider" class="mapslider" title="Future Jobs" type="range" min="0" max="96" step="0.5" value="1" list="tickmarks" />
+<input id="jobslider" class="mapslider" title="Future Jobs" type="range" min="0" max="48" step="0.5" value="1" list="tickmarks" />
 
 <span id="totaljobs">0 Jobs </span> in next <span id="jobsliderval">Hr</span>.
 </div>
 
 <hr />
+
+
+<input id="prevridertime" class="mapslider" title="Rider Positions" type="range" min="0" max="48" step="0.5" value="1" list="tickmarks" />
+<span id="totalriderpositions">0 Riders have</span> GPS in previous <span id="prevriderhours">Hr</span>.
+
+
+
+<hr />
+
+
+
+
+
+
 
 <p title="Unscheduled jobs except bulk drops"><span id="numunsched">0</span> Unscheduled 
 <span id="unscheduleddetails"></span>
@@ -963,9 +1146,21 @@ echo $menuhtml;
 
 <div id="sidebarfromajax"> </div>
 
-<input class="cbbcheckbox" id="scaleonrefresh" name="scaleonrefresh" value="1" checked="" type="checkbox"> Auto rescale on refresh <br />
+<label>
+<input class="cbbcheckbox" id="scaleonrefresh" name="scaleonrefresh" value="0" type="checkbox"> Auto rescale on refresh 
+</label>
 
 <hr />
+
+Line on top of existing with 
+ASAP / Cargobike icons
+
+<br />
+
+Dropdown rider select to make bigger
+
+<br />
+
 
 
 Add rider filter to job / rider list in left menus <br />
@@ -980,9 +1175,14 @@ Add public / private jobcomments <br />
 
 Add Service ( 1x Mileage Rate unless hide service name unchecked? ) <br />
 
+If area present do not show in left hand list
+
+<br />
 
 Areas - from extra lookup - put results from each job into array<br />
 Sub-areas - from extra lookup <br />
+
+
 Labels - For Areas <br />
 
 Title on rider details table <br />
@@ -1006,7 +1206,7 @@ Block surrounding powered by cojm - seperate paragraphs <hr />
 
 Github Todo - 
 
-Filter by multiple services <br />
+ <br />
 
 
 

@@ -96,8 +96,8 @@ left join cojm_pod e ON p.publictrackingref = e.id
 
 WHERE `p`.`status` = 86
 ORDER BY `p`.`ShipDate` ASC";
- 
-$stmt = $dbh->query($sql);
+
+$stmt = $dbh->query($sql)->fetchAll();
 
      
 if ($stmt) {

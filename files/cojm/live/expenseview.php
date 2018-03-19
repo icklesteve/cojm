@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	expenseview.php - P+L Search
-    Copyright (C) 2017 S.Young cojm.co.uk
+    Copyright (C) 2018 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -225,7 +225,6 @@ echo '> Just Payments </option>
 ';
 
 ?>
-
 
 <select class="ui-state-highlight ui-corner-left" name="orderby">
     <option value="">Order by Date </option>
@@ -495,7 +494,9 @@ if ($view=='expenses') {
             '</td>
             <td> ';
             
-            if ($row['expensevat']>'0') {  $temptab.= ' &'.$globalprefrow['currencysymbol']. $row['expensevat']; }
+            if ($row['expensevat']>'0') {
+                $temptab.= ' &'.$globalprefrow['currencysymbol']. $row['expensevat'];
+                }
             
             $temptab.= ' </td> ';
             
@@ -728,7 +729,8 @@ else if ($view=='statmnt') {
             $tablerow[] = array(
             "date"=>(strtotime($row['expensedate'])),
             "ref"=>$row['expenseref'],
-            "amount"=>($row["expensecost"] + $row["expensevat"]),
+//            "amount"=>($row["expensecost"] + $row["expensevat"]), // vat included in total expense cost
+            "amount"=>($row["expensecost"]),            
             "isexpense"=>1,
             "client"=>$clientid,
             "CompanyName"=>($row['cojmname'].' '.$row['whoto'].' '.$temptab),
@@ -1153,7 +1155,6 @@ $(document).ready(function() {
     
     
     
-    
 	$(function(){
 				  $('#rangeBa, #rangeBb').daterangepicker();  
 			 });
@@ -1175,7 +1176,6 @@ $(".acc").floatThead({
 <?php } ?>
 
 });
-    
 	</script>
 <?php
 echo '</body></html>';

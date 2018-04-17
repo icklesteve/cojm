@@ -53,6 +53,16 @@ Object.defineProperty(Array.prototype, "equals", {enumerable: false});
     
     
     
+
+    var cojmgestureHandling='cooperative';
+    
+    if (mobdevice==0) {
+        
+        cojmgestureHandling='greedy';
+
+    }    
+    
+    
 var maplastupdated;
 var ridertable;
 var totalareas=0;
@@ -181,6 +191,7 @@ function initialize() {
 		scaleControl: true,
 		mapTypeControl: true,
         fullscreenControl: true,
+        gestureHandling: cojmgestureHandling,
         mapTypeControlOptions: {
             mapTypeIds: mapTypeIds,
             style: mymapstyle

@@ -70,6 +70,9 @@ p.CustomerID,
 p.CyclistID,
 p.jobcomments,
 p.privatejobcomments,
+p.starttrackpause,
+p.finishtrackpause,
+p.collectiondate,
 u.CompanyName,
 p.orderdep,
 l.depname,
@@ -79,6 +82,7 @@ p.FreightCharge,
 p.vatcharge,
 p.CyclistID,
 r.cojmname,
+r.trackerid,
 y.opsname,
 y.descrip,
 z.opsname AS `subareaname`,
@@ -130,7 +134,9 @@ if ($stmt) {
         
         
         $numberitems= trim(strrev(ltrim(strrev($row['numberitems']), '0')),'.');
-        $rhtml.='<tr><td><a target="_blank" class="newwin" href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> ';
+        $rhtml.='
+        
+        <tr><td><a target="_blank" class="newwin" href="order.php?id='. $row['ID'].'">'. $row['ID'].'</a> ';
         // if different month show month AND date
         if (date('M')<>(date('M', strtotime($row['ShipDate'])))) { 
             $rhtml.= date('H:i A D jS M', strtotime($row['ShipDate']));
@@ -180,9 +186,89 @@ if ($stmt) {
         <td>&'.$globalprefrow['currencysymbol'].' '.$row['FreightCharge'].'</td>
         <td>';
 
-        if ($row['CyclistID']<>1) {
+                if ($row['CyclistID']<>1) {
             $rhtml.=' <a href="cyclist.php?thiscyclist='.$row['CyclistID'].'">'.$row['cojmname'].'</a> ';
             }
+        
+        
+                    // adds tracking icon if data present
+            
+            $trackingtext='';
+            $thistrackerid=$row['trackerid'];
+            
+            $startpause=strtotime($row['starttrackpause']); 
+            $finishpause=strtotime($row['finishtrackpause']); 
+            $collecttime=strtotime($row['collectiondate']); 
+            $delivertime=strtotime($row['ShipDate']); 
+            if (($startpause > '10') and ( $finishpause < '10')) { $delivertime=$startpause; } 
+            if ($startpause <'10') { $startpause='9999999999'; }
+            
+               
+              //   $rhtml.=' 202 '.$row['trackerid'];
+                
+                   
+
+            $trzsql="SELECT timestamp FROM `instamapper` 
+            WHERE `device_key` = ?
+            AND `timestamp` > ?
+            AND `timestamp` NOT BETWEEN ?
+            AND ?
+            AND `timestamp` < ?
+            ORDER BY `timestamp` ASC 
+            LIMIT 1";             
+            
+            $trastmt = $dbh->prepare($trzsql);
+            $trastmt->execute([$thistrackerid,$collecttime,$startpause,$finishpause,$delivertime]);
+            $foundlast = $trastmt->fetchColumn();
+            
+            
+            
+            // $rhtml.=' 222 ';
+            
+            
+            
+         
+            
+            if ($foundlast){
+                $trackingtext= 'Tracking from ' . date('H:i A D jS ', $foundlast) . ', '; 
+                
+                // $rhtml.=' 230 ';
+
+                
+                $trxsql="SELECT timestamp FROM `instamapper` 
+                WHERE `device_key` = ?
+                AND `timestamp` > ?
+                AND `timestamp` NOT BETWEEN ?
+                AND ?
+                AND `timestamp` < ?
+                ORDER BY `timestamp` DESC 
+                LIMIT 1";             
+                
+                $stmt = $dbh->prepare($trxsql);
+                $stmt->execute([$thistrackerid,$collecttime,$startpause,$finishpause,$delivertime]);
+                $foundlastb = $stmt->fetchColumn();
+                
+                if ($foundlastb){
+                    $trackingtext.= ' until ' . date('H:i A D jS ', $foundlastb) . ', '; 
+                }
+            }
+            
+            
+            
+            
+        
+            
+            // $rhtml.=' 261 TEST ';
+            
+            if ($trackingtext) {
+                $rhtml.= '<a href="../createkml.php?id='. $row['publictrackingref'].'"><img src="../images/icon_world_dynamic.gif" alt="Download Tracking" title="'.$trackingtext.'"></a>';
+                
+
+            }
+            
+            
+        
+
             
         $rhtml.='</td><td>';
 

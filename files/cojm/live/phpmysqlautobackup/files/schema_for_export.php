@@ -159,29 +159,30 @@ if ($backupruntype=="run2.php") { $query=$query.' ORDER BY ts desc '; } else {  
 		  
 		  
 		  
-		  $query=$query. ' LIMIT '. $limit_from .', '. $limit_to.' ';
-		  
-          $result = $dbc->prepare($query);
-          $rows = $dbc->executeGetRows($result);
-          foreach ($rows as $row_array)
-          {
-            $export = 'insert into `' . $table . '` (`' . implode('`, `', $table_list) . '`) values (';
-            $lines_exported++;
-            reset($table_list);
-            while (list(,$i) = each($table_list))
-            {
-              if (!isset($row_array[$i])) $export .= 'NULL, ';
-              elseif (has_data($row_array[$i]))
-              {
-                $row = addslashes($row_array[$i]);
-                $row = str_replace("\n#", "\n".'\#', $row);
-                $export .= '\'' . $row . '\', ';
-              }
-              else $export .= '\'\', ';
+		$query=$query. ' LIMIT '. $limit_from .', '. $limit_to.' ';
+		
+        $result = $dbc->prepare($query);
+        $rows = $dbc->executeGetRows($result);
+        foreach ($rows as $row_array) {
+                $export = 'insert into `' . $table . '` (`' . implode('`, `', $table_list) . '`) values (';
+                $lines_exported++;
+                reset($table_list);
+                
+                // while (list(,$i) = each($table_list)) {
+// while(list($key, $value) = each($table_list))             
+foreach($table_list as $i) {
+
+                if (!isset($row_array[$i])) { $export .= 'NULL, '; }
+                    elseif (has_data($row_array[$i])) {
+                        $row = addslashes($row_array[$i]);
+                        $row = str_replace("\n#", "\n".'\#', $row);
+                        $export .= '\'' . $row . '\', ';
+                    }
+                    else $export .= '\'\', ';
+                }
+                $export = substr($export,0,-2) . ");".NEWLINE;
+                $buffer.= $export;
             }
-            $export = substr($export,0,-2) . ");".NEWLINE;
-            $buffer.= $export;
-          }
         }
 //uncomment line below to show table dumps, inc insert and alter table statements:
 //exit('<textarea rows="30" name="themessage" cols="100">'.$buffer.$alter_tables.'</textarea>');

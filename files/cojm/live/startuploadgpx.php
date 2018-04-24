@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	startuploadgpx.php - GPS Tab, upload .gpx files, start searching gps history, delete rider gps by day 
-    Copyright (C) 2017 S.Young cojm.co.uk
+    Copyright (C) 2018 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -38,7 +38,7 @@ $linecoords='';
 $loop='0';
 $lattot='';
 $lontot='';
-$map='';
+$map=array();
 $heading='';
 
 $max_lat = '-99999';
@@ -116,6 +116,9 @@ echo '<!DOCTYPE html>
 <link rel="stylesheet" type="text/css" href="'. $globalprefrow['glob10'].'" >
 <link rel="stylesheet" type="text/css" href="../css/cojmmap.css">
 <link rel="stylesheet" href="css/themes/'. $globalprefrow['clweb8'].'/jquery-ui.css" type="text/css" >
+
+
+<script> var mobdevice=0; </script>
 
 <script src="//maps.googleapis.com/maps/api/js?v='.$globalprefrow['googlemapver'].'&amp;libraries=geometry&amp;key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>
 <script type="text/javascript" src="js/'. $globalprefrow['glob9'].'"></script>
@@ -282,9 +285,9 @@ $numberoftracks=0;
 $gmapdata='';
 $alreadyondb=0;
 
-$totavglat='';
-$totavglon='';
-$avgcount='1';
+$totavglat=0;
+$totavglon=0;
+$avgcount=1;
 $extensions='';
 $map['latitude']='';
 
@@ -408,6 +411,9 @@ foreach ($gpx_xml->trk as $track) {
 
             $lat=round($lat,5);
             $lon=round($lon,5);	
+            $totavglat=round($totavglat,6);	
+            $totavglon=round($totavglon,6);	
+            
 		
             $totavglat=$totavglat+$lat;
             $totavglon=$totavglon+$lon;

@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	ajaxchangejob.php - Handles Ajax Requests made from various pages ( the controller in MVC language :-), also see changejob.php
-    Copyright (C) 2017 S.Young cojm.co.uk
+    Copyright (C) 2018 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -2819,7 +2819,7 @@ if ($hasid) {
             if ($cojmaction=='recalcprice') {
                 
                 $infotext.=' Recalc Price ajaxcj 2799 ';
-                $buildloopcharge='';
+                $buildloopcharge=0;
                 // $script.=" alert('recalc');  ";
 
                 $query = "

@@ -289,7 +289,6 @@ header('Content-Disposition:attachment; filename="'.$jobid.'-'.$globalprefrow['g
 
 echo $kmlOutput;
 
-mysql_close();
 $dbh=null;
 
 ?>

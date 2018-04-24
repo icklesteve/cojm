@@ -106,6 +106,12 @@ else {
     // every 6 hours, after 6am, 12pm and 18pm and 00 hrs
 
 
+    
+    
+//    $lastran2=0; // REMOVE AFTER debugging
+    
+    
+    
     // id=1 run.php
     // id=2 run2.php
     // id=3 cojm-12-hr-stats.php

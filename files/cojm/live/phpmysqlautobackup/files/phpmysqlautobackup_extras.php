@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	phpmysqlautobackup_extras.php 
-    Copyright (C) 2017 S.Young cojm.co.uk
+    Copyright (C) 2018 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -48,53 +48,54 @@ Version    Date              Comment
 ********************************************************************************************/
 $phpMySQLAutoBackup_version="1.6.3";
 // ---------------------------------------------------------
-function has_data($value)
-{
- if (is_array($value)) return (sizeof($value) > 0)? true : false;
- else return (($value != '') && (strtolower($value) != 'null') && (strlen(trim($value)) > 0)) ? true : false;
+function has_data($value) {
+    if (is_array($value)) return (sizeof($value) > 0)? true : false;
+    else return (($value != '') && (strtolower($value) != 'null') && (strlen(trim($value)) > 0)) ? true : false;
 }
 
-function xmail ($to_emailaddress,$from_emailaddress, $subject, $content, $file_name, $backup_type, $ver)
-{
- $mail_attached = "";
- $boundary = "----=_NextPart_000_01FB_010".md5($to_emailaddress);
- $mail_attached.="--".$boundary.NEWLINE
-                       ."Content-Type: application/octet-stream;".NEWLINE." name=\"$file_name\"".NEWLINE
-                       ."Content-Transfer-Encoding: base64".NEWLINE
-                       ."Content-Disposition: attachment;".NEWLINE." filename=\"$file_name\"".NEWLINE.NEWLINE
-                       .chunk_split(base64_encode($content)).NEWLINE;
- $mail_attached .= "--".$boundary."--".NEWLINE;
- $add_header ="MIME-Version: 1.0".NEWLINE."Content-Type: multipart/mixed;".NEWLINE." boundary=\"$boundary\" ".NEWLINE;
- $mail_content="--".$boundary.NEWLINE."Content-Type: text/plain; ".NEWLINE." charset=\"iso-8859-1\"".NEWLINE."Content-Transfer-Encoding: 7bit".NEWLINE.NEWLINE."BACKUP Successful...".NEWLINE.NEWLINE."Please see attached for your zipped Backup file; $backup_type ".NEWLINE."If this is the first backup then you should test it restores correctly to a test server.".NEWLINE.NEWLINE." phpMySQLAutoBackup (version $ver) is developed by http://www.dwalker.co.uk/ ".NEWLINE.NEWLINE." Have a good day now you have a backup of your MySQL db  :-) ".NEWLINE.NEWLINE." Please consider making a donation at: ".NEWLINE." http://www.dwalker.co.uk/make_a_donation.php ".NEWLINE." (every penny or cent helps)".NEWLINE.$mail_attached;
- return mail($to_emailaddress, $subject, $mail_content, "From: $from_emailaddress".NEWLINE."Reply-To:$from_emailaddress".NEWLINE.$add_header);
+function xmail ($to_emailaddress,$from_emailaddress, $subject, $content, $file_name, $backup_type, $ver) {
+    $mail_attached = "";
+    $boundary = "----=_NextPart_000_01FB_010".md5($to_emailaddress);
+    $mail_attached.="--".$boundary.NEWLINE
+                        ."Content-Type: application/octet-stream;".NEWLINE." name=\"$file_name\"".NEWLINE
+                        ."Content-Transfer-Encoding: base64".NEWLINE
+                        ."Content-Disposition: attachment;".NEWLINE." filename=\"$file_name\"".NEWLINE.NEWLINE
+                        .chunk_split(base64_encode($content)).NEWLINE;
+    $mail_attached .= "--".$boundary."--".NEWLINE;
+    $add_header ="MIME-Version: 1.0".NEWLINE."Content-Type: multipart/mixed;".NEWLINE." boundary=\"$boundary\" ".NEWLINE;
+    $mail_content="--".$boundary.NEWLINE."Content-Type: text/plain; ".NEWLINE." charset=\"iso-8859-1\"".NEWLINE."Content-Transfer-Encoding: 7bit".NEWLINE.NEWLINE."BACKUP Successful...".NEWLINE.NEWLINE."Please see attached for your zipped Backup file; $backup_type ".NEWLINE."If this is the first backup then you should test it restores correctly to a test server.".NEWLINE.NEWLINE." phpMySQLAutoBackup (version $ver) is developed by http://www.dwalker.co.uk/ ".NEWLINE.NEWLINE." Have a good day now you have a backup of your MySQL db  :-) ".NEWLINE.NEWLINE." Please consider making a donation at: ".NEWLINE." http://www.dwalker.co.uk/make_a_donation.php ".NEWLINE." (every penny or cent helps)".NEWLINE.$mail_attached;
+    return mail($to_emailaddress, $subject, $mail_content, "From: $from_emailaddress".NEWLINE."Reply-To:$from_emailaddress".NEWLINE.$add_header);
 }
 
-function write_backup($gzdata, $backup_file_name)
-{
-	
-	
+function write_backup($gzdata, $backup_file_name) {
 	$filename = BALOCATION."backups/".date("Y").'-'.date("m")."/".$backup_file_name;
-$dirname = dirname($filename);
-if (!is_dir($dirname))
-{
-    mkdir($dirname, 0755, true);
-}
+    $dirname = dirname($filename);
+    if (!is_dir($dirname)) {
+        mkdir($dirname, 0755, true);
+    }
 	
-	
-	
-	
-	
- $fp = fopen(BALOCATION."backups/".date("Y").'-'.date("m")."/".$backup_file_name, "w");
- fwrite($fp, $gzdata);
- fclose($fp);
- //check folder is protected - stop HTTP access
- if (!file_exists(BALOCATION."backups/".date("Y").'-'.date("m")."/.htaccess"))
- {
-  $fp = fopen(BALOCATION."backups/".date("Y").'-'.date("m")."/.htaccess", "w");
-  fwrite($fp, "deny from all");
-  fclose($fp);
- }
-//  delete_old_backups();   ////     EDITED DIRECTORY SO NO DELETING OLD BACKUPS
+    $errors=' <br /> 84 write_backup *********************************************************** ';
+    $fp = fopen(BALOCATION."backups/".date("Y").'-'.date("m")."/".$backup_file_name, "w");
+    $errors.=fwrite($fp, $gzdata).' bytes to ' . BALOCATION."backups/".date("Y").'-'.date("m")."/".$backup_file_name;
+    fclose($fp);
+
+    if (file_exists(BALOCATION."backups/".date("Y").'-'.date("m")."/".$backup_file_name)) { 
+        $errors.=NEWLINE. ' FILE EXISTS ';
+    } else {
+        $errors.=NEWLINE. ' FILE DOES NOT EXIST ';
+    }
+
+
+    
+    //check folder is protected - stop HTTP access
+    if (!file_exists(BALOCATION."backups/".date("Y").'-'.date("m")."/.htaccess")) {
+        $fp = fopen(BALOCATION."backups/".date("Y").'-'.date("m")."/.htaccess", "w");
+        fwrite($fp, "deny from all");
+        fclose($fp);
+    }
+    //  delete_old_backups();   ////     EDITED DIRECTORY SO NO DELETING OLD BACKUPS
+    return $errors;
+
 }
  
 function delete_old_backups()
@@ -128,7 +129,7 @@ function delete_old_backups()
 
 
 class transfer_backup {
-    public $error = "";
+    public $error;
 
     public function transfer_data($ftp_username,$ftp_password,$ftp_server,$ftp_path,$passwdzip_file_name,$lines_exported, $backupdescription) {
 		 global $transfer_backup_infotext;
@@ -210,11 +211,7 @@ if ($info['speed_upload'] >= 1073741824)
             $speed = '0 bytes';
         }	
 		
-		
-		
-		
-		
- 
+	
  $transfer_backup_infotext.=' FTPd '. $bytes.' in ' . $info['total_time'] . ' secs, avg '.$speed. '  / sec. ';	
  
  

@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	invoice.php - Create a PDF invoice
-    Copyright (C) 2017 S.Young cojm.co.uk
+    Copyright (C) 2018 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -56,8 +56,8 @@
  
 $alpha_time = microtime(TRUE); 
  $filename="invoice.php";
- error_reporting(E_ALL);
-ini_set('display_errors', '1');
+// error_reporting(E_ALL);
+// ini_set('display_errors', '1');
  
  
 // error_reporting( E_ERROR | E_WARNING | E_PARSE );
@@ -1186,13 +1186,27 @@ if ($page=='createpdf') {
     define('K_TCPDF_EXTERNAL_CONFIG', true);
     
     
+global $l;
+$l = Array();
+
+// PAGE META DESCRIPTORS --------------------------------------
+
+$l['a_meta_charset'] = 'UTF-8';
+$l['a_meta_dir'] = 'ltr';
+$l['a_meta_language'] = 'en';
+
+// TRANSLATIONS --------------------------------------
+$l['w_page'] = 'page';
+    
+    
+        
+    // Include the main TCPDF library 
+    require_once(realpath('../tcpdf/tcpdf.php'));
+
+
 
     
     
-    
-    require_once('../tcpdf/config/lang/eng.php');
-    require_once('../tcpdf/tcpdf.php');
-
     // create new PDF document
     $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 

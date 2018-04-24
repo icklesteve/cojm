@@ -223,7 +223,7 @@ class GeoCalc {
 }
 
 function ConvKilometersToMiles($dValue) {
-	return $dValue / 1.609344;
+	return int($dValue) / 1.609344;
 }
 
 

@@ -129,6 +129,7 @@ $dend='';
 <link rel="stylesheet" type="text/css" href="../css/cojmmap.css">
 <link rel="stylesheet" href="css/themes/<?php echo $globalprefrow['clweb8']; ?>/jquery-ui.css" type="text/css" >
 <script type="text/javascript" src="js/<?php echo $globalprefrow['glob9']; ?>"></script>
+<script> var mobdevice=0; // map fix for gesture handling </script>
 <?php 
 
 echo '<script src="//maps.googleapis.com/maps/api/js?v='.$globalprefrow['googlemapver'].'&amp;libraries=geometry&amp;key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>
@@ -158,6 +159,7 @@ var max_lat = [];
 var min_lat = [];
 var max_lon = [];
 var min_lon = [];
+
 
 
 function custominitialize() {

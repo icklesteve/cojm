@@ -2,7 +2,7 @@
 /*
     COJM Courier Online Operations Management
 	clientviewtargetcollection.php - General Purpose Job Lookup
-    Copyright (C) 2017 S.Young cojm.co.uk
+    Copyright (C) 2018 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -231,9 +231,6 @@ echo ' <select name="timetype" class="ui-state-highlight ui-corner-left">
 
 
 
-
-
-
 // actualcollect
 
 
@@ -320,6 +317,7 @@ echo ' Order By <select name="orderby" class="ui-state-highlight ui-corner-left"
 <option '; if ($orderby=='id') { echo 'selected'; } echo ' value="id">Job Reference</option>
 <option '; if ($orderby=='numberitems') { echo 'selected'; } echo ' value="numberitems">Number Items</option>
 <option '; if ($orderby=='nextaction') { echo 'selected'; } echo ' value="nextaction">Next Action Time (Like Homepage)</option>
+<option '; if ($orderby=='actualdeliver') { echo 'selected'; } echo ' value="actualdeliver">Actual Delivery Time</option>
 </select>';
 
 
@@ -503,6 +501,7 @@ if ($orderby=='status') { $sql.=" ORDER BY `Orders`.`status` ASC "; }
 if ($orderby=='id') { $sql.=" ORDER BY `Orders`.`ID` ASC "; }
 if ($orderby=='numberitems') { $sql.=" ORDER BY `Orders`.`numberitems` DESC "; }
 if ($orderby=='nextaction') { $sql.=" ORDER BY `Orders`.`nextactiondate` DESC "; }
+if ($orderby=='actualdeliver') { $sql.=" ORDER BY `Orders`.`ShipDate` DESC "; }
 
 // echo $sql;    
     

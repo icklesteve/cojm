@@ -1166,7 +1166,7 @@ if ($lookuppage) {
             // if waitingstarttime use that instead
             if (($row['status']) >'76' ) { // calcs job time, english : $lengthtext
             
-                $secmod='';
+                $secmod=0;
                 $lengthtext='';
                 $tottimec=strtotime($row['starttrackpause']);
                 $tottimed=strtotime($row['finishtrackpause']);
@@ -1175,7 +1175,7 @@ if ($lookuppage) {
                 }
                 $tottimea=strtotime($row['collectiondate']); 
                 $tottimeb=strtotime($row['ShipDate']); 
-                $tottimedif=($tottimeb-$tottimea-$secmod);
+                $tottimedif=(($tottimeb)-$tottimea-$secmod);
                 $inputval = $tottimedif; // USER DEFINES NUMBER OF SECONDS FOR WORKING OUT | 3661 = 1HOUR 1MIN 1SEC 
                 $unitd ='86400';
                 $unith ='3600';        // Num of seconds in an Hour... 
@@ -3352,7 +3352,7 @@ function pcfromlatlng($dLatitude,$dLongitude) {
     $data = $cbstmt->fetchAll();
     
     if ($data) {
-        $thispc=$data[0][PZ_Postcode];
+        $thispc=$data[0]['PZ_Postcode'];
         $start= substr($thispc, 0, -3); 
         $toreturn= $start.' '.substr($thispc, -3);
     }

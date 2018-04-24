@@ -71,6 +71,12 @@ if (isset($table_exclude))
  $backup_type="\n\n BACKUP Type: partial, EXCLUDES tables:\n";
  foreach ($table_exclude as $key => $value) $backup_type.= "  $value;\n";
 }
+
+
+
+
+global $errors;
+
 $errors="";
 
 
@@ -91,8 +97,13 @@ $backup_info.=$backup_type;
  $backup_file_name = 'mysql_'.$backupruntype.'_'.$_SERVER['HTTP_HOST'].strftime("_%d_%b_%Y_time_%H_%M_%S.sql",time()).'.gz';
  $dump_buffer = gzencode($buffer);
 
+ 
+  $msg_local_backup="";
+ 
+ 
+ $errors.=$backup_file_name;
 
-if ($save_backup_zip_file_to_server) write_backup($dump_buffer, $backup_file_name);
+ $errors.= write_backup($dump_buffer, $backup_file_name);
 
 
 
@@ -101,7 +112,7 @@ $outfile = BALOCATION.'backups/'.date("Y").'-'.date("m").'/'.$backup_file_name.'
 $infile  = BALOCATION.'backups/'.date("Y").'-'.date("m").'/'.$backup_file_name;
 
 
-shell_exec("zip -j -P $password $outfile $infile");
+$beer=("zip -j -P $password $outfile $infile");
 // readfile($outfile);
 // @unlink($outfile);
 
@@ -137,15 +148,11 @@ if (isset($ftp_username))
 
 
 
-
-
-
-
 if ($send_email_backup) xmail($to_emailaddress,$from_emailaddress, "phpMySQLAutoBackup: $backup_file_name", $dump_buffer, $backup_file_name, $backup_type, $phpMySQLAutoBackup_version);
 // if ($send_email_report) {
  $msg_email_backup="";
  $msg_ftp_backup="";
- $msg_local_backup="";
+
  if ($send_email_backup) $msg_email_backup="\nthe email with the backup attached has been sent to: $to_emailaddress \n";
  if (isset($ftp_username)) $msg_ftp_backup="\nthe password protected backup zip file has been transferred to: $ftp_server $ftp_path \n  $transfer_backup_infotext  \n";
  if ($save_backup_zip_file_to_server) $msg_local_backup="\n also saved locally. \n";
@@ -166,6 +173,6 @@ if ($send_email_backup) xmail($to_emailaddress,$from_emailaddress, "phpMySQLAuto
 
 
 // echo ' try passwd zip ';
-unlink(BALOCATION."backups/".date("Y").'-'.date("m").'/'.$justgz_file_name);
+// unlink(BALOCATION."backups/".date("Y").'-'.date("m").'/'.$justgz_file_name);
 
 ?>

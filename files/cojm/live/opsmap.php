@@ -3,7 +3,7 @@
 /*
     COJM Courier Online Operations Management
 	opsmap.php - Displays POI & Ops Areas
-    Copyright (C) 2017 S.Young cojm.co.uk
+    Copyright (C) 2018 S.Young cojm.co.uk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -54,7 +54,14 @@ $hasforms='0';
 #toploader { display:block; }
 </style>
 
-<?php
+
+
+</head><body>  <?php
+//  $adminmenu="1";
+$filename="opsmap.php";
+include "cojmmenu.php";
+
+
 echo '<script src="//maps.googleapis.com/maps/api/js?v='.$globalprefrow['googlemapver'].'&amp;libraries=geometry&amp;key='.$globalprefrow['googlemapapiv3key'].'" type="text/javascript"></script>
 
 <script src="../js/maptemplate.js" type="text/javascript"></script>
@@ -533,11 +540,6 @@ function loadmapfromtemplate() {
 google.maps.event.addDomListener(window, "load", loadmapfromtemplate);
 
 </script>
-</head><body>  <?php
-//  $adminmenu="1";
-$filename="opsmap.php";
-include "cojmmenu.php";
-?>
 
 <div id="gmap_wrapper" >
 <div class="full_map" id="search_map">

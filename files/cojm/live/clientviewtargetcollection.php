@@ -29,7 +29,7 @@ include "changejob.php";
 $adminmenu = "1";
 $lengthtext='';
 $numjobs=0;
-$vattablecost='0';
+$vattablecost=0;
 $showdepcol='';
 $gpxarray = array();
 $areaarray = array();
@@ -576,8 +576,8 @@ if ($result) {
     
     ';
     
-    $tablecost='';
-    $tabletotal='';
+    $tablecost=0;
+    $tabletotal=0;
     $temptrack='';
     $tottimedif='';
     $secmod='';
@@ -793,7 +793,7 @@ if ($result) {
                 $stmt = $dbh->prepare($sql);
                 $stmt->execute([$row['opsmapsubarea']]);
                 $name = $stmt->fetchColumn();
-                echo ' ( Sub Area '.$name.' ) ';
+                echo ' ( '.$name.' ) ';
             }
         }
         
@@ -835,7 +835,7 @@ if ($result) {
         
         
         
-        $secmod='0';
+        $secmod=0;
         
         
         

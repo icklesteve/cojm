@@ -53,7 +53,6 @@ while (list(, $id) = each($gpxarray)) {
     $statement->execute($parameters);
     $orow = $statement->fetch(PDO::FETCH_ASSOC);
 
-
     $testfile="cache/jstrack/".date('Y', strtotime($orow['ShipDate']))."/".date('m', strtotime($orow['ShipDate']))."/".$orow['ID'].'tracks.kml';
     if (!file_exists($testfile)) {
         $errorjobs++;
@@ -202,7 +201,7 @@ while ( $areax < ($arrlength)) {
 
     $areadesc[]=$trow['opsname'];
 
-    $areacoord='';
+    $areacoord=array();
 
     $p=$trow['POLY'];
     $trans = array("POLYGON" => "", "((" => "", "))" => "");

@@ -67,6 +67,8 @@ include "C4uconnect.php";
 $page=$_POST['page']; // preview , createpdf , addtodb
 
 
+$tableitems=0;
+
 // date to invoice until
 $invoicetodate=trim($_POST['invoicetodate']);
 $invoicetodate = str_replace("/", ":", "$invoicetodate", $count);
@@ -462,7 +464,7 @@ foreach ($stmt as $row) {
 
     $tablevatcost =$tablevatcost  + $row["vatcharge"]; 
     $tablecost =$tablecost  + $row["FreightCharge"];
-    $tableitems=$tableitems + $numberitems;
+    $tableitems=$tableitems + $row['numberitems'];
     $ir=$ir+1;
     if( $ir & 1 ) {
         $bgc=$globalprefrow['invoicefooter'];

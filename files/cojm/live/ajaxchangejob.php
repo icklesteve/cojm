@@ -2631,7 +2631,7 @@ if ($hasid) {
                 if ($globalprefrow['inaccuratepostcode']<>'1') {
                     
                     // $infotext.=' <br /> postcode flag is'.$globalprefrow['inaccuratepostcode'].'with no gap.';
-                    $tempdist='';
+                    $tempdist=0;
                     $lastfoundpc1='';
 
                     while ($i<21) {
@@ -2692,7 +2692,7 @@ if ($hasid) {
                     } // ends i less 22
                 } else {     // ends check to ensure accurate postcode setup type
                 
-                    if (isset($_POST['distance'])) { $tempdist=trim($_POST['distance']); } else { $tempdist=''; }
+                    if (isset($_POST['distance'])) { $tempdist=trim($_POST['distance']); } else { $tempdist=0; }
                 
                     // echo $tempdist;
                     // this is where we need the code to work out a non auto distance
